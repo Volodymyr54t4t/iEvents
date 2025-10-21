@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд учня</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Панель учня</h2>
+                <p id="userName">Завантаження...</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="student-dashboard.html" class="nav-item active">Головна</a>
+                <a href="student-contests.html" class="nav-item">Мої конкурси</a>
+                <a href="student-results.html" class="nav-item">Результати</a>
+                <a href="student-predictions.html" class="nav-item">Прогнози</a>
+                <a href="notifications.html" class="nav-item">Сповіщення</a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary" style="width: 100%;">Вийти</button>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Дашборд учня</h1>
+                <p>Відстежуйте свої досягнення та участь у конкурсах</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Участей у конкурсах</span>
+                    </div>
+                    <div class="stat-card-value" id="totalParticipations">0</div>
+                    <div class="stat-card-change">Поточних: <span id="ongoingParticipations">0</span></div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Середній бал</span>
+                    </div>
+                    <div class="stat-card-value" id="averageScore">0</div>
+                    <div class="stat-card-change" id="scoreChange">-</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Найкращий результат</span>
+                    </div>
+                    <div class="stat-card-value" id="bestScore">0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Рейтинг</span>
+                    </div>
+                    <div class="stat-card-value" id="ranking">-</div>
+                    <div class="stat-card-change">у класі</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Мої конкурси</h2>
+                    <a href="student-contests.html" class="btn btn-primary">Переглянути всі</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Назва</th>
+                                <th>Дата проведення</th>
+                                <th>Статус</th>
+                                <th>Результат</th>
+                                <th>Прогноз</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myContestsTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Прогрес за останні місяці</h2>
+                </div>
+                <div id="progressChart" style="padding: 20px;">
+                    <p style="text-align: center; color: var(--text-secondary);">Завантаження...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Рекомендації</h2>
+                </div>
+                <div id="recommendations">
+                    <p style="text-align: center; color: var(--text-secondary);">Завантаження...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/student-dashboard.js"></script>
+</body>
+</html>

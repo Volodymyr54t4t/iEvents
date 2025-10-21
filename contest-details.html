@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Деталі конкурсу</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Панель методиста</h2>
+                <p id="userName">Завантаження...</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="methodist-dashboard.html" class="nav-item">Головна</a>
+                <a href="contests.html" class="nav-item active">Конкурси</a>
+                <a href="participants.html" class="nav-item">Учасники</a>
+                <a href="results.html" class="nav-item">Результати</a>
+                <a href="statistics.html" class="nav-item">Статистика</a>
+                <a href="notifications.html" class="nav-item">Сповіщення</a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary" style="width: 100%;">Вийти</button>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <a href="contests.html" style="color: var(--accent-primary); text-decoration: none; font-size: 14px;">← Назад до конкурсів</a>
+                    <h1 id="contestName">Завантаження...</h1>
+                    <p id="contestDescription">Завантаження...</p>
+                </div>
+                <button onclick="showAddResultModal()" class="btn btn-primary">Додати результат</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Дата проведення</span>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 18px;" id="contestDate">-</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Дедлайн реєстрації</span>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 18px;" id="registrationDeadline">-</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Учасників</span>
+                    </div>
+                    <div class="stat-card-value" id="participantCount">0</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Статус</span>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 18px;" id="contestStatus">-</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Учасники та результати</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Учень</th>
+                                <th>Клас</th>
+                                <th>Вчитель</th>
+                                <th>Статус</th>
+                                <th>Результат</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participantsTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Result Modal -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Додати результат</h2>
+                <button class="modal-close" onclick="closeResultModal()">&times;</button>
+            </div>
+            <form id="resultForm" class="auth-form">
+                <input type="hidden" id="participantId">
+                
+                <div class="form-group">
+                    <label for="participantSelect">Учасник</label>
+                    <select id="participantSelect" required>
+                        <option value="">Оберіть учасника</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="score">Бал</label>
+                    <input type="number" id="score" required min="0" max="100" placeholder="85">
+                </div>
+                
+                <div id="modalError" class="error-message"></div>
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                    <button type="button" onclick="closeResultModal()" class="btn btn-secondary">Скасувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/contest-details.js"></script>
+</body>
+</html>

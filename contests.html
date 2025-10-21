@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управління конкурсами</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Панель методиста</h2>
+                <p id="userName">Завантаження...</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="methodist-dashboard.html" class="nav-item">Головна</a>
+                <a href="contests.html" class="nav-item active">Конкурси</a>
+                <a href="participants.html" class="nav-item">Учасники</a>
+                <a href="results.html" class="nav-item">Результати</a>
+                <a href="statistics.html" class="nav-item">Статистика</a>
+                <a href="notifications.html" class="nav-item">Сповіщення</a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary" style="width: 100%;">Вийти</button>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Управління конкурсами</h1>
+                <button onclick="showCreateModal()" class="btn btn-primary">Створити конкурс</button>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Фільтри</h2>
+                </div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <select id="statusFilter" onchange="loadContests()">
+                        <option value="">Всі статуси</option>
+                        <option value="upcoming">Майбутні</option>
+                        <option value="ongoing">Поточні</option>
+                        <option value="completed">Завершені</option>
+                    </select>
+                    <input type="text" id="searchInput" placeholder="Пошук за назвою..." onkeyup="loadContests()" style="flex: 1; min-width: 200px;">
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Назва</th>
+                                <th>Опис</th>
+                                <th>Дата проведення</th>
+                                <th>Дедлайн реєстрації</th>
+                                <th>Учасників</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contestsTable">
+                            <tr>
+                                <td colspan="7" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Create/Edit Contest Modal -->
+    <div id="contestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Створити конкурс</h2>
+                <button class="modal-close" onclick="closeContestModal()">&times;</button>
+            </div>
+            <form id="contestForm" class="auth-form">
+                <input type="hidden" id="contestId">
+                
+                <div class="form-group">
+                    <label for="contestName">Назва конкурсу</label>
+                    <input type="text" id="contestName" required placeholder="Олімпіада з математики">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contestDescription">Опис</label>
+                    <textarea id="contestDescription" rows="4" required placeholder="Опис конкурсу..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contestDate">Дата проведення</label>
+                    <input type="date" id="contestDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registrationDeadline">Дедлайн реєстрації</label>
+                    <input type="date" id="registrationDeadline" required>
+                </div>
+                
+                <div id="modalError" class="error-message"></div>
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                    <button type="button" onclick="closeContestModal()" class="btn btn-secondary">Скасувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/contests.js"></script>
+</body>
+</html>

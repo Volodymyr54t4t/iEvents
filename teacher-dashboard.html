@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд вчителя</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Панель вчителя</h2>
+                <p id="userName">Завантаження...</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="teacher-dashboard.html" class="nav-item active">Головна</a>
+                <a href="teacher-students.html" class="nav-item">Мої учні</a>
+                <a href="teacher-contests.html" class="nav-item">Конкурси</a>
+                <a href="teacher-registrations.html" class="nav-item">Реєстрації</a>
+                <a href="notifications.html" class="nav-item">Сповіщення</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary" style="width: 100%;">Вийти</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Дашборд вчителя</h1>
+                <p>Управління учнями та реєстрація на конкурси</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Мої учні</span>
+                    </div>
+                    <div class="stat-card-value" id="totalStudents">0</div>
+                    <div class="stat-card-change">Активних: <span id="activeStudents">0</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Реєстрацій</span>
+                    </div>
+                    <div class="stat-card-value" id="totalRegistrations">0</div>
+                    <div class="stat-card-change">Підтверджено: <span id="approvedRegistrations">0</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Доступні конкурси</span>
+                    </div>
+                    <div class="stat-card-value" id="availableContests">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Середній бал</span>
+                    </div>
+                    <div class="stat-card-value" id="averageScore">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Доступні конкурси</h2>
+                    <button onclick="showRegisterModal()" class="btn btn-primary">Зареєструвати учня</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Назва</th>
+                                <th>Дата проведення</th>
+                                <th>Дедлайн реєстрації</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="availableContestsTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Мої реєстрації</h2>
+                    <a href="teacher-registrations.html" class="btn btn-primary">Переглянути всі</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Учень</th>
+                                <th>Конкурс</th>
+                                <th>Дата реєстрації</th>
+                                <th>Статус</th>
+                                <th>Результат</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myRegistrationsTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Топ учнів</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Учень</th>
+                                <th>Клас</th>
+                                <th>Участей</th>
+                                <th>Середній бал</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topStudentsTable">
+                            <tr>
+                                <td colspan="4" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Зареєструвати учня на конкурс</h2>
+                <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
+            </div>
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="contestSelect">Конкурс</label>
+                    <select id="contestSelect" required>
+                        <option value="">Оберіть конкурс</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="studentSelect">Учень</label>
+                    <select id="studentSelect" required>
+                        <option value="">Оберіть учня</option>
+                    </select>
+                </div>
+
+                <div id="modalError" class="error-message"></div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Зареєструвати</button>
+                    <button type="button" onclick="closeRegisterModal()" class="btn btn-secondary">Скасувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/teacher-dashboard.js"></script>
+</body>
+
+</html>

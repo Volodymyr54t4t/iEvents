@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд методиста</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Панель методиста</h2>
+                <p id="userName">Завантаження...</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="methodist-dashboard.html" class="nav-item active">Головна</a>
+                <a href="contests.html" class="nav-item">Конкурси</a>
+                <a href="participants.html" class="nav-item">Учасники</a>
+                <a href="results.html" class="nav-item">Результати</a>
+                <a href="statistics.html" class="nav-item">Статистика</a>
+                <a href="notifications.html" class="nav-item">Сповіщення</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary" style="width: 100%;">Вийти</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Дашборд методиста</h1>
+                <p>Огляд системи управління конкурсами</p>
+            </div>
+
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Всього конкурсів</span>
+                    </div>
+                    <div class="stat-card-value" id="totalContests">0</div>
+                    <div class="stat-card-change">Активних: <span id="activeContests">0</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Всього учасників</span>
+                    </div>
+                    <div class="stat-card-value" id="totalParticipants">0</div>
+                    <div class="stat-card-change">Очікують підтвердження: <span id="pendingParticipants">0</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Вчителів</span>
+                    </div>
+                    <div class="stat-card-value" id="totalTeachers">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Учнів</span>
+                    </div>
+                    <div class="stat-card-value" id="totalStudents">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Останні конкурси</h2>
+                    <a href="contests.html" class="btn btn-primary">Переглянути всі</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Назва</th>
+                                <th>Дата проведення</th>
+                                <th>Учасників</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentContests">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Учасники, що очікують підтвердження</h2>
+                    <a href="participants.html" class="btn btn-primary">Переглянути всіх</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Учень</th>
+                                <th>Конкурс</th>
+                                <th>Вчитель</th>
+                                <th>Дата реєстрації</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingParticipantsTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center;">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Остання активність</h2>
+                </div>
+                <div id="recentActivity">
+                    <p style="text-align: center; color: var(--text-secondary);">Завантаження...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/methodist-dashboard.js"></script>
+</body>
+
+</html>
