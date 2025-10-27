@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль - iEvents</title>
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <div id="header"></div>
+    
+    <main class="main-content">
+        <div class="profile-container">
+            <h1 class="page-title">Мій профіль</h1>
+            
+            <div class="role-badge" id="roleBadge">
+                <span class="role-label">Роль:</span>
+                <span class="role-value" id="roleValue">Учень</span>
+            </div>
+
+            <form id="profileForm" class="profile-form">
+                <div class="avatar-section">
+                    <div class="avatar-preview" id="avatarPreview">
+                        <span class="avatar-placeholder">📷</span>
+                    </div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('avatarInput').click()">
+                        Завантажити фото
+                    </button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lastName">Прізвище *</label>
+                        <input type="text" id="lastName" required placeholder="Іванов">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName">Ім'я *</label>
+                        <input type="text" id="firstName" required placeholder="Іван">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="middleName">По батькові</label>
+                    <input type="text" id="middleName" placeholder="Іванович">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telegram">Telegram (нік) *</label>
+                        <input type="text" id="telegram" required placeholder="@username">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Номер телефону *</label>
+                        <input type="tel" id="phone" required placeholder="+380 XX XXX XX XX">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthDate">Дата народження *</label>
+                    <input type="date" id="birthDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">Місто *</label>
+                    <input type="text" id="city" required placeholder="Київ">
+                </div>
+
+                <div class="form-group">
+                    <label for="school">Навчальний заклад</label>
+                    <input type="text" id="school" placeholder="Школа №1">
+                </div>
+
+                <div class="form-group">
+                    <label for="grade">Клас/Курс</label>
+                    <input type="text" id="grade" placeholder="10-А">
+                </div>
+
+                <div class="form-group">
+                    <label for="interests">Інтереси та хобі</label>
+                    <textarea id="interests" rows="4" placeholder="Розкажіть про свої інтереси..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">Про себе</label>
+                    <textarea id="bio" rows="4" placeholder="Розкажіть про себе..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Зберегти профіль</button>
+                <div id="profileMessage" class="message"></div>
+            </form>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="components.js"></script>
+    <script src="profile.js"></script>
+</body>
+</html>

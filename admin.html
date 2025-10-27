@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адмін панель - iEvents</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div id="header"></div>
+    
+    <div id="adminAuth" class="auth-overlay">
+        <div class="auth-modal">
+            <h2>🔐 Вхід до адмін панелі</h2>
+            <form id="adminAuthForm">
+                <div class="form-group">
+                    <label for="adminPassword">Пароль адміністратора</label>
+                    <input type="password" id="adminPassword" required placeholder="Введіть пароль">
+                </div>
+                <button type="submit" class="btn btn-primary">Увійти</button>
+                <div id="authError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <main class="main-content" id="adminContent" style="display: none;">
+        <div class="admin-container">
+            <h1 class="page-title">Адміністративна панель</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <div class="stat-label">Всього користувачів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-label">Учнів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍🏫</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalTeachers">0</div>
+                        <div class="stat-label">Вчителів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalMethodists">0</div>
+                        <div class="stat-label">Методистів</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="users-section">
+                <h2>Користувачі системи</h2>
+                <div class="table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>ПІБ</th>
+                                <th>Телефон</th>
+                                <th>Telegram</th>
+                                <th>Роль</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <h3>Зміна ролі користувача</h3>
+            <p id="modalUserInfo"></p>
+            <div class="role-buttons">
+                <button class="role-btn" data-role="учень">👨‍🎓 Учень</button>
+                <button class="role-btn" data-role="вчитель">👨‍🏫 Вчитель</button>
+                <button class="role-btn" data-role="методист">📋 Методист</button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeRoleModal()">Скасувати</button>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="components.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

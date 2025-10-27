@@ -1,45 +1,56 @@
 <!DOCTYPE html>
 <html lang="uk">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система управління конкурсами - Вхід</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Головна - iEvents</title>
+    <link rel="stylesheet" href="index.css">
 </head>
-
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h1>Система управління конкурсами</h1>
-                <p>Увійдіть до свого облікового запису</p>
+    <div id="header"></div>
+    
+    <main class="main-content">
+        <div class="hero">
+            <h1 class="hero-title">Ласкаво просимо до iEvents! 🎯</h1>
+            <p class="hero-subtitle">Ваша платформа для організації подій</p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon">📅</div>
+                <h3>Події</h3>
+                <p>Створюйте та керуйте подіями</p>
             </div>
-
-            <form id="loginForm" class="auth-form">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="your@email.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" id="password" name="password" required placeholder="••••••••">
-                </div>
-
-                <div id="errorMessage" class="error-message"></div>
-
-                <button type="submit" class="btn btn-primary">Увійти</button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Немає облікового запису? <a href="register.html">Зареєструватися</a></p>
+            
+            <div class="card">
+                <div class="card-icon">👥</div>
+                <h3>Учасники</h3>
+                <p>Запрошуйте та керуйте учасниками</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <h3>Статистика</h3>
+                <p>Відстежуйте успішність подій</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">🎯</div>
+                <h3>Цілі</h3>
+                <p>Досягайте поставлених цілей</p>
             </div>
         </div>
-    </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
+        <div class="info-section">
+            <h2>Ваш профіль</h2>
+            <p>Заповніть свій профіль, щоб отримати повний доступ до платформи</p>
+            <a href="profile.html" class="btn btn-primary">Перейти до профілю</a>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="components.js"></script>
+    <script src="index.js"></script>
 </body>
-
 </html>
