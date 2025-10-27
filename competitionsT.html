@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управління конкурсами - iEvents</title>
+    <link rel="stylesheet" href="competitionsT.css">
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>Управління конкурсами</h1>
+            <p class="subtitle">Створюйте конкурси та додавайте учнів</p>
+        </div>
+
+        <!-- Форма створення конкурсу -->
+        <div class="card">
+            <h2>Створити новий конкурс</h2>
+            <form id="createCompetitionForm" class="competition-form">
+                <div class="form-group">
+                    <label for="title">Назва конкурсу *</label>
+                    <input type="text" id="title" name="title" required placeholder="Наприклад: Олімпіада з математики">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Опис</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Опишіть конкурс..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Дата початку *</label>
+                        <input type="date" id="startDate" name="startDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endDate">Дата закінчення *</label>
+                        <input type="date" id="endDate" name="endDate" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Створити конкурс</button>
+            </form>
+        </div>
+
+        <!-- Список конкурсів -->
+        <div class="card">
+            <h2>Всі конкурси</h2>
+            <div id="competitionsList" class="competitions-list">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <!-- Модальне вікно для додавання учнів -->
+    <div id="addStudentsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Додати учнів на конкурс</h2>
+                <button class="modal-close" onclick="closeAddStudentsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-box">
+                    <input type="text" id="studentSearch" placeholder="Пошук учнів за ім'ям або класом...">
+                </div>
+                <div id="studentsList" class="students-list">
+                    <div class="loading">Завантаження учнів...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddStudentsModal()">Скасувати</button>
+                <button class="btn btn-primary" onclick="addSelectedStudents()">Додати вибраних</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="components.js"></script>
+    <script src="competitionsT.js"></script>
+</body>
+
+</html>

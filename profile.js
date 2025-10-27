@@ -7,7 +7,6 @@ if (!userId || userId === "undefined" || userId === "null") {
 
 let avatarFile = null
 
-// Load profile data
 async function loadProfile() {
   try {
     const response = await fetch(`http://localhost:3000/api/profile/${userId}`)
@@ -27,11 +26,16 @@ async function loadProfile() {
       document.getElementById("interests").value = profile.interests || ""
       document.getElementById("bio").value = profile.bio || ""
 
+      const avatarPreview = document.getElementById("avatarPreview")
       if (profile.avatar) {
-        document.getElementById("avatarPreview").innerHTML = `<img src="${profile.avatar}" alt="Avatar">`
+        console.log("Завантаження аватара з бази даних:", profile.avatar)
+        const avatarUrl = `${profile.avatar}?t=${Date.now()}`
+        avatarPreview.innerHTML = `<img src="${avatarUrl}" alt="Avatar" onerror="console.error('Помилка завантаження аватара'); this.parentElement.innerHTML='<span class=\\'avatar-placeholder\\'>📷</span>'">`
+      } else {
+        console.log("��ватар не знайдено в базі даних")
+        avatarPreview.innerHTML = '<span class="avatar-placeholder">📷</span>'
       }
 
-      // Update role display
       const roleValue = document.getElementById("roleValue")
       roleValue.textContent = profile.role || "учень"
     } else {
@@ -42,14 +46,33 @@ async function loadProfile() {
   }
 }
 
-// Avatar upload
 document.getElementById("avatarInput").addEventListener("change", (e) => {
   const file = e.target.files[0]
   if (file) {
+    console.log("Вибрано файл аватара:", file.name, file.size, "байт")
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Файл занадто великий. Максимальний розмір: 5MB")
+      e.target.value = ""
+      return
+    }
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+    if (!allowedTypes.includes(file.type)) {
+      alert("Дозволені тільки зображення (JPEG, PNG, GIF, WebP)")
+      e.target.value = ""
+      return
+    }
+
     avatarFile = file
     const reader = new FileReader()
     reader.onload = (e) => {
+      console.log("Попередній перегляд аватара завантажено")
       document.getElementById("avatarPreview").innerHTML = `<img src="${e.target.result}" alt="Avatar">`
+    }
+    reader.onerror = (error) => {
+      console.error("Помилка читання файлу:", error)
+      alert("Помилка читання файлу")
     }
     reader.readAsDataURL(file)
   }
@@ -59,7 +82,10 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   e.preventDefault()
 
   const messageDiv = document.getElementById("profileMessage")
-  messageDiv.style.display = "block"
+  messageDiv.style.display = "none"
+
+  console.log("=== Початок збереження профілю ===")
+  console.log("Файл аватара для завантаження:", avatarFile ? avatarFile.name : "немає")
 
   const formData = new FormData()
   formData.append("userId", userId)
@@ -77,23 +103,32 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
 
   if (avatarFile) {
     formData.append("avatar", avatarFile)
+    console.log("Аватар додано до FormData")
   }
 
   try {
+    console.log("Відправка запиту на сервер...")
     const response = await fetch("http://localhost:3000/api/profile", {
       method: "POST",
       body: formData,
     })
 
+    console.log("Статус відповіді:", response.status)
     const data = await response.json()
+    console.log("Дані відповіді:", data)
 
     if (response.ok) {
       messageDiv.textContent = "Профіль успішно збережено!"
       messageDiv.className = "message success"
       messageDiv.style.display = "block"
 
-      // Reload profile to show updated data
-      await loadProfile()
+      avatarFile = null
+      document.getElementById("avatarInput").value = ""
+
+      console.log("Перезавантаження профілю з бази даних...")
+      setTimeout(async () => {
+        await loadProfile()
+      }, 500)
 
       setTimeout(() => {
         messageDiv.style.display = "none"
@@ -104,11 +139,13 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
       messageDiv.style.display = "block"
     }
   } catch (error) {
-    console.error("Profile save error:", error)
+    console.error("Помилка збереження профілю:", error)
     messageDiv.textContent = "Помилка з'єднання з сервером"
     messageDiv.className = "message error"
     messageDiv.style.display = "block"
   }
+
+  console.log("=== Кінець збереження профілю ===")
 })
 
 loadProfile()

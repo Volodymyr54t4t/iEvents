@@ -171,6 +171,58 @@ async function initDatabase() {
       console.log("  ✓ Таблиця profiles вже існує")
     }
 
+    // Крок 4: Перевірка та створення таблиці competitions
+    console.log("Крок 4: Перевірка таблиці competitions...")
+    const competitionsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'competitions'
+      ) as exists
+    `)
+
+    if (!competitionsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці competitions...")
+      await client.query(`
+        CREATE TABLE competitions (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          start_date DATE NOT NULL,
+          end_date DATE NOT NULL,
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця competitions створена")
+    } else {
+      console.log("  ✓ Таблиця competitions вже існує")
+    }
+
+    // Крок 5: Перевірка та створення таблиці competition_participants
+    console.log("Крок 5: Перевірка таблиці competition_participants...")
+    const participantsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'competition_participants'
+      ) as exists
+    `)
+
+    if (!participantsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці competition_participants...")
+      await client.query(`
+        CREATE TABLE competition_participants (
+          id SERIAL PRIMARY KEY,
+          competition_id INTEGER REFERENCES competitions(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(competition_id, user_id)
+        )
+      `)
+      console.log("  ✓ Таблиця competition_participants створена")
+    } else {
+      console.log("  ✓ Таблиця competition_participants вже існує")
+    }
+
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -659,6 +711,278 @@ app.post("/api/admin/validate", (req, res) => {
     res.status(401).json({
       valid: false,
       error: "Невірний пароль"
+    })
+  }
+})
+
+// Отримання списку всіх учнів (сортовано по класах)
+app.get("/api/students", async (req, res) => {
+  console.log("Запит списку учнів")
+
+  try {
+    const result = await pool.query(`
+      SELECT u.id, u.email, u.role,
+             p.first_name, p.last_name, p.grade, p.avatar
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE u.role = 'учень'
+      ORDER BY p.grade ASC NULLS LAST, p.last_name ASC
+    `)
+
+    console.log("✓ Знайдено учнів:", result.rows.length)
+    res.json({
+      students: result.rows
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання учнів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання учнів"
+    })
+  }
+})
+
+// Створення нового конкурсу
+app.post("/api/competitions", async (req, res) => {
+  const {
+    title,
+    description,
+    startDate,
+    endDate,
+    createdBy
+  } = req.body
+
+  console.log("Створення конкурсу:", title)
+
+  if (!title || !startDate || !endDate) {
+    console.log("Помилка: відсутні обов'язкові поля")
+    return res.status(400).json({
+      error: "Назва, дата початку та дата закінчення обов'язкові"
+    })
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO competitions (title, description, start_date, end_date, created_by) 
+       VALUES ($1, $2, $3, $4, $5) 
+       RETURNING *`,
+      [title, description, startDate, endDate, createdBy || null],
+    )
+
+    console.log("✓ Конкурс створено з ID:", result.rows[0].id)
+    res.json({
+      competition: result.rows[0]
+    })
+  } catch (error) {
+    console.error("❌ Помилка створення конкурсу:", error.message)
+    res.status(500).json({
+      error: "Помилка створення конкурсу"
+    })
+  }
+})
+
+// Отримання всіх конкурсів
+app.get("/api/competitions", async (req, res) => {
+  console.log("Запит списку конкурсів")
+
+  try {
+    const result = await pool.query(`
+      SELECT c.*, 
+             COUNT(cp.id) as participants_count
+      FROM competitions c
+      LEFT JOIN competition_participants cp ON c.id = cp.competition_id
+      GROUP BY c.id
+      ORDER BY c.start_date DESC
+    `)
+
+    console.log("✓ Знайдено конкурсів:", result.rows.length)
+    res.json({
+      competitions: result.rows
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання конкурсів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання конкурсів"
+    })
+  }
+})
+
+// Отримання конкурсів для конкретного учня
+app.get("/api/competitions/my/:userId", async (req, res) => {
+  const {
+    userId
+  } = req.params
+
+  console.log("Запит конкурсів для користувача:", userId)
+
+  if (!userId || userId === "undefined" || userId === "null") {
+    console.log("Помилка: невірний userId")
+    return res.status(400).json({
+      error: "Невірний ID користувача"
+    })
+  }
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT c.*, cp.added_at,
+             CASE 
+               WHEN c.end_date < CURRENT_DATE THEN 'неактивний'
+               WHEN c.start_date > CURRENT_DATE THEN 'майбутній'
+               ELSE 'активний'
+             END as status
+      FROM competitions c
+      INNER JOIN competition_participants cp ON c.id = cp.competition_id
+      WHERE cp.user_id = $1
+      ORDER BY c.start_date DESC
+    `,
+      [userId],
+    )
+
+    console.log("✓ Знайдено конкурсів для користувача:", result.rows.length)
+    res.json({
+      competitions: result.rows
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання конкурсів користувача:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання конкурсів"
+    })
+  }
+})
+
+// Додавання учнів на конкурс
+app.post("/api/competitions/:id/participants", async (req, res) => {
+  const {
+    id
+  } = req.params
+  const {
+    studentIds
+  } = req.body
+
+  console.log("Додавання учнів на конкурс ID:", id)
+
+  if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+    console.log("Помилка: не вказано учнів")
+    return res.status(400).json({
+      error: "Необхідно вибрати хоча б одного учня"
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    // Перевірка існування конкурсу
+    const competitionCheck = await client.query("SELECT id FROM competitions WHERE id = $1", [id])
+    if (competitionCheck.rows.length === 0) {
+      await client.query("ROLLBACK")
+      console.log("Помилка: конкурс не знайдено")
+      return res.status(404).json({
+        error: "Конкурс не знайдено"
+      })
+    }
+
+    let addedCount = 0
+    let skippedCount = 0
+
+    for (const studentId of studentIds) {
+      try {
+        await client.query(
+          `INSERT INTO competition_participants (competition_id, user_id) 
+           VALUES ($1, $2)`,
+          [id, studentId],
+        )
+        addedCount++
+      } catch (error) {
+        if (error.code === "23505") {
+          // Учень вже доданий
+          skippedCount++
+        } else {
+          throw error
+        }
+      }
+    }
+
+    await client.query("COMMIT")
+    console.log(`✓ Додано учнів: ${addedCount}, пропущено: ${skippedCount}`)
+    res.json({
+      message: `Успішно додано ${addedCount} учнів`,
+      added: addedCount,
+      skipped: skippedCount,
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("❌ Помилка додавання учнів:", error.message)
+    res.status(500).json({
+      error: "Помилка додавання учнів на конкурс"
+    })
+  } finally {
+    client.release()
+  }
+})
+
+// Отримання учасників конкурсу
+app.get("/api/competitions/:id/participants", async (req, res) => {
+  const {
+    id
+  } = req.params
+
+  console.log("Запит учасників конкурсу ID:", id)
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT u.id, u.email,
+             p.first_name, p.last_name, p.grade, p.avatar,
+             cp.added_at
+      FROM competition_participants cp
+      INNER JOIN users u ON cp.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE cp.competition_id = $1
+      ORDER BY p.grade ASC NULLS LAST, p.last_name ASC
+    `,
+      [id],
+    )
+
+    console.log("✓ Знайдено учасників:", result.rows.length)
+    res.json({
+      participants: result.rows
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання учасників:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання учасників"
+    })
+  }
+})
+
+// Видалення конкурсу
+app.delete("/api/competitions/:id", async (req, res) => {
+  const {
+    id
+  } = req.params
+
+  console.log("Видалення конкурсу ID:", id)
+
+  try {
+    const result = await pool.query("DELETE FROM competitions WHERE id = $1 RETURNING id", [id])
+
+    if (result.rows.length === 0) {
+      console.log("Помилка: конкурс не знайдено")
+      return res.status(404).json({
+        error: "Конкурс не знайдено"
+      })
+    }
+
+    console.log("✓ Конкурс видалено")
+    res.json({
+      message: "Конкурс успішно видалено"
+    })
+  } catch (error) {
+    console.error("❌ Помилка видалення конкурсу:", error.message)
+    res.status(500).json({
+      error: "Помилка видалення конкурсу"
     })
   }
 })

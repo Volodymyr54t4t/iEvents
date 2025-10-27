@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профіль - iEvents</title>
     <link rel="stylesheet" href="profile.css">
 </head>
+
 <body>
-    <div id="header"></div>
-    
+    <!-- Changed div to header element for semantic HTML -->
+    <header id="header"></header>
+
     <main class="main-content">
         <div class="profile-container">
             <h1 class="page-title">Мій профіль</h1>
-            
+
             <div class="role-badge" id="roleBadge">
                 <span class="role-label">Роль:</span>
                 <span class="role-value" id="roleValue">Учень</span>
@@ -24,7 +27,8 @@
                         <span class="avatar-placeholder">📷</span>
                     </div>
                     <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('avatarInput').click()">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('avatarInput').click()">
                         Завантажити фото
                     </button>
                 </div>
@@ -94,7 +98,10 @@
 
     <div id="footer"></div>
 
+    <!-- Added role.js before other scripts for proper initialization -->
+    <script src="role.js"></script>
     <script src="components.js"></script>
     <script src="profile.js"></script>
 </body>
+
 </html>

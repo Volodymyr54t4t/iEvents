@@ -1,24 +1,28 @@
 // Header component
 function renderHeader() {
-  const userId = localStorage.getItem("userId")
-  const userEmail = localStorage.getItem("userEmail")
-  const userRole = localStorage.getItem("userRole")
+    const userId = localStorage.getItem("userId")
+    const userEmail = localStorage.getItem("userEmail")
+    const userRole = localStorage.getItem("userRole")
 
-  if (!userId) return
+    if (!userId) return
 
-  const header = document.getElementById("header")
-  if (!header) return
+    const header = document.getElementById("header")
+    if (!header) return
 
-  const isAdmin = window.location.pathname.includes("admin.html")
+    const competitionsLink =
+        userRole === "вчитель" || userRole === "методист" ?
+        '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
+        '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
-  header.innerHTML = `
+    header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
                 <a href="index.html" class="logo">🎯 iEvents</a>
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
+                    ${competitionsLink}
                     <a href="profile.html" class="nav-link">Профіль</a>
-                    ${userRole === "вчитель" || userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""}
+                    <a href="admin.html" class="nav-link">Адмін</a>
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
                         <span class="user-role">${userRole}</span>
@@ -29,11 +33,11 @@ function renderHeader() {
         </header>
     `
 
-  // Add header styles
-  if (!document.getElementById("header-styles")) {
-    const style = document.createElement("style")
-    style.id = "header-styles"
-    style.textContent = `
+    // Add header styles
+    if (!document.getElementById("header-styles")) {
+        const style = document.createElement("style")
+        style.id = "header-styles"
+        style.textContent = `
             .site-header {
                 background: white;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -123,16 +127,16 @@ function renderHeader() {
                 }
             }
         `
-    document.head.appendChild(style)
-  }
+        document.head.appendChild(style)
+    }
 }
 
 // Footer component
 function renderFooter() {
-  const footer = document.getElementById("footer")
-  if (!footer) return
+    const footer = document.getElementById("footer")
+    if (!footer) return
 
-  footer.innerHTML = `
+    footer.innerHTML = `
         <footer class="site-footer">
             <div class="footer-container">
                 <p>&copy; 2025 iEvents. Всі права захищені.</p>
@@ -145,11 +149,11 @@ function renderFooter() {
         </footer>
     `
 
-  // Add footer styles
-  if (!document.getElementById("footer-styles")) {
-    const style = document.createElement("style")
-    style.id = "footer-styles"
-    style.textContent = `
+    // Add footer styles
+    if (!document.getElementById("footer-styles")) {
+        const style = document.createElement("style")
+        style.id = "footer-styles"
+        style.textContent = `
             .site-footer {
                 background: #2d3748;
                 color: white;
@@ -188,18 +192,18 @@ function renderFooter() {
                 }
             }
         `
-    document.head.appendChild(style)
-  }
+        document.head.appendChild(style)
+    }
 }
 
 // Logout function
 function logout() {
-  localStorage.clear()
-  window.location.href = "auth.html"
+    localStorage.clear()
+    window.location.href = "auth.html"
 }
 
 // Initialize components
 document.addEventListener("DOMContentLoaded", () => {
-  renderHeader()
-  renderFooter()
+    renderHeader()
+    renderFooter()
 })

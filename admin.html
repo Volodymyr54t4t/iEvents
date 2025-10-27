@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Адмін панель - iEvents</title>
     <link rel="stylesheet" href="admin.css">
 </head>
+
 <body>
-    <div id="header"></div>
-    
+    <!-- Changed div to header element -->
+    <header id="header"></header>
+
     <div id="adminAuth" class="auth-overlay">
         <div class="auth-modal">
             <h2>🔐 Вхід до адмін панелі</h2>
@@ -25,8 +28,13 @@
 
     <main class="main-content" id="adminContent" style="display: none;">
         <div class="admin-container">
+            <!-- Added super methodist indicator -->
+            <div id="superMethodistBadge" class="super-methodist-badge" style="display: none;">
+                ⭐ Ви увійшли як головний методист
+            </div>
+
             <h1 class="page-title">Адміністративна панель</h1>
-            
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">👥</div>
@@ -97,7 +105,10 @@
 
     <div id="footer"></div>
 
+    <!-- Added role.js for dynamic header -->
+    <script src="role.js"></script>
     <script src="components.js"></script>
     <script src="admin.js"></script>
 </body>
+
 </html>

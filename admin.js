@@ -1,11 +1,28 @@
 const ADMIN_PASSWORD = "319560"
 let currentUserId = null
+let isSuperMethodist = false
 
 // Admin authentication
-document.getElementById("adminAuthForm").addEventListener("submit", (e) => {
+document.getElementById("adminAuthForm").addEventListener("submit", async (e) => {
   e.preventDefault()
   const password = document.getElementById("adminPassword").value
   const errorDiv = document.getElementById("authError")
+
+  const loggedInUserId = localStorage.getItem("userId")
+  if (loggedInUserId) {
+    try {
+      const response = await fetch(`http://localhost:3000/api/user/is-super-methodist/${loggedInUserId}`)
+      const data = await response.json()
+      isSuperMethodist = data.isSuperMethodist
+      console.log("[v0] Is super methodist:", isSuperMethodist)
+
+      if (isSuperMethodist) {
+        document.getElementById("superMethodistBadge").style.display = "block"
+      }
+    } catch (error) {
+      console.error("Error checking super methodist status:", error)
+    }
+  }
 
   if (password === ADMIN_PASSWORD) {
     document.getElementById("adminAuth").style.display = "none"
@@ -65,6 +82,16 @@ function updateStats(users) {
 function openRoleModal(userId, email, currentRole) {
   currentUserId = userId
   document.getElementById("modalUserInfo").textContent = `Користувач: ${email} (Поточна роль: ${currentRole})`
+
+  const methodistBtn = document.querySelector('.role-btn[data-role="методист"]')
+  if (methodistBtn) {
+    if (isSuperMethodist) {
+      methodistBtn.style.display = "inline-block"
+    } else {
+      methodistBtn.style.display = "none"
+    }
+  }
+
   document.getElementById("roleModal").classList.add("show")
 }
 
@@ -78,6 +105,11 @@ document.querySelectorAll(".role-btn").forEach((btn) => {
   btn.addEventListener("click", async () => {
     const newRole = btn.dataset.role
 
+    if (newRole === "методист" && !isSuperMethodist) {
+      alert("Тільки головний методист може призначати роль методиста")
+      return
+    }
+
     try {
       const response = await fetch("http://localhost:3000/api/admin/change-role", {
         method: "POST",
@@ -86,11 +118,25 @@ document.querySelectorAll(".role-btn").forEach((btn) => {
       })
 
       if (response.ok) {
+        const loggedInUserId = localStorage.getItem("userId")
+
+        if (currentUserId.toString() === loggedInUserId) {
+          localStorage.setItem("userRole", newRole)
+          console.log("[v0] Current user's role changed to:", newRole)
+
+          if (typeof window.renderHeader === "function") {
+            window.renderHeader(newRole)
+          }
+        }
+
         closeRoleModal()
         loadUsers()
+
+        alert(`Роль успішно змінено на: ${newRole}`)
       }
     } catch (error) {
       console.error("Error changing role:", error)
+      alert("Помилка зміни ролі")
     }
   })
 })
