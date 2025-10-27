@@ -14,6 +14,8 @@ function renderHeader() {
         '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
         '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
+    const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
+
     header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
@@ -22,7 +24,7 @@ function renderHeader() {
                     <a href="index.html" class="nav-link">Головна</a>
                     ${competitionsLink}
                     <a href="profile.html" class="nav-link">Профіль</a>
-                    <a href="admin.html" class="nav-link">Адмін</a>
+                    ${adminLink}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
                         <span class="user-role">${userRole}</span>
