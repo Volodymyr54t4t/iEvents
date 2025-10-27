@@ -14,15 +14,23 @@ function renderHeader() {
         '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
         '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
+    const resultsLink =
+        userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
+
+    const statisticsLink =
+        userRole === "вчитель" || userRole === "методист" ? '<a href="statistics.html" class="nav-link">Статистика</a>' : ""
+
     const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
 
     header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
-                <a href="index.html" class="logo">🎯 iEvents</a>
+                <a href="home.html" class="logo">🎯 iEvents</a>
                 <nav class="nav">
-                    <a href="index.html" class="nav-link">Головна</a>
+                    <a href="home.html" class="nav-link">Головна</a>
                     ${competitionsLink}
+                    ${resultsLink}
+                    ${statisticsLink}
                     <a href="profile.html" class="nav-link">Профіль</a>
                     ${adminLink}
                     <div class="user-info">

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управління результатами - iEvents</title>
+    <link rel="stylesheet" href="results.css">
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>Управління результатами</h1>
+            <p class="subtitle">Додавайте та редагуйте результати учнів</p>
+        </div>
+
+        <!-- Вибір конкурсу -->
+        <div class="card">
+            <h2>Виберіть конкурс</h2>
+            <div class="competition-selector">
+                <select id="competitionSelect" onchange="loadCompetitionParticipants()">
+                    <option value="">Завантаження конкурсів...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Список учасників з результатами -->
+        <div class="card" id="participantsCard" style="display: none;">
+            <div class="card-header">
+                <h2>Учасники конкурсу</h2>
+                <button class="btn btn-primary" onclick="openAddResultModal()">Додати результат</button>
+            </div>
+            <div id="participantsList" class="participants-list">
+                <div class="loading">Виберіть конкурс</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <!-- Модальне вікно для додавання/редагування результату -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Додати результат</h2>
+                <button class="modal-close" onclick="closeResultModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="resultForm">
+                    <div class="form-group">
+                        <label for="studentSelect">Учень *</label>
+                        <select id="studentSelect" required>
+                            <option value="">Виберіть учня</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="score">Бали</label>
+                            <input type="number" id="score" step="0.01" placeholder="Наприклад: 95.5">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="place">Місце</label>
+                            <input type="number" id="place" min="1" placeholder="Наприклад: 1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Примітки</label>
+                        <textarea id="notes" rows="3" placeholder="Додаткова інформація про результат..."></textarea>
+                    </div>
+
+                    <input type="hidden" id="resultId">
+                    <input type="hidden" id="editMode" value="false">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeResultModal()">Скасувати</button>
+                <button class="btn btn-primary" onclick="saveResult()">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="components.js"></script>
+    <script src="results.js"></script>
+</body>
+
+</html>

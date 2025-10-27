@@ -8,6 +8,7 @@ if (!userId) {
 // Завантаження конкурсів при завантаженні сторінки
 document.addEventListener("DOMContentLoaded", () => {
     loadMyCompetitions()
+    loadMyResults()
 })
 
 // Завантаження конкурсів користувача
@@ -47,7 +48,7 @@ function displayCompetitions(containerId, competitions, type) {
         if (type === "active") {
             message = "Наразі у вас немає активних конкурсів"
         } else if (type === "upcoming") {
-            message = "Наразі у вас немає майбутніх конкурсів"
+            message = "Наразі у вас немає ��айбутніх конкурсів"
         } else {
             message = "У вас ще немає завершених конкурсів"
         }
@@ -115,4 +116,81 @@ function showError(containerId) {
       <p>Спробуйте оновити сторінку</p>
     </div>
   `
+}
+
+async function loadMyResults() {
+    const container = document.getElementById("myResults")
+    container.innerHTML = '<div class="loading">Завантаження результатів...</div>'
+
+    try {
+        // Get all competitions the student participates in
+        const competitionsResponse = await fetch(`http://localhost:3000/api/competitions/my/${userId}`)
+        const competitionsData = await competitionsResponse.json()
+
+        if (!competitionsResponse.ok || competitionsData.competitions.length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>У вас поки немає результатів</p></div>'
+            return
+        }
+
+        // Get results for each competition
+        const allResults = []
+        for (const competition of competitionsData.competitions) {
+            try {
+                const resultsResponse = await fetch(`http://localhost:3000/api/results/${competition.id}`)
+                const resultsData = await resultsResponse.json()
+
+                if (resultsResponse.ok && resultsData.results.length > 0) {
+                    // Filter results for current user
+                    const myResult = resultsData.results.find((r) => r.user_id === Number.parseInt(userId))
+                    if (myResult) {
+                        allResults.push({
+                            ...myResult,
+                            competition_title: competition.title,
+                            competition_date: competition.end_date,
+                        })
+                    }
+                }
+            } catch (error) {
+                console.error(`Помилка завантаження результатів для конкурсу ${competition.id}:`, error)
+            }
+        }
+
+        if (allResults.length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>У вас поки немає результатів</p></div>'
+            return
+        }
+
+        // Sort by date (newest first)
+        allResults.sort((a, b) => new Date(b.competition_date) - new Date(a.competition_date))
+
+        container.innerHTML = `
+            <div class="results-grid">
+                ${allResults
+                  .map((result) => {
+                    const date = new Date(result.competition_date).toLocaleDateString("uk-UA")
+                    const placeEmoji =
+                      result.place === 1 ? "🥇" : result.place === 2 ? "🥈" : result.place === 3 ? "🥉" : "🏅"
+
+                    return `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3>${result.competition_title}</h3>
+                                <span class="result-date">${date}</span>
+                            </div>
+                            <div class="result-body">
+                                ${result.place ? `<div class="result-place">${placeEmoji} Місце: ${result.place}</div>` : ""}
+                                ${result.score ? `<div class="result-score">📊 Бали: ${result.score}</div>` : ""}
+                                <div class="result-achievement">🏆 ${result.achievement}</div>
+                                ${result.notes ? `<div class="result-notes">📝 ${result.notes}</div>` : ""}
+                            </div>
+                        </div>
+                    `
+                  })
+                  .join("")}
+            </div>
+        `
+    } catch (error) {
+        console.error("Помилка завантаження результатів:", error)
+        container.innerHTML = '<div class="empty-state"><p>Помилка завантаження результатів</p></div>'
+    }
 }
