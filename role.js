@@ -30,7 +30,7 @@ async function fetchAndUpdateRole() {
 }
 
 async function checkPageAccess() {
-  const currentPage = window.location.pathname.split("/").pop() || "index.html"
+  const currentPage = window.location.pathname.split("/").pop() || "home.html"
   const userId = localStorage.getItem("userId")
 
   let userRole = localStorage.getItem("userRole")
@@ -42,7 +42,7 @@ async function checkPageAccess() {
   console.log("Перевірка доступу до сторінки:", currentPage, "Роль:", userRole)
 
   const pageAccess = {
-    "index.html": ["учень", "вчитель", "методист", null],
+    "home.html": ["учень", "вчитель", "методист", null],
     "competitions.html": ["учень", "вчитель", "методист"],
     "profile.html": ["учень", "вчитель", "методист"],
     "admin.html": ["методист"],
@@ -74,7 +74,7 @@ async function checkPageAccess() {
   } else {
     console.log("Доступ заборонено: недостатньо прав")
     alert(`У вас немає доступу до цієї сторінки. Ваша роль: ${userRole}`)
-    window.location.href = "index.html"
+    window.location.href = "home.html"
     return false
   }
 }
@@ -90,7 +90,7 @@ function renderHeader(role) {
     header.innerHTML = `
       <header class="site-header">
         <div class="header-container">
-          <a href="index.html" class="logo">🎯 iEvents</a>
+          <a href="home.html" class="logo">🎯 iEvents</a>
           <nav class="nav">
             <a href="auth.html" class="btn btn-primary">Вхід</a>
             <a href="auth.html" class="btn btn-secondary">Реєстрація</a>
@@ -112,21 +112,21 @@ function renderHeader(role) {
   switch (role) {
     case "учень":
       navLinks = `
-        <a href="index.html" class="nav-link">Головна</a>
+        <a href="home.html" class="nav-link">Головна</a>
         <a href="competitions.html" class="nav-link">Мої конкурси</a>
         <a href="profile.html" class="nav-link">Профіль</a>
       `
       break
     case "вчитель":
       navLinks = `
-        <a href="index.html" class="nav-link">Головна</a>
+        <a href="home.html" class="nav-link">Головна</a>
         <a href="competitions.html" class="nav-link">Конкурси</a>
         <a href="profile.html" class="nav-link">Профіль</a>
       `
       break
     case "методист":
       navLinks = `
-        <a href="index.html" class="nav-link">Головна</a>
+        <a href="home.html" class="nav-link">Головна</a>
         <a href="competitions.html" class="nav-link">Конкурси</a>
         <a href="profile.html" class="nav-link">Профіль</a>
         <a href="admin.html" class="nav-link">Адмін</a>
@@ -134,7 +134,7 @@ function renderHeader(role) {
       break
     default:
       navLinks = `
-        <a href="index.html" class="nav-link">Головна</a>
+        <a href="home.html" class="nav-link">Головна</a>
         <a href="profile.html" class="nav-link">Профіль</a>
       `
   }
@@ -142,7 +142,7 @@ function renderHeader(role) {
   header.innerHTML = `
     <header class="site-header">
       <div class="header-container">
-        <a href="index.html" class="logo">🎯 iEvents</a>
+        <a href="home.html" class="logo">🎯 iEvents</a>
         <nav class="nav" id="mainNav">
           ${navLinks}
           <div class="user-info">

@@ -37,6 +37,8 @@
                 <button class="tab-btn active" data-tab="dashboard">📊 Дашборд</button>
                 <button class="tab-btn" data-tab="users">👥 Користувачі</button>
                 <button class="tab-btn" data-tab="competitions">🏆 Конкурси</button>
+                <button class="tab-btn" data-tab="results">🎯 Результати</button>
+                <button class="tab-btn" data-tab="statistics">📈 Статистика</button>
             </div>
 
             <!-- Dashboard section with statistics -->
@@ -152,6 +154,220 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Results management section -->
+            <div id="results-section" class="tab-content">
+                <div class="section-header">
+                    <h2>Управління результатами</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="openAddResultModal()">Додати результат</button>
+                        <div class="search-box">
+                            <input type="text" id="resultSearch" placeholder="Пошук результатів...">
+                        </div>
+                        <select class="filter-select" id="resultCompetitionFilter" onchange="applyResultFilters()">
+                            <option value="all">Всі конкурси</option>
+                        </select>
+                        <select class="filter-select" id="resultPlaceFilter" onchange="applyResultFilters()">
+                            <option value="all">Всі місця</option>
+                            <option value="1">1 місце</option>
+                            <option value="2">2 місце</option>
+                            <option value="3">3 місце</option>
+                            <option value="other">Інші місця</option>
+                        </select>
+                        <select class="filter-select" id="resultGradeFilter" onchange="applyResultFilters()">
+                            <option value="all">Всі класи</option>
+                            <option value="5">5 клас</option>
+                            <option value="6">6 клас</option>
+                            <option value="7">7 клас</option>
+                            <option value="8">8 клас</option>
+                            <option value="9">9 клас</option>
+                            <option value="10">10 клас</option>
+                            <option value="11">11 клас</option>
+                        </select>
+                        <select class="filter-select" id="resultAchievementFilter" onchange="applyResultFilters()">
+                            <option value="all">Всі досягнення</option>
+                            <option value="Переможець">Переможець</option>
+                            <option value="Призер">Призер</option>
+                            <option value="Учасник">Учасник</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Конкурс</th>
+                                <th>Учень</th>
+                                <th>Клас</th>
+                                <th>Місце</th>
+                                <th>Бали</th>
+                                <th>Досягнення</th>
+                                <th>Примітки</th>
+                                <th>Дата додавання</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Added new statistics section with comprehensive data visualization -->
+            <div id="statistics-section" class="tab-content">
+                <div class="section-header">
+                    <h2>Детальна статистика системи</h2>
+                </div>
+
+                <!-- Overview Statistics -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">Загальна статистика</h3>
+                    <div class="stats-grid stats-grid-large">
+                        <div class="stat-card stat-card-highlight">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="statsStudents">0</div>
+                                <div class="stat-label">Всього учнів</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-highlight">
+                            <div class="stat-icon">🏆</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="statsCompetitions">0</div>
+                                <div class="stat-label">Всього конкурсів</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-highlight">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="statsParticipations">0</div>
+                                <div class="stat-label">Всього участей</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="statsActiveCompetitions">0</div>
+                                <div class="stat-label">Активні конкурси</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-info">
+                            <div class="stat-icon">🔜</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="statsUpcomingCompetitions">0</div>
+                                <div class="stat-label">Майбутні конкурси</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-secondary">
+                            <div class="stat-icon">✔️</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="statsCompletedCompetitions">0</div>
+                                <div class="stat-label">Завершені конкурси</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participation Rate -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">Рівень участі учнів</h3>
+                    <div class="participation-card">
+                        <div class="participation-rate">
+                            <div class="rate-circle">
+                                <div class="rate-value" id="participationRate">0%</div>
+                            </div>
+                            <div class="rate-details">
+                                <p><strong id="participatingStudents">0</strong> з <strong
+                                        id="totalStudentsForRate">0</strong> учнів беруть участь у конкурсах</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics by Grade -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">Статистика по класах</h3>
+                    <div class="table-container">
+                        <table class="data-table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Клас</th>
+                                    <th>Кількість учнів</th>
+                                    <th>Участей</th>
+                                    <th>Середній бал</th>
+                                    <th>Рівень участі</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statsByGradeTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Top Students -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">Топ-10 найактивніших учнів</h3>
+                    <div class="table-container">
+                        <table class="data-table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Місце</th>
+                                    <th>ПІБ</th>
+                                    <th>Клас</th>
+                                    <th>Email</th>
+                                    <th>Кількість участей</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topStudentsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Competition Statistics -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">Детальна статистика конкурсів</h3>
+                    <div class="table-container">
+                        <table class="data-table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Назва конкурсу</th>
+                                    <th>Дата початку</th>
+                                    <th>Дата закінчення</th>
+                                    <th>Учасників</th>
+                                    <th>Середній бал</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody id="competitionStatsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Participation Timeline -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">Динаміка участі по місяцях</h3>
+                    <div class="timeline-container">
+                        <div id="participationTimeline" class="timeline-chart"></div>
+                    </div>
+                </div>
+
+                <!-- Statistics by School -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">Топ-10 шкіл за участю</h3>
+                    <div class="table-container">
+                        <table class="data-table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Місце</th>
+                                    <th>Школа</th>
+                                    <th>Кількість учнів</th>
+                                    <th>Участей</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schoolStatsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -253,6 +469,57 @@
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">Зберегти</button>
                     <button type="button" class="btn btn-secondary" onclick="closeCompetitionModal()">Скасувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing result -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content modal-large">
+            <h3 id="resultModalTitle">Додати результат</h3>
+            <form id="resultForm">
+                <div class="form-group">
+                    <label for="resultCompetition">Конкурс *</label>
+                    <select id="resultCompetition" required class="form-select">
+                        <option value="">Оберіть конкурс</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="resultStudent">Учень *</label>
+                    <select id="resultStudent" required class="form-select">
+                        <option value="">Оберіть учня</option>
+                    </select>
+                    <small class="form-hint">Показуються тільки учні, які беруть участь у обраному конкурсі</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="resultPlace">Місце</label>
+                        <input type="number" id="resultPlace" min="1" placeholder="Наприклад: 1, 2, 3">
+                    </div>
+                    <div class="form-group">
+                        <label for="resultScore">Бали</label>
+                        <input type="text" id="resultScore" placeholder="Наприклад: 95, A+, Золото">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="resultAchievement">Досягнення *</label>
+                    <select id="resultAchievement" required class="form-select">
+                        <option value="">Оберіть досягнення</option>
+                        <option value="Переможець">Переможець</option>
+                        <option value="Призер">Призер</option>
+                        <option value="Учасник">Учасник</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="resultNotes">Примітки</label>
+                    <textarea id="resultNotes" rows="3"
+                        placeholder="Додаткова інформація про результат (необов'язково)"></textarea>
+                </div>
+                <small class="form-hint">* Вкажіть хоча б місце або бали</small>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeResultModal()">Скасувати</button>
                 </div>
             </form>
         </div>

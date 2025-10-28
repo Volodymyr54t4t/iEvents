@@ -12,7 +12,7 @@ if (!userId) {
 
 if (userRole !== "вчитель" && userRole !== "методист") {
     alert("У вас немає доступу до цієї сторінки")
-    window.location.href = "index.html"
+    window.location.href = "home.html"
 }
 
 // Завантаження конкурсів при завантаженні сторінки

@@ -78,36 +78,35 @@ async function loadGradeStats() {
     }
 }
 
-// Завантаження динаміки участі
+// Завантаження статистики успішності конкурсів
 async function loadTimelineStats() {
     try {
-        const response = await fetch(`${API_URL}/statistics/participation-timeline`)
+        const response = await fetch(`${API_URL}/statistics/competition-success`)
         const data = await response.json()
 
-        if (!data.timeline || data.timeline.length === 0) {
+        if (!data.competitions || data.competitions.length === 0) {
             document.getElementById("timelineChart").parentElement.innerHTML =
-                '<p style="text-align: center; padding: 40px; color: #666;">Немає даних для відображення. Додайте учасників на конкурси.</p>'
+                '<p style="text-align: center; padding: 40px; color: #666;">Немає даних для відображення. Додайте результати конкурсів.</p>'
             return
         }
 
-        const months = data.timeline.map((t) => t.month)
-        const participations = data.timeline.map((t) => Number.parseInt(t.participations_count) || 0)
+        const competitions = data.competitions.map((c) =>
+            c.title.length > 20 ? c.title.substring(0, 20) + "..." : c.title,
+        )
+        const scores = data.competitions.map((c) => Number.parseFloat(c.average_score) || 0)
 
         const ctx = document.getElementById("timelineChart").getContext("2d")
         const chart = new window.Chart(ctx, {
-            type: "line",
+            type: "bar",
             data: {
-                labels: months,
+                labels: competitions,
                 datasets: [{
-                    label: "Участей",
-                    data: participations,
+                    label: "Середній бал",
+                    data: scores,
+                    backgroundColor: "rgba(245, 87, 108, 0.8)",
                     borderColor: "rgba(245, 87, 108, 1)",
-                    backgroundColor: "rgba(245, 87, 108, 0.1)",
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointBackgroundColor: "rgba(245, 87, 108, 1)",
+                    borderWidth: 2,
+                    borderRadius: 8,
                 }, ],
             },
             options: {
@@ -117,19 +116,25 @@ async function loadTimelineStats() {
                     legend: {
                         display: false,
                     },
+                    tooltip: {
+                        callbacks: {
+                            title: (context) => data.competitions[context[0].dataIndex].title,
+                        },
+                    },
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        max: 100,
                         ticks: {
-                            stepSize: 1,
+                            stepSize: 10,
                         },
                     },
                 },
             },
         })
     } catch (error) {
-        console.error("Помилка завантаження динаміки участі:", error)
+        console.error("Помилка завантаження статистики успішності:", error)
     }
 }
 

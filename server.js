@@ -187,6 +187,7 @@ async function initDatabase() {
           description TEXT,
           start_date DATE NOT NULL,
           end_date DATE NOT NULL,
+          manual_status VARCHAR(20),
           created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -194,6 +195,23 @@ async function initDatabase() {
       console.log("  ✓ Таблиця competitions створена")
     } else {
       console.log("  ✓ Таблиця competitions вже існує")
+
+      // Перевірка колонки manual_status
+      console.log("  → Перевірка колонки manual_status...")
+      const manualStatusColumnCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'competitions' AND column_name = 'manual_status'
+        ) as exists
+      `)
+
+      if (!manualStatusColumnCheck.rows[0].exists) {
+        console.log("  → Додавання колонки manual_status...")
+        await client.query(`ALTER TABLE competitions ADD COLUMN manual_status VARCHAR(20)`)
+        console.log("  ✓ Колонка manual_status додана")
+      } else {
+        console.log("  ✓ Колонка manual_status вже існує")
+      }
     }
 
     // Крок 5: Перевірка та створення таблиці competition_participants
@@ -878,7 +896,7 @@ app.get("/api/students", async (req, res) => {
 
 // Створення нового конкурсу
 app.post("/api/competitions", async (req, res) => {
-  const { title, description, startDate, endDate, createdBy } = req.body
+  const { title, description, startDate, endDate, manualStatus, createdBy } = req.body
 
   console.log("Створення конкурсу:", title)
 
@@ -891,10 +909,10 @@ app.post("/api/competitions", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO competitions (title, description, start_date, end_date, created_by) 
-       VALUES ($1, $2, $3, $4, $5) 
+      `INSERT INTO competitions (title, description, start_date, end_date, manual_status, created_by) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
        RETURNING *`,
-      [title, description, startDate, endDate, createdBy || null],
+      [title, description, startDate, endDate, manualStatus || null, createdBy || null],
     )
 
     console.log("✓ Конкурс створено з ID:", result.rows[0].id)
@@ -1688,7 +1706,7 @@ app.get("/api/admin/all-results", async (req, res) => {
 // Update competition
 app.put("/api/competitions/:id", async (req, res) => {
   const { id } = req.params
-  const { title, description, startDate, endDate } = req.body
+  const { title, description, startDate, endDate, manualStatus } = req.body
 
   console.log("Оновлення конкурсу ID:", id)
 
@@ -1699,10 +1717,10 @@ app.put("/api/competitions/:id", async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE competitions 
-       SET title = $1, description = $2, start_date = $3, end_date = $4
-       WHERE id = $5
+       SET title = $1, description = $2, start_date = $3, end_date = $4, manual_status = $5
+       WHERE id = $6
        RETURNING *`,
-      [title, description, startDate, endDate, id],
+      [title, description, startDate, endDate, manualStatus || null, id],
     )
 
     if (result.rows.length === 0) {
@@ -1831,7 +1849,7 @@ app.get("/api/statistics/average-scores", async (req, res) => {
     const overallResult = await pool.query(`
       SELECT ROUND(AVG(CAST(score AS NUMERIC)), 1) as average
       FROM competition_results
-      WHERE score ~ '^[0-9]+(\\.[0-9]+)?$'
+      WHERE score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$'
     `)
 
     // Average scores by grade
@@ -1843,7 +1861,7 @@ app.get("/api/statistics/average-scores", async (req, res) => {
       FROM competition_results cr
       INNER JOIN users u ON cr.user_id = u.id
       LEFT JOIN profiles p ON u.id = p.user_id
-      WHERE cr.score ~ '^[0-9]+(\\.[0-9]+)?$' AND p.grade IS NOT NULL
+      WHERE cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' AND p.grade IS NOT NULL
       GROUP BY p.grade
       ORDER BY p.grade ASC
     `)
@@ -1857,6 +1875,38 @@ app.get("/api/statistics/average-scores", async (req, res) => {
     console.error("❌ Помилка отримання середніх балів:", error.message)
     res.status(500).json({
       error: "Помилка отримання середніх балів",
+    })
+  }
+})
+
+app.get("/api/statistics/competition-success", async (req, res) => {
+  console.log("Запит статистики успішності по конкурсах")
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        c.title,
+        c.id,
+        COUNT(DISTINCT cp.id) as participants_count,
+        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score
+      FROM competitions c
+      LEFT JOIN competition_participants cp ON c.id = cp.competition_id
+      LEFT JOIN competition_results cr ON c.id = cr.competition_id
+      WHERE c.end_date >= CURRENT_DATE - INTERVAL '6 months'
+      GROUP BY c.id, c.title
+      HAVING COUNT(DISTINCT cp.id) > 0
+      ORDER BY c.start_date DESC
+      LIMIT 10
+    `)
+
+    console.log("✓ Статистика успішності по конкурсах отримана")
+    res.json({
+      competitions: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання статистики успішності:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання статистики успішності",
     })
   }
 })
@@ -1901,7 +1951,7 @@ app.get("/api/statistics/class-details", async (req, res) => {
         p.grade,
         COUNT(DISTINCT u.id) as students_count,
         COUNT(cp.id) as participations_count,
-        ROUND(AVG(CAST(CASE WHEN cr.score ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
+        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
         ROUND(
           (COUNT(DISTINCT cp.user_id)::NUMERIC / NULLIF(COUNT(DISTINCT u.id), 0)) * 100, 
           1
@@ -1938,7 +1988,7 @@ app.get("/api/statistics/competitions-detailed", async (req, res) => {
         c.start_date,
         c.end_date,
         COUNT(DISTINCT cp.id) as participants_count,
-        ROUND(AVG(CAST(CASE WHEN cr.score ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
+        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
         CASE 
           WHEN c.end_date < CURRENT_DATE THEN 'завершений'
           WHEN c.start_date > CURRENT_DATE THEN 'майбутній'
