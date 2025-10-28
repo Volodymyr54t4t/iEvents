@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогнозування результатів - iEvents</title>
+    <link rel="stylesheet" href="predictions.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>Прогнозування результатів учнів</h1>
+                <p class="subtitle">Система аналізує минулі конкурси та прогнозує майбутні результати</p>
+            </div>
+            <button class="btn-back" onclick="window.location.href='statistics.html'">
+                ← Назад до статистики
+            </button>
+        </header>
+
+        <div class="overview-section">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalStudents">-</div>
+                    <div class="stat-label">Всього учнів</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="activeStudents">-</div>
+                    <div class="stat-label">Активні учні</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="improvingStudents">-</div>
+                    <div class="stat-label">Покращують результати</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="needAttention">-</div>
+                    <div class="stat-label">Потребують уваги</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="gradeFilter">Клас:</label>
+                <select id="gradeFilter">
+                    <option value="all">Всі класи</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="trendFilter">Тренд:</label>
+                <select id="trendFilter">
+                    <option value="all">Всі тренди</option>
+                    <option value="improving">Покращення</option>
+                    <option value="stable">Стабільний</option>
+                    <option value="declining">Погіршення</option>
+                    <option value="new">Новачки</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="activityFilter">Активність:</label>
+                <select id="activityFilter">
+                    <option value="all">Всі рівні</option>
+                    <option value="high">Висока (5+ конкурсів)</option>
+                    <option value="medium">Середня (2-4 конкурси)</option>
+                    <option value="low">Низька (1 конкурс)</option>
+                    <option value="none">Без участі</option>
+                </select>
+            </div>
+            <button class="btn-refresh" onclick="loadPredictions()">🔄 Оновити</button>
+        </div>
+
+        <div class="predictions-section">
+            <h2>Прогнози для учнів</h2>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Аналіз даних та створення прогнозів...</p>
+            </div>
+            <div class="predictions-grid" id="predictionsGrid"></div>
+            <div class="no-data" id="noData" style="display: none;">
+                <p>Немає даних для відображення</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="predictions.js"></script>
+</body>
+
+</html>

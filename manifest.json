@@ -1,0 +1,20 @@
+{
+  "name": "iEvents",
+  "short_name": "Конкурси",
+  "start_url": "./home.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
+  "icons": [
+    {
+      "src": "./images/PWA/192х192.jpg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/PWA/512х512.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
