@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Статистика - iEvents</title>
+    <link rel="stylesheet" href="statistics.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="statistics-page">
+        <div class="page-header">
+            <h1>Аналітика та Статистика</h1>
+            <p class="subtitle">Відстежуйте активність учнів і плануйте нові заходи</p>
+        </div>
+
+        <!-- Загальна статистика -->
+        <section class="overview-section">
+            <div class="stat-card">
+                <div class="stat-icon students">📚</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalStudents">0</div>
+                    <div class="stat-label">Всього учнів</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon competitions">🏆</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalCompetitions">0</div>
+                    <div class="stat-label">Всього конкурсів</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon participations">👥</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalParticipations">0</div>
+                    <div class="stat-label">Всього участей</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon active">⚡</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="activeCompetitions">0</div>
+                    <div class="stat-label">Активні конкурси</div>
+                </div>
+            </div>
+
+            <!-- Added average score card -->
+            <div class="stat-card">
+                <div class="stat-icon average">📊</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="averageScore">0</div>
+                    <div class="stat-label">Середній бал</div>
+                </div>
+            </div>
+
+            <!-- Added participation rate card -->
+            <div class="stat-card">
+                <div class="stat-icon rate">📈</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="participationRate">0%</div>
+                    <div class="stat-label">Рівень участі</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Added planning section for new events -->
+        <section class="planning-section" id="planningSection" style="display: none;">
+            <div class="planning-card">
+                <div class="planning-header">
+                    <h2>📅 Планування нового заходу</h2>
+                    <button class="btn-close" onclick="closePlanningForm()">✕</button>
+                </div>
+                <form id="planningForm" class="planning-form">
+                    <div class="form-group">
+                        <label for="eventTitle">Назва заходу *</label>
+                        <input type="text" id="eventTitle" required placeholder="Наприклад: Олімпіада з математики">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventDescription">Опис</label>
+                        <textarea id="eventDescription" rows="3" placeholder="Опис заходу..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventStartDate">Дата початку *</label>
+                            <input type="date" id="eventStartDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="eventEndDate">Дата закінчення *</label>
+                            <input type="date" id="eventEndDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closePlanningForm()">Скасувати</button>
+                        <button type="submit" class="btn-primary">Створити захід</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Added button to open planning form -->
+        <div class="action-bar">
+            <button class="btn-plan" onclick="openPlanningForm()" id="planButton" style="display: none;">
+                ➕ Запланувати новий захід
+            </button>
+        </div>
+
+        <!-- Графіки -->
+        <section class="charts-section">
+            <div class="chart-card">
+                <h2>Участь по класах</h2>
+                <canvas id="gradeChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h2>Динаміка участі</h2>
+                <canvas id="timelineChart"></canvas>
+            </div>
+
+            <!-- Added average scores by grade chart -->
+            <div class="chart-card">
+                <h2>Середні бали по класах</h2>
+                <canvas id="averageScoresChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Топ учнів -->
+        <section class="top-students-section">
+            <h2>Топ активних учнів</h2>
+            <div class="students-grid" id="topStudents">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </section>
+
+        <!-- Статистика по конкурсах -->
+        <section class="competitions-stats-section">
+            <h2>Статистика конкурсів</h2>
+            <div class="competitions-table-wrapper">
+                <table class="competitions-table" id="competitionsTable">
+                    <thead>
+                        <tr>
+                            <th>Назва конкурсу</th>
+                            <th>Дата початку</th>
+                            <th>Дата закінчення</th>
+                            <th>Учасників</th>
+                            <!-- Added average score column -->
+                            <th>Середній бал</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="loading">Завантаження...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Статистика по школах -->
+        <section class="schools-stats-section">
+            <h2>Топ шкіл за активністю</h2>
+            <div class="schools-list" id="schoolsList">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </section>
+
+        <!-- Added detailed class statistics section -->
+        <section class="class-details-section">
+            <h2>Детальна статистика по класах</h2>
+            <div class="class-details-grid" id="classDetails">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="components.js"></script>
+    <script src="statistics.js"></script>
+</body>
+
+</html>

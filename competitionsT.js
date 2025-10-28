@@ -1,5 +1,6 @@
 let currentCompetitionId = null
 let allStudents = []
+const currentResultsCompetitionId = null
 
 // Перевірка авторизації
 const userId = localStorage.getItem("userId")
@@ -110,11 +111,11 @@ async function loadCompetitions() {
                   <span class="status-badge status-${status}">${statusText}</span>
                 </div>
                 <div class="competition-actions">
+                  <button class="btn btn-info" onclick="window.location.href='results.html'">
+                    📊 Результати
+                  </button>
                   <button class="btn btn-success" onclick="openAddStudentsModal(${competition.id})">
                     Додати учнів
-                  </button>
-                  <button class="btn btn-danger" onclick="deleteCompetition(${competition.id})">
-                    Видалити
                   </button>
                 </div>
               </div>
@@ -274,7 +275,7 @@ async function addSelectedStudents() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                studentIds
+                studentIds,
             }),
         })
 
@@ -290,30 +291,5 @@ async function addSelectedStudents() {
     } catch (error) {
         console.error("Помилка:", error)
         alert("Помилка додавання учнів")
-    }
-}
-
-// Видалення конкурсу
-async function deleteCompetition(competitionId) {
-    if (!confirm("Ви впевнені, що хочете видалити цей конкурс?")) {
-        return
-    }
-
-    try {
-        const response = await fetch(`http://localhost:3000/api/competitions/${competitionId}`, {
-            method: "DELETE",
-        })
-
-        const data = await response.json()
-
-        if (response.ok) {
-            alert("Конкурс успішно видалено")
-            loadCompetitions()
-        } else {
-            alert(data.error || "Помилка видалення конкурсу")
-        }
-    } catch (error) {
-        console.error("Помилка:", error)
-        alert("Помилка видалення конкурсу")
     }
 }

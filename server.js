@@ -2,9 +2,7 @@ require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
 const bcrypt = require("bcrypt")
-const {
-  Pool
-} = require("pg")
+const { Pool } = require("pg")
 const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
@@ -383,10 +381,7 @@ app.get("/", (req, res) => {
 })
 
 app.post("/api/register", async (req, res) => {
-  const {
-    email,
-    password
-  } = req.body
+  const { email, password } = req.body
 
   console.log("Спроба реєстрації:", email)
 
@@ -493,10 +488,7 @@ app.post("/api/register", async (req, res) => {
 })
 
 app.post("/api/login", async (req, res) => {
-  const {
-    email,
-    password
-  } = req.body
+  const { email, password } = req.body
 
   console.log("Спроба входу:", email)
 
@@ -545,9 +537,7 @@ app.post("/api/login", async (req, res) => {
 })
 
 app.get("/api/user/role/:userId", async (req, res) => {
-  const {
-    userId
-  } = req.params
+  const { userId } = req.params
 
   console.log("Запит ролі користувача:", userId)
 
@@ -581,9 +571,7 @@ app.get("/api/user/role/:userId", async (req, res) => {
 })
 
 app.get("/api/profile/:userId", async (req, res) => {
-  const {
-    userId
-  } = req.params
+  const { userId } = req.params
 
   console.log("Запит профілю для користувача:", userId)
 
@@ -646,21 +634,8 @@ app.get("/api/profile/:userId", async (req, res) => {
 })
 
 app.post("/api/profile", upload.single("avatar"), async (req, res) => {
-  const {
-    userId,
-    firstName,
-    lastName,
-    middleName,
-    telegram,
-    phone,
-    birthDate,
-    city,
-    school,
-    grade,
-    interests,
-    bio
-  } =
-  req.body
+  const { userId, firstName, lastName, middleName, telegram, phone, birthDate, city, school, grade, interests, bio } =
+    req.body
 
   console.log("Оновлення профілю для користувача:", userId)
 
@@ -801,10 +776,7 @@ app.get("/api/admin/users", async (req, res) => {
 })
 
 app.post("/api/admin/change-role", async (req, res) => {
-  const {
-    userId,
-    role
-  } = req.body
+  const { userId, role } = req.body
 
   console.log("Зміна ролі користувача ID:", userId, "на роль:", role)
 
@@ -851,9 +823,7 @@ app.post("/api/admin/change-role", async (req, res) => {
 })
 
 app.post("/api/admin/validate", (req, res) => {
-  const {
-    password
-  } = req.body
+  const { password } = req.body
   const ADMIN_PASSWORD = "319560"
 
   console.log("Спроба входу в адмін панель")
@@ -908,13 +878,7 @@ app.get("/api/students", async (req, res) => {
 
 // Створення нового конкурсу
 app.post("/api/competitions", async (req, res) => {
-  const {
-    title,
-    description,
-    startDate,
-    endDate,
-    createdBy
-  } = req.body
+  const { title, description, startDate, endDate, createdBy } = req.body
 
   console.log("Створення конкурсу:", title)
 
@@ -973,9 +937,7 @@ app.get("/api/competitions", async (req, res) => {
 
 // Отримання конкурсів для конкретного учня
 app.get("/api/competitions/my/:userId", async (req, res) => {
-  const {
-    userId
-  } = req.params
+  const { userId } = req.params
 
   console.log("Запит конкурсів для користувача:", userId)
 
@@ -1017,12 +979,8 @@ app.get("/api/competitions/my/:userId", async (req, res) => {
 
 // Додавання учнів на конкурс
 app.post("/api/competitions/:id/participants", async (req, res) => {
-  const {
-    id
-  } = req.params
-  const {
-    studentIds
-  } = req.body
+  const { id } = req.params
+  const { studentIds } = req.body
 
   console.log("Додавання учнів на конкурс ID:", id)
 
@@ -1089,9 +1047,7 @@ app.post("/api/competitions/:id/participants", async (req, res) => {
 
 // Отримання учасників конкурсу
 app.get("/api/competitions/:id/participants", async (req, res) => {
-  const {
-    id
-  } = req.params
+  const { id } = req.params
 
   console.log("Запит учасників конкурсу ID:", id)
 
@@ -1124,9 +1080,7 @@ app.get("/api/competitions/:id/participants", async (req, res) => {
 
 // Отримання учасників конкурсу з результатами
 app.get("/api/competitions/:id/participants-with-results", async (req, res) => {
-  const {
-    id
-  } = req.params
+  const { id } = req.params
 
   console.log("Запит учасників з результатами для конкурсу ID:", id)
 
@@ -1169,9 +1123,7 @@ app.get("/api/competitions/:id/participants-with-results", async (req, res) => {
 
 // Видалення конкурсу
 app.delete("/api/competitions/:id", async (req, res) => {
-  const {
-    id
-  } = req.params
+  const { id } = req.params
 
   console.log("Видалення конкурсу ID:", id)
 
@@ -1199,14 +1151,7 @@ app.delete("/api/competitions/:id", async (req, res) => {
 
 // Створення результату (новий ендпоінт)
 app.post("/api/results", async (req, res) => {
-  const {
-    competitionId,
-    studentId,
-    score,
-    place,
-    notes,
-    addedBy
-  } = req.body
+  const { competitionId, studentId, score, place, notes, addedBy } = req.body
 
   console.log("Додавання результату для учня ID:", studentId, "на конкурс ID:", competitionId)
 
@@ -1287,137 +1232,10 @@ app.post("/api/results", async (req, res) => {
   }
 })
 
-// Отримання результатів конкурсу (старий ендпоінт)
-// app.get("/api/results/:competitionId", async (req, res) => {
-//   const { competitionId } = req.params
-
-//   console.log("Запит результатів конкурсу ID:", competitionId)
-
-//   try {
-//     const result = await pool.query(
-//       `
-//       SELECT cr.*,
-//              u.email,
-//              p.first_name, p.last_name, p.grade
-//       FROM competition_results cr
-//       INNER JOIN users u ON cr.user_id = u.id
-//       LEFT JOIN profiles p ON u.id = p.user_id
-//       WHERE cr.competition_id = $1
-//       ORDER BY
-//         CASE WHEN cr.place IS NULL THEN 1 ELSE 0 END,
-//         cr.place ASC,
-//         p.last_name ASC
-//     `,
-//       [competitionId],
-//     )
-
-//     console.log("✓ Знайдено результатів:", result.rows.length)
-//     res.json({
-//       results: result.rows,
-//     })
-//   } catch (error) {
-//     console.error("❌ Помилка отримання результатів:", error.message)
-//     res.status(500).json({
-//       error: "Помилка отримання результатів",
-//     })
-//   }
-// })
-
-// Отримання одного результату (старий ендпоінт)
-// app.get("/api/results/single/:resultId", async (req, res) => {
-//   const { resultId } = req.params
-
-//   console.log("Запит результату ID:", resultId)
-
-//   try {
-//     const result = await pool.query(
-//       `
-//       SELECT cr.*,
-//              u.email,
-//              p.first_name, p.last_name
-//       FROM competition_results cr
-//       INNER JOIN users u ON cr.user_id = u.id
-//       LEFT JOIN profiles p ON u.id = p.user_id
-//       WHERE cr.id = $1
-//     `,
-//       [resultId],
-//     )
-
-//     if (result.rows.length === 0) {
-//       console.log("Помилка: результат не знайдено")
-//       return res.status(404).json({
-//         error: "Результат не знайдено",
-//       })
-//     }
-
-//     console.log("✓ Результат знайдено")
-//     res.json({
-//       result: result.rows[0],
-//     })
-//   } catch (error) {
-//     console.error("❌ Помилка отримання результату:", error.message)
-//     res.status(500).json({
-//       error: "Помилка отримання результату",
-//     })
-//   }
-// })
-
-// Оновлення результату (старий ендпоінт)
-// app.put("/api/results/:resultId", async (req, res) => {
-//   const { resultId } = req.params
-//   const { place, score, achievement, notes } = req.body
-
-//   console.log("Оновлення результату ID:", resultId)
-
-//   if (!achievement) {
-//     console.log("Помилка: досягнення обов'язкове")
-//     return res.status(400).json({
-//       error: "Досягнення обов'язкове",
-//     })
-//   }
-
-//   try {
-//     const result = await pool.query(
-//       `UPDATE competition_results
-//        SET place = $1, score = $2, achievement = $3, notes = $4, updated_at = CURRENT_TIMESTAMP
-//        WHERE id = $5
-//        RETURNING *`,
-//       [place, score, achievement, notes, resultId],
-//     )
-
-//     if (result.rows.length === 0) {
-//       console.log("Помилка: результат не знайдено")
-//       return res.status(404).json({
-//         error: "Результат не знайдено",
-//       })
-//     }
-
-//     console.log("✓ Результат оновлено")
-//     res.json({
-//       message: "Результат успішно оновлено",
-//       result: result.rows[0],
-//     })
-//   } catch (error) {
-//     console.error("❌ Помилка оновлення результату:", error.message)
-//     res.status(500).json({
-//       error: "Помилка оновлення результату",
-//     })
-//   }
-// })
-
 // Оновлення результату (новий ендпоінт)
 app.put("/api/results/:resultId", async (req, res) => {
-  const {
-    resultId
-  } = req.params
-  const {
-    competitionId,
-    studentId,
-    score,
-    place,
-    notes,
-    addedBy
-  } = req.body
+  const { resultId } = req.params
+  const { competitionId, studentId, score, place, notes, addedBy } = req.body
 
   console.log("Оновлення результату ID:", resultId)
 
@@ -1458,7 +1276,7 @@ app.put("/api/results/:resultId", async (req, res) => {
     }
 
     // Оновлення результату
-    const result = await client.query(
+    const result = await pool.query(
       `UPDATE competition_results 
        SET score = $1, place = $2, notes = $3, achievement = $4, updated_at = CURRENT_TIMESTAMP
        WHERE id = $5 
@@ -1486,9 +1304,7 @@ app.put("/api/results/:resultId", async (req, res) => {
 
 // Видалення результату (новий ендпоінт)
 app.delete("/api/results/:resultId", async (req, res) => {
-  const {
-    resultId
-  } = req.params
+  const { resultId } = req.params
 
   console.log("Видалення результату ID:", resultId)
 
@@ -1516,9 +1332,7 @@ app.delete("/api/results/:resultId", async (req, res) => {
 
 // Експорт результатів конкурсу
 app.get("/api/results/:competitionId/export", async (req, res) => {
-  const {
-    competitionId
-  } = req.params
+  const { competitionId } = req.params
 
   console.log("Експорт результатів конкурсу ID:", competitionId)
 
@@ -1526,9 +1340,7 @@ app.get("/api/results/:competitionId/export", async (req, res) => {
     const competition = await pool.query("SELECT title FROM competitions WHERE id = $1", [competitionId])
 
     if (competition.rows.length === 0) {
-      return res.status(404).json({
-        error: "Конкурс не знайдено"
-      })
+      return res.status(404).json({ error: "Конкурс не знайдено" })
     }
 
     const results = await pool.query(
@@ -1781,6 +1593,372 @@ app.get("/api/statistics/by-school", async (req, res) => {
     console.error("❌ Помилка отримання статистики по школах:", error.message)
     res.status(500).json({
       error: "Помилка отримання статистики",
+    })
+  }
+})
+
+// Get all participants with competition and user details
+app.get("/api/admin/all-participants", async (req, res) => {
+  console.log("Запит всіх учасників")
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        cp.id,
+        cp.competition_id,
+        cp.user_id,
+        cp.added_at,
+        c.title as competition_title,
+        u.email,
+        p.first_name,
+        p.last_name,
+        p.grade
+      FROM competition_participants cp
+      INNER JOIN competitions c ON cp.competition_id = c.id
+      INNER JOIN users u ON cp.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      ORDER BY cp.added_at DESC
+    `)
+
+    console.log("✓ Знайдено учасників:", result.rows.length)
+    res.json({ participants: result.rows })
+  } catch (error) {
+    console.error("❌ Помилка отримання учасників:", error.message)
+    res.status(500).json({ error: "Помилка отримання учасників" })
+  }
+})
+
+// Delete participant
+app.delete("/api/admin/participants/:id", async (req, res) => {
+  const { id } = req.params
+
+  console.log("Видалення учасника ID:", id)
+
+  try {
+    const result = await pool.query("DELETE FROM competition_participants WHERE id = $1 RETURNING id", [id])
+
+    if (result.rows.length === 0) {
+      console.log("Помилка: учасника не знайдено")
+      return res.status(404).json({ error: "Учасника не знайдено" })
+    }
+
+    console.log("✓ Учасника видалено")
+    res.json({ message: "Учасника видалено" })
+  } catch (error) {
+    console.error("❌ Помилка видалення учасника:", error.message)
+    res.status(500).json({ error: "Помилка видалення учасника" })
+  }
+})
+
+// Get all results with competition and user details
+app.get("/api/admin/all-results", async (req, res) => {
+  console.log("Запит всіх результатів")
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        cr.id,
+        cr.competition_id,
+        cr.user_id,
+        cr.place,
+        cr.score,
+        cr.achievement,
+        cr.notes,
+        cr.added_at,
+        c.title as competition_title,
+        u.email,
+        p.first_name,
+        p.last_name,
+        p.grade
+      FROM competition_results cr
+      INNER JOIN competitions c ON cr.competition_id = c.id
+      INNER JOIN users u ON cr.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      ORDER BY cr.added_at DESC
+    `)
+
+    console.log("✓ Знайдено результатів:", result.rows.length)
+    res.json({ results: result.rows })
+  } catch (error) {
+    console.error("❌ Помилка отримання результатів:", error.message)
+    res.status(500).json({ error: "Помилка отримання результатів" })
+  }
+})
+
+// Update competition
+app.put("/api/competitions/:id", async (req, res) => {
+  const { id } = req.params
+  const { title, description, startDate, endDate } = req.body
+
+  console.log("Оновлення конкурсу ID:", id)
+
+  if (!title || !startDate || !endDate) {
+    return res.status(400).json({ error: "Назва та дати обов'язкові" })
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE competitions 
+       SET title = $1, description = $2, start_date = $3, end_date = $4
+       WHERE id = $5
+       RETURNING *`,
+      [title, description, startDate, endDate, id],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Конкурс не знайдено" })
+    }
+
+    console.log("✓ Конкурс оновлено")
+    res.json({ competition: result.rows[0] })
+  } catch (error) {
+    console.error("❌ Помилка оновлення конкурсу:", error.message)
+    res.status(500).json({ error: "Помилка оновлення конкурсу" })
+  }
+})
+
+app.post("/api/admin/create-user", async (req, res) => {
+  const { email, password, firstName, lastName, role, phone, telegram } = req.body
+
+  console.log("Створення користувача адміністратором:", email, "з роллю:", role)
+
+  // Validation
+  if (!email || !password || !role) {
+    console.log("Помилка: відсутні обов'язкові поля")
+    return res.status(400).json({
+      error: "Email, пароль та роль обов'язкові",
+    })
+  }
+
+  if (password.length < 6) {
+    console.log("Помилка: пароль занадто короткий")
+    return res.status(400).json({
+      error: "Пароль повинен містити мінімум 6 символів",
+    })
+  }
+
+  const validRoles = ["учень", "вчитель", "методист"]
+  if (!validRoles.includes(role)) {
+    console.log("Помилка: невірна роль")
+    return res.status(400).json({
+      error: "Невірна роль. Доступні: учень, вчитель, методист",
+    })
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    console.log("Помилка: невірний формат email")
+    return res.status(400).json({
+      error: "Невірний формат email",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+    console.log("Транзакція розпочата")
+
+    // Check if user already exists
+    const existingUser = await client.query("SELECT id FROM users WHERE email = $1", [email])
+
+    if (existingUser.rows.length > 0) {
+      await client.query("ROLLBACK")
+      console.log("Помилка: користувач вже існує")
+      return res.status(400).json({
+        error: "Користувач з таким email вже існує",
+      })
+    }
+
+    // Hash password
+    console.log("Хешування пароля...")
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create user with specified role
+    console.log("Створення користувача в базі даних...")
+    const userResult = await client.query(
+      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3::user_role) RETURNING id, email, role",
+      [email, hashedPassword, role],
+    )
+
+    const user = userResult.rows[0]
+    console.log("Користувач створений з ID:", user.id)
+
+    // Create profile with additional information
+    console.log("Створення профілю для користувача...")
+    await client.query(
+      "INSERT INTO profiles (user_id, first_name, last_name, phone, telegram) VALUES ($1, $2, $3, $4, $5)",
+      [user.id, firstName || null, lastName || null, phone || null, telegram || null],
+    )
+    console.log("Профіль створений")
+
+    await client.query("COMMIT")
+    console.log("Транзакція завершена успішно")
+    console.log("✓ Користувача створено адміністратором:", email)
+
+    res.json({
+      message: "Користувача успішно створено",
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("❌ Помилка створення користувача:")
+    console.error("Тип помилки:", error.name)
+    console.error("Повідомлення:", error.message)
+    console.error("Код помилки:", error.code)
+
+    if (error.code === "23505") {
+      return res.status(400).json({
+        error: "Користувач з таким email вже існує",
+      })
+    }
+
+    res.status(500).json({
+      error: "Помилка створення користувача",
+    })
+  } finally {
+    client.release()
+  }
+})
+
+app.get("/api/statistics/average-scores", async (req, res) => {
+  console.log("Запит середніх балів")
+
+  try {
+    // Overall average score
+    const overallResult = await pool.query(`
+      SELECT ROUND(AVG(CAST(score AS NUMERIC)), 1) as average
+      FROM competition_results
+      WHERE score ~ '^[0-9]+(\\.[0-9]+)?$'
+    `)
+
+    // Average scores by grade
+    const byGradeResult = await pool.query(`
+      SELECT 
+        p.grade,
+        ROUND(AVG(CAST(cr.score AS NUMERIC)), 1) as average_score,
+        COUNT(cr.id) as results_count
+      FROM competition_results cr
+      INNER JOIN users u ON cr.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE cr.score ~ '^[0-9]+(\\.[0-9]+)?$' AND p.grade IS NOT NULL
+      GROUP BY p.grade
+      ORDER BY p.grade ASC
+    `)
+
+    console.log("✓ Середні бали отримано")
+    res.json({
+      overallAverage: overallResult.rows[0]?.average || "N/A",
+      byGrade: byGradeResult.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання середніх балів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання середніх балів",
+    })
+  }
+})
+
+app.get("/api/statistics/participation-rate", async (req, res) => {
+  console.log("Запит рівня участі")
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        COUNT(DISTINCT u.id) as total_students,
+        COUNT(DISTINCT cp.user_id) as participating_students,
+        ROUND(
+          (COUNT(DISTINCT cp.user_id)::NUMERIC / NULLIF(COUNT(DISTINCT u.id), 0)) * 100, 
+          1
+        ) as participation_rate
+      FROM users u
+      LEFT JOIN competition_participants cp ON u.id = cp.user_id
+      WHERE u.role = 'учень'
+    `)
+
+    console.log("✓ Рівень участі отримано")
+    res.json({
+      rate: result.rows[0]?.participation_rate || 0,
+      totalStudents: Number.parseInt(result.rows[0]?.total_students) || 0,
+      participatingStudents: Number.parseInt(result.rows[0]?.participating_students) || 0,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання рівня участі:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання рівня участі",
+    })
+  }
+})
+
+app.get("/api/statistics/class-details", async (req, res) => {
+  console.log("Запит детальної статистики класів")
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        p.grade,
+        COUNT(DISTINCT u.id) as students_count,
+        COUNT(cp.id) as participations_count,
+        ROUND(AVG(CAST(CASE WHEN cr.score ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
+        ROUND(
+          (COUNT(DISTINCT cp.user_id)::NUMERIC / NULLIF(COUNT(DISTINCT u.id), 0)) * 100, 
+          1
+        ) as participation_rate
+      FROM profiles p
+      INNER JOIN users u ON p.user_id = u.id
+      LEFT JOIN competition_participants cp ON u.id = cp.user_id
+      LEFT JOIN competition_results cr ON u.id = cr.user_id
+      WHERE u.role = 'учень' AND p.grade IS NOT NULL
+      GROUP BY p.grade
+      ORDER BY p.grade ASC
+    `)
+
+    console.log("✓ Детальна статистика класів отримана")
+    res.json({
+      classes: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання детальної статистики класів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання детальної статистики класів",
+    })
+  }
+})
+
+app.get("/api/statistics/competitions-detailed", async (req, res) => {
+  console.log("Запит детальної статистики конкурсів")
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        c.id,
+        c.title,
+        c.start_date,
+        c.end_date,
+        COUNT(DISTINCT cp.id) as participants_count,
+        ROUND(AVG(CAST(CASE WHEN cr.score ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
+        CASE 
+          WHEN c.end_date < CURRENT_DATE THEN 'завершений'
+          WHEN c.start_date > CURRENT_DATE THEN 'майбутній'
+          ELSE 'активний'
+        END as status
+      FROM competitions c
+      LEFT JOIN competition_participants cp ON c.id = cp.competition_id
+      LEFT JOIN competition_results cr ON c.id = cr.competition_id
+      GROUP BY c.id, c.title, c.start_date, c.end_date
+      ORDER BY c.start_date DESC
+    `)
+
+    console.log("✓ Детальна статистика конкурсів отримана")
+    res.json({
+      competitions: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання детальної статистики конкурсів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання детальної статистики конкурсів",
     })
   }
 })
