@@ -116,7 +116,7 @@ body {
 /* Графіки */
 .charts-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 48px;
 }
@@ -563,7 +563,38 @@ body {
 }
 
 /* Адаптивність */
+@media (max-width: 1024px) {
+  .statistics-page {
+    padding: 32px 16px;
+  }
+
+  .overview-section {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+
+  .class-details-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  .students-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
+  .statistics-page {
+    padding: 24px 12px;
+  }
+
+  .page-header {
+    margin-bottom: 32px;
+  }
+
   .page-header h1 {
     font-size: 32px;
   }
@@ -572,16 +603,36 @@ body {
     font-size: 16px;
   }
 
+  .overview-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
   .charts-section {
     grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .chart-card {
+    padding: 20px;
+  }
+
+  .chart-card h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
   }
 
   .students-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
   }
 
   .stat-card {
     padding: 20px;
+    flex-direction: column;
+    text-align: center;
   }
 
   .stat-icon {
@@ -592,5 +643,124 @@ body {
 
   .stat-value {
     font-size: 28px;
+  }
+
+  .competitions-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -20px;
+    padding: 0 20px;
+  }
+
+  .competitions-table {
+    min-width: 600px;
+  }
+
+  .competitions-table th,
+  .competitions-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .top-students-section,
+  .competitions-stats-section,
+  .schools-stats-section,
+  .class-details-section {
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .top-students-section h2,
+  .competitions-stats-section h2,
+  .schools-stats-section h2,
+  .class-details-section h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .school-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .school-participations {
+    font-size: 28px;
+    align-self: flex-end;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .planning-card {
+    padding: 20px;
+  }
+
+  .planning-header h2 {
+    font-size: 20px;
+  }
+
+  .class-details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .class-detail-card {
+    padding: 16px;
+  }
+
+  .class-name {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .students-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-card {
+    padding: 16px;
+  }
+
+  .btn-plan {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 10px 20px;
+    font-size: 13px;
   }
 }

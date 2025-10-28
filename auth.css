@@ -5,7 +5,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   display: flex;
@@ -141,8 +142,87 @@ body {
   display: block;
 }
 
-@media (max-width: 480px) {
+/* Enhanced responsive design for all devices */
+@media (max-width: 768px) {
+  body {
+    padding: 16px;
+  }
+
   .auth-card {
-    padding: 24px;
+    padding: 32px 24px;
+  }
+
+  .logo {
+    font-size: 28px;
+  }
+
+  .tabs {
+    gap: 6px;
+  }
+
+  .tab {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 12px;
+  }
+
+  .auth-card {
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .auth-header {
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .tabs {
+    margin-bottom: 24px;
+  }
+
+  .tab {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group input {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-card {
+    padding: 20px 16px;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+
+  .tab {
+    padding: 8px 6px;
+    font-size: 11px;
   }
 }

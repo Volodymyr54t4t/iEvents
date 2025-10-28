@@ -5,15 +5,20 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   background: #f7fafc;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-content {
+  flex: 1;
   max-width: 800px;
   margin: 0 auto;
   padding: 40px 20px;
+  width: 100%;
 }
 
 .profile-container {
@@ -120,6 +125,7 @@ body {
 
 .form-group textarea {
   resize: vertical;
+  min-height: 100px;
 }
 
 .btn {
@@ -173,12 +179,118 @@ body {
   display: block;
 }
 
+/* Enhanced responsive design for all devices */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 32px 16px;
+  }
+}
+
 @media (max-width: 768px) {
+  .main-content {
+    padding: 24px 16px;
+  }
+
   .profile-container {
-    padding: 24px;
+    padding: 32px 24px;
+  }
+
+  .page-title {
+    font-size: 28px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .avatar-preview {
+    width: 120px;
+    height: 120px;
+  }
+
+  .avatar-placeholder {
+    font-size: 48px;
+  }
+
+  .role-badge {
+    padding: 10px 20px;
+  }
+
+  .role-label {
+    font-size: 13px;
+  }
+
+  .role-value {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 12px;
+  }
+
+  .profile-container {
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .role-badge {
+    padding: 10px 16px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .avatar-section {
+    margin-bottom: 24px;
+  }
+
+  .avatar-preview {
+    width: 100px;
+    height: 100px;
+    border: 3px solid #667eea;
+  }
+
+  .avatar-placeholder {
+    font-size: 40px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .profile-container {
+    padding: 20px 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .avatar-preview {
+    width: 90px;
+    height: 90px;
+  }
+
+  .avatar-placeholder {
+    font-size: 36px;
   }
 }

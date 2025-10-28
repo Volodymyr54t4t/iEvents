@@ -864,20 +864,20 @@ async function loadParticipationRate() {
 
 async function loadStatsByGrade() {
   try {
-    console.log("[v0] Loading statistics by grade...")
+    console.log("Loading statistics by grade...")
     const response = await fetch("http://localhost:3000/api/statistics/class-details")
 
-    console.log("[v0] Response status:", response.status, response.statusText)
+    console.log(" Response status:", response.status, response.statusText)
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error("[v0] Server error response:", errorText)
+      console.error("Server error response:", errorText)
       showNotification(`Помилка завантаження статистики по класах: ${response.status}`, "error")
       return
     }
 
     const data = await response.json()
-    console.log("[v0] Statistics by grade response:", data)
+    console.log(" Statistics by grade response:", data)
 
     const tbody = document.getElementById("statsByGradeTable")
     tbody.innerHTML = ""
@@ -902,10 +902,10 @@ async function loadStatsByGrade() {
       `
       tbody.appendChild(row)
     })
-    console.log("[v0] Statistics by grade loaded successfully")
+    console.log(" Statistics by grade loaded successfully")
   } catch (error) {
-    console.error("[v0] Error loading stats by grade:", error)
-    console.error("[v0] Error details:", error.message, error.stack)
+    console.error(" Error loading stats by grade:", error)
+    console.error(" Error details:", error.message, error.stack)
     showNotification(`Помилка завантаження статистики по класах: ${error.message}`, "error")
   }
 }
@@ -952,20 +952,20 @@ async function loadTopStudents() {
 
 async function loadCompetitionStatistics() {
   try {
-    console.log("[v0] Loading competition statistics...")
+    console.log("Loading competition statistics...")
     const response = await fetch("http://localhost:3000/api/statistics/competitions-detailed")
 
-    console.log("[v0] Response status:", response.status, response.statusText)
+    console.log(" Response status:", response.status, response.statusText)
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error("[v0] Server error response:", errorText)
+      console.error("Server error response:", errorText)
       showNotification(`Помилка завантаження статистики конкурсів: ${response.status}`, "error")
       return
     }
 
     const data = await response.json()
-    console.log("[v0] Competition statistics response:", data)
+    console.log("Competition statistics response:", data)
 
     const tbody = document.getElementById("competitionStatsTable")
     tbody.innerHTML = ""
@@ -991,10 +991,10 @@ async function loadCompetitionStatistics() {
       `
       tbody.appendChild(row)
     })
-    console.log("[v0] Competition statistics loaded successfully")
+    console.log(" Competition statistics loaded successfully")
   } catch (error) {
-    console.error("[v0] Error loading competition statistics:", error)
-    console.error("[v0] Error details:", error.message, error.stack)
+    console.error("Error loading competition statistics:", error)
+    console.error(" Error details:", error.message, error.stack)
     showNotification(`Помилка завантаження статистики конкурсів: ${error.message}`, "error")
   }
 }

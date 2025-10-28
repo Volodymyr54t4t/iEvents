@@ -5,8 +5,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: #f7fafc;
   min-height: 100vh;
 }
@@ -61,7 +60,7 @@ body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 24px;
   margin-bottom: 40px;
 }
@@ -87,11 +86,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 60%
-  );
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -125,8 +120,7 @@ body {
   font-size: 64px;
   font-weight: 900;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2),
-    0 8px 16px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1);
   line-height: 1;
   letter-spacing: -2px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -450,7 +444,8 @@ body {
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 14px;
-  min-width: 300px;
+  width: 100%;
+  max-width: 300px;
 }
 
 .search-box input:focus {
@@ -1006,183 +1001,44 @@ body {
   background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
 }
 
-.stat-card-info {
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-}
+/* Added comprehensive responsive design for all screen sizes */
 
-.stat-card-secondary {
-  background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
-}
+/* Tablet and smaller desktops (1024px and below) */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 32px 16px;
+  }
 
-.participation-card {
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.participation-rate {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-
-.rate-circle {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-  position: relative;
-}
-
-.rate-circle::before {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border-radius: 50%;
-  background: white;
-}
-
-.rate-value {
-  font-size: 56px;
-  font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-  z-index: 1;
-}
-
-.rate-details {
-  flex: 1;
-  min-width: 300px;
-}
-
-.rate-details p {
-  font-size: 18px;
-  color: #2d3748;
-  line-height: 1.6;
-}
-
-.rate-details strong {
-  color: #667eea;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.stats-table {
-  background: white;
-}
-
-.stats-table tbody tr:nth-child(even) {
-  background: #f7fafc;
-}
-
-.participation-badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 13px;
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
-}
-
-.participation-count {
-  display: inline-block;
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 13px;
-  box-shadow: 0 2px 6px rgba(72, 187, 120, 0.3);
-}
-
-.timeline-container {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-}
-
-.timeline-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.timeline-bar {
-  display: grid;
-  grid-template-columns: 100px 1fr 80px;
-  align-items: center;
-  gap: 16px;
-}
-
-.timeline-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #2d3748;
-  text-align: right;
-}
-
-.timeline-bar-container {
-  height: 32px;
-  background: #e2e8f0;
-  border-radius: 16px;
-  overflow: hidden;
-  position: relative;
-}
-
-.timeline-bar-fill {
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  transition: width 0.5s ease;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
-}
-
-.timeline-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #667eea;
-  text-align: center;
-}
-
-.achievement-badge.переможець {
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-  color: #744210;
-}
-
-.achievement-badge.призер {
-  background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
-  color: #2d3748;
-}
-
-.achievement-badge.учасник {
-  background: linear-gradient(135deg, #cd7f32 0%, #e59866 100%);
-  color: #ffffff;
-}
-
-@media (max-width: 768px) {
   .admin-container {
-    padding: 24px;
+    padding: 32px 24px;
   }
 
-  .users-table {
-    font-size: 12px;
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 28px;
   }
 
-  .users-table th,
-  .users-table td {
-    padding: 12px 8px;
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+  }
+
+  .stat-card {
+    padding: 24px 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-icon {
+    font-size: 48px;
+  }
+
+  .stat-info {
+    width: 100%;
+  }
+
+  .stat-value {
+    font-size: 48px;
   }
 
   .admin-tabs {
@@ -1191,44 +1047,203 @@ body {
 
   .tab-btn {
     padding: 10px 16px;
-    font-size: 12px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile devices (768px and below) */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 24px 12px;
+  }
+
+  .admin-container {
+    padding: 24px 16px;
+    border-radius: 12px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    padding: 20px 16px;
+  }
+
+  .stat-icon {
+    font-size: 40px;
+  }
+
+  .stat-value {
+    font-size: 40px;
+  }
+
+  .stat-label {
+    font-size: 13px;
   }
 
   .section-header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-actions .btn {
+    width: 100%;
   }
 
   .search-box input {
-    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .admin-tabs {
+    gap: 4px;
+    padding-bottom: 8px;
+  }
+
+  .tab-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+
+  .users-table,
+  .data-table {
+    min-width: 700px;
+  }
+
+  .users-table th,
+  .users-table td,
+  .data-table th,
+  .data-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .btn-action {
+    padding: 8px 12px;
+    font-size: 12px;
+    margin-right: 4px;
+  }
+
+  .modal-content {
+    padding: 24px 20px;
+    max-width: 95%;
+  }
+
+  .modal-large {
+    max-width: 95%;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .data-table {
-    font-size: 12px;
+  .form-group label {
+    font-size: 13px;
   }
 
-  .data-table th,
-  .data-table td {
-    padding: 12px 8px;
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 10px 14px;
+    font-size: 13px;
   }
 
-  .btn-action {
-    padding: 4px 8px;
-    font-size: 11px;
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions .btn {
+    width: 100%;
+  }
+
+  .role-btn {
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .auth-modal {
+    padding: 32px 24px;
+    max-width: 95%;
+  }
+
+  .auth-modal h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .super-methodist-badge {
+    padding: 14px 20px;
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+
+  .stats-section {
+    padding: 20px 16px;
+    margin-bottom: 20px;
+  }
+
+  .stats-section h3 {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .top-item {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .top-item .rank {
+    font-size: 18px;
+    min-width: 28px;
+  }
+
+  .top-item .name {
+    font-size: 14px;
+  }
+
+  .top-item .value {
+    font-size: 13px;
   }
 
   .notification {
+    top: 10px;
     right: 10px;
     left: 10px;
-    top: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
   }
 
   .empty-state {
-    padding: 48px 16px !important;
+    padding: 48px 20px !important;
   }
 
   .empty-state-icon {
@@ -1239,69 +1254,186 @@ body {
     font-size: 18px;
   }
 
+  .empty-state-subtext {
+    font-size: 13px;
+  }
+}
+
+/* Small mobile devices (480px and below) */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 10px;
+  }
+
+  .admin-container {
+    padding: 20px 12px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
   .stat-card {
-    padding: 24px 20px;
-    gap: 16px;
+    padding: 16px 12px;
   }
 
   .stat-icon {
-    font-size: 48px;
-  }
-
-  .stat-info {
-    padding: 12px 16px;
+    font-size: 32px;
   }
 
   .stat-value {
-    font-size: 48px;
-    letter-spacing: -1px;
+    font-size: 32px;
   }
 
   .stat-label {
     font-size: 12px;
-    letter-spacing: 0.5px;
   }
 
-  .stats-section {
-    padding: 16px;
-  }
-
-  .stats-section-title {
+  .section-header h2 {
     font-size: 18px;
   }
 
-  .rate-circle {
-    width: 150px;
-    height: 150px;
+  .tab-btn {
+    padding: 8px 10px;
+    font-size: 11px;
   }
 
-  .rate-value {
-    font-size: 42px;
+  .users-table,
+  .data-table {
+    min-width: 600px;
   }
 
-  .rate-details {
-    min-width: 100%;
-    text-align: center;
-  }
-
-  .rate-details p {
-    font-size: 16px;
-  }
-
-  .rate-details strong {
-    font-size: 20px;
-  }
-
-  .timeline-bar {
-    grid-template-columns: 80px 1fr 60px;
-    gap: 12px;
-  }
-
-  .timeline-label {
+  .users-table th,
+  .users-table td,
+  .data-table th,
+  .data-table td {
+    padding: 10px 6px;
     font-size: 12px;
   }
 
-  .timeline-value {
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .btn-action {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .modal-content {
+    padding: 20px 16px;
+  }
+
+  .modal-content h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .modal-content p {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  .role-btn {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .auth-modal {
+    padding: 24px 16px;
+  }
+
+  .auth-modal h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .super-methodist-badge {
+    padding: 12px 16px;
     font-size: 14px;
+  }
+
+  .stats-section {
+    padding: 16px 12px;
+  }
+
+  .stats-section h3 {
+    font-size: 16px;
+  }
+
+  .top-item {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .top-item .rank {
+    font-size: 16px;
+    min-width: 24px;
+  }
+
+  .top-item .name {
+    font-size: 13px;
+  }
+
+  .top-item .value {
+    font-size: 12px;
+  }
+
+  .role-badge,
+  .status-badge,
+  .id-badge,
+  .date-badge,
+  .grade-badge,
+  .achievement-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .participant-count,
+  .place-badge,
+  .score-badge {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .comp-title {
+    font-size: 14px;
+  }
+
+  .comp-description {
+    font-size: 12px;
+  }
+
+  .notes-text {
+    font-size: 12px;
+  }
+
+  .empty-state {
+    padding: 32px 16px !important;
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+  }
+
+  .empty-state-text {
+    font-size: 16px;
+  }
+
+  .empty-state-subtext {
+    font-size: 12px;
   }
 }
