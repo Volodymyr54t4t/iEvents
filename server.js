@@ -397,6 +397,10 @@ initDatabase().catch((err) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "auth.html"))
 })
+//сторінка
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"))
+})
 
 app.post("/api/register", async (req, res) => {
   const { email, password } = req.body

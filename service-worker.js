@@ -1,7 +1,7 @@
 const CACHE_NAME = "contest-platform-v1";
 const urlsToCache = [
   "/",
-  "/home.html",
+  "/index.html",
   "/index.css",
   "/index.js",
   "/manifest.json"

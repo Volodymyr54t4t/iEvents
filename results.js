@@ -8,7 +8,7 @@ if (!userId) {
 
 if (userRole !== "вчитель" && userRole !== "методист") {
     alert("У вас немає прав для доступу до цієї сторінки")
-    window.location.href = "home.html"
+    window.location.href = "index.html"
 }
 
 let currentCompetitionId = null

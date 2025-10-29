@@ -25,9 +25,9 @@ function renderHeader() {
     header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
-                <a href="home.html" class="logo">🎯 iEvents</a>
+                <a href="index.html" class="logo">🎯 iEvents</a>
                 <nav class="nav">
-                    <a href="home.html" class="nav-link">Головна</a>
+                    <a href="index.html" class="nav-link">Головна</a>
                     ${competitionsLink}
                     ${resultsLink}
                     ${statisticsLink}

@@ -32,7 +32,7 @@ async function loadProfile() {
         const avatarUrl = `${profile.avatar}?t=${Date.now()}`
         avatarPreview.innerHTML = `<img src="${avatarUrl}" alt="Avatar" onerror="console.error('Помилка завантаження аватара'); this.parentElement.innerHTML='<span class=\\'avatar-placeholder\\'>📷</span>'">`
       } else {
-        console.log("��ватар не знайдено в базі даних")
+        console.log("Аватар не знайдено в базі даних")
         avatarPreview.innerHTML = '<span class="avatar-placeholder">📷</span>'
       }
 

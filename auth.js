@@ -45,7 +45,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       localStorage.setItem("userId", data.userId)
       localStorage.setItem("userEmail", data.email)
       localStorage.setItem("userRole", data.role)
-      window.location.href = "home.html"
+      window.location.href = "index.html"
     } else {
       errorDiv.textContent = data.error || "Помилка входу"
       errorDiv.classList.add("show")
@@ -101,7 +101,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
       localStorage.setItem("userId", data.userId)
       localStorage.setItem("userEmail", data.email)
       localStorage.setItem("userRole", data.role)
-      window.location.href = "home.html"
+      window.location.href = "index.html"
     } else {
       errorDiv.textContent = data.error || "Помилка реєстрації"
       errorDiv.classList.add("show")

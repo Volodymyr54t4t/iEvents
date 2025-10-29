@@ -1,7 +1,7 @@
 {
   "name": "iEvents",
   "short_name": "Конкурси",
-  "start_url": "./home.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1976d2",
