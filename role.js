@@ -39,13 +39,14 @@ async function checkPageAccess() {
     userRole = await fetchAndUpdateRole()
   }
 
-  console.log("Перевірка доступу до сторінки:", currentPage, "Роль:", userRole)
+  console.log("Перевірка д��ступу до сторінки:", currentPage, "Роль:", userRole)
 
   const pageAccess = {
     "index.html": ["учень", "вчитель", "методист", null],
     "competitions.html": ["учень", "вчитель", "методист"],
     "profile.html": ["учень", "вчитель", "методист"],
     "admin.html": ["методист"],
+    "results.html": ["вчитель", "методист"],
     "auth.html": [null],
   }
 
@@ -120,14 +121,18 @@ function renderHeader(role) {
     case "вчитель":
       navLinks = `
         <a href="index.html" class="nav-link">Головна</a>
-        <a href="competitions.html" class="nav-link">Конкурси</a>
+        <a href="competitionsT.html" class="nav-link">Конкурси</a>
+        <a href="results.html" class="nav-link">Результати</a>
+        <a href="statistics.html" class="nav-link">Статистика</a>
         <a href="profile.html" class="nav-link">Профіль</a>
       `
       break
     case "методист":
       navLinks = `
         <a href="index.html" class="nav-link">Головна</a>
-        <a href="competitions.html" class="nav-link">Конкурси</a>
+        <a href="competitionsT.html" class="nav-link">Конкурси</a>
+        <a href="results.html" class="nav-link">Результати</a>
+        <a href="statistics.html" class="nav-link">Статистика</a>
         <a href="profile.html" class="nav-link">Профіль</a>
         <a href="admin.html" class="nav-link">Адмін</a>
       `

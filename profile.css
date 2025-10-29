@@ -7,7 +7,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  background: #f7fafc;
+  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -41,11 +41,12 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
   color: white;
   border-radius: 8px;
   margin-bottom: 32px;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.3);
 }
 
 .role-label {
@@ -74,7 +75,7 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 4px solid #667eea;
+  border: 4px solid #7ec8e3;
 }
 
 .avatar-placeholder {
@@ -119,8 +120,8 @@ body {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #7ec8e3;
+  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
 }
 
 .form-group textarea {
@@ -140,13 +141,13 @@ body {
 
 .btn-primary {
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 16px rgba(126, 200, 227, 0.3);
 }
 
 .btn-secondary {
@@ -253,7 +254,7 @@ body {
   .avatar-preview {
     width: 100px;
     height: 100px;
-    border: 3px solid #667eea;
+    border: 3px solid #7ec8e3;
   }
 
   .avatar-placeholder {
