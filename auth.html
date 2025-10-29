@@ -1,1 +1,62 @@
-я
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід / Реєстрація - iEvents</title>
+    <link rel="stylesheet" href="auth.css">
+    <!-- Added PWA CSS -->
+    <link rel="stylesheet" href="pwa.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <!-- Removed emoji from logo -->
+                <h1 class="logo">iEvents</h1>
+                <p class="subtitle">Платформа для організації подій</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" data-tab="login">Вхід</button>
+                <button class="tab" data-tab="register">Реєстрація</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Пароль</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary">Увійти</button>
+                <div id="loginError" class="error-message"></div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Пароль</label>
+                    <input type="password" id="registerPassword" required placeholder="••••••••" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Підтвердіть пароль</label>
+                    <input type="password" id="registerConfirmPassword" required placeholder="••••••••" minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">Зареєструватися</button>
+                <div id="registerError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="auth.js"></script>
+</body>
+</html>

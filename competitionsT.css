@@ -5,9 +5,9 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
   min-height: 100vh;
   color: #2d3748;
 }
@@ -21,51 +21,54 @@ body {
 .page-header {
   text-align: center;
   margin-bottom: 40px;
-  color: white;
+  color: #0a5f7f;
 }
 
 .page-header h1 {
   font-size: 36px;
   margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .subtitle {
   font-size: 18px;
   opacity: 0.9;
   margin-bottom: 16px;
+  color: #5a7a8a;
 }
 
 .btn-results {
   display: inline-block;
   padding: 12px 24px;
-  background: #48bb78;
+  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
   color: white;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 16px;
   transition: all 0.2s;
   margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.3);
 }
 
 .btn-results:hover {
-  background: #38a169;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+  box-shadow: 0 8px 24px rgba(77, 208, 225, 0.4);
 }
 
 .card {
   background: white;
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 32px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(10, 95, 127, 0.08);
 }
 
 .card h2 {
   font-size: 24px;
   margin-bottom: 24px;
-  color: #2d3748;
+  color: #0a5f7f;
+  font-weight: 700;
 }
 
 .competition-form {
@@ -82,23 +85,25 @@ body {
 
 .form-group label {
   font-weight: 600;
-  color: #4a5568;
+  color: #0a5f7f;
   font-size: 14px;
 }
 
 .form-group input,
 .form-group textarea {
-  padding: 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.2s;
+  padding: 12px 16px;
+  border: 2px solid #a8d8ea;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-family: inherit;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #7ec8e3;
+  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
 }
 
 .form-row {
@@ -108,55 +113,59 @@ body {
 }
 
 .btn {
-  padding: 12px 24px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-primary {
-  background: #667eea;
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #5568d3;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 16px rgba(126, 200, 227, 0.3);
 }
 
 .btn-secondary {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: #e8f4f8;
+  color: #0a5f7f;
+  border: 2px solid #a8d8ea;
 }
 
 .btn-secondary:hover {
-  background: #cbd5e0;
+  background: #d4ecf5;
 }
 
 .btn-danger {
-  background: #fc8181;
+  background: linear-gradient(135deg, #ef9a9a 0%, #e57373 100%);
   color: white;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 10px 16px;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-danger:hover {
-  background: #f56565;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 154, 154, 0.4);
 }
 
 .btn-success {
-  background: #48bb78;
+  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
   color: white;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 10px 16px;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-success:hover {
-  background: #38a169;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.4);
 }
 
 .competitions-list {
@@ -166,15 +175,17 @@ body {
 }
 
 .competition-item {
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border: 2px solid #a8d8ea;
+  border-radius: 16px;
   padding: 20px;
   transition: all 0.2s;
+  background: white;
+  box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
 }
 
 .competition-item:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  border-color: #7ec8e3;
+  box-shadow: 0 8px 24px rgba(126, 200, 227, 0.25);
 }
 
 .competition-header {
@@ -187,7 +198,7 @@ body {
 .competition-title {
   font-size: 20px;
   font-weight: 700;
-  color: #2d3748;
+  color: #0a5f7f;
 }
 
 .competition-actions {
@@ -196,7 +207,7 @@ body {
 }
 
 .competition-description {
-  color: #718096;
+  color: #5a7a8a;
   margin-bottom: 12px;
   line-height: 1.6;
 }
@@ -205,7 +216,7 @@ body {
   display: flex;
   gap: 24px;
   font-size: 14px;
-  color: #4a5568;
+  color: #0a5f7f;
 }
 
 .competition-meta span {
@@ -216,45 +227,49 @@ body {
 
 .status-badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .status-active {
-  background: #c6f6d5;
-  color: #22543d;
+  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  color: white;
 }
 
 .status-upcoming {
-  background: #bee3f8;
-  color: #2c5282;
+  background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
+  color: white;
 }
 
 .status-inactive {
-  background: #fed7d7;
-  color: #742a2a;
+  background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%);
+  color: white;
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #718096;
+  color: #5a7a8a;
 }
 
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #718096;
+  color: #5a7a8a;
 }
 
 .empty-state h3 {
   font-size: 20px;
   margin-bottom: 8px;
+  color: #0a5f7f;
+  font-weight: 600;
 }
 
-/* Modal styles */
 .modal {
   display: none;
   position: fixed;
@@ -274,17 +289,18 @@ body {
 
 .modal-content {
   background: white;
-  border-radius: 12px;
+  border-radius: 20px;
   width: 90%;
   max-width: 600px;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .modal-header {
   padding: 24px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid #a8d8ea;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -293,19 +309,22 @@ body {
 .modal-header h2 {
   font-size: 20px;
   margin: 0;
+  color: #0a5f7f;
+  font-weight: 700;
 }
 
 .modal-close {
   background: none;
   border: none;
   font-size: 32px;
-  color: #718096;
+  color: #5a7a8a;
   cursor: pointer;
   line-height: 1;
+  transition: color 0.2s;
 }
 
 .modal-close:hover {
-  color: #2d3748;
+  color: #0a5f7f;
 }
 
 .modal-body {
@@ -316,7 +335,7 @@ body {
 
 .modal-footer {
   padding: 24px;
-  border-top: 2px solid #e2e8f0;
+  border-top: 2px solid #a8d8ea;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -328,15 +347,21 @@ body {
 
 .search-box input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 10px 16px;
+  border: 2px solid #a8d8ea;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #0a5f7f;
+}
+
+.search-box input::placeholder {
+  color: #7ec8e3;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #7ec8e3;
+  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
 }
 
 .students-list {
@@ -350,20 +375,20 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border: 2px solid #a8d8ea;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .student-item:hover {
-  border-color: #667eea;
-  background: #f7fafc;
+  border-color: #7ec8e3;
+  background: #f0f9fc;
 }
 
 .student-item.selected {
-  border-color: #667eea;
-  background: #edf2f7;
+  border-color: #7ec8e3;
+  background: #e6f7fb;
 }
 
 .student-checkbox {
@@ -376,12 +401,12 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #e2e8f0;
+  background: #a8d8ea;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #667eea;
+  color: white;
 }
 
 .student-avatar img {
@@ -397,24 +422,25 @@ body {
 
 .student-name {
   font-weight: 600;
-  color: #2d3748;
+  color: #0a5f7f;
 }
 
 .student-grade {
   font-size: 14px;
-  color: #718096;
+  color: #5a7a8a;
 }
 
-/* Added styles for results modal and functionality */
 .btn-info {
-  background: #4299e1;
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
   color: white;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 10px 16px;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-info:hover {
-  background: #3182ce;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
 }
 
 .btn-sm {
@@ -427,16 +453,18 @@ body {
 }
 
 .results-form-section {
-  background: #f7fafc;
+  background: #f0f9fc;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 16px;
   margin-bottom: 24px;
+  border: 2px solid #a8d8ea;
 }
 
 .results-form-section h3 {
   font-size: 18px;
   margin-bottom: 16px;
-  color: #2d3748;
+  color: #0a5f7f;
+  font-weight: 700;
 }
 
 .result-form {
@@ -446,17 +474,19 @@ body {
 }
 
 .result-form select {
-  padding: 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.2s;
+  padding: 12px 16px;
+  border: 2px solid #a8d8ea;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s;
   background: white;
+  color: #0a5f7f;
 }
 
 .result-form select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #7ec8e3;
+  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
 }
 
 .results-list-section {
@@ -472,44 +502,51 @@ body {
 
 .results-header h3 {
   font-size: 18px;
-  color: #2d3748;
+  color: #0a5f7f;
   margin: 0;
+  font-weight: 700;
 }
 
 .results-table-container {
   overflow-x: auto;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
 }
 
 .results-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
 }
 
 .results-table thead {
-  background: #f7fafc;
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
 }
 
 .results-table th {
-  padding: 12px;
+  padding: 18px 24px;
   text-align: left;
-  font-weight: 600;
-  color: #4a5568;
-  font-size: 14px;
-  border-bottom: 2px solid #e2e8f0;
+  font-weight: 700;
+  color: white;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
 }
 
 .results-table td {
-  padding: 12px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e8f4f8;
   color: #2d3748;
   font-size: 14px;
+  vertical-align: middle;
 }
 
 .results-table tbody tr:hover {
-  background: #f7fafc;
+  background: #f0f9fc;
 }
 
 .results-table tbody tr:last-child td {
@@ -535,7 +572,6 @@ body {
   transform: scale(1.2);
 }
 
-/* Enhanced responsive design for all devices */
 @media (max-width: 1024px) {
   .main-container {
     padding: 32px 16px;
@@ -827,3 +863,36 @@ body {
     font-size: 13px;
   }
 }
+@media (max-width: 320px) {
+  .main-container {
+    padding: 16px 8px;
+  }
+
+  .btn-results {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .card h2 {
+    font-size: 16px;
+  }
+
+  .competition-form {
+    gap: 12px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+} 

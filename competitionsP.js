@@ -48,7 +48,7 @@ function displayCompetitions(containerId, competitions, type) {
         if (type === "active") {
             message = "Наразі у вас немає активних конкурсів"
         } else if (type === "upcoming") {
-            message = "Наразі у вас немає ��айбутніх конкурсів"
+            message = "Наразі у вас немає майбутніх конкурсів"
         } else {
             message = "У вас ще немає завершених конкурсів"
         }
