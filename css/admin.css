@@ -841,8 +841,8 @@ main {
 }
 
 .rate-circle {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
   display: flex;
@@ -853,25 +853,10 @@ main {
 }
 
 .rate-value {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 900;
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.rate-details {
-  flex: 1;
-}
-
-.rate-details p {
-  font-size: 16px;
-  color: #0a5f7f;
-  line-height: 1.6;
-}
-
-.rate-details strong {
-  color: #0a5f7f;
-  font-weight: 700;
 }
 
 .empty-state {
@@ -1224,12 +1209,12 @@ main {
   }
 
   .rate-circle {
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
   }
 
   .rate-value {
-    font-size: 40px;
+    font-size: 48px;
   }
 
   .rate-details p {
@@ -1432,12 +1417,12 @@ main {
   }
 
   .rate-circle {
-    width: 80px;
-    height: 80px;
+    width: 130px;
+    height: 130px;
   }
 
   .rate-value {
-    font-size: 32px;
+    font-size: 42px;
   }
 
   .rate-details p {

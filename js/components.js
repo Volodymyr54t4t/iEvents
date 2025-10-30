@@ -10,9 +10,9 @@ function renderHeader() {
   if (!header) return
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист"
-      ? '<a href="competitionsT.html" class="nav-link">Конкурси</a>'
-      : '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
+    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
@@ -73,8 +73,5 @@ function logout() {
   window.location.href = "auth.html"
 }
 
-// Initialize components
-document.addEventListener("DOMContentLoaded", () => {
-  renderHeader()
-  renderFooter()
-})
+renderHeader()
+renderFooter()

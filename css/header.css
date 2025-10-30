@@ -8,6 +8,28 @@
   border-bottom: 2px solid #f7fafc;
 }
 
+/* Added skeleton loading state for instant header display */
+#header:empty {
+  min-height: 70px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 2px solid #f7fafc;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
