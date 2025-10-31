@@ -4,7 +4,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-o8nm.onrender.com"
+  BASE_URL = "https://ievents-qf5k.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
