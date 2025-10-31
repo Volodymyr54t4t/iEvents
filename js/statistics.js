@@ -8,8 +8,7 @@ if (!userId) {
     window.location.href = "auth.html"
 }
 
-// API базова URL
-const API_URL = "http://localhost:3000/api"
+const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://ievents-qf5k.onrender.com"
 
 // Завантаження загальної статистики
 async function loadOverviewStats() {
@@ -96,7 +95,10 @@ async function loadTimelineStats() {
         const scores = data.competitions.map((c) => Number.parseFloat(c.average_score) || 0)
 
         const ctx = document.getElementById("timelineChart").getContext("2d")
-        const chart = new window.Chart(ctx, {
+        if (window.timelineChartInstance) {
+            window.timelineChartInstance.destroy()
+        }
+        window.timelineChartInstance = new window.Chart(ctx, {
             type: "bar",
             data: {
                 labels: competitions,
@@ -195,11 +197,11 @@ async function loadCompetitionsStats() {
                 return `
         <tr>
           <td>${comp.title}</td>
-          <td>${new Date(comp.start_date).toLocaleDateString("uk-UA")}</td>
-          <td>${new Date(comp.end_date).toLocaleDateString("uk-UA")}</td>
-          <td>${comp.participants_count || 0}</td>
-          <td>${comp.average_score ? Number.parseFloat(comp.average_score).toFixed(1) : "N/A"}</td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td data-label="Дата початку:">${new Date(comp.start_date).toLocaleDateString("uk-UA")}</td>
+          <td data-label="Дата закінчення:">${new Date(comp.end_date).toLocaleDateString("uk-UA")}</td>
+          <td data-label="Учасників:">${comp.participants_count || 0}</td>
+          <td data-label="Середній бал:">${comp.average_score ? Number.parseFloat(comp.average_score).toFixed(1) : "N/A"}</td>
+          <td data-label="Статус:"><span class="status-badge ${statusClass}">${statusText}</span></td>
         </tr>
       `
             })
@@ -227,11 +229,11 @@ async function loadCompetitionsStats() {
                 return `
         <tr>
           <td>${comp.title}</td>
-          <td>${new Date(comp.start_date).toLocaleDateString("uk-UA")}</td>
-          <td>${new Date(comp.end_date).toLocaleDateString("uk-UA")}</td>
-          <td>${comp.participants_count || 0}</td>
-          <td>N/A</td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td data-label="Дата початку:">${new Date(comp.start_date).toLocaleDateString("uk-UA")}</td>
+          <td data-label="Дата закінчення:">${new Date(comp.end_date).toLocaleDateString("uk-UA")}</td>
+          <td data-label="Учасників:">${comp.participants_count || 0}</td>
+          <td data-label="Середній бал:">N/A</td>
+          <td data-label="Статус:"><span class="status-badge ${statusClass}">${statusText}</span></td>
         </tr>
       `
             })
@@ -286,7 +288,10 @@ async function loadAverageScores() {
             const averages = data.byGrade.map((g) => Number.parseFloat(g.average_score) || 0)
 
             const ctx = document.getElementById("averageScoresChart").getContext("2d")
-            new window.Chart(ctx, {
+            if (window.averageScoresChartInstance) {
+                window.averageScoresChartInstance.destroy()
+            }
+            window.averageScoresChartInstance = new window.Chart(ctx, {
                 type: "bar",
                 data: {
                     labels: grades,
@@ -399,7 +404,7 @@ function closePlanningForm() {
 
 // Ініціалізація сторінки
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log(" Завантаження статистики...")
+    console.log("[v0] Завантаження статистики...")
 
     // Check user role and show planning button for teachers and methodists
     if (userRole === "вчитель" || userRole === "методист") {
@@ -456,5 +461,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadCompetitionsStats()
     await loadSchoolsStats()
     await loadClassDetails()
-    console.log(" Статистика завантажена")
+    console.log("[v0] Статистика завантажена")
 })

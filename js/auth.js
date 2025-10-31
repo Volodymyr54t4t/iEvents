@@ -2,6 +2,8 @@
 const tabs = document.querySelectorAll(".tab")
 const forms = document.querySelectorAll(".auth-form")
 
+const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://ievents-qf5k.onrender.com"
+
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     const tabName = tab.dataset.tab
@@ -27,21 +29,11 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     return
   }
 
-  const API_URL =
-    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ?
-    "http://localhost:3000" :
-    "https://ievents-o8nm.onrender.com"
-
   try {
     const response = await fetch(`${API_URL}/api/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email,
-        password
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     })
 
     const data = await response.json()
@@ -88,21 +80,11 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     return
   }
 
-  const API_URL =
-    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ?
-    "http://localhost:3000" :
-    "https://ievents-o8nm.onrender.com"
-
   try {
     const response = await fetch(`${API_URL}/api/register`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email,
-        password
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     })
 
     const data = await response.json()
