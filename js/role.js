@@ -1,3 +1,5 @@
+const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000/api" : `${window.location.origin}/api`
+
 // Role management and dynamic header rendering
 
 async function fetchAndUpdateRole() {
@@ -9,7 +11,7 @@ async function fetchAndUpdateRole() {
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/api/user/role/${userId}`)
+    const response = await fetch(`${API_URL}/user/role/${userId}`)
 
     if (response.ok) {
       const data = await response.json()
@@ -39,7 +41,7 @@ async function checkPageAccess() {
     userRole = await fetchAndUpdateRole()
   }
 
-  console.log("Перевірка д��ступу до сторінки:", currentPage, "Роль:", userRole)
+  console.log("Перевірка доступу до сторінки:", currentPage, "Роль:", userRole)
 
   const pageAccess = {
     "index.html": ["учень", "вчитель", "методист", null],

@@ -11,7 +11,11 @@ const app = express()
 const PORT = 3000
 
 // Middleware
-app.use(cors())
+app.use(cors({
+    origin: "*", // Можеш замінити на свій домен, наприклад "https://ievents-o8nm.onrender.com"
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }))
 app.use(express.json())
 app.use(express.static(path.join(__dirname)))
 app.use("/uploads", express.static("uploads"))

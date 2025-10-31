@@ -1,3 +1,5 @@
+const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000/api" : `${window.location.origin}/api`
+
 let currentCompetitionId = null
 let allStudents = []
 const currentResultsCompetitionId = null
@@ -40,7 +42,7 @@ document.getElementById("createCompetitionForm").addEventListener("submit", asyn
     }
 
     try {
-        const response = await fetch("http://localhost:3000/api/competitions", {
+        const response = await fetch(`${API_URL}/competitions`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -69,7 +71,7 @@ async function loadCompetitions() {
     container.innerHTML = '<div class="loading">Завантаження...</div>'
 
     try {
-        const response = await fetch("http://localhost:3000/api/competitions")
+        const response = await fetch(`${API_URL}/competitions`)
         const data = await response.json()
 
         if (response.ok) {
@@ -141,7 +143,7 @@ async function loadCompetitions() {
 // Завантаження списку учнів
 async function loadStudents() {
     try {
-        const response = await fetch("http://localhost:3000/api/students")
+        const response = await fetch(`${API_URL}/students`)
         const data = await response.json()
 
         if (response.ok) {
@@ -269,7 +271,7 @@ async function addSelectedStudents() {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/api/competitions/${currentCompetitionId}/participants`, {
+        const response = await fetch(`${API_URL}/competitions/${currentCompetitionId}/participants`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

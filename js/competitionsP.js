@@ -1,3 +1,5 @@
+const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000/api" : `${window.location.origin}/api`
+
 // Перевірка авторизації
 const userId = localStorage.getItem("userId")
 
@@ -14,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Завантаження конкурсів користувача
 async function loadMyCompetitions() {
     try {
-        const response = await fetch(`http://localhost:3000/api/competitions/my/${userId}`)
+        const response = await fetch(`${API_URL}/competitions/my/${userId}`)
         const data = await response.json()
 
         if (response.ok) {
@@ -123,8 +125,7 @@ async function loadMyResults() {
     container.innerHTML = '<div class="loading">Завантаження результатів...</div>'
 
     try {
-        // Get all competitions the student participates in
-        const competitionsResponse = await fetch(`http://localhost:3000/api/competitions/my/${userId}`)
+        const competitionsResponse = await fetch(`${API_URL}/competitions/my/${userId}`)
         const competitionsData = await competitionsResponse.json()
 
         if (!competitionsResponse.ok || competitionsData.competitions.length === 0) {
@@ -136,7 +137,7 @@ async function loadMyResults() {
         const allResults = []
         for (const competition of competitionsData.competitions) {
             try {
-                const resultsResponse = await fetch(`http://localhost:3000/api/results/${competition.id}`)
+                const resultsResponse = await fetch(`${API_URL}/results/${competition.id}`)
                 const resultsData = await resultsResponse.json()
 
                 if (resultsResponse.ok && resultsData.results.length > 0) {
