@@ -1,3 +1,10 @@
+// 🔧 Визначаємо, де зараз запущений сайт — локально чи онлайн
+const BASE_URL =
+  window.location.hostname === "localhost" ?
+  "http://localhost:3000" // 🖥️ Локальний сервер
+  :
+  "https://ievents-o8nm.onrender.com" // ☁️ Онлайн-сервер Render
+
 // Tab switching
 const tabs = document.querySelectorAll(".tab")
 const forms = document.querySelectorAll(".auth-form")
@@ -27,13 +34,8 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     return
   }
 
-  const API_URL =
-    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ?
-    "http://localhost:3000" :
-    "https://ievents-o8nm.onrender.com"
-
   try {
-    const response = await fetch(`${API_URL}/api/login`, {
+    const response = await fetch(`${BASE_URL}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -88,13 +90,8 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     return
   }
 
-  const API_URL =
-    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ?
-    "http://localhost:3000" :
-    "https://ievents-o8nm.onrender.com"
-
   try {
-    const response = await fetch(`${API_URL}/api/register`, {
+    const response = await fetch(`${BASE_URL}/api/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
