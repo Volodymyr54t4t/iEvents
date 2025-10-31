@@ -1,9 +1,13 @@
 // 🔧 Визначаємо, де зараз запущений сайт — локально чи онлайн
-const BASE_URL =
-  window.location.hostname === "localhost" ?
-  "http://localhost:3000" // 🖥️ Локальний сервер
-  :
-  "https://ievents-o8nm.onrender.com" // ☁️ Онлайн-сервер Render
+let BASE_URL
+if (window.location.hostname === "localhost") {
+  // 🖥️ Локальний режим
+  BASE_URL = "http://localhost:3000"
+} else {
+  // ☁️ Онлайн-сервер Render
+  BASE_URL = "https://ievents-o8nm.onrender.com"
+}
+console.log("📡 Підключення до:", BASE_URL)
 
 const userId = localStorage.getItem("userId")
 
