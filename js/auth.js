@@ -67,57 +67,64 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 });
 
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
-  e.preventDefault()
+  e.preventDefault();
 
-  const email = document.getElementById("registerEmail").value.trim()
-  const password = document.getElementById("registerPassword").value
-  const confirmPassword = document.getElementById("registerConfirmPassword").value
-  const errorDiv = document.getElementById("registerError")
+  const email = document.getElementById("registerEmail").value.trim();
+  const password = document.getElementById("registerPassword").value;
+  const confirmPassword = document.getElementById("registerConfirmPassword").value;
+  const errorDiv = document.getElementById("registerError");
 
+  // 🔹 Перевірки полів
   if (!email || !password || !confirmPassword) {
-    errorDiv.textContent = "Заповніть всі поля"
-    errorDiv.classList.add("show")
-    return
+    errorDiv.textContent = "Заповніть всі поля";
+    errorDiv.classList.add("show");
+    return;
   }
 
   if (password.length < 6) {
-    errorDiv.textContent = "Пароль повинен містити мінімум 6 символів"
-    errorDiv.classList.add("show")
-    return
+    errorDiv.textContent = "Пароль повинен містити мінімум 6 символів";
+    errorDiv.classList.add("show");
+    return;
   }
 
   if (password !== confirmPassword) {
-    errorDiv.textContent = "Паролі не співпадають"
-    errorDiv.classList.add("show")
-    return
+    errorDiv.textContent = "Паролі не співпадають";
+    errorDiv.classList.add("show");
+    return;
   }
+
+  // 🔹 Автоматичне визначення середовища (локально / Render)
+  const API_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://ievents-o8nm.onrender.com"; // ← твоя адреса Render
 
   try {
-    const response = await fetch("http://localhost:3000/api/register", {
+    const response = await fetch(`${API_URL}/api/register`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email,
-        password
-      }),
-    })
+      body: JSON.stringify({ email, password }),
+    });
 
-    const data = await response.json()
+    const data = await response.json();
 
     if (response.ok) {
-      localStorage.setItem("userId", data.userId)
-      localStorage.setItem("userEmail", data.email)
-      localStorage.setItem("userRole", data.role)
-      window.location.href = "index.html"
+      // ✅ Реєстрація успішна
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("userEmail", data.email);
+      localStorage.setItem("userRole", data.role);
+      window.location.href = "index.html";
     } else {
-      errorDiv.textContent = data.error || "Помилка реєстрації"
-      errorDiv.classList.add("show")
+      // ⚠️ Сервер повернув помилку
+      errorDiv.textContent = data.error || "Помилка реєстрації";
+      errorDiv.classList.add("show");
     }
   } catch (error) {
-    console.error("Registration error:", error)
-    errorDiv.textContent = "Помилка з'єднання з сервером"
-    errorDiv.classList.add("show")
+    // ❌ Сервер недоступний
+    console.error("Registration error:", error);
+    errorDiv.textContent = "Помилка з'єднання з сервером";
+    errorDiv.classList.add("show");
   }
-})
+});
