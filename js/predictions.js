@@ -1,4 +1,8 @@
-const API_URL = "http://localhost:3000/api"
+// 🔧 Визначаємо, де зараз запущений сайт — локально чи онлайн
+const BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000" // 🖥️ Локальний сервер
+    : "https://ievents-o8nm.onrender.com" // ☁️ Онлайн-сервер Render
 
 let allPredictions = []
 
@@ -22,8 +26,8 @@ async function loadPredictions() {
   try {
     // Fetch all necessary data from the server
     const [studentsRes, resultsRes] = await Promise.all([
-      fetch(`${API_URL}/students`),
-      fetch(`${API_URL}/admin/all-results`),
+      fetch(`${BASE_URL}/api/students`),
+      fetch(`${BASE_URL}/api/admin/all-results`),
     ])
 
     if (!studentsRes.ok || !resultsRes.ok) {
