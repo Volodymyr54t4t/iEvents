@@ -1,3 +1,9 @@
+// 🔧 Визначаємо, де зараз запущений сайт — локально чи онлайн
+const BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000" // 🖥️ Локальний сервер
+    : "https://ievents-qf5k.onrender.com" // ☁️ Онлайн-сервер Render
+
 const ADMIN_PASSWORD = "319560"
 let currentUserId = null
 let isSuperMethodist = false
@@ -17,7 +23,7 @@ document.getElementById("adminAuthForm").addEventListener("submit", async (e) =>
   const loggedInUserId = localStorage.getItem("userId")
   if (loggedInUserId) {
     try {
-      const response = await fetch(`http://localhost:3000/api/user/is-super-methodist/${loggedInUserId}`)
+      const response = await fetch(`${BASE_URL}/api/user/is-super-methodist/${loggedInUserId}`)
       const data = await response.json()
       isSuperMethodist = data.isSuperMethodist
 
@@ -61,7 +67,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 
 async function loadUsers() {
   try {
-    const response = await fetch("http://localhost:3000/api/admin/users")
+    const response = await fetch(`${BASE_URL}/api/admin/users`)
     const data = await response.json()
 
     if (response.ok) {
@@ -108,7 +114,7 @@ async function updateDashboardStats(users) {
   document.getElementById("totalMethodists").textContent = users.filter((u) => u.role === "методист").length
 
   try {
-    const response = await fetch("http://localhost:3000/api/admin/all-participants")
+    const response = await fetch(`${BASE_URL}/api/admin/all-participants`)
     const data = await response.json()
     if (response.ok) {
       document.getElementById("totalParticipations").textContent = data.participants.length
@@ -118,7 +124,7 @@ async function updateDashboardStats(users) {
   }
 
   try {
-    const response = await fetch("http://localhost:3000/api/competitions")
+    const response = await fetch(`${BASE_URL}/api/competitions`)
     const data = await response.json()
     if (response.ok) {
       document.getElementById("totalCompetitions").textContent = data.competitions.length
@@ -141,7 +147,7 @@ document.getElementById("userSearch")?.addEventListener("input", (e) => {
 
 async function loadCompetitions() {
   try {
-    const response = await fetch("http://localhost:3000/api/competitions")
+    const response = await fetch(`${BASE_URL}/api/competitions`)
     const data = await response.json()
 
     if (response.ok) {
@@ -229,7 +235,7 @@ document.querySelectorAll(".role-btn").forEach((btn) => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/admin/change-role", {
+      const response = await fetch(`${BASE_URL}/api/admin/change-role`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUserId, role: newRole }),
@@ -312,8 +318,8 @@ document.getElementById("competitionForm").addEventListener("submit", async (e) 
 
   try {
     const url = currentEditingCompetitionId
-      ? `http://localhost:3000/api/competitions/${currentEditingCompetitionId}`
-      : "http://localhost:3000/api/competitions"
+      ? `${BASE_URL}/api/competitions/${currentEditingCompetitionId}`
+      : `${BASE_URL}/api/competitions`
 
     const method = currentEditingCompetitionId ? "PUT" : "POST"
 
@@ -347,7 +353,7 @@ async function deleteCompetition(id, title) {
     return
 
   try {
-    const response = await fetch(`http://localhost:3000/api/competitions/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/competitions/${id}`, {
       method: "DELETE",
     })
 
@@ -410,7 +416,7 @@ document.getElementById("addUserForm").addEventListener("submit", async (e) => {
   }
 
   try {
-    const response = await fetch("http://localhost:3000/api/admin/create-user", {
+    const response = await fetch(`${BASE_URL}/api/admin/create-user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
@@ -459,7 +465,7 @@ document.getElementById("resultCompetition")?.addEventListener("change", async (
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/api/competitions/${competitionId}/participants-with-results`)
+    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/participants-with-results`)
     const data = await response.json()
 
     if (response.ok) {
@@ -498,7 +504,7 @@ document.getElementById("resultCompetition")?.addEventListener("change", async (
 
 async function loadResults() {
   try {
-    const response = await fetch("http://localhost:3000/api/admin/all-results")
+    const response = await fetch(`${BASE_URL}/api/admin/all-results`)
     const data = await response.json()
 
     if (response.ok) {
@@ -683,11 +689,9 @@ document.getElementById("resultForm")?.addEventListener("submit", async (e) => {
   }
 
   try {
-    const url = currentEditingResultId
-      ? `http://localhost:3000/api/results/${currentEditingResultId}`
-      : "http://localhost:3000/api/results"
+    const url = currentEditingResultId ? `${BASE_URL}/api/results/${currentEditingResultId}` : `${BASE_URL}/api/results`
 
-    const method = currentEditingResultId ? "PUT" : "POST"
+    const method = currentEditingCompetitionId ? "PUT" : "POST"
 
     const response = await fetch(url, {
       method,
@@ -714,7 +718,7 @@ async function deleteResult(id, studentName, competitionTitle) {
   if (!confirm(`Видалити результат учня "${studentName}" у конкурсі "${competitionTitle}"?`)) return
 
   try {
-    const response = await fetch(`http://localhost:3000/api/results/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/results/${id}`, {
       method: "DELETE",
     })
 
@@ -749,9 +753,7 @@ async function editResult(id) {
   })
 
   try {
-    const response = await fetch(
-      `http://localhost:3000/api/competitions/${result.competition_id}/participants-with-results`,
-    )
+    const response = await fetch(`${BASE_URL}/api/competitions/${result.competition_id}/participants-with-results`)
     const data = await response.json()
 
     if (response.ok) {
@@ -831,7 +833,7 @@ async function loadAllStatistics() {
 
 async function loadOverviewStatistics() {
   try {
-    const response = await fetch("http://localhost:3000/api/statistics/overview")
+    const response = await fetch(`${BASE_URL}/api/statistics/overview`)
     const data = await response.json()
 
     if (response.ok) {
@@ -849,7 +851,7 @@ async function loadOverviewStatistics() {
 
 async function loadParticipationRate() {
   try {
-    const response = await fetch("http://localhost:3000/api/statistics/participation-rate")
+    const response = await fetch(`${BASE_URL}/api/statistics/participation-rate`)
     const data = await response.json()
 
     if (response.ok) {
@@ -864,10 +866,7 @@ async function loadParticipationRate() {
 
 async function loadStatsByGrade() {
   try {
-    console.log("Loading statistics by grade...")
-    const response = await fetch("http://localhost:3000/api/statistics/class-details")
-
-    console.log(" Response status:", response.status, response.statusText)
+    const response = await fetch(`${BASE_URL}/api/statistics/class-details`)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -877,7 +876,6 @@ async function loadStatsByGrade() {
     }
 
     const data = await response.json()
-    console.log(" Statistics by grade response:", data)
 
     const tbody = document.getElementById("statsByGradeTable")
     tbody.innerHTML = ""
@@ -902,17 +900,15 @@ async function loadStatsByGrade() {
       `
       tbody.appendChild(row)
     })
-    console.log(" Statistics by grade loaded successfully")
   } catch (error) {
-    console.error(" Error loading stats by grade:", error)
-    console.error(" Error details:", error.message, error.stack)
+    console.error("Error loading stats by grade:", error)
     showNotification(`Помилка завантаження статистики по класах: ${error.message}`, "error")
   }
 }
 
 async function loadTopStudents() {
   try {
-    const response = await fetch("http://localhost:3000/api/statistics/top-students?limit=10")
+    const response = await fetch(`${BASE_URL}/api/statistics/top-students?limit=10`)
     const data = await response.json()
 
     if (response.ok) {
@@ -952,10 +948,7 @@ async function loadTopStudents() {
 
 async function loadCompetitionStatistics() {
   try {
-    console.log("Loading competition statistics...")
-    const response = await fetch("http://localhost:3000/api/statistics/competitions-detailed")
-
-    console.log(" Response status:", response.status, response.statusText)
+    const response = await fetch(`${BASE_URL}/api/statistics/competitions-detailed`)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -965,7 +958,6 @@ async function loadCompetitionStatistics() {
     }
 
     const data = await response.json()
-    console.log("Competition statistics response:", data)
 
     const tbody = document.getElementById("competitionStatsTable")
     tbody.innerHTML = ""
@@ -991,17 +983,45 @@ async function loadCompetitionStatistics() {
       `
       tbody.appendChild(row)
     })
-    console.log(" Competition statistics loaded successfully")
   } catch (error) {
     console.error("Error loading competition statistics:", error)
-    console.error(" Error details:", error.message, error.stack)
     showNotification(`Помилка завантаження статистики конкурсів: ${error.message}`, "error")
+    // Fallback to original endpoint if detailed one doesn't exist
+    const response = await fetch(`${BASE_URL}/api/statistics/competitions`)
+    const data = await response.json()
+
+    if (response.ok) {
+      const tbody = document.getElementById("competitionStatsTable")
+      tbody.innerHTML = ""
+
+      if (!data.competitions || data.competitions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">Немає даних про конкурси</td>
+          </tr>
+        `
+        return
+      }
+
+      data.competitions.forEach((comp) => {
+        const row = document.createElement("tr")
+        row.innerHTML = `
+          <td><strong>${comp.title}</strong></td>
+          <td><span class="date-badge">${new Date(comp.start_date).toLocaleDateString("uk-UA")}</span></td>
+          <td><span class="date-badge">${new Date(comp.end_date).toLocaleDateString("uk-UA")}</span></td>
+          <td>${comp.participants_count || 0}</td>
+          <td>N/A</td>
+          <td><span class="status-badge">${getCompetitionStatus(comp.start_date, comp.end_date)}</span></td>
+        `
+        tbody.appendChild(row)
+      })
+    }
   }
 }
 
 async function loadParticipationTimeline() {
   try {
-    const response = await fetch("http://localhost:3000/api/statistics/participation-timeline")
+    const response = await fetch(`${BASE_URL}/api/statistics/participation-timeline`)
     const data = await response.json()
 
     if (response.ok) {
@@ -1037,7 +1057,7 @@ async function loadParticipationTimeline() {
 
 async function loadSchoolStatistics() {
   try {
-    const response = await fetch("http://localhost:3000/api/statistics/by-school")
+    const response = await fetch(`${BASE_URL}/api/statistics/by-school`)
     const data = await response.json()
 
     if (response.ok) {
