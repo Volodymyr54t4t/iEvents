@@ -15,47 +15,56 @@ tabs.forEach((tab) => {
 })
 
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault()
+  e.preventDefault();
 
-  const email = document.getElementById("loginEmail").value.trim()
-  const password = document.getElementById("loginPassword").value
-  const errorDiv = document.getElementById("loginError")
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const errorDiv = document.getElementById("loginError");
 
   if (!email || !password) {
-    errorDiv.textContent = "Заповніть всі поля"
-    errorDiv.classList.add("show")
-    return
+    errorDiv.textContent = "Заповніть всі поля";
+    errorDiv.classList.add("show");
+    return;
   }
 
+  // 🔹 Автоматично визначає, локально чи на Render
+  const API_URL =
+    window.location.hostname === "localhost" ?
+    "http://localhost:3000" :
+    "https://ievents-o8nm.onrender.com"; // ← Твоя адреса Render
+
   try {
-    const response = await fetch("http://localhost:3000/api/login", {
+    const response = await fetch(`${API_URL}/api/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email,
         password
       }),
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
 
     if (response.ok) {
-      localStorage.setItem("userId", data.userId)
-      localStorage.setItem("userEmail", data.email)
-      localStorage.setItem("userRole", data.role)
-      window.location.href = "index.html"
+      // ✅ Успішний вхід
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("userEmail", data.email);
+      localStorage.setItem("userRole", data.role);
+      window.location.href = "index.html";
     } else {
-      errorDiv.textContent = data.error || "Помилка входу"
-      errorDiv.classList.add("show")
+      // ⚠️ Невірні дані або помилка на бекенді
+      errorDiv.textContent = data.error || "Помилка входу";
+      errorDiv.classList.add("show");
     }
   } catch (error) {
-    console.error("Login error:", error)
-    errorDiv.textContent = "Помилка з'єднання з сервером"
-    errorDiv.classList.add("show")
+    // ❌ Сервер недоступний або fetch не спрацював
+    console.error("Login error:", error);
+    errorDiv.textContent = "Помилка з'єднання з сервером";
+    errorDiv.classList.add("show");
   }
-})
+});
 
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault()
