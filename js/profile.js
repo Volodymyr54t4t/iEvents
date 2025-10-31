@@ -1,5 +1,3 @@
-const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://ievents-qf5k.onrender.com"
-
 const userId = localStorage.getItem("userId")
 
 if (!userId || userId === "undefined" || userId === "null") {
@@ -11,7 +9,7 @@ let avatarFile = null
 
 async function loadProfile() {
   try {
-    const response = await fetch(`${API_URL}/api/profile/${userId}`)
+    const response = await fetch(`http://localhost:3000/api/profile/${userId}`)
     const data = await response.json()
 
     if (response.ok && data.profile) {
@@ -39,8 +37,7 @@ async function loadProfile() {
       }
 
       const roleValue = document.getElementById("roleValue")
-      const userRole = localStorage.getItem("userRole") || "учень"
-      roleValue.textContent = userRole
+      roleValue.textContent = profile.role || "учень"
     } else {
       console.error("Failed to load profile:", data.error)
     }
@@ -111,7 +108,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
 
   try {
     console.log("Відправка запиту на сервер...")
-    const response = await fetch(`${API_URL}/api/profile`, {
+    const response = await fetch("http://localhost:3000/api/profile", {
       method: "POST",
       body: formData,
     })
