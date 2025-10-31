@@ -2,7 +2,7 @@ const BASE_URL =
   window.location.hostname === "localhost" ?
   "http://localhost:3000" // 🖥️ Локальний сервер
   :
-  "https://ievents-o8nm.onrender.com" // ☁️ Онлайн-сервер Render
+  "https://ievents-qf5k.onrender.com" // ☁️ Онлайн-сервер Render
 
 // Load results on page load
 document.addEventListener("DOMContentLoaded", () => {
