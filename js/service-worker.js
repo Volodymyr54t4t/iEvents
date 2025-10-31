@@ -1,10 +1,10 @@
-const CACHE_NAME = "contest-platform-v1";
+const CACHE_NAME = "iEvents";
 const urlsToCache = [
   "/",
-  "/index.html",
-  "/index.css",
-  "/index.js",
-  "/manifest.json"
+  "../index.html",
+  "../index.css",
+  "./index.js",
+  "../manifest.json"
 ];
 
 // Встановлення SW
