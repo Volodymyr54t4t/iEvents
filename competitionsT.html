@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управління конкурсами - iEvents</title>
-    <link rel="stylesheet" href="css/competitionsT.css">
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/competitionsT.css">
+    <!-- Load config.js first -->
+    <script src="js/config.js"></script>
 </head>
 
 <body>
@@ -20,8 +21,8 @@
             <p class="subtitle">Створюйте конкурси та додавайте учнів</p>
         </div>
 
-        <!-- Форма створення конкурсу -->
-        <div class="card">
+        <!-- Форма створення конкурсу - тепер з id для контролю видимості -->
+        <div class="card" id="createCompetitionCard" style="display: none;">
             <h2>Створити новий конкурс</h2>
             <form id="createCompetitionForm" class="competition-form">
                 <div class="form-group">
