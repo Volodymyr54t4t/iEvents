@@ -201,6 +201,11 @@ async function initializeDatabase() {
           city VARCHAR(100),
           school VARCHAR(255),
           grade VARCHAR(50),
+          school_id INTEGER,
+          grade_number INTEGER,
+          grade_letter VARCHAR(10),
+          club_institution VARCHAR(255),
+          club_name VARCHAR(255),
           interests TEXT,
           bio TEXT,
           avatar TEXT,
@@ -210,6 +215,31 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця profiles створена")
     } else {
       console.log("  ✓ Таблиця profiles вже існує")
+
+      // Ensure new columns exist
+      const columnsToAdd = [
+        { name: "school_id", type: "INTEGER" },
+        { name: "grade_number", type: "INTEGER" },
+        { name: "grade_letter", type: "VARCHAR(10)" },
+        { name: "club_institution", type: "VARCHAR(255)" },
+        { name: "club_name", type: "VARCHAR(255)" },
+      ]
+
+      for (const col of columnsToAdd) {
+        const columnCheck = await client.query(`
+          SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'profiles' AND column_name = '${col.name}'
+          ) as exists
+        `)
+        if (!columnCheck.rows[0].exists) {
+          console.log(`  → Додавання колонки ${col.name}...`)
+          await client.query(`ALTER TABLE profiles ADD COLUMN ${col.name} ${col.type}`)
+          console.log(`  ✓ Колонка ${col.name} додана`)
+        } else {
+          console.log(`  ✓ Колонка ${col.name} вже існує`)
+        }
+      }
     }
 
     // Крок 4: Перевірка та створення таблиці competitions
@@ -696,8 +726,25 @@ app.get("/api/profile/:userId", async (req, res) => {
 })
 
 app.post("/api/profile", upload.single("avatar"), async (req, res) => {
-  const { userId, firstName, lastName, middleName, telegram, phone, birthDate, city, school, grade, interests, bio } =
-    req.body
+  const {
+    userId,
+    firstName,
+    lastName,
+    middleName,
+    telegram,
+    phone,
+    birthDate,
+    city,
+    school,
+    grade,
+    schoolId,
+    gradeNumber,
+    gradeLetter,
+    clubInstitution,
+    clubName,
+    interests,
+    bio,
+  } = req.body
 
   console.log("Оновлення профілю для користувача:", userId)
 
@@ -738,8 +785,9 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
         `INSERT INTO profiles (
           user_id, first_name, last_name, middle_name, 
           telegram, phone, birth_date, city, 
-          school, grade, interests, bio, avatar
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+          school, grade, school_id, grade_number, grade_letter,
+          club_institution, club_name, interests, bio, avatar
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
         [
           userId,
           firstName || null,
@@ -751,6 +799,11 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
           city || null,
           school || null,
           grade || null,
+          schoolId || null,
+          gradeNumber || null,
+          gradeLetter || null,
+          clubInstitution || null,
+          clubName || null,
           interests || null,
           bio || null,
           avatarPath,
@@ -774,6 +827,11 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
         city: city,
         school: school,
         grade: grade,
+        school_id: schoolId,
+        grade_number: gradeNumber,
+        grade_letter: gradeLetter,
+        club_institution: clubInstitution,
+        club_name: clubName,
         interests: interests,
         bio: bio,
       }
@@ -804,7 +862,7 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
     })
   } catch (error) {
     await client.query("ROLLBACK")
-    console.error("❌ Помилка оновлення профілю:", error.message)
+    console.error("Помилка оновлення профілю:", error)
     res.status(500).json({
       error: "Помилка оновлення профілю",
     })
@@ -935,6 +993,16 @@ app.get("/api/students", async (req, res) => {
     res.status(500).json({
       error: "Помилка отримання учнів",
     })
+  }
+})
+
+app.get("/api/schools", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT id, name FROM schools ORDER BY name")
+    res.json({ schools: result.rows })
+  } catch (error) {
+    console.error("Error fetching schools:", error)
+    res.status(500).json({ error: "Помилка отримання списку шкіл" })
   }
 })
 
@@ -1138,8 +1206,7 @@ app.get("/api/competitions/:id/participants", async (req, res) => {
     const result = await pool.query(
       `
       SELECT u.id, u.email,
-             p.first_name, p.last_name, p.grade, p.avatar,
-             cp.added_at
+             p.first_name, p.last_name, p.grade, p.avatar
       FROM competition_participants cp
       INNER JOIN users u ON cp.user_id = u.id
       LEFT JOIN profiles p ON u.id = p.user_id

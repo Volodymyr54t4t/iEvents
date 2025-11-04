@@ -5,11 +5,12 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
 const userId = localStorage.getItem("userId")
+const userRole = localStorage.getItem("userRole") || "учень"
 
 if (!userId || userId === "undefined" || userId === "null") {
   console.error("Invalid userId, redirecting to auth")
@@ -17,6 +18,49 @@ if (!userId || userId === "undefined" || userId === "null") {
 }
 
 let avatarFile = null
+
+function toggleFieldsByRole() {
+  const isStudent = userRole === "учень"
+
+  // Показуємо/приховуємо поля для учнів
+  document.getElementById("schoolSelectGroup").style.display = isStudent ? "block" : "none"
+  document.getElementById("schoolTextGroup").style.display = isStudent ? "none" : "block"
+  document.getElementById("gradeStudentGroup").style.display = isStudent ? "flex" : "none"
+  document.getElementById("gradeTextGroup").style.display = isStudent ? "none" : "block"
+  document.getElementById("clubGroup").style.display = isStudent ? "flex" : "none"
+
+  // Встановлюємо required для полів учнів
+  if (isStudent) {
+    document.getElementById("schoolSelect").required = true
+    document.getElementById("gradeNumber").required = true
+    document.getElementById("school").required = false
+    document.getElementById("grade").required = false
+  } else {
+    document.getElementById("schoolSelect").required = false
+    document.getElementById("gradeNumber").required = false
+    document.getElementById("school").required = false
+    document.getElementById("grade").required = false
+  }
+}
+
+async function loadSchools() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/schools`)
+    const data = await response.json()
+
+    if (response.ok && data.schools) {
+      const select = document.getElementById("schoolSelect")
+      data.schools.forEach((school) => {
+        const option = document.createElement("option")
+        option.value = school.id
+        option.textContent = `${school.id} – ${school.name}`
+        select.appendChild(option)
+      })
+    }
+  } catch (error) {
+    console.error("Error loading schools:", error)
+  }
+}
 
 async function loadProfile() {
   try {
@@ -30,10 +74,32 @@ async function loadProfile() {
       document.getElementById("middleName").value = profile.middle_name || ""
       document.getElementById("telegram").value = profile.telegram || ""
       document.getElementById("phone").value = profile.phone || ""
-      document.getElementById("birthDate").value = profile.birth_date || ""
+
+      if (profile.birth_date) {
+        const date = new Date(profile.birth_date)
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, "0")
+        const day = String(date.getDate()).padStart(2, "0")
+        document.getElementById("birthDate").value = `${year}-${month}-${day}`
+      } else {
+        document.getElementById("birthDate").value = ""
+      }
+
       document.getElementById("city").value = profile.city || ""
-      document.getElementById("school").value = profile.school || ""
-      document.getElementById("grade").value = profile.grade || ""
+
+      if (userRole === "учень") {
+        if (profile.school_id) {
+          document.getElementById("schoolSelect").value = profile.school_id
+        }
+        document.getElementById("gradeNumber").value = profile.grade_number || ""
+        document.getElementById("gradeLetter").value = profile.grade_letter || ""
+        document.getElementById("clubInstitution").value = profile.club_institution || ""
+        document.getElementById("clubName").value = profile.club_name || ""
+      } else {
+        document.getElementById("school").value = profile.school || ""
+        document.getElementById("grade").value = profile.grade || ""
+      }
+
       document.getElementById("interests").value = profile.interests || ""
       document.getElementById("bio").value = profile.bio || ""
 
@@ -48,7 +114,6 @@ async function loadProfile() {
       }
 
       const roleValue = document.getElementById("roleValue")
-      const userRole = localStorage.getItem("userRole") || "учень"
       roleValue.textContent = userRole
     } else {
       console.error("Failed to load profile:", data.error)
@@ -108,10 +173,19 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   formData.append("phone", document.getElementById("phone").value.trim())
   formData.append("birthDate", document.getElementById("birthDate").value)
   formData.append("city", document.getElementById("city").value.trim())
-  formData.append("school", document.getElementById("school").value.trim())
-  formData.append("grade", document.getElementById("grade").value.trim())
   formData.append("interests", document.getElementById("interests").value.trim())
   formData.append("bio", document.getElementById("bio").value.trim())
+
+  if (userRole === "учень") {
+    formData.append("schoolId", document.getElementById("schoolSelect").value)
+    formData.append("gradeNumber", document.getElementById("gradeNumber").value.trim())
+    formData.append("gradeLetter", document.getElementById("gradeLetter").value.trim())
+    formData.append("clubInstitution", document.getElementById("clubInstitution").value.trim())
+    formData.append("clubName", document.getElementById("clubName").value.trim())
+  } else {
+    formData.append("school", document.getElementById("school").value.trim())
+    formData.append("grade", document.getElementById("grade").value.trim())
+  }
 
   if (avatarFile) {
     formData.append("avatar", avatarFile)
@@ -160,4 +234,6 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   console.log("=== Кінець збереження профілю ===")
 })
 
+toggleFieldsByRole()
+loadSchools()
 loadProfile()

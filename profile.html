@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профіль - iEvents</title>
-    <link rel="stylesheet" href="css/profile.css">
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <!-- Load config.js first -->
+    <script src="js/config.js"></script>
 </head>
 
 <body>
@@ -52,14 +53,15 @@
                     <input type="text" id="middleName" placeholder="Іванович">
                 </div>
 
+                <!-- Зробили telegram та phone необов'язковими -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="telegram">Telegram (нік) *</label>
-                        <input type="text" id="telegram" required placeholder="@username">
+                        <label for="telegram">Telegram (нік)</label>
+                        <input type="text" id="telegram" placeholder="@username">
                     </div>
                     <div class="form-group">
-                        <label for="phone">Номер телефону *</label>
-                        <input type="tel" id="phone" required placeholder="+380 XX XXX XX XX">
+                        <label for="phone">Номер телефону</label>
+                        <input type="tel" id="phone" placeholder="+380 XX XXX XX XX">
                     </div>
                 </div>
 
@@ -73,14 +75,48 @@
                     <input type="text" id="city" required placeholder="Київ">
                 </div>
 
-                <div class="form-group">
+                <!-- Додали dropdown для вибору закладу (тільки для учнів) -->
+                <div class="form-group" id="schoolSelectGroup" style="display: none;">
+                    <label for="schoolSelect">Навчальний заклад *</label>
+                    <select id="schoolSelect" required>
+                        <option value="">Оберіть заклад...</option>
+                    </select>
+                </div>
+
+                <!-- Для не-учнів залишаємо текстове поле -->
+                <div class="form-group" id="schoolTextGroup">
                     <label for="school">Навчальний заклад</label>
                     <input type="text" id="school" placeholder="Школа №1">
                 </div>
 
-                <div class="form-group">
+                <!-- Розділили клас на номер та літеру (тільки для учнів) -->
+                <div class="form-row" id="gradeStudentGroup" style="display: none;">
+                    <div class="form-group">
+                        <label for="gradeNumber">Клас *</label>
+                        <input type="text" id="gradeNumber" placeholder="10" maxlength="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="gradeLetter">Літера (за бажанням)</label>
+                        <input type="text" id="gradeLetter" placeholder="А" maxlength="2">
+                    </div>
+                </div>
+
+                <!-- Для не-учнів залишаємо одне поле -->
+                <div class="form-group" id="gradeTextGroup">
                     <label for="grade">Клас/Курс</label>
                     <input type="text" id="grade" placeholder="10-А">
+                </div>
+
+                <!-- Додали поля для гуртка (тільки для учнів) -->
+                <div class="form-row" id="clubGroup" style="display: none;">
+                    <div class="form-group">
+                        <label for="clubInstitution">Заклад гуртка</label>
+                        <input type="text" id="clubInstitution" placeholder="Назва закладу">
+                    </div>
+                    <div class="form-group">
+                        <label for="clubName">Назва гуртка</label>
+                        <input type="text" id="clubName" placeholder="Назва гуртка">
+                    </div>
                 </div>
 
                 <div class="form-group">
