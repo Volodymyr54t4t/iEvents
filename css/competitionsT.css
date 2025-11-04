@@ -5,8 +5,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
   min-height: 100vh;
   color: #2d3748;
@@ -22,12 +21,14 @@ body {
   text-align: center;
   margin-bottom: 40px;
   color: #0a5f7f;
+  animation: fadeInDown 0.6s ease-out;
 }
 
 .page-header h1 {
   font-size: 36px;
   margin-bottom: 8px;
   font-weight: 700;
+  animation: slideInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .subtitle {
@@ -35,6 +36,7 @@ body {
   opacity: 0.9;
   margin-bottom: 16px;
   color: #5a7a8a;
+  animation: fadeIn 0.8s ease-out 0.2s both;
 }
 
 .btn-results {
@@ -62,6 +64,7 @@ body {
   padding: 32px;
   margin-bottom: 24px;
   box-shadow: 0 8px 32px rgba(10, 95, 127, 0.08);
+  animation: slideInUp 0.7s ease-out 0.1s both;
 }
 
 .card h2 {
@@ -69,18 +72,22 @@ body {
   margin-bottom: 24px;
   color: #0a5f7f;
   font-weight: 700;
+  animation: slideInLeft 0.6s ease-out 0.2s both;
 }
 
 .competition-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  animation: fadeIn 0.6s ease-out;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  animation: slideInUp 0.5s ease-out both;
+  transition: all 0.3s ease;
 }
 
 .form-group label {
@@ -104,12 +111,15 @@ body {
   outline: none;
   border-color: #7ec8e3;
   box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
+  animation: pulse 0.6s ease-out;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  animation: slideInUp 0.5s ease-out both;
+  transition: all 0.3s ease;
 }
 
 .btn {
@@ -119,7 +129,15 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:hover {
+  animation: buttonHover 0.3s ease-out forwards;
+}
+
+.btn:active {
+  animation: buttonActive 0.2s ease-out forwards;
 }
 
 .btn-primary {
@@ -128,8 +146,7 @@ body {
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(126, 200, 227, 0.3);
+  animation: buttonHover 0.3s ease-out forwards;
 }
 
 .btn-secondary {
@@ -139,7 +156,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background: #d4ecf5;
+  animation: buttonHover 0.3s ease-out forwards;
 }
 
 .btn-danger {
@@ -151,8 +168,7 @@ body {
 }
 
 .btn-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 154, 154, 0.4);
+  animation: buttonHover 0.3s ease-out forwards;
 }
 
 .btn-success {
@@ -164,28 +180,30 @@ body {
 }
 
 .btn-success:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.4);
+  animation: buttonHover 0.3s ease-out forwards;
 }
 
 .competitions-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: fadeIn 0.5s ease-out 0.3s both;
 }
 
 .competition-item {
   border: 2px solid #a8d8ea;
   border-radius: 16px;
   padding: 20px;
-  transition: all 0.2s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
   box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
+  animation: slideInUp 0.5s ease-out both;
 }
 
 .competition-item:hover {
   border-color: #7ec8e3;
-  box-shadow: 0 8px 24px rgba(126, 200, 227, 0.25);
+  box-shadow: 0 16px 40px rgba(126, 200, 227, 0.3);
+  transform: translateY(-8px);
 }
 
 .competition-header {
@@ -193,23 +211,49 @@ body {
   justify-content: space-between;
   align-items: start;
   margin-bottom: 12px;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .competition-title {
   font-size: 20px;
   font-weight: 700;
   color: #0a5f7f;
+  transition: color 0.3s ease;
+}
+
+.competition-item:hover .competition-title {
+  color: #7ec8e3;
 }
 
 .competition-actions {
   display: flex;
   gap: 8px;
+  animation: fadeInRight 0.5s ease-out 0.2s both;
+}
+
+.competition-actions .btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.competition-actions .btn:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+.competition-actions .btn:active {
+  transform: translateY(-1px) scale(1.02);
 }
 
 .competition-description {
   color: #5a7a8a;
   margin-bottom: 12px;
   line-height: 1.6;
+  animation: fadeIn 0.6s ease-out 0.3s both;
+  transition: all 0.3s ease;
+}
+
+.competition-item:hover .competition-description {
+  color: #0a5f7f;
 }
 
 .competition-meta {
@@ -217,12 +261,20 @@ body {
   gap: 24px;
   font-size: 14px;
   color: #0a5f7f;
+  animation: slideInUp 0.5s ease-out 0.4s both;
 }
 
 .competition-meta span {
   display: flex;
   align-items: center;
   gap: 6px;
+  animation: fadeIn 0.4s ease-out both;
+  transition: all 0.3s ease;
+}
+
+.competition-meta span:hover {
+  color: #7ec8e3;
+  transform: translateX(4px);
 }
 
 .status-badge {
@@ -234,6 +286,16 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  animation: scaleIn 0.4s ease-out both;
+  transition: all 0.3s ease;
+}
+
+.status-badge:hover,
+.level-badge:hover,
+.subject-badge:hover,
+.online-badge:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .status-active {
@@ -255,12 +317,14 @@ body {
   text-align: center;
   padding: 40px;
   color: #5a7a8a;
+  animation: fadeInUp 0.5s ease-out;
 }
 
 .empty-state {
   text-align: center;
   padding: 60px 20px;
   color: #5a7a8a;
+  animation: fadeIn 0.6s ease-out;
 }
 
 .empty-state h3 {
@@ -268,6 +332,11 @@ body {
   margin-bottom: 8px;
   color: #0a5f7f;
   font-weight: 600;
+  animation: slideInDown 0.5s ease-out;
+}
+
+.empty-state p {
+  animation: slideInUp 0.5s ease-out 0.1s both;
 }
 
 .modal {
@@ -281,10 +350,12 @@ body {
   z-index: 1000;
   align-items: center;
   justify-content: center;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal.active {
   display: flex;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
@@ -296,6 +367,7 @@ body {
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal-header {
@@ -304,6 +376,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  animation: slideInDown 0.5s ease-out;
 }
 
 .modal-header h2 {
@@ -311,6 +384,7 @@ body {
   margin: 0;
   color: #0a5f7f;
   font-weight: 700;
+  animation: fadeIn 0.5s ease-out 0.1s both;
 }
 
 .modal-close {
@@ -320,17 +394,20 @@ body {
   color: #5a7a8a;
   cursor: pointer;
   line-height: 1;
-  transition: color 0.2s;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.4s ease-out;
 }
 
 .modal-close:hover {
   color: #0a5f7f;
+  transform: rotate(90deg) scale(1.2);
 }
 
 .modal-body {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
+  animation: fadeIn 0.5s ease-out 0.1s both;
 }
 
 .modal-footer {
@@ -339,6 +416,7 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  animation: slideInUp 0.5s ease-out 0.1s both;
 }
 
 .search-box {
@@ -368,6 +446,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .student-item {
@@ -378,17 +457,21 @@ body {
   border: 2px solid #a8d8ea;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInUp 0.4s ease-out both;
 }
 
 .student-item:hover {
   border-color: #7ec8e3;
   background: #f0f9fc;
+  transform: translateX(8px);
+  box-shadow: 0 6px 16px rgba(126, 200, 227, 0.25);
 }
 
 .student-item.selected {
   border-color: #7ec8e3;
   background: #e6f7fb;
+  animation: pulse 0.6s ease-out;
 }
 
 .student-checkbox {
@@ -407,6 +490,12 @@ body {
   justify-content: center;
   font-weight: 700;
   color: white;
+  animation: scaleIn 0.4s ease-out;
+  transition: all 0.3s ease;
+}
+
+.student-item:hover .student-avatar {
+  transform: scale(1.1);
 }
 
 .student-avatar img {
@@ -418,11 +507,17 @@ body {
 
 .student-info {
   flex: 1;
+  animation: fadeInLeft 0.4s ease-out;
 }
 
 .student-name {
   font-weight: 600;
   color: #0a5f7f;
+  transition: all 0.3s ease;
+}
+
+.student-item:hover .student-name {
+  color: #7ec8e3;
 }
 
 .student-grade {
@@ -439,8 +534,7 @@ body {
 }
 
 .btn-info:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
+  animation: buttonHover 0.3s ease-out forwards;
 }
 
 .btn-sm {
@@ -478,421 +572,509 @@ body {
   border: 2px solid #a8d8ea;
   border-radius: 10px;
   font-size: 14px;
-  transition: all 0.2s;
-  background: white;
-  color: #0a5f7f;
+  font-family: inherit;
 }
 
-.result-form select:focus {
-  outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
-}
-
-.results-list-section {
-  margin-top: 24px;
-}
-
-.results-header {
+/* Add CSS for dynamic fields section */
+.dynamic-fields-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
-.results-header h3 {
-  font-size: 18px;
+.dynamic-fields-header label {
+  font-weight: 600;
   color: #0a5f7f;
-  margin: 0;
-  font-weight: 700;
-}
-
-.results-table-container {
-  overflow-x: auto;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
-}
-
-.results-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.results-table thead {
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
-}
-
-.results-table th {
-  padding: 18px 24px;
-  text-align: left;
-  font-weight: 700;
-  color: white;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: none;
-}
-
-.results-table td {
-  padding: 16px 24px;
-  border-bottom: 1px solid #e8f4f8;
-  color: #2d3748;
   font-size: 14px;
-  vertical-align: middle;
 }
 
-.results-table tbody tr:hover {
-  background: #f0f9fc;
+.dynamic-field-wrapper {
+  animation: slideIn 0.3s ease-out;
 }
 
-.results-table tbody tr:last-child td {
-  border-bottom: none;
+.dynamic-field-wrapper.animate-in {
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.actions-cell {
+.dynamic-field-wrapper.animate-out {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.95);
+  }
+}
+
+.dynamic-fields-container {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #e8f4f8;
+  transition: all 0.3s ease;
 }
 
-.btn-icon {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px;
-  transition: transform 0.2s;
+.dynamic-fields-container:hover {
+  border-color: #a8d8ea;
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.15);
 }
 
-.btn-icon:hover {
-  transform: scale(1.2);
+.dynamic-field-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 100px;
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #a8d8ea;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(10, 95, 127, 0.06);
+}
+
+.dynamic-field-row:hover {
+  border-color: #7ec8e3;
+  box-shadow: 0 4px 16px rgba(126, 200, 227, 0.2);
+  transform: translateY(-2px);
+}
+
+.dynamic-field-label,
+.dynamic-field-value {
+  padding: 12px 16px;
+  border: 2px solid #a8d8ea;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0a5f7f;
+  transition: all 0.3s ease;
+}
+
+.dynamic-field-label::placeholder,
+.dynamic-field-value::placeholder {
+  color: #a8d8ea;
+}
+
+.dynamic-field-label:focus,
+.dynamic-field-value:focus {
+  outline: none;
+  border-color: #7ec8e3;
+  box-shadow: 0 0 0 4px rgba(126, 200, 227, 0.15);
+  background: #f8fbfd;
+}
+
+.dynamic-field-label {
+  font-weight: 600;
+}
+
+.dynamic-field-value {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Button styles in dynamic fields */
+.dynamic-field-row .btn-danger {
+  height: fit-content;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+}
+
+.dynamic-field-row .btn-danger:hover {
+  transform: scale(1.05) translateY(-2px);
 }
 
 @media (max-width: 1024px) {
-  .main-container {
-    padding: 32px 16px;
+  .dynamic-field-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
-  .card {
-    padding: 28px;
+  .dynamic-field-row .btn-danger {
+    width: 100%;
   }
 }
 
 @media (max-width: 768px) {
-  .main-container {
-    padding: 24px 16px;
+  .dynamic-fields-container {
+    padding: 12px;
+    gap: 10px;
   }
 
-  .page-header {
-    margin-bottom: 32px;
-  }
-
-  .page-header h1 {
-    font-size: 28px;
-  }
-
-  .subtitle {
-    font-size: 16px;
-  }
-
-  .btn-results {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-
-  .card {
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-
-  .card h2 {
-    font-size: 20px;
-    margin-bottom: 20px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .competition-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .competition-actions {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .competition-actions button {
-    flex: 1;
-    min-width: 100px;
-  }
-
-  .competition-meta {
-    flex-direction: column;
+  .dynamic-field-row {
+    padding: 12px;
     gap: 8px;
   }
 
-  .modal-content {
-    width: 95%;
-    max-height: 90vh;
+  .dynamic-field-label,
+  .dynamic-field-value {
+    padding: 10px 12px;
+    font-size: 13px;
   }
 
-  .modal-large {
-    max-width: 95%;
-  }
-
-  .modal-header {
-    padding: 20px;
-  }
-
-  .modal-body {
-    padding: 20px;
-  }
-
-  .modal-footer {
-    padding: 20px;
-    flex-wrap: wrap;
-  }
-
-  .modal-footer .btn {
-    flex: 1;
-    min-width: 120px;
-  }
-
-  .results-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .results-table {
-    font-size: 12px;
-  }
-
-  .results-table th,
-  .results-table td {
-    padding: 8px;
-  }
-
-  .empty-state {
-    padding: 40px 16px;
+  .dynamic-field-value {
+    min-height: 50px;
   }
 }
 
 @media (max-width: 480px) {
-  .main-container {
-    padding: 20px 12px;
-  }
-
-  .page-header {
-    margin-bottom: 24px;
-  }
-
-  .page-header h1 {
-    font-size: 24px;
-  }
-
-  .subtitle {
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
-
-  .btn-results {
-    padding: 10px 16px;
-    font-size: 13px;
-    width: 100%;
-  }
-
-  .card {
-    padding: 20px;
-    border-radius: 10px;
-  }
-
-  .card h2 {
-    font-size: 18px;
-  }
-
-  .competition-form {
-    gap: 16px;
-  }
-
-  .form-group input,
-  .form-group textarea {
+  .dynamic-fields-container {
     padding: 10px;
-    font-size: 14px;
   }
 
-  .btn {
-    padding: 10px 20px;
-    font-size: 14px;
+  .dynamic-field-row {
+    padding: 10px;
   }
 
-  .btn-danger,
-  .btn-success,
-  .btn-info {
-    padding: 6px 12px;
+  .dynamic-field-label,
+  .dynamic-field-value {
+    padding: 8px 10px;
     font-size: 12px;
-  }
-
-  .competition-item {
-    padding: 16px;
-  }
-
-  .competition-title {
-    font-size: 18px;
-  }
-
-  .competition-description {
-    font-size: 13px;
-  }
-
-  .competition-meta {
-    font-size: 13px;
-  }
-
-  .competition-actions {
-    flex-direction: column;
-  }
-
-  .competition-actions button {
-    width: 100%;
-  }
-
-  .modal-content {
-    width: 98%;
-    max-height: 92vh;
-  }
-
-  .modal-header {
-    padding: 16px;
-  }
-
-  .modal-header h2 {
-    font-size: 18px;
-  }
-
-  .modal-close {
-    font-size: 28px;
-  }
-
-  .modal-body {
-    padding: 16px;
-  }
-
-  .modal-footer {
-    padding: 16px;
-  }
-
-  .search-box input {
-    padding: 10px;
-    font-size: 14px;
-  }
-
-  .student-item {
-    padding: 10px;
-  }
-
-  .student-avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
-  }
-
-  .student-name {
-    font-size: 14px;
-  }
-
-  .student-grade {
-    font-size: 12px;
-  }
-
-  .results-form-section {
-    padding: 16px;
-  }
-
-  .results-form-section h3 {
-    font-size: 16px;
-  }
-
-  .result-form select {
-    padding: 10px;
-    font-size: 14px;
-  }
-
-  .results-table {
-    font-size: 11px;
-  }
-
-  .results-table th,
-  .results-table td {
-    padding: 6px;
-  }
-
-  .actions-cell {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .empty-state {
-    padding: 32px 12px;
-  }
-
-  .empty-state h3 {
-    font-size: 18px;
   }
 }
 
-@media (max-width: 360px) {
-  .page-header h1 {
-    font-size: 22px;
-  }
+/* Add comprehensive animations for all elements */
 
-  .competition-title {
-    font-size: 16px;
-  }
+/* Filters section animations */
+.filters-section {
+  animation: slideInUp 0.6s ease-out;
+}
 
-  .btn {
-    padding: 8px 16px;
-    font-size: 13px;
+.btn-add-competition {
+  animation: bounceInScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-add-competition:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(77, 208, 225, 0.4);
+}
+
+.btn-add-competition:active {
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* Filter inputs animations */
+.filter-input,
+.filter-select {
+  animation: slideInUp 0.5s ease-out both;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-input:nth-child(1),
+.filters-row .filter-select:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.filters-row .filter-select:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.filters-row .filter-select:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.filters-row .filter-select:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.filters-row .filter-select:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 4px rgba(126, 200, 227, 0.2);
+}
+
+.competitions-list {
+  animation: fadeIn 0.5s ease-out 0.3s both;
+}
+
+.competition-item:nth-child(1) {
+  animation-delay: 0.3s;
+}
+
+.competition-item:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.competition-item:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.competition-item:nth-child(n + 4) {
+  animation-delay: 0.6s;
+}
+
+.competition-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  animation: slideInRight 0.5s ease-out 0.1s both;
+}
+
+.level-badge,
+.subject-badge,
+.online-badge {
+  animation: scaleIn 0.4s ease-out both;
+  transition: all 0.3s ease;
+}
+
+.status-badge:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.status-badge:nth-child(2),
+.level-badge {
+  animation-delay: 0.3s;
+}
+
+.status-badge:nth-child(3),
+.subject-badge {
+  animation-delay: 0.4s;
+}
+
+.status-badge:nth-child(4),
+.online-badge {
+  animation-delay: 0.5s;
+}
+
+.competition-organizer {
+  animation: fadeInUp 0.5s ease-out 0.5s both;
+  color: #5a7a8a;
+  margin-top: 12px;
+  transition: all 0.3s ease;
+}
+
+.competition-item:hover .competition-organizer {
+  color: #0a5f7f;
+  transform: translateX(4px);
+}
+
+.competition-meta span:nth-child(1) {
+  animation-delay: 0.4s;
+}
+
+.competition-meta span:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.competition-meta span:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+.competition-meta span:nth-child(4) {
+  animation-delay: 0.7s;
+}
+
+.competition-form:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.competition-form:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.competition-form:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.competition-form:nth-child(n + 4) {
+  animation-delay: 0.4s;
+}
+
+.student-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.student-item:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.student-item:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.student-item:nth-child(n + 4) {
+  animation-delay: 0.25s;
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
-@media (max-width: 320px) {
-  .main-container {
-    padding: 16px 8px;
-  }
 
-  .btn-results {
-    padding: 8px 12px;
-    font-size: 12px;
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .card {
-    padding: 16px;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .card h2 {
-    font-size: 16px;
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
   }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
-  .competition-form {
-    gap: 12px;
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
-  .form-group input,
-  .form-group textarea {
-    padding: 8px;
-    font-size: 13px;
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .btn {
-    padding: 8px 16px;
-    font-size: 13px;
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
   }
-} 
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(126, 200, 227, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(126, 200, 227, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(126, 200, 227, 0);
+  }
+}
+
+@keyframes bounceInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes buttonHover {
+  to {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(126, 200, 227, 0.3);
+  }
+}
+
+@keyframes buttonActive {
+  to {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 8px rgba(126, 200, 227, 0.2);
+  }
+}

@@ -287,6 +287,39 @@ async function initializeDatabase() {
       }
     }
 
+    // Додавання нових колонок до таблиці competitions
+    console.log("  → Перевірка та додавання нових колонок до competitions...")
+    const newCompetitionColumns = [
+      { name: "subject_id", type: "INTEGER REFERENCES subjects(id) ON DELETE SET NULL" },
+      { name: "level", type: "VARCHAR(50)" },
+      { name: "organizer", type: "VARCHAR(255)" },
+      { name: "location", type: "VARCHAR(255)" },
+      { name: "max_participants", type: "INTEGER" },
+      { name: "registration_deadline", type: "DATE" },
+      { name: "requirements", type: "TEXT" },
+      { name: "prizes", type: "TEXT" },
+      { name: "contact_info", type: "TEXT" },
+      { name: "website_url", type: "VARCHAR(255)" },
+      { name: "is_online", type: "BOOLEAN DEFAULT FALSE" },
+      { name: "custom_fields", type: "JSONB" }, // Added custom_fields
+    ]
+
+    for (const col of newCompetitionColumns) {
+      const columnCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'competitions' AND column_name = '${col.name}'
+        ) as exists
+      `)
+      if (!columnCheck.rows[0].exists) {
+        console.log(`  → Додавання колонки ${col.name}...`)
+        await client.query(`ALTER TABLE competitions ADD COLUMN ${col.name} ${col.type}`)
+        console.log(`  ✓ Колонка ${col.name} додана`)
+      } else {
+        console.log(`  ✓ Колонка ${col.name} вже існує`)
+      }
+    }
+
     // Крок 5: Перевірка та створення таблиці competition_participants
     console.log("Крок 5: Перевірка таблиці competition_participants...")
     const participantsTableCheck = await client.query(`
@@ -1015,6 +1048,16 @@ app.get("/api/students", async (req, res) => {
   }
 })
 
+app.get("/api/subjects", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM subjects ORDER BY name")
+    res.json({ subjects: result.rows })
+  } catch (error) {
+    console.error("Помилка отримання предметів:", error)
+    res.status(500).json({ error: "Помилка отримання предметів" })
+  }
+})
+
 app.get("/api/schools", async (req, res) => {
   try {
     const result = await pool.query("SELECT id, name FROM schools ORDER BY name")
@@ -1026,7 +1069,25 @@ app.get("/api/schools", async (req, res) => {
 })
 
 app.post("/api/competitions", async (req, res) => {
-  const { title, description, startDate, endDate, manualStatus, createdBy } = req.body
+  const {
+    title,
+    description,
+    startDate,
+    endDate,
+    manualStatus,
+    createdBy,
+    subjectId,
+    level,
+    organizer,
+    location,
+    maxParticipants,
+    registrationDeadline,
+    requirements,
+    prizes,
+    contactInfo,
+    websiteUrl,
+    isOnline,
+  } = req.body
 
   console.log("Створення конкурсу:", title)
 
@@ -1039,10 +1100,33 @@ app.post("/api/competitions", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO competitions (title, description, start_date, end_date, manual_status, created_by) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO competitions (
+        title, description, start_date, end_date, manual_status, created_by,
+        subject_id, level, organizer, location, max_participants,
+        registration_deadline, requirements, prizes, contact_info,
+        website_url, is_online
+      ) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
        RETURNING *`,
-      [title, description, startDate, endDate, manualStatus || null, createdBy || null],
+      [
+        title,
+        description,
+        startDate,
+        endDate,
+        manualStatus || null,
+        createdBy || null,
+        subjectId || null,
+        level || null,
+        organizer || null,
+        location || null,
+        maxParticipants || null,
+        registrationDeadline || null,
+        requirements || null,
+        prizes || null,
+        contactInfo || null,
+        websiteUrl || null,
+        isOnline || false,
+      ],
     )
 
     const competition = result.rows[0]
@@ -1897,10 +1981,27 @@ app.get("/api/admin/all-results", async (req, res) => {
   }
 })
 
-// Update competition
 app.put("/api/competitions/:id", async (req, res) => {
   const { id } = req.params
-  const { title, description, startDate, endDate, manualStatus } = req.body
+  const {
+    title,
+    description,
+    startDate,
+    endDate,
+    manualStatus,
+    subjectId,
+    level,
+    organizer,
+    location,
+    maxParticipants,
+    registrationDeadline,
+    requirements,
+    prizes,
+    contactInfo,
+    websiteUrl,
+    isOnline,
+    customFields, // Added customFields parameter
+  } = req.body
 
   console.log("Оновлення конкурсу ID:", id)
 
@@ -1911,10 +2012,34 @@ app.put("/api/competitions/:id", async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE competitions 
-       SET title = $1, description = $2, start_date = $3, end_date = $4, manual_status = $5
-       WHERE id = $6
+       SET title = $1, description = $2, start_date = $3, end_date = $4, 
+           manual_status = $5, subject_id = $6, level = $7, organizer = $8,
+           location = $9, max_participants = $10, registration_deadline = $11,
+           requirements = $12, prizes = $13, contact_info = $14,
+           website_url = $15, is_online = $16, custom_fields = $17, 
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $18
        RETURNING *`,
-      [title, description, startDate, endDate, manualStatus || null, id],
+      [
+        title,
+        description,
+        startDate,
+        endDate,
+        manualStatus || null,
+        subjectId || null,
+        level || null,
+        organizer || null,
+        location || null,
+        maxParticipants || null,
+        registrationDeadline || null,
+        requirements || null,
+        prizes || null,
+        contactInfo || null,
+        websiteUrl || null,
+        isOnline || false,
+        customFields || null, // Added customFields value
+        id,
+      ],
     )
 
     if (result.rows.length === 0) {

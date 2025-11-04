@@ -21,39 +21,48 @@
             <p class="subtitle">Створюйте конкурси та додавайте учнів</p>
         </div>
 
-        <!-- Форма створення конкурсу - тепер з id для контролю видимості -->
-        <div class="card" id="createCompetitionCard" style="display: none;">
-            <h2>Створити новий конкурс</h2>
-            <form id="createCompetitionForm" class="competition-form">
-                <div class="form-group">
-                    <label for="title">Назва конкурсу *</label>
-                    <input type="text" id="title" name="title" required placeholder="Наприклад: Олімпіада з математики">
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Опис</label>
-                    <textarea id="description" name="description" rows="4" placeholder="Опишіть конкурс..."></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="startDate">Дата початку *</label>
-                        <input type="date" id="startDate" name="startDate" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="endDate">Дата закінчення *</label>
-                        <input type="date" id="endDate" name="endDate" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Створити конкурс</button>
-            </form>
+        <!-- Додано кнопку створення конкурсу та фільтри -->
+        <div class="filters-section">
+            <button class="btn-add-competition" onclick="openCreateCompetitionModal()">
+                Додати конкурс
+            </button>
+            
+            <div class="filters-row">
+                <input type="text" id="searchCompetitions" class="filter-input" placeholder="Пошук конкурсів...">
+                
+                <select id="filterSubject" class="filter-select">
+                    <option value="">Всі предмети</option>
+                </select>
+                
+                <select id="filterLevel" class="filter-select">
+                    <option value="">Всі рівні</option>
+                </select>
+                
+                <select id="filterStatus" class="filter-select">
+                    <option value="">Всі статуси</option>
+                    <option value="active">Активні</option>
+                    <option value="upcoming">Майбутні</option>
+                    <option value="inactive">Завершені</option>
+                </select>
+                
+                <select id="filterOwnership" class="filter-select">
+                    <option value="all">Всі конкурси</option>
+                    <option value="my">Мої конкурси</option>
+                </select>
+                
+                <select id="sortBy" class="filter-select">
+                    <option value="date_desc">Спочатку нові</option>
+                    <option value="date_asc">Спочатку старі</option>
+                    <option value="title_asc">За назвою (А-Я)</option>
+                    <option value="title_desc">За назвою (Я-А)</option>
+                    <option value="participants_desc">За кількістю учасників</option>
+                </select>
+            </div>
         </div>
 
         <!-- Список конкурсів -->
         <div class="card">
-            <h2>Всі конкурси</h2>
+            <h2>Конкурси</h2>
             <div id="competitionsList" class="competitions-list">
                 <div class="loading">Завантаження...</div>
             </div>
@@ -61,6 +70,134 @@
     </main>
 
     <div id="footer"></div>
+
+    <!-- Модальне вікно для створення/редагування конкурсу -->
+    <div id="createCompetitionModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">Створити новий конкурс</h2>
+                <button class="modal-close" onclick="closeCreateCompetitionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createCompetitionForm" class="competition-form">
+                    <input type="hidden" id="editCompetitionId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="title">Назва конкурсу *</label>
+                            <input type="text" id="title" name="title" required placeholder="Наприклад: Олімпіада з математики">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Предмет *</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">Оберіть предмет</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="level">Рівень *</label>
+                            <select id="level" name="level" required>
+                                <option value="">Оберіть рівень</option>
+                                <option value="Шкільний">Шкільний</option>
+                                <option value="Районний">Районний</option>
+                                <option value="Міський">Міський</option>
+                                <option value="Обласний">Обласний</option>
+                                <option value="Всеукраїнський">Всеукраїнський</option>
+                                <option value="Міжнародний">Міжнародний</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="organizer">Організатор</label>
+                            <input type="text" id="organizer" name="organizer" placeholder="Хто організовує конкурс">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Опис конкурсу</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Детальний опис конкурсу..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Дата початку *</label>
+                            <input type="date" id="startDate" name="startDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endDate">Дата закінчення *</label>
+                            <input type="date" id="endDate" name="endDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="registrationDeadline">Дедлайн реєстрації</label>
+                            <input type="date" id="registrationDeadline" name="registrationDeadline">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location">Місце проведення</label>
+                            <input type="text" id="location" name="location" placeholder="Адреса або назва закладу">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="maxParticipants">Макс. кількість учасників</label>
+                            <input type="number" id="maxParticipants" name="maxParticipants" min="1" placeholder="Необмежено">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="isOnline">Формат</label>
+                            <select id="isOnline" name="isOnline">
+                                <option value="false">Офлайн</option>
+                                <option value="true">Онлайн</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requirements">Вимоги до учасників</label>
+                        <textarea id="requirements" name="requirements" rows="3" placeholder="Вікові обмеження, необхідні документи тощо..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prizes">Призи та нагороди</label>
+                        <textarea id="prizes" name="prizes" rows="3" placeholder="Опишіть призи для переможців..."></textarea>
+                    </div>
+
+                    <!-- Adding dynamic custom fields section -->
+                    <div class="form-group">
+                        <div class="dynamic-fields-header">
+                            <label>Додаткові поля</label>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="addDynamicField()">+ Додати поле</button>
+                        </div>
+                        <div id="dynamicFieldsContainer" class="dynamic-fields-container">
+                            <!-- Dynamic fields will be added here -->
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactInfo">Контактна інформація</label>
+                            <input type="text" id="contactInfo" name="contactInfo" placeholder="Email або телефон для зв'язку">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="websiteUrl">Веб-сайт конкурсу</label>
+                            <input type="url" id="websiteUrl" name="websiteUrl" placeholder="https://example.com">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCreateCompetitionModal()">Скасувати</button>
+                <button class="btn btn-primary" onclick="saveCompetition()">Зберегти конкурс</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Модальне вікно для додавання учнів -->
     <div id="addStudentsModal" class="modal">
