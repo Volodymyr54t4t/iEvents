@@ -42,6 +42,63 @@ body {
   font-weight: 500;
 }
 
+/* New filters section styling matching the image */
+.filters-section {
+  margin-bottom: 24px;
+}
+
+.add-result-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+}
+
+.add-result-btn:hover {
+  background: linear-gradient(135deg, #5eb3d6 0%, #4a9fc4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.filter-input,
+.filter-select {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #7ec8e3;
+  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
+}
+
+.filter-input::placeholder {
+  color: #a0aec0;
+}
+
+.filter-select {
+  cursor: pointer;
+}
+
 .card {
   background: white;
   border-radius: 12px;
@@ -96,6 +153,7 @@ body {
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   transition: all 0.2s;
+  background: white;
 }
 
 .participant-item:hover {
@@ -104,7 +162,7 @@ body {
 }
 
 .participant-item.has-result {
-  background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+  background: linear-gradient(135deg, #f0fff4 0%, #e6f9ea 100%);
   border-color: #48bb78;
 }
 
@@ -119,20 +177,18 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #e2e8f0;
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #7ec8e3;
-  font-size: 18px;
+  color: white;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .participant-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
+  display: none;
 }
 
 .participant-details {
@@ -182,6 +238,7 @@ body {
 
 .result-value.place {
   color: #f59e0b;
+  font-weight: 700;
 }
 
 .result-value.score {
@@ -377,6 +434,68 @@ body {
 }
 
 /* Enhanced responsive design for all devices */
+
+/* Added styles for filters */
+.filters-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.filters-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 12px;
+  border: 2px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #7ec8e3;
+}
+
+/* Added confirmed badge style */
+.confirmed-badge {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Added success button style */
+.btn-success {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+}
+
+.btn-success:hover {
+  background: #38a169;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+}
+
 @media (max-width: 1024px) {
   .main-container {
     padding: 32px 16px;
@@ -388,6 +507,16 @@ body {
 
   .page-header {
     padding: 28px 16px;
+  }
+
+  /* Responsive adjustments for new filter layout */
+  .filters-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .filter-input {
+    grid-column: 1 / -1;
   }
 }
 
@@ -503,6 +632,26 @@ body {
 
   .empty-state {
     padding: 40px 16px;
+  }
+
+  /* Make filters stack on mobile */
+  .filters-container {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-row {
+    grid-template-columns: 1fr;
+  }
+
+  .add-result-btn {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .filter-input,
+  .filter-select {
+    padding: 10px 14px;
+    font-size: 13px;
   }
 }
 
@@ -621,6 +770,17 @@ body {
 
   .empty-state h3 {
     font-size: 18px;
+  }
+
+  .add-result-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .filter-input,
+  .filter-select {
+    padding: 10px 12px;
+    font-size: 13px;
   }
 }
 

@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
     BASE_URL = "http://localhost:3000"
 } else {
     // ☁️ Онлайн-сервер Render
-    BASE_URL = "https://ievents-qf5k.onrender.com"
+    BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -24,15 +24,15 @@ if (userRole !== "вчитель" && userRole !== "методист") {
 
 let currentCompetitionId = null
 let currentParticipants = []
+let allParticipants = []
+let allClasses = new Set()
 
-// Завантаження конкурсів при завантаженні сторінки
 document.addEventListener("DOMContentLoaded", () => {
     loadCompetitions()
 })
 
-// Завантаження списку конкурсів
 async function loadCompetitions() {
-    const select = document.getElementById("competitionSelect")
+    const select = document.getElementById("competitionFilter")
 
     try {
         const response = await fetch(`${BASE_URL}/api/competitions`)
@@ -40,10 +40,12 @@ async function loadCompetitions() {
 
         if (response.ok && data.competitions.length > 0) {
             select.innerHTML =
-                '<option value="">Виберіть конкурс</option>' +
+                '<option value="">Всі конкурси</option>' +
                 data.competitions
                 .map((comp) => `<option value="${comp.id}">${comp.title} (${comp.participants_count} учасників)</option>`)
                 .join("")
+
+            document.getElementById("filtersSection").style.display = "block"
         } else {
             select.innerHTML = '<option value="">Конкурсів не знайдено</option>'
         }
@@ -53,9 +55,8 @@ async function loadCompetitions() {
     }
 }
 
-// Завантаження учасників конкурсу
 async function loadCompetitionParticipants() {
-    const select = document.getElementById("competitionSelect")
+    const select = document.getElementById("competitionFilter")
     currentCompetitionId = select.value
 
     const card = document.getElementById("participantsCard")
@@ -75,119 +76,202 @@ async function loadCompetitionParticipants() {
 
         if (response.ok) {
             currentParticipants = data.participants
+            allParticipants = data.participants
+
+            allClasses = new Set(data.participants.map((p) => p.grade).filter(Boolean))
+            const classFilter = document.getElementById("classFilter")
+            classFilter.innerHTML =
+                '<option value="">Всі класи</option>' +
+                Array.from(allClasses)
+                .sort()
+                .map((grade) => `<option value="${grade}">${grade}</option>`)
+                .join("")
+
             displayParticipants(data.participants)
         } else {
             container.innerHTML = `
-                <div class="empty-state">
-                    <h3>Помилка завантаження</h3>
-                    <p>${data.error || "Спробуйте пізніше"}</p>
-                </div>
-            `
+        <div class="empty-state">
+          <h3>Помилка завантаження</h3>
+          <p>${data.error || "Спробуйте пізніше"}</p>
+        </div>
+      `
         }
     } catch (error) {
         console.error("Помилка:", error)
         container.innerHTML = `
-            <div class="empty-state">
-                <h3>Помилка завантаження</h3>
-                <p>Перевірте підключення до інтернету</p>
-            </div>
-        `
+      <div class="empty-state">
+        <h3>Помилка завантаження</h3>
+        <p>Перевірте підключення до інтернету</p>
+      </div>
+    `
     }
 }
 
-// Відображення учасників
+function applyFilters() {
+    const searchTerm = document.getElementById("searchInput").value.toLowerCase()
+    const placeFilter = document.getElementById("placeFilter").value
+    const classFilter = document.getElementById("classFilter").value
+    const sortBy = document.getElementById("sortBy").value
+
+    let filtered = [...allParticipants]
+
+    if (searchTerm) {
+        filtered = filtered.filter((p) => {
+            const fullName = [p.last_name, p.first_name].filter(Boolean).join(" ").toLowerCase()
+            return fullName.includes(searchTerm)
+        })
+    }
+
+    if (placeFilter) {
+        if (placeFilter === "other") {
+            filtered = filtered.filter((p) => p.place && !["АП", "1", "2", "3"].includes(p.place))
+        } else {
+            filtered = filtered.filter((p) => p.place === placeFilter)
+        }
+    }
+
+    if (classFilter) {
+        filtered = filtered.filter((p) => p.grade === classFilter)
+    }
+
+    filtered.sort((a, b) => {
+        const aName = [a.last_name, a.first_name].filter(Boolean).join(" ")
+        const bName = [b.last_name, b.first_name].filter(Boolean).join(" ")
+
+        switch (sortBy) {
+            case "name":
+                return aName.localeCompare(bName, "uk")
+            case "name-desc":
+                return bName.localeCompare(aName, "uk")
+            case "grade":
+                return (a.grade || "").localeCompare(b.grade || "", "uk")
+            case "score-desc":
+                return (b.score || 0) - (a.score || 0)
+            case "score-asc":
+                return (a.score || 0) - (b.score || 0)
+            case "place-asc":
+                const aPlace = a.place === "АП" ? 0 : Number.parseInt(a.place) || 999
+                const bPlace = b.place === "АП" ? 0 : Number.parseInt(b.place) || 999
+                return aPlace - bPlace
+            case "place-desc":
+                const aPlaceDesc = a.place === "АП" ? 0 : Number.parseInt(a.place) || 999
+                const bPlaceDesc = b.place === "АП" ? 0 : Number.parseInt(b.place) || 999
+                return bPlaceDesc - aPlaceDesc
+            default:
+                return 0
+        }
+    })
+
+    displayParticipants(filtered)
+}
+
 function displayParticipants(participants) {
     const container = document.getElementById("participantsList")
 
     if (participants.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
-                <h3>Учасників не знайдено</h3>
-                <p>Додайте учнів на цей конкурс</p>
-            </div>
-        `
+      <div class="empty-state">
+        <h3>Учасників не знайдено</h3>
+        <p>Додайте учнів на цей конкурс</p>
+      </div>
+    `
         return
     }
 
     container.innerHTML = participants
         .map((participant) => {
             const fullName = [participant.last_name, participant.first_name].filter(Boolean).join(" ") || participant.email
-
-            const initials = fullName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-
+            const firstLetter = participant.first_name ? participant.first_name[0].toUpperCase() : fullName[0].toUpperCase()
             const hasResult = participant.result_id !== null
+            const isConfirmed = participant.is_confirmed === true
+
+            let placeDisplay = ""
+            if (participant.place) {
+                placeDisplay = participant.place === "АП" ? "АП" : participant.place
+            }
 
             return `
-            <div class="participant-item ${hasResult ? "has-result" : ""}">
-                <div class="participant-info">
-                    <div class="participant-avatar">
-                        ${
-                          participant.avatar
-                            ? `<img src="${participant.avatar}" alt="${fullName}">`
-                            : `<span>${initials}</span>`
-                        }
-                    </div>
-                    <div class="participant-details">
-                        <div class="participant-name">${fullName}</div>
-                        <div class="participant-grade">${participant.grade || "Клас не вказано"}</div>
-                    </div>
-                </div>
-                
-                ${
-                  hasResult
-                    ? `
-                    <div class="result-info">
-                        ${
-                          participant.score !== null
-                            ? `
-                            <div class="result-badge">
-                                <span class="result-label">Бали</span>
-                                <span class="result-value score">${participant.score}</span>
-                            </div>
-                        `
-                            : ""
-                        }
-                        ${
-                          participant.place !== null
-                            ? `
-                            <div class="result-badge">
-                                <span class="result-label">Місце</span>
-                                <span class="result-value place">${participant.place}</span>
-                            </div>
-                        `
-                            : ""
-                        }
-                    </div>
-                `
-                    : `
-                    <span class="no-result-badge">Без результату</span>
-                `
-                }
-                
-                <div class="participant-actions">
-                    ${
-                      hasResult
-                        ? `
-                        <button class="btn btn-warning" onclick="editResult(${participant.student_id})">
-                            Редагувати
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteResult(${participant.result_id})">
-                            Видалити
-                        </button>
-                    `
-                        : `
-                        <button class="btn btn-primary" onclick="addResultForStudent(${participant.student_id})">
-                            Додати результат
-                        </button>
-                    `
-                    }
-                </div>
+        <div class="participant-item ${hasResult ? "has-result" : ""}">
+          <div class="participant-info">
+            <div class="participant-avatar">
+              <span>${firstLetter}</span>
             </div>
-        `
+            <div class="participant-details">
+              <div class="participant-name">${fullName}</div>
+              <div class="participant-grade">${participant.grade || "Клас не вказано"}</div>
+            </div>
+          </div>
+          
+          ${
+            hasResult
+              ? `
+            <div class="result-info">
+              ${
+                participant.score !== null
+                  ? `
+                <div class="result-badge">
+                  <span class="result-label">Бали</span>
+                  <span class="result-value score">${participant.score}</span>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                placeDisplay
+                  ? `
+                <div class="result-badge">
+                  <span class="result-label">Місце</span>
+                  <span class="result-value place">${placeDisplay}</span>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          `
+              : `
+            <span class="no-result-badge">Без результату</span>
+          `
+          }
+          
+          <div class="participant-actions">
+            ${
+              hasResult
+                ? `
+              ${
+                userRole === "методист"
+                  ? `
+                <button class="btn btn-warning" onclick="editResult(${participant.student_id})">
+                  Редагувати
+                </button>
+              `
+                  : ""
+              }
+              ${
+                userRole === "методист"
+                  ? `
+                <button class="btn btn-danger" onclick="deleteResult(${participant.result_id})">
+                  Видалити
+                </button>
+              `
+                  : ""
+              }
+              ${
+                isConfirmed
+                  ? `
+                <span class="confirmed-badge">Підтверджено</span>
+              `
+                  : ""
+              }
+            `
+                : `
+              <button class="btn btn-primary" onclick="addResultForStudent(${participant.student_id})">
+                Додати результат
+              </button>
+            `
+            }
+          </div>
+        </div>
+      `
         })
         .join("")
 }
@@ -217,6 +301,9 @@ function openAddResultModal() {
     document.getElementById("modalTitle").textContent = "Додати результат"
     document.getElementById("editMode").value = "false"
     document.getElementById("resultForm").reset()
+    document.getElementById("customPlaceGroup").style.display = "none"
+    document.getElementById("confirmBtn").style.display = "none"
+    document.getElementById("saveBtn").textContent = "Зберегти"
 
     modal.classList.add("active")
 }
@@ -235,6 +322,9 @@ function addResultForStudent(studentId) {
     document.getElementById("modalTitle").textContent = "Додати результат"
     document.getElementById("editMode").value = "false"
     document.getElementById("resultForm").reset()
+    document.getElementById("customPlaceGroup").style.display = "none"
+    document.getElementById("confirmBtn").style.display = "none"
+    document.getElementById("saveBtn").textContent = "Зберегти"
 
     modal.classList.add("active")
 }
@@ -245,6 +335,11 @@ function editResult(studentId) {
 
     if (!participant || !participant.result_id) {
         alert("Результат не знайдено")
+        return
+    }
+
+    if (userRole === "вчитель" && participant.is_confirmed) {
+        alert("Ви не можете редагувати підтверджений результат")
         return
     }
 
@@ -260,8 +355,36 @@ function editResult(studentId) {
     document.getElementById("editMode").value = "true"
     document.getElementById("resultId").value = participant.result_id
     document.getElementById("score").value = participant.score || ""
-    document.getElementById("place").value = participant.place || ""
+
+    const placeType = document.getElementById("placeType")
+    const customPlace = document.getElementById("customPlace")
+    const customPlaceGroup = document.getElementById("customPlaceGroup")
+
+    if (participant.place === "АП") {
+        placeType.value = "АП"
+        customPlaceGroup.style.display = "none"
+    } else if (participant.place === "1" || participant.place === "2" || participant.place === "3") {
+        placeType.value = participant.place
+        customPlaceGroup.style.display = "none"
+    } else if (participant.place) {
+        placeType.value = "custom"
+        customPlace.value = participant.place
+        customPlaceGroup.style.display = "block"
+    }
+
     document.getElementById("notes").value = participant.notes || ""
+    document.getElementById("isConfirmed").value = participant.is_confirmed ? "true" : "false"
+
+    const confirmBtn = document.getElementById("confirmBtn")
+    const saveBtn = document.getElementById("saveBtn")
+
+    if (userRole === "вчитель" && !participant.is_confirmed) {
+        confirmBtn.style.display = "inline-block"
+        saveBtn.textContent = "Зберегти чернетку"
+    } else {
+        confirmBtn.style.display = "none"
+        saveBtn.textContent = "Зберегти"
+    }
 
     modal.classList.add("active")
 }
@@ -275,13 +398,16 @@ function closeResultModal() {
     studentSelect.disabled = false
 
     document.getElementById("resultForm").reset()
+    document.getElementById("customPlaceGroup").style.display = "none"
+    document.getElementById("confirmBtn").style.display = "none"
+    document.getElementById("saveBtn").textContent = "Зберегти"
 }
 
-// Збереження результату
-async function saveResult() {
+async function saveResult(confirm = false) {
     const studentId = document.getElementById("studentSelect").value
     const score = document.getElementById("score").value
-    const place = document.getElementById("place").value
+    const placeType = document.getElementById("placeType").value
+    const customPlace = document.getElementById("customPlace").value
     const notes = document.getElementById("notes").value
     const editMode = document.getElementById("editMode").value === "true"
     const resultId = document.getElementById("resultId").value
@@ -291,18 +417,30 @@ async function saveResult() {
         return
     }
 
-    if (!score && !place) {
+    if (!score && !placeType) {
         alert("Введіть хоча б бали або місце")
         return
+    }
+
+    let finalPlace = null
+    if (placeType === "custom") {
+        if (!customPlace) {
+            alert("Вкажіть місце")
+            return
+        }
+        finalPlace = customPlace
+    } else if (placeType) {
+        finalPlace = placeType
     }
 
     const resultData = {
         competitionId: currentCompetitionId,
         studentId: Number.parseInt(studentId),
         score: score ? Number.parseFloat(score) : null,
-        place: place ? Number.parseInt(place) : null,
+        place: finalPlace,
         notes: notes || null,
         addedBy: Number.parseInt(userId),
+        isConfirmed: confirm || userRole === "методист",
     }
 
     try {
@@ -331,7 +469,11 @@ async function saveResult() {
         const data = await response.json()
 
         if (response.ok) {
-            alert(editMode ? "Результат успішно оновлено!" : "Результат успішно додано!")
+            if (confirm) {
+                alert("Результат успішно підтверджено!")
+            } else {
+                alert(editMode ? "Результат успішно оновлено!" : "Результат успішно додано!")
+            }
             closeResultModal()
             loadCompetitionParticipants()
         } else {
@@ -365,5 +507,16 @@ async function deleteResult(resultId) {
     } catch (error) {
         console.error("Помилка:", error)
         alert("Помилка видалення результату")
+    }
+}
+
+function handlePlaceTypeChange() {
+    const placeType = document.getElementById("placeType").value
+    const customPlaceGroup = document.getElementById("customPlaceGroup")
+
+    if (placeType === "custom") {
+        customPlaceGroup.style.display = "block"
+    } else {
+        customPlaceGroup.style.display = "none"
     }
 }

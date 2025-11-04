@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управління результатами - iEvents</title>
-    <link rel="stylesheet" href="css/results.css">
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/results.css">
+    <!-- Load config.js first -->
+    <script src="js/config.js"></script>
 </head>
 
 <body>
@@ -20,24 +21,49 @@
             <p class="subtitle">Додавайте та редагуйте результати учнів</p>
         </div>
 
-        <!-- Вибір конкурсу -->
-        <div class="card">
-            <h2>Виберіть конкурс</h2>
-            <div class="competition-selector">
-                <select id="competitionSelect" onchange="loadCompetitionParticipants()">
-                    <option value="">Завантаження конкурсів...</option>
+        <!-- Фільтри та сортування -->
+        <div class="filters-section" id="filtersSection" style="display: none;">
+            <button class="add-result-btn" onclick="openAddResultModal()" id="addResultBtn">
+                Додати результат
+            </button>
+
+            <div class="filters-row">
+                <input type="text" id="searchInput" class="filter-input" placeholder="Пошук результатів..."
+                    oninput="applyFilters()">
+
+                <select id="competitionFilter" class="filter-select" onchange="loadCompetitionParticipants()">
+                    <option value="">Всі конкурси</option>
+                </select>
+
+                <select id="placeFilter" class="filter-select" onchange="applyFilters()">
+                    <option value="">Всі місця</option>
+                    <option value="АП">АП</option>
+                    <option value="1">1 місце</option>
+                    <option value="2">2 місце</option>
+                    <option value="3">3 місце</option>
+                    <option value="other">Інші місця</option>
+                </select>
+
+                <select id="classFilter" class="filter-select" onchange="applyFilters()">
+                    <option value="">Всі класи</option>
+                </select>
+
+                <select id="sortBy" class="filter-select" onchange="applyFilters()">
+                    <option value="name">Всі досягнення</option>
+                    <option value="name-desc">Ім'я (Я-А)</option>
+                    <option value="grade">За класом</option>
+                    <option value="score-desc">Бали (більше → менше)</option>
+                    <option value="score-asc">Бали (менше → більше)</option>
+                    <option value="place-asc">Місце (1 → останнє)</option>
+                    <option value="place-desc">Місце (останнє → 1)</option>
                 </select>
             </div>
         </div>
 
         <!-- Список учасників з результатами -->
         <div class="card" id="participantsCard" style="display: none;">
-            <div class="card-header">
-                <h2>Учасники конкурсу</h2>
-                <button class="btn btn-primary" onclick="openAddResultModal()">Додати результат</button>
-            </div>
             <div id="participantsList" class="participants-list">
-                <div class="loading">Виберіть конкурс</div>
+                <div class="loading">Завантаження...</div>
             </div>
         </div>
     </main>
@@ -66,10 +92,24 @@
                             <input type="number" id="score" step="0.01" placeholder="Наприклад: 95.5">
                         </div>
 
+                        <!-- Changed place input to select with predefined options -->
                         <div class="form-group">
-                            <label for="place">Місце</label>
-                            <input type="number" id="place" min="1" placeholder="Наприклад: 1">
+                            <label for="placeType">Місце / Ступінь</label>
+                            <select id="placeType" onchange="handlePlaceTypeChange()">
+                                <option value="">Виберіть тип</option>
+                                <option value="АП">АП (Абсолютний переможець)</option>
+                                <option value="1">1 місце</option>
+                                <option value="2">2 місце</option>
+                                <option value="3">3 місце</option>
+                                <option value="custom">Інше місце (вказати)</option>
+                            </select>
                         </div>
+                    </div>
+
+                    <!-- Added custom place input that appears when "custom" is selected -->
+                    <div class="form-group" id="customPlaceGroup" style="display: none;">
+                        <label for="customPlace">Вкажіть місце</label>
+                        <input type="number" id="customPlace" min="4" placeholder="Наприклад: 4">
                     </div>
 
                     <div class="form-group">
@@ -79,11 +119,16 @@
 
                     <input type="hidden" id="resultId">
                     <input type="hidden" id="editMode" value="false">
+                    <!-- Added hidden field to track if result is confirmed -->
+                    <input type="hidden" id="isConfirmed" value="false">
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeResultModal()">Скасувати</button>
-                <button class="btn btn-primary" onclick="saveResult()">Зберегти</button>
+                <!-- Added confirm button for teachers -->
+                <button class="btn btn-success" onclick="saveResult(true)" id="confirmBtn"
+                    style="display: none;">Підтвердити</button>
+                <button class="btn btn-primary" onclick="saveResult(false)" id="saveBtn">Зберегти</button>
             </div>
         </div>
     </div>

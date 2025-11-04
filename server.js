@@ -441,6 +441,25 @@ async function initializeDatabase() {
       } else {
         console.log("  ✓ Колонка achievement вже існує")
       }
+
+      const columnCheck = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'competition_results' AND column_name = 'is_confirmed'
+      `)
+
+      if (columnCheck.rows.length === 0) {
+        await client.query(`
+          ALTER TABLE competition_results 
+          ADD COLUMN is_confirmed BOOLEAN DEFAULT FALSE
+        `)
+        console.log("✓ Додано колонку is_confirmed")
+      }
+
+      await client.query(`
+        ALTER TABLE competition_results 
+        ALTER COLUMN place TYPE VARCHAR(10) USING place::VARCHAR(10)
+      `)
     }
 
     console.log("=== База даних готова до роботи! ===\n")
@@ -1248,7 +1267,8 @@ app.get("/api/competitions/:id/participants-with-results", async (req, res) => {
         r.id as result_id,
         r.score,
         r.place,
-        r.notes
+        r.notes,
+        r.is_confirmed
       FROM competition_participants cp
       INNER JOIN users u ON cp.user_id = u.id
       LEFT JOIN profiles p ON u.id = p.user_id
@@ -1301,7 +1321,7 @@ app.delete("/api/competitions/:id", async (req, res) => {
 
 // Створення результату (новий ендпоінт)
 app.post("/api/results", async (req, res) => {
-  const { competitionId, studentId, score, place, notes, addedBy } = req.body
+  const { competitionId, studentId, score, place, notes, addedBy, isConfirmed } = req.body
 
   console.log("Додавання результату для учня ID:", studentId, "на конкурс ID:", competitionId)
 
@@ -1349,20 +1369,42 @@ app.post("/api/results", async (req, res) => {
       })
     }
 
+    const columnCheck = await client.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'competition_results' AND column_name = 'is_confirmed'
+    `)
+
+    if (columnCheck.rows.length === 0) {
+      await client.query(`
+        ALTER TABLE competition_results 
+        ADD COLUMN is_confirmed BOOLEAN DEFAULT FALSE
+      `)
+      console.log("✓ Додано колонку is_confirmed")
+    }
+
+    await client.query(`
+      ALTER TABLE competition_results 
+      ALTER COLUMN place TYPE VARCHAR(10) USING place::VARCHAR(10)
+    `)
+
     // Створення результату
     const result = await client.query(
-      `INSERT INTO competition_results (competition_id, user_id, score, place, notes, achievement, added_by) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO competition_results (competition_id, user_id, score, place, notes, achievement, added_by, is_confirmed) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING *`,
-      [competitionId, studentId, score, place, notes, score || place || "Участь", addedBy],
+      [competitionId, studentId, score, place, notes, score || place || "Участь", addedBy, isConfirmed || false],
     )
 
     await client.query("COMMIT")
     console.log("✓ Результат додано з ID:", result.rows[0].id)
 
     // Notify the student about the new result
-    // This call relies on bot.js. Ensure it's correctly imported and works.
-    await notifyUserNewResult(studentId, competitionId) // Call the bot notification function
+    try {
+      await notifyUserNewResult(studentId, competitionId)
+    } catch (notifyError) {
+      console.log("Помилка сповіщення:", notifyError.message)
+    }
 
     res.json({
       message: "Результат успішно додано",
@@ -1389,7 +1431,7 @@ app.post("/api/results", async (req, res) => {
 // Оновлення результату (новий ендпоінт)
 app.put("/api/results/:resultId", async (req, res) => {
   const { resultId } = req.params
-  const { competitionId, studentId, score, place, notes, addedBy } = req.body
+  const { competitionId, studentId, score, place, notes, addedBy, isConfirmed } = req.body
 
   console.log("Оновлення результату ID:", resultId)
 
@@ -1427,15 +1469,30 @@ app.put("/api/results/:resultId", async (req, res) => {
           error: "У вас немає прав для редагування результатів",
         })
       }
+
+      if (teacherCheck.rows[0].role === "вчитель" && resultCheck.rows[0].is_confirmed) {
+        await client.query("ROLLBACK")
+        console.log("Помилка: вчитель не може редагувати підтверджений результат")
+        return res.status(403).json({
+          error: "Ви не можете редагувати підтверджений результат",
+        })
+      }
     }
 
     // Оновлення результату
     const result = await pool.query(
       `UPDATE competition_results 
-       SET score = $1, place = $2, notes = $3, achievement = $4, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5 
+       SET score = $1, place = $2, notes = $3, achievement = $4, is_confirmed = $5, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $6 
        RETURNING *`,
-      [score, place, notes, score || place || "Участь", resultId],
+      [
+        score,
+        place,
+        notes,
+        score || place || "Участь",
+        isConfirmed !== undefined ? isConfirmed : resultCheck.rows[0].is_confirmed,
+        resultId,
+      ],
     )
 
     await client.query("COMMIT")
@@ -1819,6 +1876,7 @@ app.get("/api/admin/all-results", async (req, res) => {
         cr.achievement,
         cr.notes,
         cr.added_at,
+        cr.is_confirmed,
         c.title as competition_title,
         u.email,
         p.first_name,
