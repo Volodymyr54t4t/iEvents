@@ -6,7 +6,13 @@ const { Pool } = require("pg")
 const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
-const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCompetition } = require("./bot")
+const {
+  initBot,
+  shutdownBot,
+  notifyUserAddedToCompetition,
+  notifyUserNewResult,
+  notifyNewCompetition,
+} = require("./bot")
 
 const app = express()
 const PORT = 3000
@@ -16,18 +22,8 @@ const PORT = 3000
 // Store chat IDs for notifications (in production, store in database)
 const subscribedChats = new Set()
 
-// Telegram bot commands
-// Note: These commands are typically handled within bot.js. If they are intended to be here,
-// ensure the bot instance is correctly managed or remove them if the bot is fully managed in bot.js.
-// For now, assuming the bot initialization and command handling are intended to be in bot.js as per the CHANGE instruction.
-
 // Function to send Telegram notifications
 async function sendTelegramNotification(message) {
-  // This function relies on the 'bot' instance, which is now removed from this file.
-  // If this function is still needed here, the 'bot' instance needs to be re-introduced
-  // or this function needs to be moved to bot.js.
-  // Based on the update, we'll assume the bot instance and its related logic are in bot.js.
-  // If this function is meant to be a utility here, it would need to be refactored to accept the bot instance.
   console.log("sendTelegramNotification called with message:", message)
   // Placeholder: If bot is in bot.js, this would need to be called from there or the bot instance passed.
   // For now, we comment out the actual sending part.
@@ -573,6 +569,55 @@ initializeDatabase().catch((err) => {
 // Головна сторінка
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "auth.html"))
+})
+
+app.get("/auth.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "auth.html"))
+})
+
+app.get("/index.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"))
+})
+
+app.get("/profile.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "profile.html"))
+})
+
+app.get("/profilesT.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "profilesT.html"))
+})
+
+// </CHANGE> Оновлено маршрут з profilesT.html на profileT.html
+app.get("/profileT.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "profileT.html"))
+})
+
+app.get("/competitionsP.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "competitionsP.html"))
+})
+
+app.get("/competitionsT.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "competitionsT.html"))
+})
+
+app.get("/admin.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"))
+})
+
+app.get("/results.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "results.html"))
+})
+
+app.get("/statistics.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "statistics.html"))
+})
+
+app.get("/predictions.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "predictions.html"))
+})
+
+app.get("/students-list.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "students-list.html"))
 })
 
 app.post("/api/register", async (req, res) => {
@@ -1197,7 +1242,8 @@ app.post("/api/competitions", async (req, res) => {
 Не пропустіть можливість взяти участь!
     `.trim()
 
-    // await sendTelegramNotification(notificationMessage) // Use the local sendTelegramNotification - This will fail if sendTelegramNotification is not fully implemented or bot is not initialized here.
+    // await sendTelegramNotification(notificationMessage) // Use the local sendTelegramNotification
+    console.log("New competition created. Notification sending needs to be re-integrated or managed in bot.js.")
 
     res.json({
       competition: competition,
@@ -2766,6 +2812,14 @@ app.get("/api/students/:studentId/participations", async (req, res) => {
   }
 })
 
+app.use((req, res, next) => {
+  if (req.path.endsWith(".html")) {
+    res.status(404).sendFile(path.join(__dirname, "auth.html"))
+  } else {
+    next()
+  }
+})
+
 app.use((err, req, res, next) => {
   console.error("❌ Необроблена помилка сервера:")
   console.error("URL:", req.url)
@@ -2787,6 +2841,19 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     error: "Внутрішня помилка сервера",
   })
+})
+
+// Server shutdown handlers
+process.on("SIGINT", async () => {
+  console.log("\n🛑 Отримано SIGINT, завершення роботи сервера...")
+  await shutdownBot()
+  process.exit(0)
+})
+
+process.on("SIGTERM", async () => {
+  console.log("\n🛑 Отримано SIGTERM, завершення роботи сервера...")
+  await shutdownBot()
+  process.exit(0)
 })
 
 // Запуск сервера

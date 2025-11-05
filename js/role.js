@@ -1,3 +1,6 @@
+// Universal API_URL constant at the beginning
+const API_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://ievents-qf5k.onrender.com"
+
 // Role management and dynamic header rendering
 
 async function fetchAndUpdateRole() {
@@ -9,7 +12,7 @@ async function fetchAndUpdateRole() {
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/api/user/role/${userId}`)
+    const response = await fetch(`${API_URL}/api/user/role/${userId}`)
 
     if (response.ok) {
       const data = await response.json()
@@ -39,7 +42,7 @@ async function checkPageAccess() {
     userRole = await fetchAndUpdateRole()
   }
 
-  console.log("Перевірка д��ступу до сторінки:", currentPage, "Роль:", userRole)
+  console.log("Перевірка доступу до сторінки:", currentPage, "Роль:", userRole)
 
   const pageAccess = {
     "index.html": ["учень", "вчитель", "методист", null],
@@ -114,7 +117,7 @@ function renderHeader(role) {
     case "учень":
       navLinks = `
         <a href="index.html" class="nav-link">Головна</a>
-        <a href="competitions.html" class="nav-link">Мої конкурси</a>
+        <a href="competitionsP.html" class="nav-link">Мої конкурси</a>
         <a href="profile.html" class="nav-link">Профіль</a>
       `
       break
@@ -124,7 +127,7 @@ function renderHeader(role) {
         <a href="competitionsT.html" class="nav-link">Конкурси</a>
         <a href="results.html" class="nav-link">Результати</a>
         <a href="statistics.html" class="nav-link">Статистика</a>
-        <a href="profile.html" class="nav-link">Профіль</a>
+        <a href="profileT.html" class="nav-link">Профіль</a>
       `
       break
     case "методист":
@@ -133,7 +136,7 @@ function renderHeader(role) {
         <a href="competitionsT.html" class="nav-link">Конкурси</a>
         <a href="results.html" class="nav-link">Результати</a>
         <a href="statistics.html" class="nav-link">Статистика</a>
-        <a href="profile.html" class="nav-link">Профіль</a>
+        <a href="profileT.html" class="nav-link">Профіль</a>
         <a href="admin.html" class="nav-link">Адмін</a>
       `
       break

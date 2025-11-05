@@ -2,10 +2,14 @@
 .site-header {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: sticky;
+  position: fixed;
+  /* Explicitly set top to 0 to ensure header is at very top */
   top: 0;
-  z-index: 100;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   border-bottom: 2px solid #f7fafc;
+  width: 100%;
 }
 
 /* Added skeleton loading state for instant header display */
@@ -13,11 +17,15 @@
   min-height: 70px;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: sticky;
+  position: fixed;
+  /* Explicitly set top to 0 */
   top: 0;
-  z-index: 100;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   border-bottom: 2px solid #f7fafc;
   animation: pulse 1.5s ease-in-out infinite;
+  width: 100%;
 }
 
 @keyframes pulse {
@@ -132,6 +140,30 @@
 }
 
 .btn-logout:active {
+  transform: translateY(0);
+}
+
+/* Added login button styles for non-authenticated users */
+.btn-login {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.3);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(126, 200, 227, 0.4);
+}
+
+.btn-login:active {
   transform: translateY(0);
 }
 

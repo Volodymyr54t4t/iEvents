@@ -1,10 +1,8 @@
 // Header component
 function renderHeader() {
   const userId = localStorage.getItem("userId")
-  const userEmail = localStorage.getItem("userEmail")
-  const userRole = localStorage.getItem("userRole")
-
-  if (!userId) return
+  const userEmail = localStorage.getItem("userEmail") || "Гість"
+  const userRole = localStorage.getItem("userRole") || "учень"
 
   const header = document.getElementById("header")
   if (!header) return
@@ -30,6 +28,10 @@ function renderHeader() {
     '<a href="profileT.html" class="nav-link">Профіль</a>' :
     '<a href="profile.html" class="nav-link">Профіль</a>'
 
+  const authButton = userId ?
+    '<button class="btn-logout" onclick="logout()">Вийти</button>' :
+    '<a href="auth.html" class="btn-login">Увійти</a>'
+
   header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
@@ -42,11 +44,15 @@ function renderHeader() {
                     ${predictionsLink}
                     ${profileLink}
                     ${adminLink}
-                    <div class="user-info">
+                    ${
+                      userId
+                        ? `<div class="user-info">
                         <span class="user-email">${userEmail}</span>
                         <span class="user-role">${userRole}</span>
-                    </div>
-                    <button class="btn-logout" onclick="logout()">Вийти</button>
+                    </div>`
+                        : ""
+                    }
+                    ${authButton}
                 </nav>
             </div>
         </header>

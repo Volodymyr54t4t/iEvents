@@ -10,6 +10,8 @@ body {
   background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
   min-height: 100vh;
   color: #2d3748;
+  /* Added padding-top to account for fixed header */
+  padding-top: 90px;
 }
 
 .main-container {

@@ -5,14 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Прогнозування результатів - iEvents</title>
-    <link rel="stylesheet" href="css/predictions.css">
+    <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
+    <link rel="stylesheet" href="css/predictions.css">
+    <!-- Load config.js first -->
+    <script src="js/config.js"></script>
 </head>
 
 <body>
+    <!-- Changed div to header tag for semantic HTML -->
+    <header id="header"></header>
+
     <div class="container">
-        <header class="header">
+        <div class="page-header">
             <div class="header-content">
                 <h1>Прогнозування результатів учнів</h1>
                 <p class="subtitle">Система аналізує минулі конкурси та прогнозує майбутні результати</p>
@@ -20,7 +25,7 @@
             <button class="btn-back" onclick="window.location.href='statistics.html'">
                 ← Назад до статистики
             </button>
-        </header>
+        </div>
 
         <div class="overview-section">
             <div class="stat-card">
@@ -53,7 +58,12 @@
             </div>
         </div>
 
+        <!-- Added search and comprehensive sorting options -->
         <div class="filters-section">
+            <div class="filter-group">
+                <label for="searchInput">🔍 Пошук:</label>
+                <input type="text" id="searchInput" placeholder="Ім'я або email учня...">
+            </div>
             <div class="filter-group">
                 <label for="gradeFilter">Клас:</label>
                 <select id="gradeFilter">
@@ -80,11 +90,22 @@
                     <option value="none">Без участі</option>
                 </select>
             </div>
+            <div class="filter-group">
+                <label for="sortBy">Сортування:</label>
+                <select id="sortBy">
+                    <option value="name">За ім'ям</option>
+                    <option value="grade">За класом</option>
+                    <option value="avgScore">За середнім балом</option>
+                    <option value="predictedScore">За прогнозом</option>
+                    <option value="participation">За кількістю участей</option>
+                    <option value="trend">За трендом</option>
+                </select>
+            </div>
             <button class="btn-refresh" onclick="loadPredictions()">🔄 Оновити</button>
         </div>
 
         <div class="predictions-section">
-            <h2>Прогнози для учнів</h2>
+            <h2>Прогнози для учнів вашого закладу</h2>
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 <p>Аналіз даних та створення прогнозів...</p>
@@ -95,8 +116,11 @@
             </div>
         </div>
     </div>
-    <!-- Added footer element -->
+
+    <!-- Added footer container -->
     <div id="footer"></div>
+
+    <!-- Added components.js for header/footer -->
     <script src="js/components.js"></script>
     <script src="js/predictions.js"></script>
 </body>

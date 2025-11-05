@@ -12,19 +12,19 @@
 </head>
 
 <body>
-    <!-- Added header element for dynamic header rendering -->
     <header id="header"></header>
+    <script src="js/components.js"></script>
 
     <main class="main-content">
-        <!-- Updated hero section with welcoming message -->
-        <div class="hero">
+        <!-- Hero Section -->
+        <section class="hero">
             <h1 class="hero-title">Ласкаво просимо до iEvents!</h1>
             <p class="hero-subtitle">Ваша платформа для організації та управління подіями</p>
             <p class="hero-description">Створюйте конкурси, відстежуйте результати та керуйте учасниками в одному місці
             </p>
-        </div>
+        </section>
 
-        <!-- Added feature cards grid -->
+        <!-- Cards grid for main features -->
         <div class="cards-grid">
             <div class="card">
                 <div class="card-icon">🏆</div>
@@ -37,14 +37,14 @@
                 <div class="card-icon">👥</div>
                 <h3>Учасники</h3>
                 <p>Запрошуйте учасників, керуйте їх профілями та відстежуйте їх досягнення в конкурсах.</p>
-                <a href="competitionsP.html" class="card-link">Учасники конкурсів →</a>
+                <a href="students-list.html" class="card-link">Учасники конкурсів →</a>
             </div>
 
             <div class="card">
                 <div class="card-icon">📊</div>
                 <h3>Статистика</h3>
                 <p>Аналізуйте результати конкурсів, переглядайте звіти та відстежуйте прогрес учасників.</p>
-                <a href="#" class="card-link">Переглянути статистику →</a>
+                <a href="statistics.html" class="card-link">Переглянути статистику →</a>
             </div>
 
             <div class="card">
@@ -55,55 +55,71 @@
             </div>
         </div>
 
-        <!-- Added features section -->
-        <div class="features-section">
-            <h2>Чому обирають iEvents?</h2>
+        <!-- Features Section -->
+        <section class="features-section">
+            <h2>Можливості платформи</h2>
             <div class="features-list">
                 <div class="feature-item">
-                    <div class="feature-icon">✨</div>
+                    <div class="feature-icon">🎯</div>
                     <div class="feature-content">
-                        <h4>Простота використання</h4>
-                        <p>Інтуїтивний інтерфейс, який не потребує навчання</p>
+                        <h4>Створення конкурсів</h4>
+                        <p>Легко створюйте конкурси з детальними описами та критеріями оцінювання</p>
                     </div>
                 </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">📈</div>
+                    <div class="feature-content">
+                        <h4>Відстеження прогресу</h4>
+                        <p>Моніторте результати учасників та аналізуйте їх досягнення</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">🔔</div>
+                    <div class="feature-content">
+                        <h4>Сповіщення</h4>
+                        <p>Отримуйте сповіщення про нові конкурси та результати через Telegram</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-content">
+                        <h4>Прогнозування</h4>
+                        <p>Система аналізує минулі результати та прогнозує майбутні досягнення</p>
+                    </div>
+                </div>
+
                 <div class="feature-item">
                     <div class="feature-icon">🔒</div>
                     <div class="feature-content">
-                        <h4>Безпека даних</h4>
-                        <p>Надійний захист інформації про учасників та результати</p>
+                        <h4>Безпека</h4>
+                        <p>Надійний захист даних учасників та результатів конкурсів</p>
                     </div>
                 </div>
+
                 <div class="feature-item">
                     <div class="feature-icon">📱</div>
                     <div class="feature-content">
-                        <h4>Адаптивний дизайн</h4>
-                        <p>Працює на всіх пристроях - від смартфонів до комп'ютерів</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">⚡</div>
-                    <div class="feature-content">
-                        <h4>Швидкість роботи</h4>
-                        <p>Миттєве оновлення даних та швидкий доступ до інформації</p>
+                        <h4>Telegram інтеграція</h4>
+                        <p>Керуйте конкурсами через зручний Telegram бот @iEvents2026_bot</p>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Added call-to-action section -->
-        <div class="info-section">
-            <h2>Почніть використовувати iEvents сьогодні</h2>
-            <p>Заповніть свій профіль та отримайте повний доступ до всіх можливостей платформи</p>
-            <a href="profile.html" class="btn btn-primary">Перейти до профілю</a>
-        </div>
+        <!-- Info/CTA section -->
+        <section class="info-section">
+            <h2>Готові розпочати?</h2>
+            <p>Приєднуйтесь до платформи iEvents та організовуйте конкурси професійно</p>
+            <a href="competitionsT.html" class="btn btn-primary">Переглянути конкурси</a>
+        </section>
     </main>
 
-    <!-- Added footer element -->
     <div id="footer"></div>
 
-    <!-- Added scripts for dynamic header and footer -->
     <script src="js/role.js"></script>
-    <script src="js/components.js"></script>
     <script src="js/index.js"></script>
 </body>
 

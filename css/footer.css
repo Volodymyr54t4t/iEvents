@@ -1,24 +1,11 @@
 /* Modern Footer Styles with Comprehensive Responsive Design */
-body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-main,
-.main-content,
-.statistics-page,
-.admin-container,
-.container {
-  flex: 1;
-}
 
 .site-footer {
   background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
   color: #0a5f7f;
-  margin-top: auto;
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 /* Enhanced neon separator with better visibility */

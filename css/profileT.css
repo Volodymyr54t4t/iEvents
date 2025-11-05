@@ -11,6 +11,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* Added padding-top to account for fixed header */
+  padding-top: 90px;
 }
 
 .main-content {

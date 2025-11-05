@@ -1,8 +1,14 @@
 const TelegramBot = require("node-telegram-bot-api")
-const { Pool } = require("pg")
+const {
+  Pool
+} = require("pg")
 
 // Telegram Bot Token
 const TELEGRAM_TOKEN = "8543297029:AAHVaWK-4eAkSTQ8WSzKG0lyKPdfsnBo3dU"
+
+// Connection retry configuration
+const MAX_RETRIES = 3
+const RETRY_DELAY = 5000
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -12,8 +18,14 @@ const pool = new Pool({
   },
 })
 
+pool.on("error", (err) => {
+  console.error("❌ Непередбачена помилка в database pool:", err)
+})
+
 let bot = null
 let isInitialized = false
+let connectionAttempts = 0
+let isShuttingDown = false
 
 // Store user states for conversation flow
 const userStates = new Map()
@@ -55,68 +67,128 @@ async function sendLongMessage(chatId, text) {
   const messages = splitMessage(text)
 
   for (let i = 0; i < messages.length; i++) {
-    await bot.sendMessage(chatId, messages[i])
-    // Small delay between messages to avoid rate limiting
-    if (i < messages.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+    try {
+      await bot.sendMessage(chatId, messages[i])
+      if (i < messages.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    } catch (error) {
+      if (error.message.includes("ENOTFOUND") || error.message.includes("ECONNRESET")) {
+        console.warn(`⚠️ Не можна відправити повідомлення користувачу ${chatId}. Мережа недоступна.`)
+        break
+      }
+      throw error
     }
   }
 }
 
-// Initialize bot
 async function initBot() {
-  if (isInitialized) {
+  if (isInitialized && bot) {
     console.log("⚠️ Telegram бот вже ініціалізовано")
     return bot
   }
 
-  console.log("🤖 Ініціалізація Telegram бота...")
-
-  bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true })
-  isInitialized = true
-
-  bot.on("polling_error", (error) => {
-    console.error("⚠️ Telegram polling error:", error.message)
-  })
-
-  // Check if telegram_chat_id column exists in users table
-  const client = await pool.connect()
-  try {
-    const columnCheck = await client.query(`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'users' AND column_name = 'telegram_chat_id'
-      ) as exists
-    `)
-
-    if (!columnCheck.rows[0].exists) {
-      console.log("📊 Додавання колонки telegram_chat_id до таблиці users...")
-      await client.query(`
-        ALTER TABLE users ADD COLUMN telegram_chat_id BIGINT UNIQUE
-      `)
-      console.log("✅ Колонка telegram_chat_id додана")
-    }
-  } finally {
-    client.release()
+  if (isShuttingDown) {
+    console.log("⚠️ Бот в процесі завершення роботи")
+    return null
   }
 
-  // Set bot commands
-  await bot.setMyCommands([
-    { command: "/start", description: "Почати роботу з ботом" },
-    { command: "/login", description: "Увійти за допомогою email" },
-    { command: "/mycompetitions", description: "Мої конкурси" },
-    { command: "/myresults", description: "Мої результати" },
-    { command: "/profile", description: "Мій профіль" },
-    { command: "/logout", description: "Вийти з профілю" },
-    { command: "/help", description: "Допомога" },
-  ])
+  console.log("🤖 Ініціалізація Telegram бота...")
 
-  // Command: /start
-  bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id
-    const firstName = msg.from.first_name || "користувач"
+  try {
+    if (bot) {
+      try {
+        await bot.stopPolling()
+        console.log("✓ Попередній polling зупинено")
+      } catch (e) {
+        console.log("⚠️ Помилка при зупинці попереднього polling:", e.message)
+      }
+    }
 
-    const welcomeMessage = `Привіт, ${firstName}! 👋
+    bot = new TelegramBot(TELEGRAM_TOKEN, {
+      polling: true
+    })
+    isInitialized = true
+    connectionAttempts = 0
+
+    bot.on("polling_error", (error) => {
+      if (error.code === "EFATAL" || error.message.includes("ECONNRESET") || error.message.includes("ENOTFOUND")) {
+        console.warn("⚠️ Помилка мережі Telegram. Спроба повторного підключення...")
+        connectionAttempts++
+
+        if (connectionAttempts > MAX_RETRIES) {
+          console.error("❌ Максимум спроб підключення досягнуто. Бот працює в автономному режимі.")
+          connectionAttempts = 0
+        }
+      } else if (error.message.includes("409") || error.message.includes("Conflict")) {
+        console.error("❌ Конфлікт polling: інший екземпляр бота вже запущено")
+        console.log("💡 Зупиняємо поточний polling...")
+        if (bot && !isShuttingDown) {
+          bot.stopPolling().catch(() => {})
+        }
+      } else {
+        console.error("⚠️ Telegram polling error:", error.message)
+      }
+    })
+
+    // Check if telegram_chat_id column exists in users table
+    const client = await pool.connect()
+    try {
+      const columnCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'telegram_chat_id'
+        ) as exists
+      `)
+
+      if (!columnCheck.rows[0].exists) {
+        console.log("📊 Додавання колонки telegram_chat_id до таблиці users...")
+        await client.query(`
+          ALTER TABLE users ADD COLUMN telegram_chat_id BIGINT UNIQUE
+        `)
+        console.log("✅ Колонка telegram_chat_id додана")
+      }
+    } finally {
+      client.release()
+    }
+
+    // Set bot commands
+    await bot.setMyCommands([{
+        command: "/start",
+        description: "Почати роботу з ботом"
+      },
+      {
+        command: "/login",
+        description: "Увійти за допомогою email"
+      },
+      {
+        command: "/mycompetitions",
+        description: "Мої конкурси"
+      },
+      {
+        command: "/myresults",
+        description: "Мої результати"
+      },
+      {
+        command: "/profile",
+        description: "Мій профіль"
+      },
+      {
+        command: "/logout",
+        description: "Вийти з профілю"
+      },
+      {
+        command: "/help",
+        description: "Допомога"
+      },
+    ])
+
+    // Command: /start
+    bot.onText(/\/start/, async (msg) => {
+      const chatId = msg.chat.id
+      const firstName = msg.from.first_name || "користувач"
+
+      const welcomeMessage = `Привіт, ${firstName}! 👋
 
 Я бот системи iEvents - твій помічник для відстеження конкурсів та результатів.
 
@@ -130,237 +202,239 @@ async function initBot() {
 /logout - Вийти з профілю
 /help - Отримати допомогу`
 
-    await bot.sendMessage(chatId, welcomeMessage)
-  })
+      await bot.sendMessage(chatId, welcomeMessage)
+    })
 
-  // Command: /login
-  bot.onText(/\/login/, async (msg) => {
-    const chatId = msg.chat.id
+    // Command: /login
+    bot.onText(/\/login/, async (msg) => {
+      const chatId = msg.chat.id
 
-    userStates.set(chatId, { state: "waiting_for_email" })
+      userStates.set(chatId, {
+        state: "waiting_for_email"
+      })
 
-    await bot.sendMessage(chatId, "📧 Введи свій email, який ти використовуєш в системі iEvents:")
-  })
+      await bot.sendMessage(chatId, "📧 Введи свій email, який ти використовуєш в системі iEvents:")
+    })
 
-  // Command: /mycompetitions
-  bot.onText(/\/mycompetitions/, async (msg) => {
-    const chatId = msg.chat.id
+    // Command: /mycompetitions
+    bot.onText(/\/mycompetitions/, async (msg) => {
+      const chatId = msg.chat.id
 
-    try {
-      const userResult = await pool.query("SELECT id, email FROM users WHERE telegram_chat_id = $1", [chatId])
+      try {
+        const userResult = await safePoolQuery("SELECT id, email FROM users WHERE telegram_chat_id = $1", [chatId])
 
-      if (userResult.rows.length === 0) {
-        await bot.sendMessage(chatId, "❌ Ти не увійшов в систему. Використай команду /login")
-        return
-      }
-
-      const user = userResult.rows[0]
-
-      const competitionsResult = await pool.query(
-        `
-      SELECT c.id, c.title, c.description, c.start_date, c.end_date, c.manual_status,
-             cp.added_at
-      FROM competitions c
-      JOIN competition_participants cp ON c.id = cp.competition_id
-      WHERE cp.user_id = $1
-      ORDER BY c.start_date DESC
-      LIMIT 20
-    `,
-        [user.id],
-      )
-
-      if (competitionsResult.rows.length === 0) {
-        await bot.sendMessage(chatId, "📋 Ти поки не берешь участі в жодному конкурсі.")
-        return
-      }
-
-      let message = `📋 Твої конкурси (показано ${competitionsResult.rows.length}):\n\n`
-
-      for (const comp of competitionsResult.rows) {
-        const startDate = new Date(comp.start_date).toLocaleDateString("uk-UA")
-        const endDate = new Date(comp.end_date).toLocaleDateString("uk-UA")
-        const status = getCompetitionStatus(comp)
-
-        message += `🏆 ${comp.title}\n`
-        message += `📅 ${startDate} - ${endDate}\n`
-        message += `📊 Статус: ${status}\n`
-        if (comp.description && comp.description.length > 0) {
-          message += `📝 ${comp.description.substring(0, 60)}${comp.description.length > 60 ? "..." : ""}\n`
+        if (userResult.rows.length === 0) {
+          await bot.sendMessage(chatId, "❌ Ти не увійшов в систему. Використай команду /login")
+          return
         }
-        message += `\n`
-      }
 
-      await sendLongMessage(chatId, message)
-    } catch (error) {
-      console.error("Помилка при отриманні конкурсів:", error)
-      await bot.sendMessage(chatId, "❌ Виникла помилка при отриманні списку конкурсів.")
-    }
-  })
+        const user = userResult.rows[0]
 
-  // Command: /myresults
-  bot.onText(/\/myresults/, async (msg) => {
-    const chatId = msg.chat.id
+        const competitionsResult = await safePoolQuery(
+          `
+        SELECT c.id, c.title, c.description, c.start_date, c.end_date, c.manual_status,
+               cp.added_at
+        FROM competitions c
+        JOIN competition_participants cp ON c.id = cp.competition_id
+        WHERE cp.user_id = $1
+        ORDER BY c.start_date DESC
+        LIMIT 20
+      `,
+          [user.id],
+        )
 
-    try {
-      const userResult = await pool.query("SELECT id, email FROM users WHERE telegram_chat_id = $1", [chatId])
-
-      if (userResult.rows.length === 0) {
-        await bot.sendMessage(chatId, "❌ Ти не увійшов в систему. Використай команду /login")
-        return
-      }
-
-      const user = userResult.rows[0]
-
-      const resultsResult = await pool.query(
-        `
-      SELECT cr.id, cr.place, cr.score, cr.achievement, cr.notes, cr.added_at,
-             c.title as competition_title, c.start_date, c.end_date
-      FROM competition_results cr
-      JOIN competitions c ON cr.competition_id = c.id
-      WHERE cr.user_id = $1
-      ORDER BY cr.added_at DESC
-      LIMIT 15
-    `,
-        [user.id],
-      )
-
-      if (resultsResult.rows.length === 0) {
-        await bot.sendMessage(chatId, "📊 У тебе поки немає результатів.")
-        return
-      }
-
-      let message = `📊 Твої результати (останні ${resultsResult.rows.length}):\n\n`
-
-      for (let i = 0; i < resultsResult.rows.length; i++) {
-        const result = resultsResult.rows[i]
-        message += `${i + 1}. 🏆 ${result.competition_title}\n`
-
-        if (result.place) {
-          const medal = result.place === 1 ? "🥇" : result.place === 2 ? "🥈" : result.place === 3 ? "🥉" : "🏅"
-          message += `   ${medal} Місце: ${result.place}\n`
+        if (competitionsResult.rows.length === 0) {
+          await bot.sendMessage(chatId, "📋 Ти поки не берешь участі в жодному конкурсі.")
+          return
         }
-        if (result.score) {
-          message += `   📈 Бали: ${result.score}\n`
+
+        let message = `📋 Твої конкурси (показано ${competitionsResult.rows.length}):\n\n`
+
+        for (const comp of competitionsResult.rows) {
+          const startDate = new Date(comp.start_date).toLocaleDateString("uk-UA")
+          const endDate = new Date(comp.end_date).toLocaleDateString("uk-UA")
+          const status = getCompetitionStatus(comp)
+
+          message += `🏆 ${comp.title}\n`
+          message += `📅 ${startDate} - ${endDate}\n`
+          message += `📊 Статус: ${status}\n`
+          if (comp.description && comp.description.length > 0) {
+            message += `📝 ${comp.description.substring(0, 60)}${comp.description.length > 60 ? "..." : ""}\n`
+          }
+          message += `\n`
         }
-        message += `   🎖️ ${result.achievement}\n`
-        if (result.notes && result.notes.length > 0) {
-          message += `   📝 ${result.notes.substring(0, 50)}${result.notes.length > 50 ? "..." : ""}\n`
+
+        await sendLongMessage(chatId, message)
+      } catch (error) {
+        console.error("Помилка при отриманні конкурсів:", error)
+        await bot.sendMessage(chatId, "❌ Виникла помилка при отриманні списку конкурсів.")
+      }
+    })
+
+    // Command: /myresults
+    bot.onText(/\/myresults/, async (msg) => {
+      const chatId = msg.chat.id
+
+      try {
+        const userResult = await safePoolQuery("SELECT id, email FROM users WHERE telegram_chat_id = $1", [chatId])
+
+        if (userResult.rows.length === 0) {
+          await bot.sendMessage(chatId, "❌ Ти не увійшов в систему. Використай команду /login")
+          return
         }
-        message += `\n`
+
+        const user = userResult.rows[0]
+
+        const resultsResult = await safePoolQuery(
+          `
+        SELECT cr.id, cr.place, cr.score, cr.achievement, cr.notes, cr.added_at,
+               c.title as competition_title, c.start_date, c.end_date
+        FROM competition_results cr
+        JOIN competitions c ON cr.competition_id = c.id
+        WHERE cr.user_id = $1
+        ORDER BY cr.added_at DESC
+        LIMIT 15
+      `,
+          [user.id],
+        )
+
+        if (resultsResult.rows.length === 0) {
+          await bot.sendMessage(chatId, "📊 У тебе поки немає результатів.")
+          return
+        }
+
+        let message = `📊 Твої результати (останні ${resultsResult.rows.length}):\n\n`
+
+        for (let i = 0; i < resultsResult.rows.length; i++) {
+          const result = resultsResult.rows[i]
+          message += `${i + 1}. 🏆 ${result.competition_title}\n`
+
+          if (result.place) {
+            const medal = result.place === 1 ? "🥇" : result.place === 2 ? "🥈" : result.place === 3 ? "🥉" : "🏅"
+            message += `   ${medal} Місце: ${result.place}\n`
+          }
+          if (result.score) {
+            message += `   📈 Бали: ${result.score}\n`
+          }
+          message += `   🎖️ ${result.achievement}\n`
+          if (result.notes && result.notes.length > 0) {
+            message += `   📝 ${result.notes.substring(0, 50)}${result.notes.length > 50 ? "..." : ""}\n`
+          }
+          message += `\n`
+        }
+
+        await sendLongMessage(chatId, message)
+      } catch (error) {
+        console.error("Помилка при отриманні результатів:", error)
+        await bot.sendMessage(chatId, "❌ Виникла помилка при отриманні результатів.")
       }
+    })
 
-      await sendLongMessage(chatId, message)
-    } catch (error) {
-      console.error("Помилка при отриманні результатів:", error)
-      await bot.sendMessage(chatId, "❌ Виникла помилка при отриманні результатів.")
-    }
-  })
+    // Command: /profile
+    bot.onText(/\/profile/, async (msg) => {
+      const chatId = msg.chat.id
 
-  // Command: /profile
-  bot.onText(/\/profile/, async (msg) => {
-    const chatId = msg.chat.id
+      try {
+        const userResult = await safePoolQuery(
+          `
+        SELECT u.id, u.email, u.role, u.created_at,
+               p.first_name, p.last_name, p.middle_name, p.telegram, p.phone,
+               p.birth_date, p.city, p.school, p.grade
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.user_id
+        WHERE u.telegram_chat_id = $1
+      `,
+          [chatId],
+        )
 
-    try {
-      const userResult = await pool.query(
-        `
-      SELECT u.id, u.email, u.role, u.created_at,
-             p.first_name, p.last_name, p.middle_name, p.telegram, p.phone,
-             p.birth_date, p.city, p.school, p.grade
-      FROM users u
-      LEFT JOIN profiles p ON u.id = p.user_id
-      WHERE u.telegram_chat_id = $1
-    `,
-        [chatId],
-      )
+        if (userResult.rows.length === 0) {
+          await bot.sendMessage(chatId, "❌ Ти не увійшов в систему. Використай команду /login")
+          return
+        }
 
-      if (userResult.rows.length === 0) {
-        await bot.sendMessage(chatId, "❌ Ти не увійшов в систему. Використай команду /login")
-        return
+        const user = userResult.rows[0]
+
+        let message = `👤 Твій профіль:\n\n`
+        message += `📧 Email: ${user.email}\n`
+        message += `👔 Роль: ${user.role}\n`
+
+        if (user.first_name || user.last_name) {
+          message += `📛 Ім'я: ${user.last_name || ""} ${user.first_name || ""} ${user.middle_name || ""}\n`
+        }
+
+        if (user.school) {
+          message += `🏫 Школа: ${user.school}\n`
+        }
+
+        if (user.grade) {
+          message += `📚 Клас: ${user.grade}\n`
+        }
+
+        if (user.city) {
+          message += `🏙️ Місто: ${user.city}\n`
+        }
+
+        if (user.phone) {
+          message += `📱 Телефон: ${user.phone}\n`
+        }
+
+        if (user.birth_date) {
+          const birthDate = new Date(user.birth_date).toLocaleDateString("uk-UA")
+          message += `🎂 Дата народження: ${birthDate}\n`
+        }
+
+        const statsResult = await safePoolQuery(
+          `
+        SELECT 
+          (SELECT COUNT(*) FROM competition_participants WHERE user_id = $1) as competitions_count,
+          (SELECT COUNT(*) FROM competition_results WHERE user_id = $1) as results_count
+      `,
+          [user.id],
+        )
+
+        const stats = statsResult.rows[0]
+        message += `\n📊 Статистика:\n`
+        message += `🏆 Конкурсів: ${stats.competitions_count}\n`
+        message += `🎖️ Результатів: ${stats.results_count}\n`
+
+        await bot.sendMessage(chatId, message)
+      } catch (error) {
+        console.error("Помилка при отриманні профілю:", error)
+        await bot.sendMessage(chatId, "❌ Виникла помилка при отриманні профілю.")
       }
+    })
 
-      const user = userResult.rows[0]
+    // Command: /logout
+    bot.onText(/\/logout/, async (msg) => {
+      const chatId = msg.chat.id
 
-      let message = `👤 Твій профіль:\n\n`
-      message += `📧 Email: ${user.email}\n`
-      message += `👔 Роль: ${user.role}\n`
+      try {
+        const userResult = await safePoolQuery("SELECT id, email FROM users WHERE telegram_chat_id = $1", [chatId])
 
-      if (user.first_name || user.last_name) {
-        message += `📛 Ім'я: ${user.last_name || ""} ${user.first_name || ""} ${user.middle_name || ""}\n`
+        if (userResult.rows.length === 0) {
+          await bot.sendMessage(chatId, "❌ Ти не увійшов в систему.")
+          return
+        }
+
+        const user = userResult.rows[0]
+
+        await safePoolQuery("UPDATE users SET telegram_chat_id = NULL WHERE id = $1", [user.id])
+
+        await bot.sendMessage(
+          chatId,
+          `✅ Ти успішно вийшов з профілю ${user.email}\n\nЩоб увійти знову, використай команду /login`,
+        )
+      } catch (error) {
+        console.error("Помилка при виході:", error)
+        await bot.sendMessage(chatId, "❌ Виникла помилка при виході з профілю.")
       }
+    })
 
-      if (user.school) {
-        message += `🏫 Школа: ${user.school}\n`
-      }
+    // Command: /help
+    bot.onText(/\/help/, async (msg) => {
+      const chatId = msg.chat.id
 
-      if (user.grade) {
-        message += `📚 Клас: ${user.grade}\n`
-      }
-
-      if (user.city) {
-        message += `🏙️ Місто: ${user.city}\n`
-      }
-
-      if (user.phone) {
-        message += `📱 Телефон: ${user.phone}\n`
-      }
-
-      if (user.birth_date) {
-        const birthDate = new Date(user.birth_date).toLocaleDateString("uk-UA")
-        message += `🎂 Дата народження: ${birthDate}\n`
-      }
-
-      const statsResult = await pool.query(
-        `
-      SELECT 
-        (SELECT COUNT(*) FROM competition_participants WHERE user_id = $1) as competitions_count,
-        (SELECT COUNT(*) FROM competition_results WHERE user_id = $1) as results_count
-    `,
-        [user.id],
-      )
-
-      const stats = statsResult.rows[0]
-      message += `\n📊 Статистика:\n`
-      message += `🏆 Конкурсів: ${stats.competitions_count}\n`
-      message += `🎖️ Результатів: ${stats.results_count}\n`
-
-      await bot.sendMessage(chatId, message)
-    } catch (error) {
-      console.error("Помилка при отриманні профілю:", error)
-      await bot.sendMessage(chatId, "❌ Виникла помилка при отриманні профілю.")
-    }
-  })
-
-  // Command: /logout
-  bot.onText(/\/logout/, async (msg) => {
-    const chatId = msg.chat.id
-
-    try {
-      const userResult = await pool.query("SELECT id, email FROM users WHERE telegram_chat_id = $1", [chatId])
-
-      if (userResult.rows.length === 0) {
-        await bot.sendMessage(chatId, "❌ Ти не увійшов в систему.")
-        return
-      }
-
-      const user = userResult.rows[0]
-
-      await pool.query("UPDATE users SET telegram_chat_id = NULL WHERE id = $1", [user.id])
-
-      await bot.sendMessage(
-        chatId,
-        `✅ Ти успішно вийшов з профілю ${user.email}\n\nЩоб увійти знову, використай команду /login`,
-      )
-    } catch (error) {
-      console.error("Помилка при виході:", error)
-      await bot.sendMessage(chatId, "❌ Виникла помилка при виході з профілю.")
-    }
-  })
-
-  // Command: /help
-  bot.onText(/\/help/, async (msg) => {
-    const chatId = msg.chat.id
-
-    const helpMessage = `📚 Допомога по боту iEvents:
+      const helpMessage = `📚 Допомога по боту iEvents:
 
 🔐 Авторизація:
 /login - Увійти за допомогою email з системи
@@ -384,79 +458,93 @@ async function initBot() {
 
 ❓ Питання? Звернись до адміністратора системи.`
 
-    await bot.sendMessage(chatId, helpMessage)
-  })
+      await bot.sendMessage(chatId, helpMessage)
+    })
 
-  // Handle text messages (for email input)
-  bot.on("message", async (msg) => {
-    const chatId = msg.chat.id
-    const text = msg.text
+    // Handle text messages (for email input)
+    bot.on("message", async (msg) => {
+      const chatId = msg.chat.id
+      const text = msg.text
 
-    if (text && text.startsWith("/")) {
-      return
-    }
-
-    const userState = userStates.get(chatId)
-
-    if (userState && userState.state === "waiting_for_email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(text)) {
-        await bot.sendMessage(chatId, "❌ Невірний формат email. Спробуй ще раз:")
+      if (text && text.startsWith("/")) {
         return
       }
 
-      try {
-        const result = await pool.query("SELECT id, email, role, telegram_chat_id FROM users WHERE email = $1", [
-          text.toLowerCase(),
-        ])
+      const userState = userStates.get(chatId)
 
-        if (result.rows.length === 0) {
+      if (userState && userState.state === "waiting_for_email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(text)) {
+          await bot.sendMessage(chatId, "❌ Невірний формат email. Спробуй ще раз:")
+          return
+        }
+
+        try {
+          const result = await safePoolQuery("SELECT id, email, role, telegram_chat_id FROM users WHERE email = $1", [
+            text.toLowerCase(),
+          ])
+
+          if (result.rows.length === 0) {
+            await bot.sendMessage(
+              chatId,
+              "❌ Користувача з таким email не знайдено в системі. Перевір правильність email або зареєструйся на сайті.",
+            )
+            userStates.delete(chatId)
+            return
+          }
+
+          const user = result.rows[0]
+
+          if (user.telegram_chat_id === chatId) {
+            await bot.sendMessage(chatId, "✅ Ти вже увійшов в систему з цим профілем!")
+            userStates.delete(chatId)
+            return
+          }
+
+          const existingLinkResult = await safePoolQuery("SELECT id, email FROM users WHERE telegram_chat_id = $1", [
+            chatId,
+          ])
+
+          if (existingLinkResult.rows.length > 0) {
+            const oldUser = existingLinkResult.rows[0]
+            await safePoolQuery("UPDATE users SET telegram_chat_id = NULL WHERE id = $1", [oldUser.id])
+            console.log(`🔄 Відв'язано Telegram від користувача ${oldUser.email}`)
+          }
+
+          if (user.telegram_chat_id && user.telegram_chat_id !== chatId) {
+            await safePoolQuery("UPDATE users SET telegram_chat_id = NULL WHERE id = $1", [user.id])
+            console.log(`🔄 Відв'язано старий Telegram від користувача ${user.email}`)
+          }
+
+          await safePoolQuery("UPDATE users SET telegram_chat_id = $1 WHERE id = $2", [chatId, user.id])
+
+          userStates.delete(chatId)
+
           await bot.sendMessage(
             chatId,
-            "❌ Користувача з таким email не знайдено в системі. Перевір правильність email або зареєструйся на сайті.",
+            `✅ Успішно увійшов в систему!\n\n👤 Email: ${user.email}\n👔 Роль: ${user.role}\n\n🔔 Тепер ти будеш отримувати сповіщення про конкурси та результати.\n\nВикористовуй команди:\n/mycompetitions - Мої конкурси\n/myresults - Мої результати\n/profile - Мій профіль\n/logout - Вийти з профілю`,
           )
+        } catch (error) {
+          console.error("Помилка при авторизації:", error)
+          await bot.sendMessage(chatId, "❌ Виникла помилка при авторизації. Спробуй пізніше.")
           userStates.delete(chatId)
-          return
         }
-
-        const user = result.rows[0]
-
-        if (user.telegram_chat_id === chatId) {
-          await bot.sendMessage(chatId, "✅ Ти вже увійшов в систему з цим профілем!")
-          userStates.delete(chatId)
-          return
-        }
-
-        const existingLinkResult = await pool.query("SELECT id, email FROM users WHERE telegram_chat_id = $1", [chatId])
-
-        if (existingLinkResult.rows.length > 0) {
-          const oldUser = existingLinkResult.rows[0]
-          await pool.query("UPDATE users SET telegram_chat_id = NULL WHERE id = $1", [oldUser.id])
-          console.log(`🔄 Відв'язано Telegram від користувача ${oldUser.email}`)
-        }
-
-        if (user.telegram_chat_id && user.telegram_chat_id !== chatId) {
-          await pool.query("UPDATE users SET telegram_chat_id = NULL WHERE id = $1", [user.id])
-          console.log(`🔄 Відв'язано старий Telegram від користувача ${user.email}`)
-        }
-
-        await pool.query("UPDATE users SET telegram_chat_id = $1 WHERE id = $2", [chatId, user.id])
-
-        userStates.delete(chatId)
-
-        await bot.sendMessage(
-          chatId,
-          `✅ Успішно увійшов в систему!\n\n👤 Email: ${user.email}\n👔 Роль: ${user.role}\n\n🔔 Тепер ти будеш отримувати сповіщення про конкурси та результати.\n\nВикористовуй команди:\n/mycompetitions - Мої конкурси\n/myresults - Мої результати\n/profile - Мій профіль\n/logout - Вийти з профілю`,
-        )
-      } catch (error) {
-        console.error("Помилка при авторизації:", error)
-        await bot.sendMessage(chatId, "❌ Виникла помилка при авторизації. Спробуй пізніше.")
-        userStates.delete(chatId)
       }
-    }
-  })
+    })
 
-  console.log("✅ Telegram бот успішно запущено!")
+    console.log("✅ Telegram бот успішно запущено!")
+  } catch (error) {
+    console.error("Помилка при ініціалізації бота:", error)
+    if (connectionAttempts < MAX_RETRIES) {
+      console.warn(`🔄 Спроба ${connectionAttempts + 1} ініціалізації бота через ${RETRY_DELAY / 1000} секунд...`)
+      setTimeout(initBot, RETRY_DELAY)
+      connectionAttempts++
+    } else {
+      console.error("❌ Максимум спроб ініціалізації бота досягнуто.")
+      connectionAttempts = 0
+    }
+  }
+
   return bot
 }
 
@@ -485,7 +573,7 @@ async function notifyUserAddedToCompetition(userId, competitionId) {
   if (!bot) return
 
   try {
-    const result = await pool.query(
+    const result = await safePoolQuery(
       `
       SELECT u.telegram_chat_id, u.email, c.title, c.description, c.start_date, c.end_date
       FROM users u
@@ -522,7 +610,7 @@ async function notifyUserNewResult(userId, competitionId, resultData) {
   if (!bot) return
 
   try {
-    const result = await pool.query(
+    const result = await safePoolQuery(
       `
       SELECT u.telegram_chat_id, u.email, c.title
       FROM users u
@@ -567,7 +655,7 @@ async function notifyNewCompetition(competitionId) {
   if (!bot) return
 
   try {
-    const competitionResult = await pool.query(
+    const competitionResult = await safePoolQuery(
       "SELECT title, description, start_date, end_date FROM competitions WHERE id = $1",
       [competitionId],
     )
@@ -580,7 +668,9 @@ async function notifyNewCompetition(competitionId) {
     const startDate = new Date(competition.start_date).toLocaleDateString("uk-UA")
     const endDate = new Date(competition.end_date).toLocaleDateString("uk-UA")
 
-    const usersResult = await pool.query("SELECT telegram_chat_id, email FROM users WHERE telegram_chat_id IS NOT NULL")
+    const usersResult = await safePoolQuery(
+      "SELECT telegram_chat_id, email FROM users WHERE telegram_chat_id IS NOT NULL",
+    )
 
     const message = `🆕 Новий конкурс в системі!
 
@@ -609,7 +699,7 @@ async function notifyDeadlineReminder(competitionId) {
   if (!bot) return
 
   try {
-    const result = await pool.query(
+    const result = await safePoolQuery(
       `
       SELECT DISTINCT u.telegram_chat_id, u.email, c.title, c.end_date
       FROM users u
@@ -649,37 +739,88 @@ async function notifyDeadlineReminder(competitionId) {
   }
 }
 
+async function safePoolQuery(query, params = []) {
+  try {
+    return await pool.query(query, params)
+  } catch (error) {
+    if (error.message.includes("ENOTFOUND") || error.message.includes("ECONNRESET")) {
+      console.error("❌ Помилка при з'єднанні з базою даних:", error.message)
+      console.log("💡 Підказка: Переконайтеся, що DATABASE_URL в .env файлі правильний")
+      throw new Error("База даних недоступна. Спробуйте пізніше.")
+    }
+    throw error
+  }
+}
+
 setInterval(
   async () => {
-    try {
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(0, 0, 0, 0)
+      try {
+        console.log("⏰ Перевірка дедлайнів...")
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(0, 0, 0, 0)
 
-      const dayAfterTomorrow = new Date(tomorrow)
-      dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1)
+        const dayAfterTomorrow = new Date(tomorrow)
+        dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1)
 
-      const result = await pool.query(
-        `
-      SELECT id, title, end_date
-      FROM competitions
-      WHERE end_date >= $1 AND end_date < $2
-    `,
-        [tomorrow, dayAfterTomorrow],
-      )
+        const result = await safePoolQuery(
+          `
+        SELECT id, title, end_date
+        FROM competitions
+        WHERE end_date >= $1 AND end_date < $2
+      `,
+          [tomorrow, dayAfterTomorrow],
+        )
 
-      for (const competition of result.rows) {
-        await notifyDeadlineReminder(competition.id)
+        for (const competition of result.rows) {
+          await notifyDeadlineReminder(competition.id)
+        }
+      } catch (error) {
+        if (error.message.includes("недоступна")) {
+          console.warn("⚠️ Перевірка дедлайнів пропущена: база даних недоступна")
+        } else {
+          console.error("❌ Помилка при перевірці дедлайнів:", error.message)
+        }
       }
-    } catch (error) {
-      console.error("Помилка при перевірці дедлайнів:", error)
-    }
-  },
-  60 * 60 * 1000,
+    },
+    60 * 60 * 1000,
 )
+
+async function shutdownBot() {
+  if (!bot || isShuttingDown) {
+    return
+  }
+
+  isShuttingDown = true
+  console.log("🛑 Зупинка Telegram бота...")
+
+  try {
+    await bot.stopPolling()
+    console.log("✅ Telegram бот зупинено")
+  } catch (error) {
+    console.error("❌ Помилка при зупинці бота:", error.message)
+  } finally {
+    bot = null
+    isInitialized = false
+    isShuttingDown = false
+  }
+}
+
+process.on("SIGINT", async () => {
+  console.log("\n🛑 Отримано SIGINT, завершення роботи...")
+  await shutdownBot()
+  process.exit(0)
+})
+
+process.on("SIGTERM", async () => {
+  console.log("\n🛑 Отримано SIGTERM, завершення роботи...")
+  await shutdownBot()
+  process.exit(0)
+})
 
 module.exports = {
   initBot,
+  shutdownBot,
   notifyUserAddedToCompetition,
   notifyUserNewResult,
   notifyNewCompetition,
