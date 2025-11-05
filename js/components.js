@@ -25,6 +25,11 @@ function renderHeader() {
 
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
 
+  const profileLink =
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="profileT.html" class="nav-link">Профіль</a>' :
+    '<a href="profile.html" class="nav-link">Профіль</a>'
+
   header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
@@ -35,7 +40,7 @@ function renderHeader() {
                     ${resultsLink}
                     ${statisticsLink}
                     ${predictionsLink}
-                    <a href="profile.html" class="nav-link">Профіль</a>
+                    ${profileLink}
                     ${adminLink}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>

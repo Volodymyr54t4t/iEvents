@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мої учні - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/students-list.css">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>Мої учні</h1>
+            <p class="subtitle">Список учнів вашого навчального закладу</p>
+        </div>
+
+        <!-- Фільтри та пошук -->
+        <div class="filters-section">
+            <div class="filters-row">
+                <input type="text" id="searchStudents" class="filter-input" placeholder="Пошук за ім'ям, прізвищем...">
+
+                <select id="filterGrade" class="filter-select">
+                    <option value="">Всі класи</option>
+                </select>
+
+                <select id="filterStatus" class="filter-select">
+                    <option value="">Всі статуси</option>
+                    <option value="active">Активні</option>
+                    <option value="inactive">Неактивні</option>
+                </select>
+
+                <button class="btn btn-primary" onclick="resetFilters()">🔄 Скинути</button>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="totalStudents">0</div>
+                <div class="stat-label">Всього учнів</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeStudents">0</div>
+                <div class="stat-label">Активних</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="averageGrade">0</div>
+                <div class="stat-label">Середня оцінка</div>
+            </div>
+        </div>
+
+        <!-- Список учнів -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Учні</h2>
+                <div class="view-toggle">
+                    <button class="view-btn active" onclick="setViewMode('list')" title="Список">📋</button>
+                    <button class="view-btn" onclick="setViewMode('grid')" title="Сітка">🔲</button>
+                </div>
+            </div>
+
+            <div id="studentsList" class="students-list">
+                <div class="loading">Завантаження учнів...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальне вікно деталей учня -->
+    <div id="studentDetailModal" class="modal">
+        <div class="modal-content modal-medium">
+            <div class="modal-header">
+                <h2 id="modalStudentName">Деталі учня</h2>
+                <button class="modal-close" onclick="closeStudentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="student-detail">
+                    <div class="detail-section">
+                        <h3>Особисті дані</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">ПІБ:</span>
+                            <span class="detail-value" id="detailFullName">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value" id="detailEmail">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Телефон:</span>
+                            <span class="detail-value" id="detailPhone">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Дата народження:</span>
+                            <span class="detail-value" id="detailBirthDate">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Місто:</span>
+                            <span class="detail-value" id="detailCity">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Навчання</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Клас:</span>
+                            <span class="detail-value" id="detailGrade">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Навчальний заклад:</span>
+                            <span class="detail-value" id="detailSchool">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Участі</h3>
+                        <div id="participationList" class="participation-list">
+                            <p>Немає участей</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/components.js"></script>
+    <script src="js/students-list.js"></script>
+</body>
+
+</html>

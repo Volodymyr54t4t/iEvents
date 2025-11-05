@@ -206,6 +206,13 @@ async function initializeDatabase() {
           grade_letter VARCHAR(10),
           club_institution VARCHAR(255),
           club_name VARCHAR(255),
+          experience_years INTEGER DEFAULT 0,
+          subjects_ids TEXT,
+          grades_catering TEXT,
+          specialization VARCHAR(255),
+          awards TEXT,
+          methodist_area TEXT,
+          consultation_areas TEXT,
           interests TEXT,
           bio TEXT,
           avatar TEXT,
@@ -216,29 +223,72 @@ async function initializeDatabase() {
     } else {
       console.log("  ✓ Таблиця profiles вже існує")
 
-      // Ensure new columns exist
       const columnsToAdd = [
         { name: "school_id", type: "INTEGER" },
         { name: "grade_number", type: "INTEGER" },
         { name: "grade_letter", type: "VARCHAR(10)" },
         { name: "club_institution", type: "VARCHAR(255)" },
         { name: "club_name", type: "VARCHAR(255)" },
+        { name: "experience_years", type: "INTEGER DEFAULT 0" },
+        { name: "subjects_ids", type: "TEXT" },
+        { name: "grades_catering", type: "TEXT" },
+        { name: "specialization", type: "VARCHAR(255)" },
+        { name: "awards", type: "TEXT" },
+        { name: "methodist_area", type: "TEXT" },
+        { name: "consultation_areas", type: "TEXT" },
       ]
 
       for (const col of columnsToAdd) {
-        const columnCheck = await client.query(`
-          SELECT EXISTS (
-            SELECT 1 FROM information_schema.columns 
-            WHERE table_name = 'profiles' AND column_name = '${col.name}'
-          ) as exists
-        `)
-        if (!columnCheck.rows[0].exists) {
-          console.log(`  → Додавання колонки ${col.name}...`)
+        try {
+          const columnCheck = await client.query(`
+            SELECT EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_name = 'profiles' AND column_name = '${col.name}'
+            ) as exists
+          `)
+
+          if (!columnCheck.rows[0].exists) {
+            console.log(`  → Додавання колонки ${col.name}...`)
+            await client.query(`ALTER TABLE profiles ADD COLUMN ${col.name} ${col.type}`)
+            console.log(`  ✓ Колонка ${col.name} додана`)
+          }
+        } catch (colError) {
+          // Колонка вже існує, пропускаємо
+        }
+      }
+    }
+
+    // Add these columns for teacher/methodist profiles
+    const teacherProfileColumns = [
+      { name: "experience_years", type: "INTEGER DEFAULT 0" },
+      { name: "subjects_ids", type: "TEXT" },
+      { name: "grades_catering", type: "TEXT" },
+      { name: "specialization", type: "VARCHAR(255)" },
+      { name: "awards", type: "TEXT" },
+      { name: "methodist_area", type: "TEXT" },
+      { name: "consultation_areas", type: "TEXT" },
+      { name: "is_active", type: "BOOLEAN DEFAULT TRUE" }, // Added is_active
+      { name: "average_score", type: "NUMERIC(5, 2)" }, // Added average_score
+    ]
+
+    console.log("  → Перевірка та додавання колонок для профілю вчителя/методиста...")
+    for (const col of teacherProfileColumns) {
+      const columnCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'profiles' AND column_name = '${col.name}'
+        ) as exists
+      `)
+      if (!columnCheck.rows[0].exists) {
+        console.log(`  → Додавання колонки ${col.name}...`)
+        try {
           await client.query(`ALTER TABLE profiles ADD COLUMN ${col.name} ${col.type}`)
           console.log(`  ✓ Колонка ${col.name} додана`)
-        } else {
-          console.log(`  ✓ Колонка ${col.name} вже існує`)
+        } catch (colError) {
+          console.log(`  ⚠️  Помилка при додаванні ${col.name}: ${colError.message}`)
         }
+      } else {
+        console.log(`  ✓ Колонка ${col.name} вже існує`)
       }
     }
 
@@ -302,6 +352,7 @@ async function initializeDatabase() {
       { name: "website_url", type: "VARCHAR(255)" },
       { name: "is_online", type: "BOOLEAN DEFAULT FALSE" },
       { name: "custom_fields", type: "JSONB" }, // Added custom_fields
+      { name: "updated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" }, // Added updated_at
     ]
 
     for (const col of newCompetitionColumns) {
@@ -2411,6 +2462,310 @@ setInterval(async () => {
   }
 }, 3600000) // Check every hour
 
+// GET teacher profile
+app.get("/api/profile/teacher/:userId", async (req, res) => {
+  const { userId } = req.params
+
+  console.log("Запит профілю педагога для користувача:", userId)
+
+  if (!userId || userId === "undefined" || userId === "null") {
+    return res.status(400).json({
+      error: "Невірний ID користувача",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    // Check if user exists and get role
+    const userCheck = await client.query("SELECT id, role FROM users WHERE id = $1", [userId])
+
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: "Користувача не знайдено",
+      })
+    }
+
+    const user = userCheck.rows[0]
+    if (user.role !== "вчитель" && user.role !== "методист") {
+      return res.status(403).json({
+        error: "Користувач не є педагогом",
+      })
+    }
+
+    // Get profile
+    const profileResult = await client.query("SELECT * FROM profiles WHERE user_id = $1", [userId])
+
+    if (profileResult.rows.length === 0) {
+      console.log("Профіль не знайдено, створюємо новий...")
+      await client.query("INSERT INTO profiles (user_id) VALUES ($1)", [userId])
+      const newProfile = await client.query("SELECT * FROM profiles WHERE user_id = $1", [userId])
+
+      return res.json({
+        profile: newProfile.rows[0],
+      })
+    }
+
+    res.json({
+      profile: profileResult.rows[0],
+    })
+  } catch (error) {
+    console.error("Error getting teacher profile:", error)
+    res.status(500).json({
+      error: "Помилка завантаження профілю",
+    })
+  } finally {
+    client.release()
+  }
+})
+
+// POST/UPDATE teacher profile
+app.post("/api/profile/teacher", async (req, res) => {
+  const {
+    userId,
+    firstName,
+    lastName,
+    middleName,
+    telegram,
+    phone,
+    birthDate,
+    city,
+    schoolId,
+    experienceYears,
+    subjectsIds,
+    gradesCatering,
+    specialization,
+    awards,
+    bio,
+    interests,
+    userRole,
+    methodistArea,
+    consultationAreas,
+  } = req.body
+
+  console.log("Оновлення профілю педагога для користувача:", userId)
+
+  if (!userId || userId === "undefined" || userId === "null") {
+    return res.status(400).json({
+      error: "Невірний ID користувача",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    // Check if user exists
+    const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [userId])
+    if (userCheck.rows.length === 0) {
+      await client.query("ROLLBACK")
+      return res.status(404).json({
+        error: "Користувача не знайдено",
+      })
+    }
+
+    // Check if profile exists
+    const existingProfile = await client.query("SELECT id FROM profiles WHERE user_id = $1", [userId])
+
+    if (existingProfile.rows.length === 0) {
+      console.log("Створення нового профілю педагога...")
+      await client.query(
+        `INSERT INTO profiles (
+          user_id, first_name, last_name, middle_name, 
+          telegram, phone, birth_date, city, school_id,
+          experience_years, subjects_ids, grades_catering,
+          specialization, awards, bio, interests,
+          methodist_area, consultation_areas
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+        [
+          userId,
+          firstName || null,
+          lastName || null,
+          middleName || null,
+          telegram || null,
+          phone || null,
+          birthDate || null,
+          city || null,
+          schoolId || null,
+          experienceYears || 0,
+          subjectsIds || null,
+          gradesCatering || null,
+          specialization || null,
+          awards || null,
+          bio || null,
+          interests || null,
+          methodistArea || null,
+          consultationAreas || null,
+        ],
+      )
+      console.log("✓ Новий профіль педагога створено")
+    } else {
+      console.log("Оновлення існуючого профілю педагога...")
+
+      await client.query(
+        `UPDATE profiles SET
+          first_name = $2,
+          last_name = $3,
+          middle_name = $4,
+          telegram = $5,
+          phone = $6,
+          birth_date = $7,
+          city = $8,
+          school_id = $9,
+          experience_years = $10,
+          subjects_ids = $11,
+          grades_catering = $12,
+          specialization = $13,
+          awards = $14,
+          bio = $15,
+          interests = $16,
+          methodist_area = $17,
+          consultation_areas = $18,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = $1`,
+        [
+          userId,
+          firstName || null,
+          lastName || null,
+          middleName || null,
+          telegram || null,
+          phone || null,
+          birthDate || null,
+          city || null,
+          schoolId || null,
+          experienceYears || 0,
+          subjectsIds || null,
+          gradesCatering || null,
+          specialization || null,
+          awards || null,
+          bio || null,
+          interests || null,
+          methodistArea || null,
+          consultationAreas || null,
+        ],
+      )
+      console.log("✓ Профіль педагога оновлено")
+    }
+
+    await client.query("COMMIT")
+    res.json({
+      message: "Профіль успішно оновлено",
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("Error updating teacher profile:", error)
+    res.status(500).json({
+      error: "Помилка оновлення профілю",
+    })
+  } finally {
+    client.release()
+  }
+})
+
+// GET teacher profile
+app.get("/api/teacher/:teacherId/students", async (req, res) => {
+  try {
+    const { teacherId } = req.params
+
+    console.log("[v0] Fetching students for teacher:", teacherId)
+
+    const teacherProfile = await pool.query(
+      `SELECT p.school_id, p.subjects_ids 
+       FROM profiles p
+       JOIN users u ON p.user_id = u.id
+       WHERE u.id = $1 AND u.role IN ('вчитель', 'методист')`,
+      [teacherId],
+    )
+
+    if (teacherProfile.rows.length === 0) {
+      console.log("[v0] Teacher not found or not a teacher/metodyst")
+      return res.status(404).json({ error: "Вчителя не знайдено або користувач не є вчителем/методистом." })
+    }
+
+    const schoolId = teacherProfile.rows[0].school_id
+
+    console.log("[v0] Teacher's school ID:", schoolId)
+
+    if (!schoolId) {
+      console.log("[v0] Teacher has no school assigned")
+      return res.status(400).json({ error: "У вчителя не вказана школа. Будь ласка, заповніть профіль." })
+    }
+
+    const studentsResult = await pool.query(
+      `SELECT 
+        u.id, 
+        u.email, 
+        p.first_name, 
+        p.last_name, 
+        p.middle_name,
+        p.grade_number,
+        p.grade_letter,
+        p.school_id,
+        p.phone,
+        p.birth_date,
+        p.avatar,
+        p.grade,
+        p.is_active,
+        p.average_score,
+        (SELECT name FROM schools WHERE id = p.school_id) as school_name
+      FROM users u
+      JOIN profiles p ON u.id = p.user_id
+      WHERE u.role = 'учень' 
+        AND p.school_id = $1
+        AND p.school_id IS NOT NULL
+      ORDER BY p.last_name, p.first_name`,
+      [schoolId],
+    )
+
+    console.log("[v0] Students found:", studentsResult.rows.length)
+
+    res.json({
+      success: true,
+      students: studentsResult.rows,
+      schoolName: studentsResult.rows.length > 0 ? studentsResult.rows[0].school_name : null,
+      totalStudents: studentsResult.rows.length,
+    })
+  } catch (error) {
+    console.error("[v0] Error getting teacher students:", error)
+    res.status(500).json({ error: "Помилка сервера при отриманні списку учнів" })
+  }
+})
+
+// GET student's competition participations
+app.get("/api/students/:studentId/participations", async (req, res) => {
+  try {
+    const { studentId } = req.params
+
+    // Changed 'db.query' to 'pool.query' assuming 'db' was a typo or placeholder.
+    // Also, corrected column names based on common PostgreSQL naming conventions and potential table structures.
+    // Assuming 'results' table has columns like 'score', 'place'.
+    // Assuming 'competition_results' is the correct table name.
+    const participations = await pool.query(
+      `SELECT 
+        c.id as competition_id,
+        c.title as competition_name,
+        cr.score as result_score, -- Renamed from 'score' to 'result_score' for clarity
+        cr.place,
+        c.start_date
+      FROM competition_participants cp
+      JOIN competitions c ON cp.competition_id = c.id
+      LEFT JOIN competition_results cr ON cr.user_id = cp.user_id AND cr.competition_id = c.id
+      WHERE cp.user_id = $1
+      ORDER BY c.start_date DESC`,
+      [studentId],
+    )
+
+    res.json({
+      success: true,
+      participations: participations.rows,
+    })
+  } catch (error) {
+    console.error("Error getting student participations:", error)
+    res.status(500).json({ error: "Помилка сервера при отриманні участей студента" })
+  }
+})
+
 app.use((err, req, res, next) => {
   console.error("❌ Необроблена помилка сервера:")
   console.error("URL:", req.url)
@@ -2437,7 +2792,7 @@ app.use((err, req, res, next) => {
 // Запуск сервера
 app.listen(PORT, async () => {
   console.log(`🚀 Сервер запущено на порту ${PORT}`)
-  await initializeDatabase() // Changed from initDatabase
+  await initializeDatabase()
 
   try {
     await initBot()
