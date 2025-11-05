@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -90,16 +90,17 @@ function displayUsers(users) {
   tbody.innerHTML = ""
 
   users.forEach((user) => {
+    const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim()
     const row = document.createElement("tr")
     row.innerHTML = `
-      <td>${user.id}</td>
+      <td><span class="id-badge">${user.id}</span></td>
       <td>${user.email}</td>
-      <td>${user.first_name || ""} ${user.last_name || ""}</td>
+      <td>${fullName || "-"}</td>
       <td>${user.phone || "-"}</td>
       <td>${user.telegram || "-"}</td>
       <td><span class="role-badge ${user.role}">${user.role}</span></td>
-      <td>${new Date(user.created_at).toLocaleDateString("uk-UA")}</td>
-      <td>
+      <td><span class="date-badge">${new Date(user.created_at).toLocaleDateString("uk-UA")}</span></td>
+      <td class="action-cell">
         <button class="btn-action btn-edit" onclick="openRoleModal(${user.id}, '${user.email}', '${user.role}')">
           Змінити роль
         </button>
@@ -139,16 +140,33 @@ async function updateDashboardStats(users) {
   }
 }
 
-document.getElementById("userSearch")?.addEventListener("input", (e) => {
-  const searchTerm = e.target.value.toLowerCase()
-  const filtered = allUsers.filter(
-    (user) =>
-      user.email.toLowerCase().includes(searchTerm) ||
-      (user.first_name && user.first_name.toLowerCase().includes(searchTerm)) ||
-      (user.last_name && user.last_name.toLowerCase().includes(searchTerm)),
-  )
+document.getElementById("filterUserEmail")?.addEventListener("input", applyUserFilters)
+document.getElementById("filterUserName")?.addEventListener("input", applyUserFilters)
+document.getElementById("filterUserPhone")?.addEventListener("input", applyUserFilters)
+document.getElementById("filterUserTelegram")?.addEventListener("input", applyUserFilters)
+document.getElementById("filterUserRole")?.addEventListener("change", applyUserFilters)
+
+function applyUserFilters() {
+  const emailFilter = document.getElementById("filterUserEmail")?.value.toLowerCase() || ""
+  const nameFilter = document.getElementById("filterUserName")?.value.toLowerCase() || ""
+  const phoneFilter = document.getElementById("filterUserPhone")?.value.toLowerCase() || ""
+  const telegramFilter = document.getElementById("filterUserTelegram")?.value.toLowerCase() || ""
+  const roleFilter = document.getElementById("filterUserRole")?.value || ""
+
+  const filtered = allUsers.filter((user) => {
+    const fullName = `${user.first_name || ""} ${user.last_name || ""}`.toLowerCase()
+
+    return (
+      (emailFilter === "" || user.email.toLowerCase().includes(emailFilter)) &&
+      (nameFilter === "" || fullName.includes(nameFilter)) &&
+      (phoneFilter === "" || (user.phone || "").toLowerCase().includes(phoneFilter)) &&
+      (telegramFilter === "" || (user.telegram || "").toLowerCase().includes(telegramFilter)) &&
+      (roleFilter === "" || user.role === roleFilter)
+    )
+  })
+
   displayUsers(filtered)
-})
+}
 
 async function loadCompetitions() {
   try {
@@ -173,7 +191,7 @@ function displayCompetitions(competitions) {
   if (competitions.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="empty-state">
+        <td colspan="10" class="empty-state">
           <div class="empty-state-icon">🏆</div>
           <div class="empty-state-text">Конкурсів поки немає</div>
           <div class="empty-state-subtext">Натисніть "Додати конкурс" щоб створити перший конкурс</div>
@@ -189,18 +207,47 @@ function displayCompetitions(competitions) {
     row.innerHTML = `
       <td><span class="id-badge">${comp.id}</span></td>
       <td><strong class="comp-title">${comp.title}</strong></td>
-      <td><span class="comp-description">${comp.description ? (comp.description.length > 60 ? comp.description.substring(0, 60) + "..." : comp.description) : "-"}</span></td>
+      <td><span class="badge">${comp.level || "-"}</span></td>
+      <td>${comp.organizer || "-"}</td>
       <td><span class="date-badge">${new Date(comp.start_date).toLocaleDateString("uk-UA")}</span></td>
       <td><span class="date-badge">${new Date(comp.end_date).toLocaleDateString("uk-UA")}</span></td>
-      <td><span class="participant-count">${comp.participants_count || 0} учнів</span></td>
+      <td><span class="participant-count">${comp.participants_count || 0}</span></td>
+      <td>${comp.location || "-"}</td>
       <td><span class="status-badge ${status}">${status}</span></td>
       <td class="action-cell">
-        <button class="btn-action btn-edit" onclick="editCompetition(${comp.id})" title="Редагувати конкурс">Редагувати</button>
+        <button class="btn-action btn-edit" onclick="editCompetition(${comp.id})">Редагувати</button>
         <button class="btn-action btn-delete" onclick="deleteCompetition(${comp.id}, '${comp.title.replace(/'/g, "\\'")}')">Видалити</button>
       </td>
     `
     tbody.appendChild(row)
   })
+}
+
+document.getElementById("filterCompTitle")?.addEventListener("input", applyCompetitionFilters)
+document.getElementById("filterCompStartDate")?.addEventListener("change", applyCompetitionFilters)
+document.getElementById("filterCompEndDate")?.addEventListener("change", applyCompetitionFilters)
+document.getElementById("filterCompStatus")?.addEventListener("change", applyCompetitionFilters)
+
+function applyCompetitionFilters() {
+  const titleFilter = document.getElementById("filterCompTitle")?.value.toLowerCase() || ""
+  const startDateFilter = document.getElementById("filterCompStartDate")?.value || ""
+  const endDateFilter = document.getElementById("filterCompEndDate")?.value || ""
+  const statusFilter = document.getElementById("filterCompStatus")?.value || ""
+
+  const filtered = allCompetitions.filter((comp) => {
+    const compStatus = comp.manual_status || getCompetitionStatus(comp.start_date, comp.end_date)
+    const compStartDate = comp.start_date.split("T")[0]
+    const compEndDate = comp.end_date.split("T")[0]
+
+    return (
+      (titleFilter === "" || comp.title.toLowerCase().includes(titleFilter)) &&
+      (startDateFilter === "" || compStartDate >= startDateFilter) &&
+      (endDateFilter === "" || compEndDate <= endDateFilter) &&
+      (statusFilter === "" || compStatus === statusFilter)
+    )
+  })
+
+  displayCompetitions(filtered)
 }
 
 function getCompetitionStatus(startDate, endDate) {
@@ -243,7 +290,7 @@ document.querySelectorAll(".role-btn").forEach((btn) => {
       const response = await fetch(`${BASE_URL}/api/admin/change-role`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserId, role: newRole }),
+        body: JSON.JSON.stringify({ userId: currentUserId, role: newRole }),
       })
 
       if (response.ok) {
@@ -529,7 +576,7 @@ function displayResults(results) {
   if (results.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="10" class="empty-state">
+        <td colspan="11" class="empty-state">
           <div class="empty-state-icon">🎯</div>
           <div class="empty-state-text">Результатів поки немає</div>
           <div class="empty-state-subtext">Натисніть "Додати результат" щоб створити перший результат</div>
@@ -546,21 +593,53 @@ function displayResults(results) {
     const row = document.createElement("tr")
     row.innerHTML = `
       <td><span class="id-badge">${result.id}</span></td>
-      <td><strong class="comp-title">${result.competition_title}</strong></td>
+      <td><strong>${result.competition_title}</strong></td>
       <td>${studentName}</td>
       <td><span class="grade-badge">${result.grade || "-"}</span></td>
       <td>${result.place ? `<span class="place-badge place-${result.place}">${result.place} місце</span>` : "-"}</td>
       <td>${result.score ? `<span class="score-badge">${result.score}</span>` : "-"}</td>
-      <td><span class="achievement-badge ${result.achievement ? result.achievement.toLowerCase() : ""}">${result.achievement || "-"}</span></td>
-      <td><span class="notes-text">${result.notes ? (result.notes.length > 40 ? result.notes.substring(0, 40) + "..." : result.notes) : "-"}</span></td>
+      <td><span class="achievement-badge">${result.achievement || "-"}</span></td>
+      <td>${result.school || "-"}</td>
+      <td><span class="notes-text">${result.notes ? (result.notes.length > 30 ? result.notes.substring(0, 30) + "..." : result.notes) : "-"}</span></td>
       <td><span class="date-badge">${new Date(result.added_at).toLocaleDateString("uk-UA")}</span></td>
       <td class="action-cell">
-        <button class="btn-action btn-edit" onclick="editResult(${result.id})" title="Редагувати результат">Редагувати</button>
+        <button class="btn-action btn-edit" onclick="editResult(${result.id})">Редагувати</button>
         <button class="btn-action btn-delete" onclick="deleteResult(${result.id}, '${studentName.replace(/'/g, "\\'")}', '${result.competition_title.replace(/'/g, "\\'")}')">Видалити</button>
       </td>
     `
     tbody.appendChild(row)
   })
+}
+
+document.getElementById("filterResultCompetition")?.addEventListener("input", applyResultFiltersNew)
+document.getElementById("filterResultStudent")?.addEventListener("input", applyResultFiltersNew)
+document.getElementById("filterResultPlace")?.addEventListener("change", applyResultFiltersNew)
+document.getElementById("filterResultGrade")?.addEventListener("change", applyResultFiltersNew)
+document.getElementById("filterResultAchievement")?.addEventListener("change", applyResultFiltersNew)
+
+function applyResultFiltersNew() {
+  const competitionFilter = document.getElementById("filterResultCompetition")?.value.toLowerCase() || ""
+  const studentFilter = document.getElementById("filterResultStudent")?.value.toLowerCase() || ""
+  const placeFilter = document.getElementById("filterResultPlace")?.value || ""
+  const gradeFilter = document.getElementById("filterResultGrade")?.value || ""
+  const achievementFilter = document.getElementById("filterResultAchievement")?.value || ""
+
+  const filtered = allResults.filter((result) => {
+    const studentName = `${result.first_name || ""} ${result.last_name || ""}`.toLowerCase()
+
+    return (
+      (competitionFilter === "" || result.competition_title.toLowerCase().includes(competitionFilter)) &&
+      (studentFilter === "" ||
+        studentName.includes(studentFilter) ||
+        result.email.toLowerCase().includes(studentFilter)) &&
+      (placeFilter === "" ||
+        (placeFilter === "other" ? result.place && result.place > 3 : result.place === Number.parseInt(placeFilter))) &&
+      (gradeFilter === "" || result.grade === gradeFilter) &&
+      (achievementFilter === "" || result.achievement === achievementFilter)
+    )
+  })
+
+  displayResults(filtered)
 }
 
 function populateCompetitionFilters() {
@@ -696,7 +775,7 @@ document.getElementById("resultForm")?.addEventListener("submit", async (e) => {
   try {
     const url = currentEditingResultId ? `${BASE_URL}/api/results/${currentEditingResultId}` : `${BASE_URL}/api/results`
 
-    const method = currentEditingCompetitionId ? "PUT" : "POST"
+    const method = currentEditingResultId ? "PUT" : "POST"
 
     const response = await fetch(url, {
       method,

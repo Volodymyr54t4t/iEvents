@@ -5,14 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Адмін панель - iEvents</title>
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <!-- Load config.js first -->
+    <script src="js/config.js"></script>
 </head>
 
 <body>
     <header id="header"></header>
+    <!-- Moved script right after header for immediate execution -->
+    <script src="js/components.js"></script>
 
     <div id="adminAuth" class="auth-overlay">
         <div class="auth-modal">
@@ -98,10 +101,20 @@
                     <h2>Управління користувачами</h2>
                     <div class="header-actions">
                         <button class="btn btn-primary" onclick="openAddUserModal()">➕ Додати користувача</button>
-                        <div class="search-box">
-                            <input type="text" id="userSearch" placeholder="🔍 Пошук користувачів...">
-                        </div>
                     </div>
+                </div>
+                <!-- Added filter row above table with input fields for each column -->
+                <div class="filter-row">
+                    <input type="text" class="filter-input" id="filterUserEmail" placeholder="Пошук по email">
+                    <input type="text" class="filter-input" id="filterUserName" placeholder="ПІБ">
+                    <input type="text" class="filter-input" id="filterUserPhone" placeholder="Телефон">
+                    <input type="text" class="filter-input" id="filterUserTelegram" placeholder="Telegram">
+                    <select class="filter-select" id="filterUserRole">
+                        <option value="">Всі ролі</option>
+                        <option value="учень">Учень</option>
+                        <option value="вчитель">Вчитель</option>
+                        <option value="методист">Методист</option>
+                    </select>
                 </div>
                 <div class="table-container">
                     <table class="data-table">
@@ -128,16 +141,19 @@
                     <h2>Управління конкурсами</h2>
                     <div class="header-actions">
                         <button class="btn btn-primary" onclick="openAddCompetitionModal()">Додати конкурс</button>
-                        <div class="search-box">
-                            <input type="text" id="competitionSearch" placeholder="Пошук конкурсів...">
-                        </div>
-                        <select class="filter-select" onchange="filterCompetitionsByStatus(this.value)">
-                            <option value="all">Всі статуси</option>
-                            <option value="активний">Активні</option>
-                            <option value="майбутній">Майбутні</option>
-                            <option value="завершений">Завершені</option>
-                        </select>
                     </div>
+                </div>
+                <!-- Added filter row for competitions -->
+                <div class="filter-row">
+                    <input type="text" class="filter-input" id="filterCompTitle" placeholder="Назва конкурсу">
+                    <input type="date" class="filter-input" id="filterCompStartDate">
+                    <input type="date" class="filter-input" id="filterCompEndDate">
+                    <select class="filter-select" id="filterCompStatus">
+                        <option value="">Всі статуси</option>
+                        <option value="активний">Активні</option>
+                        <option value="майбутній">Майбутні</option>
+                        <option value="завершений">Завершені</option>
+                    </select>
                 </div>
                 <div class="table-container">
                     <table class="data-table">
@@ -145,10 +161,12 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Назва</th>
-                                <th>Опис</th>
+                                <th>Рівень</th>
+                                <th>Організатор</th>
                                 <th>Дата початку</th>
                                 <th>Дата закінчення</th>
                                 <th>Учасників</th>
+                                <th>Місце</th>
                                 <th>Статус</th>
                                 <th>Дії</th>
                             </tr>
@@ -164,36 +182,35 @@
                     <h2>Управління результатами</h2>
                     <div class="header-actions">
                         <button class="btn btn-primary" onclick="openAddResultModal()">Додати результат</button>
-                        <div class="search-box">
-                            <input type="text" id="resultSearch" placeholder="Пошук результатів...">
-                        </div>
-                        <select class="filter-select" id="resultCompetitionFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі конкурси</option>
-                        </select>
-                        <select class="filter-select" id="resultPlaceFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі місця</option>
-                            <option value="1">1 місце</option>
-                            <option value="2">2 місце</option>
-                            <option value="3">3 місце</option>
-                            <option value="other">Інші місця</option>
-                        </select>
-                        <select class="filter-select" id="resultGradeFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі класи</option>
-                            <option value="5">5 клас</option>
-                            <option value="6">6 клас</option>
-                            <option value="7">7 клас</option>
-                            <option value="8">8 клас</option>
-                            <option value="9">9 клас</option>
-                            <option value="10">10 клас</option>
-                            <option value="11">11 клас</option>
-                        </select>
-                        <select class="filter-select" id="resultAchievementFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі досягнення</option>
-                            <option value="Переможець">Переможець</option>
-                            <option value="Призер">Призер</option>
-                            <option value="Учасник">Учасник</option>
-                        </select>
                     </div>
+                </div>
+                <!-- Added filter row for results -->
+                <div class="filter-row">
+                    <input type="text" class="filter-input" id="filterResultCompetition" placeholder="Конкурс">
+                    <input type="text" class="filter-input" id="filterResultStudent" placeholder="ПІБ учня">
+                    <select class="filter-select" id="filterResultPlace">
+                        <option value="">Всі місця</option>
+                        <option value="1">1 місце</option>
+                        <option value="2">2 місце</option>
+                        <option value="3">3 місце</option>
+                        <option value="other">Інші</option>
+                    </select>
+                    <select class="filter-select" id="filterResultGrade">
+                        <option value="">Всі класи</option>
+                        <option value="5">5 клас</option>
+                        <option value="6">6 клас</option>
+                        <option value="7">7 клас</option>
+                        <option value="8">8 клас</option>
+                        <option value="9">9 клас</option>
+                        <option value="10">10 клас</option>
+                        <option value="11">11 клас</option>
+                    </select>
+                    <select class="filter-select" id="filterResultAchievement">
+                        <option value="">Всі досягнення</option>
+                        <option value="Переможець">Переможець</option>
+                        <option value="Призер">Призер</option>
+                        <option value="Учасник">Учасник</option>
+                    </select>
                 </div>
                 <div class="table-container">
                     <table class="data-table">
@@ -206,8 +223,9 @@
                                 <th>Місце</th>
                                 <th>Бали</th>
                                 <th>Досягнення</th>
+                                <th>Школа</th>
                                 <th>Примітки</th>
-                                <th>Дата додавання</th>
+                                <th>Дата</th>
                                 <th>Дії</th>
                             </tr>
                         </thead>
@@ -531,7 +549,7 @@
     <div id="footer"></div>
 
     <script src="js/role.js"></script>
-    <script src="js/components.js"></script>
+    <!-- Removed components.js from here since it's now loaded earlier -->
     <script src="js/admin.js"></script>
 </body>
 

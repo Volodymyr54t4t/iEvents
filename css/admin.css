@@ -11,16 +11,33 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* Added padding-top to account for fixed header */
-  padding-top: 90px;
+  /* removed padding-top from body */
+}
+
+/* fixed header to top */
+#header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* fixed footer to bottom */
+#footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
 main {
   flex: 1;
-}
-
-#footer {
-  margin-top: auto;
+  /* added margin-top and margin-bottom to prevent overlap with fixed header/footer */
+  margin-top: 90px;
+  margin-bottom: 80px;
+  overflow-y: auto;
 }
 
 .auth-overlay {
@@ -74,7 +91,6 @@ main {
   font-weight: 700;
 }
 
-/* Updated color palette to soft blue-cyan tones */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
@@ -84,7 +100,7 @@ main {
 
 .stat-card {
   background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
-  padding: 40px 40px;
+  padding: 40px;
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -174,9 +190,9 @@ main {
 
 .table-container {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
+  margin-bottom: 20px;
 }
 
 .data-table {
@@ -208,34 +224,12 @@ main {
   vertical-align: middle;
 }
 
-.data-table th:first-child,
-.data-table td:first-child {
-  min-width: 100px;
-}
-
-.data-table th:nth-child(4),
-.data-table td:nth-child(4) {
-  min-width: 140px;
-}
-
-.data-table th:nth-child(6),
-.data-table td:nth-child(6) {
-  min-width: 120px;
-}
-
-.data-table th:last-child,
-.data-table td:last-child {
-  min-width: 180px;
-}
-
 .data-table tr:last-child td {
   border-bottom: none;
 }
-
 .data-table tbody tr {
   transition: background-color 0.2s;
 }
-
 .data-table tbody tr:hover {
   background-color: #f0f9fc;
 }
@@ -252,12 +246,10 @@ main {
   background: #b3e5fc;
   color: #01579b;
 }
-
 .role-badge.вчитель {
   background: #a8d8ea;
   color: #0a5f7f;
 }
-
 .role-badge.методист {
   background: #80deea;
   color: #00838f;
@@ -294,17 +286,6 @@ main {
 
 .btn-secondary:hover {
   background: #d4ecf5;
-}
-
-.btn-change-role {
-  background: #7ec8e3;
-  color: white;
-  padding: 8px 16px;
-  font-size: 12px;
-}
-
-.btn-change-role:hover {
-  background: #5eb3d6;
 }
 
 .form-group {
@@ -464,7 +445,6 @@ main {
 .tab-btn:hover {
   color: #7ec8e3;
 }
-
 .tab-btn.active {
   color: #0a5f7f;
   border-bottom-color: #7ec8e3;
@@ -473,7 +453,6 @@ main {
 .tab-content {
   display: none;
 }
-
 .tab-content.active {
   display: block;
 }
@@ -501,35 +480,42 @@ main {
   flex-wrap: wrap;
 }
 
-.header-actions .btn {
-  margin: 0;
-  white-space: nowrap;
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: #f0f9fc;
+  border-radius: 12px;
+  border: 1px solid #a8d8ea;
 }
 
-.search-box input {
+.filter-input {
+  flex: 1;
+  min-width: 150px;
   padding: 10px 16px;
   border: 2px solid #a8d8ea;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 14px;
-  width: 100%;
-  max-width: 300px;
   color: #0a5f7f;
 }
 
-.search-box input::placeholder {
+.filter-input::placeholder {
   color: #7ec8e3;
 }
-
-.search-box input:focus {
+.filter-input:focus {
   outline: none;
   border-color: #7ec8e3;
   box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
 }
 
 .filter-select {
+  flex: 1;
+  min-width: 120px;
   padding: 10px 16px;
   border: 2px solid #a8d8ea;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
   color: #0a5f7f;
@@ -550,21 +536,6 @@ main {
   border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
-  font-family: "Courier New", monospace;
-}
-
-.comp-title {
-  color: #0a5f7f;
-  font-size: 15px;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 2px;
-}
-
-.comp-description {
-  color: #5a7a8a;
-  font-size: 13px;
-  line-height: 1.4;
 }
 
 .date-badge {
@@ -601,7 +572,6 @@ main {
   border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
-  box-shadow: 0 2px 6px rgba(77, 208, 225, 0.3);
   min-width: 70px;
   text-align: center;
 }
@@ -614,7 +584,6 @@ main {
   border-radius: 20px;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
 }
 
@@ -661,7 +630,6 @@ main {
   border-radius: 20px;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(77, 208, 225, 0.3);
 }
 
 .achievement-badge {
@@ -672,7 +640,6 @@ main {
   border-radius: 8px;
   font-weight: 600;
   font-size: 13px;
-  box-shadow: 0 2px 6px rgba(77, 208, 225, 0.3);
 }
 
 .notes-text {
@@ -690,7 +657,6 @@ main {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .status-badge.активний {
@@ -722,7 +688,6 @@ main {
   margin-right: 8px;
   transition: all 0.2s;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-edit {
@@ -826,7 +791,7 @@ main {
 }
 
 .stat-card-secondary {
-  background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
+  background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%);
 }
 
 .participation-card {
@@ -851,7 +816,6 @@ main {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 8px 24px rgba(126, 200, 227, 0.3);
 }
 
 .rate-value {
@@ -861,9 +825,13 @@ main {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.rate-details {
+  flex: 1;
+}
+
 .empty-state {
   text-align: center;
-  padding: 64px 24px !important;
+  padding: 64px 24px;
   color: #5a7a8a;
 }
 
@@ -871,7 +839,6 @@ main {
   font-size: 72px;
   margin-bottom: 16px;
   opacity: 0.4;
-  display: block;
 }
 
 .empty-state-text {
@@ -879,25 +846,22 @@ main {
   font-weight: 600;
   margin-bottom: 8px;
   color: #0a5f7f;
-  display: block;
 }
 
 .empty-state-subtext {
   font-size: 14px;
   color: #5a7a8a;
-  display: block;
 }
 
 .notification {
   position: fixed;
-  top: 20px;
+  top: 120px;
   right: 20px;
   padding: 16px 24px;
   border-radius: 10px;
   font-weight: 600;
   font-size: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10000;
+  z-index: 999;
   opacity: 0;
   transform: translateX(400px);
   transition: all 0.3s ease;
@@ -982,88 +946,16 @@ main {
   box-shadow: 0 2px 6px rgba(77, 208, 225, 0.3);
 }
 
-.participation-count {
-  display: inline-block;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 2px 8px rgba(126, 200, 227, 0.3);
-  min-width: 80px;
-  text-align: center;
-}
-
-/* Comprehensive responsive design for all screen sizes */
-
 @media (max-width: 1024px) {
   .main-content {
     padding: 32px 16px;
   }
-
   .admin-container {
     padding: 32px 24px;
   }
-
   .page-title {
     font-size: 28px;
     margin-bottom: 28px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-  }
-
-  .stat-card {
-    padding: 32px 24px;
-    flex-direction: row;
-    text-align: left;
-    min-height: 140px;
-  }
-
-  .stat-icon {
-    font-size: 56px;
-  }
-
-  .stat-info {
-    padding: 16px 24px;
-  }
-
-  .stat-value {
-    font-size: 52px;
-  }
-
-  .admin-tabs {
-    gap: 4px;
-  }
-
-  .tab-btn {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .header-actions {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .header-actions .btn {
-    width: 100%;
-  }
-
-  .search-box input {
-    max-width: 100%;
-  }
-
-  .filter-select {
-    width: 100%;
   }
 }
 
@@ -1071,193 +963,21 @@ main {
   .main-content {
     padding: 24px 12px;
   }
-
   .admin-container {
     padding: 24px 16px;
-    border-radius: 16px;
   }
-
   .page-title {
     font-size: 24px;
-    margin-bottom: 24px;
   }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .stat-card {
-    padding: 28px 20px;
-    flex-direction: row;
-    min-height: 120px;
-  }
-
-  .stat-icon {
-    font-size: 48px;
-  }
-
-  .stat-value {
-    font-size: 44px;
-  }
-
-  .stat-label {
-    font-size: 13px;
-  }
-
-  .section-header h2 {
-    font-size: 20px;
-  }
-
-  .admin-tabs {
-    gap: 4px;
-    padding-bottom: 8px;
-  }
-
-  .tab-btn {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .table-container {
-    margin: 0 -16px;
-    padding: 0 16px;
-  }
-
-  .data-table {
-    min-width: 700px;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
-
-  .btn-action {
-    padding: 8px 12px;
-    font-size: 12px;
-    margin-right: 4px;
-  }
-
-  .modal-content {
-    padding: 24px 20px;
-    max-width: 95%;
-  }
-
-  .modal-large {
-    max-width: 95%;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .form-group label {
-    font-size: 13px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-
-  .modal-actions {
+  .filter-row {
     flex-direction: column;
   }
-
-  .modal-actions .btn {
-    width: 100%;
+  .filter-input,
+  .filter-select {
+    min-width: 100%;
   }
-
-  .role-btn {
-    padding: 14px;
-    font-size: 14px;
-  }
-
-  .auth-modal {
-    padding: 32px 24px;
-    max-width: 95%;
-  }
-
-  .auth-modal h2 {
-    font-size: 22px;
-    margin-bottom: 20px;
-  }
-
-  .super-methodist-badge {
-    padding: 14px 20px;
-    font-size: 15px;
-    margin-bottom: 20px;
-  }
-
-  .stats-section {
-    padding: 20px 16px;
-    margin-bottom: 20px;
-  }
-
-  .stats-section h3 {
-    font-size: 18px;
-    margin-bottom: 14px;
-  }
-
   .participation-rate {
     flex-direction: column;
-    gap: 20px;
-  }
-
-  .rate-circle {
-    width: 150px;
-    height: 150px;
-  }
-
-  .rate-value {
-    font-size: 48px;
-  }
-
-  .rate-details p {
-    font-size: 14px;
-  }
-
-  .notification {
-    top: 10px;
-    right: 10px;
-    left: 10px;
-    padding: 14px 18px;
-    font-size: 13px;
-  }
-
-  .empty-state {
-    padding: 48px 20px !important;
-  }
-
-  .empty-state-icon {
-    font-size: 56px;
-  }
-
-  .empty-state-text {
-    font-size: 18px;
-  }
-
-  .empty-state-subtext {
-    font-size: 13px;
-  }
-
-  .timeline-bar {
-    grid-template-columns: 60px 1fr 50px;
-    gap: 12px;
-  }
-
-  .timeline-label {
-    font-size: 12px;
-  }
-
-  .timeline-value {
-    font-size: 12px;
   }
 }
 
@@ -1265,182 +985,13 @@ main {
   .main-content {
     padding: 20px 10px;
   }
-
   .admin-container {
     padding: 20px 12px;
   }
-
   .page-title {
     font-size: 20px;
-    margin-bottom: 20px;
   }
-
-  .stat-card {
-    padding: 20px 16px;
-    min-height: 110px;
-  }
-
-  .stat-icon {
-    font-size: 40px;
-  }
-
-  .stat-value {
-    font-size: 36px;
-  }
-
-  .stat-label {
-    font-size: 12px;
-  }
-
-  .section-header h2 {
-    font-size: 18px;
-  }
-
-  .tab-btn {
-    padding: 8px 10px;
-    font-size: 11px;
-  }
-
-  .data-table {
-    min-width: 600px;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .btn {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
-  .btn-action {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .modal-content {
-    padding: 20px 16px;
-  }
-
-  .modal-content h3 {
-    font-size: 18px;
-    margin-bottom: 12px;
-  }
-
-  .modal-content p {
-    font-size: 13px;
-    margin-bottom: 20px;
-  }
-
-  .form-group label {
-    font-size: 12px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 9px 12px;
-    font-size: 12px;
-  }
-
-  .role-btn {
-    padding: 12px;
-    font-size: 13px;
-  }
-
-  .auth-modal {
-    padding: 24px 16px;
-  }
-
-  .auth-modal h2 {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .super-methodist-badge {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-
-  .stats-section {
-    padding: 16px 12px;
-  }
-
-  .stats-section h3 {
-    font-size: 16px;
-  }
-
-  .role-badge,
-  .status-badge,
-  .id-badge,
-  .date-badge,
-  .grade-badge,
-  .achievement-badge {
-    padding: 4px 8px;
-    font-size: 11px;
-  }
-
-  .participant-count,
-  .place-badge,
-  .score-badge {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .comp-title {
-    font-size: 14px;
-  }
-
-  .comp-description {
-    font-size: 12px;
-  }
-
-  .notes-text {
-    font-size: 12px;
-  }
-
-  .empty-state {
-    padding: 32px 16px !important;
-  }
-
-  .empty-state-icon {
-    font-size: 48px;
-  }
-
-  .empty-state-text {
-    font-size: 16px;
-  }
-
-  .empty-state-subtext {
-    font-size: 12px;
-  }
-
-  .rate-circle {
-    width: 130px;
-    height: 130px;
-  }
-
-  .rate-value {
-    font-size: 42px;
-  }
-
-  .rate-details p {
-    font-size: 13px;
-  }
-
-  .timeline-bar {
-    grid-template-columns: 50px 1fr 40px;
-    gap: 8px;
-  }
-
-  .timeline-label {
-    font-size: 11px;
-  }
-
-  .timeline-value {
-    font-size: 11px;
+  .section-header {
+    flex-direction: column;
   }
 }
