@@ -7,24 +7,33 @@ function renderHeader() {
   const header = document.getElementById("header")
   if (!header) return
 
+  const isGuest = !userId
+  const displayRole = isGuest ? "учень" : userRole
+
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист" ?
+    displayRole === "вчитель" || displayRole === "методист" ?
     '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
     '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const resultsLink =
-    userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
+    displayRole === "вчитель" || displayRole === "методист" ?
+    '<a href="results.html" class="nav-link">Результати</a>' :
+    ""
 
   const statisticsLink =
-    userRole === "вчитель" || userRole === "методист" ? '<a href="statistics.html" class="nav-link">Статистика</a>' : ""
+    displayRole === "вчитель" || displayRole === "методист" ?
+    '<a href="statistics.html" class="nav-link">Статистика</a>' :
+    ""
 
   const predictionsLink =
-    userRole === "вчитель" || userRole === "методист" ? '<a href="predictions.html" class="nav-link">Прогнози</a>' : ""
+    displayRole === "вчитель" || displayRole === "методист" ?
+    '<a href="predictions.html" class="nav-link">Прогнози</a>' :
+    ""
 
-  const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
+  const adminLink = displayRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
 
   const profileLink =
-    userRole === "вчитель" || userRole === "методист" ?
+    displayRole === "вчитель" || displayRole === "методист" ?
     '<a href="profileT.html" class="nav-link">Профіль</a>' :
     '<a href="profile.html" class="nav-link">Профіль</a>'
 

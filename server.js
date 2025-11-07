@@ -1043,6 +1043,43 @@ app.get("/api/admin/users", async (req, res) => {
   }
 })
 
+app.delete("/api/admin/delete-user/:id", async (req, res) => {
+  const { id } = req.params
+
+  console.log("Видалення користувача ID:", id)
+
+  try {
+    const client = await pool.connect()
+
+    try {
+      await client.query("BEGIN")
+
+      // Delete all related data
+      await client.query("DELETE FROM competition_results WHERE user_id = $1", [id])
+      await client.query("DELETE FROM competition_participants WHERE user_id = $1", [id])
+      await client.query("DELETE FROM profiles WHERE user_id = $1", [id])
+      await client.query("DELETE FROM users WHERE id = $1", [id])
+
+      await client.query("COMMIT")
+      console.log("✓ Користувача видалено")
+
+      res.json({
+        message: "Користувача успішно видалено",
+      })
+    } catch (error) {
+      await client.query("ROLLBACK")
+      throw error
+    } finally {
+      client.release()
+    }
+  } catch (error) {
+    console.error("❌ Помилка видалення користувача:", error.message)
+    res.status(500).json({
+      error: "Помилка видалення користувача",
+    })
+  }
+})
+
 app.post("/api/admin/change-role", async (req, res) => {
   const { userId, role } = req.body
 
@@ -1144,6 +1181,55 @@ app.get("/api/students", async (req, res) => {
   }
 })
 
+app.get("/api/admin/schools", async (req, res) => {
+  console.log("Запит списку шкіл")
+
+  try {
+    const result = await pool.query(`
+      SELECT id, name, created_at
+      FROM schools
+      ORDER BY name ASC
+    `)
+
+    console.log("✓ Знайдено шкіл:", result.rows.length)
+    res.json({
+      schools: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання шкіл:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання шкіл",
+    })
+  }
+})
+
+app.delete("/api/admin/schools/:id", async (req, res) => {
+  const { id } = req.params
+
+  console.log("Видалення школи ID:", id)
+
+  try {
+    const result = await pool.query("DELETE FROM schools WHERE id = $1 RETURNING id", [id])
+
+    if (result.rows.length === 0) {
+      console.log("Помилка: школу не знайдено")
+      return res.status(404).json({
+        error: "Школу не знайдено",
+      })
+    }
+
+    console.log("✓ Школу видалено")
+    res.json({
+      message: "Школу успішно видалено",
+    })
+  } catch (error) {
+    console.error("❌ Помилка видалення школи:", error.message)
+    res.status(500).json({
+      error: "Помилка видалення школи",
+    })
+  }
+})
+
 app.get("/api/subjects", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM subjects ORDER BY name")
@@ -1151,6 +1237,55 @@ app.get("/api/subjects", async (req, res) => {
   } catch (error) {
     console.error("Помилка отримання предметів:", error)
     res.status(500).json({ error: "Помилка отримання предметів" })
+  }
+})
+
+app.get("/api/admin/subjects", async (req, res) => {
+  console.log("Запит списку предметів")
+
+  try {
+    const result = await pool.query(`
+      SELECT id, name, created_at
+      FROM subjects
+      ORDER BY name ASC
+    `)
+
+    console.log("✓ Знайдено предметів:", result.rows.length)
+    res.json({
+      subjects: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання предметів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання предметів",
+    })
+  }
+})
+
+app.delete("/api/admin/subjects/:id", async (req, res) => {
+  const { id } = req.params
+
+  console.log("Видалення предмету ID:", id)
+
+  try {
+    const result = await pool.query("DELETE FROM subjects WHERE id = $1 RETURNING id", [id])
+
+    if (result.rows.length === 0) {
+      console.log("Помилка: предмет не знайдено")
+      return res.status(404).json({
+        error: "Предмет не знайдено",
+      })
+    }
+
+    console.log("✓ Предмет видалено")
+    res.json({
+      message: "Предмет успішно видалено",
+    })
+  } catch (error) {
+    console.error("❌ Помилка видалення предмету:", error.message)
+    res.status(500).json({
+      error: "Помилка видалення предмету",
+    })
   }
 })
 

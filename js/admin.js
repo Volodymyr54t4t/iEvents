@@ -14,9 +14,13 @@ let currentUserId = null
 let isSuperMethodist = false
 let currentEditingCompetitionId = null
 let currentEditingResultId = null
+const currentEditingSchoolId = null
+const currentEditingSubjectId = null
 let allUsers = []
 let allCompetitions = []
 let allResults = []
+let allSchools = []
+let allSubjects = []
 let competitionParticipants = []
 
 // Admin authentication
@@ -51,7 +55,7 @@ document.getElementById("adminAuthForm").addEventListener("submit", async (e) =>
 })
 
 async function initializeAdminPanel() {
-  await Promise.all([loadUsers(), loadCompetitions(), loadResults()])
+  await Promise.all([loadUsers(), loadCompetitions(), loadResults(), loadSchools(), loadSubjects()])
 }
 
 document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -70,6 +74,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
   })
 })
 
+// ==================== USERS ====================
 async function loadUsers() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/users`)
@@ -101,12 +106,8 @@ function displayUsers(users) {
       <td><span class="role-badge ${user.role}">${user.role}</span></td>
       <td><span class="date-badge">${new Date(user.created_at).toLocaleDateString("uk-UA")}</span></td>
       <td class="action-cell">
-        <button class="btn-action btn-edit" onclick="openRoleModal(${user.id}, '${user.email}', '${user.role}')">
-          Змінити роль
-        </button>
-        <button class="btn-action btn-view" onclick="viewUserProfile(${user.id})">
-          Профіль
-        </button>
+        <button class="btn-action btn-edit" onclick="openRoleModal(${user.id}, '${user.email}', '${user.role}')">Змінити</button>
+        <button class="btn-action btn-delete" onclick="deleteUser(${user.id}, '${user.email}')">Видалити</button>
       </td>
     `
     tbody.appendChild(row)
@@ -168,6 +169,145 @@ function applyUserFilters() {
   displayUsers(filtered)
 }
 
+document.querySelectorAll(".role-btn").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const newRole = btn.dataset.role
+
+    if (newRole === "методист" && !isSuperMethodist) {
+      alert("Тільки головний методист може призначати роль методиста")
+      return
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/admin/change-role`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId, role: newRole }),
+      })
+
+      if (response.ok) {
+        const loggedInUserId = localStorage.getItem("userId")
+
+        if (currentUserId.toString() === loggedInUserId) {
+          localStorage.setItem("userRole", newRole)
+
+          if (typeof window.renderHeader === "function") {
+            window.renderHeader(newRole)
+          }
+        }
+
+        closeRoleModal()
+        await loadUsers()
+        alert(`Роль успішно змінено на: ${newRole}`)
+      }
+    } catch (error) {
+      console.error("Error changing role:", error)
+      alert("Помилка зміни ролі")
+    }
+  })
+})
+
+async function deleteUser(userId, email) {
+  if (!confirm(`Видалити користувача ${email}?`)) return
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/admin/delete-user/${userId}`, {
+      method: "DELETE",
+    })
+
+    if (response.ok) {
+      showNotification("Користувача видалено", "success")
+      await loadUsers()
+    } else {
+      showNotification("Помилка видалення", "error")
+    }
+  } catch (error) {
+    console.error("Error:", error)
+    showNotification("Помилка видалення", "error")
+  }
+}
+
+function openRoleModal(userId, email, currentRole) {
+  currentUserId = userId
+  document.getElementById("modalUserInfo").textContent = `${email} (Роль: ${currentRole})`
+
+  const methodistBtn = document.querySelector('.role-btn[data-role="методист"]')
+  if (methodistBtn) {
+    methodistBtn.style.display = isSuperMethodist ? "inline-block" : "none"
+  }
+
+  document.getElementById("roleModal").classList.add("show")
+}
+
+function closeRoleModal() {
+  document.getElementById("roleModal").classList.remove("show")
+  currentUserId = null
+}
+
+function openAddUserModal() {
+  document.getElementById("newUserEmail").value = ""
+  document.getElementById("newUserPassword").value = ""
+  document.getElementById("newUserFirstName").value = ""
+  document.getElementById("newUserLastName").value = ""
+  document.getElementById("newUserRole").value = "учень"
+  document.getElementById("newUserPhone").value = ""
+  document.getElementById("newUserTelegram").value = ""
+
+  const methodistOption = document.getElementById("methodistOption")
+  if (methodistOption) {
+    methodistOption.style.display = isSuperMethodist ? "block" : "none"
+  }
+
+  document.getElementById("addUserModal").classList.add("show")
+}
+
+function closeAddUserModal() {
+  document.getElementById("addUserModal").classList.remove("show")
+}
+
+document.getElementById("addUserForm").addEventListener("submit", async (e) => {
+  e.preventDefault()
+
+  const role = document.getElementById("newUserRole").value
+
+  if (role === "методист" && !isSuperMethodist) {
+    alert("Тільки головний методист може створювати методистів")
+    return
+  }
+
+  const userData = {
+    email: document.getElementById("newUserEmail").value,
+    password: document.getElementById("newUserPassword").value,
+    firstName: document.getElementById("newUserFirstName").value,
+    lastName: document.getElementById("newUserLastName").value,
+    role: role,
+    phone: document.getElementById("newUserPhone").value,
+    telegram: document.getElementById("newUserTelegram").value,
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/admin/create-user`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      alert("Користувача успішно створено!")
+      closeAddUserModal()
+      await loadUsers()
+    } else {
+      alert(data.error || "Помилка створення користувача")
+    }
+  } catch (error) {
+    console.error("Error creating user:", error)
+    alert("Помилка створення користувача")
+  }
+})
+
+// ==================== COMPETITIONS ====================
 async function loadCompetitions() {
   try {
     const response = await fetch(`${BASE_URL}/api/competitions`)
@@ -194,7 +334,6 @@ function displayCompetitions(competitions) {
         <td colspan="10" class="empty-state">
           <div class="empty-state-icon">🏆</div>
           <div class="empty-state-text">Конкурсів поки немає</div>
-          <div class="empty-state-subtext">Натисніть "Додати конкурс" щоб створити перший конкурс</div>
         </td>
       </tr>
     `
@@ -206,7 +345,7 @@ function displayCompetitions(competitions) {
     const row = document.createElement("tr")
     row.innerHTML = `
       <td><span class="id-badge">${comp.id}</span></td>
-      <td><strong class="comp-title">${comp.title}</strong></td>
+      <td><strong>${comp.title}</strong></td>
       <td><span class="badge">${comp.level || "-"}</span></td>
       <td>${comp.organizer || "-"}</td>
       <td><span class="date-badge">${new Date(comp.start_date).toLocaleDateString("uk-UA")}</span></td>
@@ -216,7 +355,7 @@ function displayCompetitions(competitions) {
       <td><span class="status-badge ${status}">${status}</span></td>
       <td class="action-cell">
         <button class="btn-action btn-edit" onclick="editCompetition(${comp.id})">Редагувати</button>
-        <button class="btn-action btn-delete" onclick="deleteCompetition(${comp.id}, '${comp.title.replace(/'/g, "\\'")}')">Видалити</button>
+        <button class="btn-action btn-delete" onclick="deleteCompetition(${comp.id})">Видалити</button>
       </td>
     `
     tbody.appendChild(row)
@@ -259,61 +398,6 @@ function getCompetitionStatus(startDate, endDate) {
   if (start > now) return "майбутній"
   return "активний"
 }
-
-function openRoleModal(userId, email, currentRole) {
-  currentUserId = userId
-  document.getElementById("modalUserInfo").textContent = `Користувач: ${email} (Поточна роль: ${currentRole})`
-
-  const methodistBtn = document.querySelector('.role-btn[data-role="методист"]')
-  if (methodistBtn) {
-    methodistBtn.style.display = isSuperMethodist ? "inline-block" : "none"
-  }
-
-  document.getElementById("roleModal").classList.add("show")
-}
-
-function closeRoleModal() {
-  document.getElementById("roleModal").classList.remove("show")
-  currentUserId = null
-}
-
-document.querySelectorAll(".role-btn").forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    const newRole = btn.dataset.role
-
-    if (newRole === "методист" && !isSuperMethodist) {
-      alert("Тільки головний методист може призначати роль методиста")
-      return
-    }
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/admin/change-role`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.JSON.stringify({ userId: currentUserId, role: newRole }),
-      })
-
-      if (response.ok) {
-        const loggedInUserId = localStorage.getItem("userId")
-
-        if (currentUserId.toString() === loggedInUserId) {
-          localStorage.setItem("userRole", newRole)
-
-          if (typeof window.renderHeader === "function") {
-            window.renderHeader(newRole)
-          }
-        }
-
-        closeRoleModal()
-        await loadUsers()
-        alert(`Роль успішно змінено на: ${newRole}`)
-      }
-    } catch (error) {
-      console.error("Error changing role:", error)
-      alert("Помилка зміни ролі")
-    }
-  })
-})
 
 function openAddCompetitionModal() {
   currentEditingCompetitionId = null
@@ -382,27 +466,22 @@ document.getElementById("competitionForm").addEventListener("submit", async (e) 
     })
 
     if (response.ok) {
-      const message = currentEditingCompetitionId ? "Конкурс успішно оновлено" : "Конкурс успішно створено"
+      const message = currentEditingCompetitionId ? "Конкурс оновлено" : "Конкурс створено"
       showNotification(message, "success")
       closeCompetitionModal()
       await loadCompetitions()
     } else {
       const errorData = await response.json()
-      showNotification(errorData.error || "Помилка збереження конкурсу", "error")
+      showNotification(errorData.error || "Помилка", "error")
     }
   } catch (error) {
-    console.error("Error saving competition:", error)
-    showNotification("Помилка збереження конкурсу", "error")
+    console.error("Error:", error)
+    showNotification("Помилка", "error")
   }
 })
 
-async function deleteCompetition(id, title) {
-  if (
-    !confirm(
-      `⚠️ Видалити конкурс "${title}"?\n\nУвага: Це також видалить:\n• Всіх учасників конкурсу\n• Всі результати конкурсу\n\nЦю дію неможливо скасувати!`,
-    )
-  )
-    return
+async function deleteCompetition(id) {
+  if (!confirm("Видалити конкурс? Це також видалить всіх учасників і результати.")) return
 
   try {
     const response = await fetch(`${BASE_URL}/api/competitions/${id}`, {
@@ -410,150 +489,32 @@ async function deleteCompetition(id, title) {
     })
 
     if (response.ok) {
-      showNotification("Конкурс успішно видалено", "success")
+      showNotification("Конкурс видалено", "success")
       await loadCompetitions()
     } else {
-      const errorData = await response.json()
-      showNotification(errorData.error || "Помилка видалення конкурсу", "error")
+      showNotification("Помилка видалення", "error")
     }
   } catch (error) {
-    console.error("Error deleting competition:", error)
-    showNotification("Помилка видалення конкурсу", "error")
+    console.error("Error:", error)
+    showNotification("Помилка видалення", "error")
   }
 }
 
-function viewUserProfile(userId) {
-  window.open(`profile.html?userId=${userId}`, "_blank")
+function populateCompetitionFilters() {
+  const filterSelect = document.getElementById("resultCompetitionFilter")
+  if (!filterSelect) return
+
+  filterSelect.innerHTML = '<option value="all">Всі конкурси</option>'
+
+  allCompetitions.forEach((comp) => {
+    const option = document.createElement("option")
+    option.value = comp.id
+    option.textContent = comp.title
+    filterSelect.appendChild(option)
+  })
 }
 
-function openAddUserModal() {
-  document.getElementById("newUserEmail").value = ""
-  document.getElementById("newUserPassword").value = ""
-  document.getElementById("newUserFirstName").value = ""
-  document.getElementById("newUserLastName").value = ""
-  document.getElementById("newUserRole").value = "учень"
-  document.getElementById("newUserPhone").value = ""
-  document.getElementById("newUserTelegram").value = ""
-
-  const methodistOption = document.getElementById("methodistOption")
-  if (methodistOption) {
-    methodistOption.style.display = isSuperMethodist ? "block" : "none"
-  }
-
-  document.getElementById("addUserModal").classList.add("show")
-}
-
-function closeAddUserModal() {
-  document.getElementById("addUserModal").classList.remove("show")
-}
-
-document.getElementById("addUserForm").addEventListener("submit", async (e) => {
-  e.preventDefault()
-
-  const role = document.getElementById("newUserRole").value
-
-  if (role === "методист" && !isSuperMethodist) {
-    alert("Тільки головний методист може створювати користувачів з роллю методиста")
-    return
-  }
-
-  const userData = {
-    email: document.getElementById("newUserEmail").value,
-    password: document.getElementById("newUserPassword").value,
-    firstName: document.getElementById("newUserFirstName").value,
-    lastName: document.getElementById("newUserLastName").value,
-    role: role,
-    phone: document.getElementById("newUserPhone").value,
-    telegram: document.getElementById("newUserTelegram").value,
-  }
-
-  try {
-    const response = await fetch(`${BASE_URL}/api/admin/create-user`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    })
-
-    const data = await response.json()
-
-    if (response.ok) {
-      alert("Користувача успішно створено!")
-      closeAddUserModal()
-      await loadUsers()
-    } else {
-      alert(data.error || "Помилка створення користувача")
-    }
-  } catch (error) {
-    console.error("Error creating user:", error)
-    alert("Помилка створення користувача")
-  }
-})
-
-function showNotification(message, type = "info") {
-  const existing = document.querySelector(".notification")
-  if (existing) existing.remove()
-
-  const notification = document.createElement("div")
-  notification.className = `notification notification-${type}`
-  notification.textContent = message
-
-  document.body.appendChild(notification)
-
-  setTimeout(() => notification.classList.add("show"), 10)
-
-  setTimeout(() => {
-    notification.classList.remove("show")
-    setTimeout(() => notification.remove(), 300)
-  }, 3000)
-}
-
-document.getElementById("resultCompetition")?.addEventListener("change", async (e) => {
-  const competitionId = e.target.value
-  const studentSelect = document.getElementById("resultStudent")
-
-  if (!competitionId) {
-    studentSelect.innerHTML = '<option value="">Спочатку оберіть конкурс</option>'
-    return
-  }
-
-  try {
-    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/participants-with-results`)
-    const data = await response.json()
-
-    if (response.ok) {
-      competitionParticipants = data.participants
-      studentSelect.innerHTML = '<option value="">Оберіть учня</option>'
-
-      if (competitionParticipants.length === 0) {
-        studentSelect.innerHTML = '<option value="">Немає учасників у цьому конкурсі</option>'
-        return
-      }
-
-      const uniqueStudents = new Map()
-      competitionParticipants.forEach((participant) => {
-        if (!uniqueStudents.has(participant.student_id)) {
-          uniqueStudents.set(participant.student_id, participant)
-        }
-      })
-
-      uniqueStudents.forEach((participant) => {
-        const studentName =
-          participant.first_name && participant.last_name
-            ? `${participant.last_name} ${participant.first_name} (${participant.grade || "клас не вказано"})`
-            : participant.email
-
-        const option = document.createElement("option")
-        option.value = participant.student_id
-        option.textContent = studentName
-        studentSelect.appendChild(option)
-      })
-    }
-  } catch (error) {
-    console.error("Error loading participants:", error)
-    showNotification("Помилка завантаження учасників", "error")
-  }
-})
-
+// ==================== RESULTS ====================
 async function loadResults() {
   try {
     const response = await fetch(`${BASE_URL}/api/admin/all-results`)
@@ -579,7 +540,6 @@ function displayResults(results) {
         <td colspan="11" class="empty-state">
           <div class="empty-state-icon">🎯</div>
           <div class="empty-state-text">Результатів поки немає</div>
-          <div class="empty-state-subtext">Натисніть "Додати результат" щоб створити перший результат</div>
         </td>
       </tr>
     `
@@ -604,7 +564,7 @@ function displayResults(results) {
       <td><span class="date-badge">${new Date(result.added_at).toLocaleDateString("uk-UA")}</span></td>
       <td class="action-cell">
         <button class="btn-action btn-edit" onclick="editResult(${result.id})">Редагувати</button>
-        <button class="btn-action btn-delete" onclick="deleteResult(${result.id}, '${studentName.replace(/'/g, "\\'")}', '${result.competition_title.replace(/'/g, "\\'")}')">Видалити</button>
+        <button class="btn-action btn-delete" onclick="deleteResult(${result.id})">Видалити</button>
       </td>
     `
     tbody.appendChild(row)
@@ -642,20 +602,6 @@ function applyResultFiltersNew() {
   displayResults(filtered)
 }
 
-function populateCompetitionFilters() {
-  const filterSelect = document.getElementById("resultCompetitionFilter")
-  if (!filterSelect) return
-
-  filterSelect.innerHTML = '<option value="all">Всі конкурси</option>'
-
-  allCompetitions.forEach((comp) => {
-    const option = document.createElement("option")
-    option.value = comp.id
-    option.textContent = comp.title
-    filterSelect.appendChild(option)
-  })
-}
-
 async function openAddResultModal() {
   currentEditingResultId = null
   document.getElementById("resultModalTitle").textContent = "Додати результат"
@@ -678,73 +624,52 @@ async function openAddResultModal() {
   document.getElementById("resultModal").classList.add("show")
 }
 
-document.getElementById("resultSearch")?.addEventListener("input", () => {
-  applyResultFilters()
-})
+document.getElementById("resultCompetition")?.addEventListener("change", async (e) => {
+  const competitionId = e.target.value
+  const studentSelect = document.getElementById("resultStudent")
 
-document.getElementById("resultCompetitionFilter")?.addEventListener("change", () => {
-  applyResultFilters()
-})
-
-document.getElementById("resultPlaceFilter")?.addEventListener("change", () => {
-  applyResultFilters()
-})
-
-document.getElementById("resultGradeFilter")?.addEventListener("change", () => {
-  applyResultFilters()
-})
-
-document.getElementById("resultAchievementFilter")?.addEventListener("change", () => {
-  applyResultFilters()
-})
-
-function applyResultFilters() {
-  const searchTerm = document.getElementById("resultSearch")?.value.toLowerCase() || ""
-  const competitionId = document.getElementById("resultCompetitionFilter")?.value || "all"
-  const placeFilter = document.getElementById("resultPlaceFilter")?.value || "all"
-  const gradeFilter = document.getElementById("resultGradeFilter")?.value || "all"
-  const achievementFilter = document.getElementById("resultAchievementFilter")?.value || "all"
-
-  let filtered = allResults
-
-  if (searchTerm) {
-    filtered = filtered.filter(
-      (result) =>
-        result.competition_title.toLowerCase().includes(searchTerm) ||
-        (result.first_name && result.first_name.toLowerCase().includes(searchTerm)) ||
-        (result.last_name && result.last_name.toLowerCase().includes(searchTerm)) ||
-        result.email.toLowerCase().includes(searchTerm) ||
-        (result.achievement && result.achievement.toLowerCase().includes(searchTerm)) ||
-        (result.notes && result.notes.toLowerCase().includes(searchTerm)),
-    )
+  if (!competitionId) {
+    studentSelect.innerHTML = '<option value="">Спочатку оберіть конкурс</option>'
+    return
   }
 
-  if (competitionId !== "all") {
-    filtered = filtered.filter((result) => result.competition_id === Number.parseInt(competitionId))
-  }
+  try {
+    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/participants-with-results`)
+    const data = await response.json()
 
-  if (placeFilter !== "all") {
-    if (placeFilter === "other") {
-      filtered = filtered.filter((result) => result.place && result.place > 3)
-    } else {
-      filtered = filtered.filter((result) => result.place === Number.parseInt(placeFilter))
+    if (response.ok) {
+      competitionParticipants = data.participants
+      studentSelect.innerHTML = '<option value="">Оберіть учня</option>'
+
+      if (competitionParticipants.length === 0) {
+        studentSelect.innerHTML = '<option value="">Немає учасників</option>'
+        return
+      }
+
+      const uniqueStudents = new Map()
+      competitionParticipants.forEach((participant) => {
+        if (!uniqueStudents.has(participant.student_id)) {
+          uniqueStudents.set(participant.student_id, participant)
+        }
+      })
+
+      uniqueStudents.forEach((participant) => {
+        const studentName =
+          participant.first_name && participant.last_name
+            ? `${participant.last_name} ${participant.first_name} (${participant.grade || "клас не вказано"})`
+            : participant.email
+
+        const option = document.createElement("option")
+        option.value = participant.student_id
+        option.textContent = studentName
+        studentSelect.appendChild(option)
+      })
     }
+  } catch (error) {
+    console.error("Error:", error)
+    showNotification("Помилка завантаження учасників", "error")
   }
-
-  if (gradeFilter !== "all") {
-    filtered = filtered.filter((result) => {
-      const resultGrade = result.grade ? Number.parseInt(result.grade) : null
-      const filterGrade = Number.parseInt(gradeFilter)
-      return resultGrade === filterGrade
-    })
-  }
-
-  if (achievementFilter !== "all") {
-    filtered = filtered.filter((result) => result.achievement === achievementFilter)
-  }
-
-  displayResults(filtered)
-}
+})
 
 function closeResultModal() {
   document.getElementById("resultModal").classList.remove("show")
@@ -774,7 +699,6 @@ document.getElementById("resultForm")?.addEventListener("submit", async (e) => {
 
   try {
     const url = currentEditingResultId ? `${BASE_URL}/api/results/${currentEditingResultId}` : `${BASE_URL}/api/results`
-
     const method = currentEditingResultId ? "PUT" : "POST"
 
     const response = await fetch(url, {
@@ -784,40 +708,19 @@ document.getElementById("resultForm")?.addEventListener("submit", async (e) => {
     })
 
     if (response.ok) {
-      const message = currentEditingResultId ? "Результат успішно оновлено" : "Результат успішно додано"
+      const message = currentEditingResultId ? "Результат оновлено" : "Результат додано"
       showNotification(message, "success")
       closeResultModal()
       await loadResults()
     } else {
       const errorData = await response.json()
-      showNotification(errorData.error || "Помилка збереження результату", "error")
+      showNotification(errorData.error || "Помилка", "error")
     }
   } catch (error) {
-    console.error("Error saving result:", error)
-    showNotification("Помилка збереження результату", "error")
+    console.error("Error:", error)
+    showNotification("Помилка", "error")
   }
 })
-
-async function deleteResult(id, studentName, competitionTitle) {
-  if (!confirm(`Видалити результат учня "${studentName}" у конкурсі "${competitionTitle}"?`)) return
-
-  try {
-    const response = await fetch(`${BASE_URL}/api/results/${id}`, {
-      method: "DELETE",
-    })
-
-    if (response.ok) {
-      showNotification("Результат успішно видалено", "success")
-      await loadResults()
-    } else {
-      const errorData = await response.json()
-      showNotification(errorData.error || "Помилка видалення результату", "error")
-    }
-  } catch (error) {
-    console.error("Error deleting result:", error)
-    showNotification("Помилка видалення результату", "error")
-  }
-}
 
 async function editResult(id) {
   const result = allResults.find((r) => r.id === id)
@@ -865,7 +768,7 @@ async function editResult(id) {
       })
     }
   } catch (error) {
-    console.error("Error loading participants:", error)
+    console.error("Error:", error)
   }
 
   document.getElementById("resultPlace").value = result.place || ""
@@ -876,28 +779,131 @@ async function editResult(id) {
   document.getElementById("resultModal").classList.add("show")
 }
 
-function filterCompetitionsByStatus(status) {
-  if (status === "all") {
-    displayCompetitions(allCompetitions)
-  } else {
-    const filtered = allCompetitions.filter((comp) => {
-      const compStatus = comp.manual_status || getCompetitionStatus(comp.start_date, comp.end_date)
-      return compStatus === status
+async function deleteResult(id) {
+  if (!confirm("Видалити результат?")) return
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/results/${id}`, {
+      method: "DELETE",
     })
-    displayCompetitions(filtered)
+
+    if (response.ok) {
+      showNotification("Результат видалено", "success")
+      await loadResults()
+    } else {
+      showNotification("Помилка видалення", "error")
+    }
+  } catch (error) {
+    console.error("Error:", error)
+    showNotification("Помилка видалення", "error")
   }
 }
 
-document.getElementById("competitionSearch")?.addEventListener("input", (e) => {
-  const searchTerm = e.target.value.toLowerCase()
-  const filtered = allCompetitions.filter(
-    (comp) =>
-      comp.title.toLowerCase().includes(searchTerm) ||
-      (comp.description && comp.description.toLowerCase().includes(searchTerm)),
-  )
-  displayCompetitions(filtered)
-})
+// ==================== SCHOOLS ====================
+async function loadSchools() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/admin/schools`)
+    const data = await response.json()
 
+    if (response.ok) {
+      allSchools = data.schools
+      displaySchools(allSchools)
+    }
+  } catch (error) {
+    console.error("Error loading schools:", error)
+  }
+}
+
+function displaySchools(schools) {
+  const tbody = document.getElementById("schoolsTableBody")
+  if (!tbody) return
+
+  tbody.innerHTML = ""
+
+  schools.forEach((school) => {
+    const row = document.createElement("tr")
+    row.innerHTML = `
+      <td><span class="id-badge">${school.id}</span></td>
+      <td>${school.name}</td>
+      <td class="action-cell">
+        <button class="btn-action btn-delete" onclick="deleteSchool(${school.id})">Видалити</button>
+      </td>
+    `
+    tbody.appendChild(row)
+  })
+}
+
+async function deleteSchool(id) {
+  if (!confirm("Видалити школу?")) return
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/admin/schools/${id}`, {
+      method: "DELETE",
+    })
+
+    if (response.ok) {
+      showNotification("Школу видалено", "success")
+      await loadSchools()
+    }
+  } catch (error) {
+    console.error("Error:", error)
+    showNotification("Помилка видалення", "error")
+  }
+}
+
+// ==================== SUBJECTS ====================
+async function loadSubjects() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/admin/subjects`)
+    const data = await response.json()
+
+    if (response.ok) {
+      allSubjects = data.subjects
+      displaySubjects(allSubjects)
+    }
+  } catch (error) {
+    console.error("Error loading subjects:", error)
+  }
+}
+
+function displaySubjects(subjects) {
+  const tbody = document.getElementById("subjectsTableBody")
+  if (!tbody) return
+
+  tbody.innerHTML = ""
+
+  subjects.forEach((subject) => {
+    const row = document.createElement("tr")
+    row.innerHTML = `
+      <td><span class="id-badge">${subject.id}</span></td>
+      <td>${subject.name}</td>
+      <td class="action-cell">
+        <button class="btn-action btn-delete" onclick="deleteSubject(${subject.id})">Видалити</button>
+      </td>
+    `
+    tbody.appendChild(row)
+  })
+}
+
+async function deleteSubject(id) {
+  if (!confirm("Видалити предмет?")) return
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/admin/subjects/${id}`, {
+      method: "DELETE",
+    })
+
+    if (response.ok) {
+      showNotification("Предмет видалено", "success")
+      await loadSubjects()
+    }
+  } catch (error) {
+    console.error("Error:", error)
+    showNotification("Помилка видалення", "error")
+  }
+}
+
+// ==================== STATISTICS ====================
 async function loadAllStatistics() {
   try {
     await Promise.all([
@@ -929,7 +935,7 @@ async function loadOverviewStatistics() {
       document.getElementById("statsCompletedCompetitions").textContent = data.completedCompetitions
     }
   } catch (error) {
-    console.error("Error loading overview statistics:", error)
+    console.error("Error:", error)
   }
 }
 
@@ -944,7 +950,7 @@ async function loadParticipationRate() {
       document.getElementById("totalStudentsForRate").textContent = data.totalStudents
     }
   } catch (error) {
-    console.error("Error loading participation rate:", error)
+    console.error("Error:", error)
   }
 }
 
@@ -953,9 +959,6 @@ async function loadStatsByGrade() {
     const response = await fetch(`${BASE_URL}/api/statistics/class-details`)
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Server error response:", errorText)
-      showNotification(`Помилка завантаження статистики по класах: ${response.status}`, "error")
       return
     }
 
@@ -967,7 +970,7 @@ async function loadStatsByGrade() {
     if (!data.classes || data.classes.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="5" class="empty-state">Немає даних по класах</td>
+          <td colspan="5" class="empty-state">Немає даних</td>
         </tr>
       `
       return
@@ -985,8 +988,7 @@ async function loadStatsByGrade() {
       tbody.appendChild(row)
     })
   } catch (error) {
-    console.error("Error loading stats by grade:", error)
-    showNotification(`Помилка завантаження статистики по класах: ${error.message}`, "error")
+    console.error("Error:", error)
   }
 }
 
@@ -1002,7 +1004,7 @@ async function loadTopStudents() {
       if (data.students.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="empty-state">Немає даних про учнів</td>
+            <td colspan="5" class="empty-state">Немає даних</td>
           </tr>
         `
         return
@@ -1026,7 +1028,7 @@ async function loadTopStudents() {
       })
     }
   } catch (error) {
-    console.error("Error loading top students:", error)
+    console.error("Error:", error)
   }
 }
 
@@ -1035,9 +1037,6 @@ async function loadCompetitionStatistics() {
     const response = await fetch(`${BASE_URL}/api/statistics/competitions-detailed`)
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Server error response:", errorText)
-      showNotification(`Помилка завантаження статистики конкурсів: ${response.status}`, "error")
       return
     }
 
@@ -1049,7 +1048,7 @@ async function loadCompetitionStatistics() {
     if (!data.competitions || data.competitions.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" class="empty-state">Немає даних про конкурси</td>
+          <td colspan="6" class="empty-state">Немає даних</td>
         </tr>
       `
       return
@@ -1068,38 +1067,7 @@ async function loadCompetitionStatistics() {
       tbody.appendChild(row)
     })
   } catch (error) {
-    console.error("Error loading competition statistics:", error)
-    showNotification(`Помилка завантаження статистики конкурсів: ${error.message}`, "error")
-    // Fallback to original endpoint if detailed one doesn't exist
-    const response = await fetch(`${BASE_URL}/api/statistics/competitions`)
-    const data = await response.json()
-
-    if (response.ok) {
-      const tbody = document.getElementById("competitionStatsTable")
-      tbody.innerHTML = ""
-
-      if (!data.competitions || data.competitions.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="empty-state">Немає даних про конкурси</td>
-          </tr>
-        `
-        return
-      }
-
-      data.competitions.forEach((comp) => {
-        const row = document.createElement("tr")
-        row.innerHTML = `
-          <td><strong>${comp.title}</strong></td>
-          <td><span class="date-badge">${new Date(comp.start_date).toLocaleDateString("uk-UA")}</span></td>
-          <td><span class="date-badge">${new Date(comp.end_date).toLocaleDateString("uk-UA")}</span></td>
-          <td>${comp.participants_count || 0}</td>
-          <td>N/A</td>
-          <td><span class="status-badge">${getCompetitionStatus(comp.start_date, comp.end_date)}</span></td>
-        `
-        tbody.appendChild(row)
-      })
-    }
+    console.error("Error:", error)
   }
 }
 
@@ -1113,7 +1081,7 @@ async function loadParticipationTimeline() {
       container.innerHTML = ""
 
       if (data.timeline.length === 0) {
-        container.innerHTML = '<p class="empty-state">Немає даних про участь</p>'
+        container.innerHTML = '<p class="empty-state">Немає даних</p>'
         return
       }
 
@@ -1135,7 +1103,7 @@ async function loadParticipationTimeline() {
       })
     }
   } catch (error) {
-    console.error("Error loading participation timeline:", error)
+    console.error("Error:", error)
   }
 }
 
@@ -1151,7 +1119,7 @@ async function loadSchoolStatistics() {
       if (data.schools.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="4" class="empty-state">Немає даних про школи</td>
+            <td colspan="4" class="empty-state">Немає даних</td>
           </tr>
         `
         return
@@ -1171,6 +1139,24 @@ async function loadSchoolStatistics() {
       })
     }
   } catch (error) {
-    console.error("Error loading school statistics:", error)
+    console.error("Error:", error)
   }
+}
+
+function showNotification(message, type = "info") {
+  const existing = document.querySelector(".notification")
+  if (existing) existing.remove()
+
+  const notification = document.createElement("div")
+  notification.className = `notification notification-${type}`
+  notification.textContent = message
+
+  document.body.appendChild(notification)
+
+  setTimeout(() => notification.classList.add("show"), 10)
+
+  setTimeout(() => {
+    notification.classList.remove("show")
+    setTimeout(() => notification.remove(), 300)
+  }, 3000)
 }
