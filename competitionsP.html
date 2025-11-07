@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мої конкурси - iEvents</title>
-    <link rel="stylesheet" href="css/competitionsP.css">
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/competitionsP.css">
+    <!-- Load config.js first -->
+    <script src="js/config.js"></script>
+    <!-- Added modal logger as first script to intercept all console.log -->
+    <script src="js/log-modal.js"></script>
 </head>
+
 <body>
     <div id="header"></div>
 
@@ -41,6 +46,14 @@
                 <div class="loading">Завантаження...</div>
             </div>
         </div>
+
+        <!-- Added results section -->
+        <div class="card">
+            <h2>🏆 Мої результати</h2>
+            <div id="myResults" class="results-section">
+                <div class="loading">Завантаження результатів...</div>
+            </div>
+        </div>
     </main>
 
     <div id="footer"></div>
@@ -48,4 +61,5 @@
     <script src="js/components.js"></script>
     <script src="js/competitionsP.js"></script>
 </body>
+
 </html>

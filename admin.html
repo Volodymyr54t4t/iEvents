@@ -5,11 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Адмін панель - iEvents</title>
+    <!-- Updated CSS paths to use css/ folder -->
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/admin.css">
-    <!-- Load config.js first -->
+    <!-- Updated JS paths to use js/ folder -->
     <script src="js/config.js"></script>
+    <!-- Added modal logger as first script to intercept all console.log -->
+    <script src="js/log-modal.js"></script>
 </head>
 
 <body>
@@ -549,7 +552,6 @@
     <div id="footer"></div>
 
     <script src="js/role.js"></script>
-    <!-- Removed components.js from here since it's now loaded earlier -->
     <script src="js/admin.js"></script>
 </body>
 

@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="css/competitionsT.css">
     <!-- Load config.js first -->
     <script src="js/config.js"></script>
+    <!-- Added modal logger as first script to intercept all console.log -->
+    <script src="js/log-modal.js"></script>
 </head>
 
 <body>
@@ -26,30 +28,30 @@
             <button class="btn-add-competition" onclick="openCreateCompetitionModal()">
                 Додати конкурс
             </button>
-            
+
             <div class="filters-row">
                 <input type="text" id="searchCompetitions" class="filter-input" placeholder="Пошук конкурсів...">
-                
+
                 <select id="filterSubject" class="filter-select">
                     <option value="">Всі предмети</option>
                 </select>
-                
+
                 <select id="filterLevel" class="filter-select">
                     <option value="">Всі рівні</option>
                 </select>
-                
+
                 <select id="filterStatus" class="filter-select">
                     <option value="">Всі статуси</option>
                     <option value="active">Активні</option>
                     <option value="upcoming">Майбутні</option>
                     <option value="inactive">Завершені</option>
                 </select>
-                
+
                 <select id="filterOwnership" class="filter-select">
                     <option value="all">Всі конкурси</option>
                     <option value="my">Мої конкурси</option>
                 </select>
-                
+
                 <select id="sortBy" class="filter-select">
                     <option value="date_desc">Спочатку нові</option>
                     <option value="date_asc">Спочатку старі</option>
@@ -81,13 +83,14 @@
             <div class="modal-body">
                 <form id="createCompetitionForm" class="competition-form">
                     <input type="hidden" id="editCompetitionId">
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="title">Назва конкурсу *</label>
-                            <input type="text" id="title" name="title" required placeholder="Наприклад: Олімпіада з математики">
+                            <input type="text" id="title" name="title" required
+                                placeholder="Наприклад: Олімпіада з математики">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="subject">Предмет *</label>
                             <select id="subject" name="subject" required>
@@ -109,7 +112,7 @@
                                 <option value="Міжнародний">Міжнародний</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="organizer">Організатор</label>
                             <input type="text" id="organizer" name="organizer" placeholder="Хто організовує конкурс">
@@ -118,7 +121,8 @@
 
                     <div class="form-group">
                         <label for="description">Опис конкурсу</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Детальний опис конкурсу..."></textarea>
+                        <textarea id="description" name="description" rows="4"
+                            placeholder="Детальний опис конкурсу..."></textarea>
                     </div>
 
                     <div class="form-row">
@@ -131,7 +135,7 @@
                             <label for="endDate">Дата закінчення *</label>
                             <input type="date" id="endDate" name="endDate" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="registrationDeadline">Дедлайн реєстрації</label>
                             <input type="date" id="registrationDeadline" name="registrationDeadline">
@@ -143,12 +147,13 @@
                             <label for="location">Місце проведення</label>
                             <input type="text" id="location" name="location" placeholder="Адреса або назва закладу">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="maxParticipants">Макс. кількість учасників</label>
-                            <input type="number" id="maxParticipants" name="maxParticipants" min="1" placeholder="Необмежено">
+                            <input type="number" id="maxParticipants" name="maxParticipants" min="1"
+                                placeholder="Необмежено">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="isOnline">Формат</label>
                             <select id="isOnline" name="isOnline">
@@ -160,19 +165,22 @@
 
                     <div class="form-group">
                         <label for="requirements">Вимоги до учасників</label>
-                        <textarea id="requirements" name="requirements" rows="3" placeholder="Вікові обмеження, необхідні документи тощо..."></textarea>
+                        <textarea id="requirements" name="requirements" rows="3"
+                            placeholder="Вікові обмеження, необхідні документи тощо..."></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="prizes">Призи та нагороди</label>
-                        <textarea id="prizes" name="prizes" rows="3" placeholder="Опишіть призи для переможців..."></textarea>
+                        <textarea id="prizes" name="prizes" rows="3"
+                            placeholder="Опишіть призи для переможців..."></textarea>
                     </div>
 
                     <!-- Adding dynamic custom fields section -->
                     <div class="form-group">
                         <div class="dynamic-fields-header">
                             <label>Додаткові поля</label>
-                            <button type="button" class="btn btn-sm btn-primary" onclick="addDynamicField()">+ Додати поле</button>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="addDynamicField()">+ Додати
+                                поле</button>
                         </div>
                         <div id="dynamicFieldsContainer" class="dynamic-fields-container">
                             <!-- Dynamic fields will be added here -->
@@ -182,9 +190,10 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="contactInfo">Контактна інформація</label>
-                            <input type="text" id="contactInfo" name="contactInfo" placeholder="Email або телефон для зв'язку">
+                            <input type="text" id="contactInfo" name="contactInfo"
+                                placeholder="Email або телефон для зв'язку">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="websiteUrl">Веб-сайт конкурсу</label>
                             <input type="url" id="websiteUrl" name="websiteUrl" placeholder="https://example.com">
