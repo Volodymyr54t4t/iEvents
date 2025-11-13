@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/profileT.css">
     <script src="js/config.js"></script>
-    <script src="js/log-modal.js"></script>
 </head>
 
 <body>
@@ -17,7 +16,7 @@
 
     <main class="main-content">
         <div class="profile-container">
-            <h1 class="page-title">Мій профіль</h1>
+            <h1 class="page-title">👨‍🏫 Мій Профіль Педагога</h1>
 
             <div class="role-badge" id="roleBadge">
                 <span class="role-label">Роль:</span>
@@ -30,11 +29,11 @@
                     <div class="avatar-preview">
                         <span class="avatar-placeholder">👨‍🏫</span>
                     </div>
-                    <span class="avatar-info">Статичний аватар для всіх педагогів</span>
+                    <span class="avatar-info">Профіль педагога іEvents</span>
                 </div>
 
-                <!-- Full Name Section (separate fields) -->
-                <div class="section-title">Персональні дані</div>
+                <!-- Full Name Section -->
+                <div class="section-title">📋 Персональні дані</div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="lastName">Прізвище *</label>
@@ -47,57 +46,45 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="middleName">По батькові *</label>
-                    <input type="text" id="middleName" required placeholder="Іванович">
+                    <label for="middleName">По батькові</label>
+                    <input type="text" id="middleName" placeholder="Іванович">
                 </div>
 
                 <!-- Contact Information -->
-                <div class="section-title">Контактна інформація</div>
+                <div class="section-title">📱 Контактна інформація</div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="telegram">Telegram нік</label>
+                        <label for="phone">Телефон *</label>
+                        <input type="tel" id="phone" required placeholder="+380 99 123 45 67">
+                    </div>
+                    <div class="form-group">
+                        <label for="telegram">Telegram</label>
                         <input type="text" id="telegram" placeholder="@username">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Номер телефону *</label>
-                        <input type="tel" id="phone" required placeholder="+380 XX XXX XX XX">
-                    </div>
-                </div>
-
-                <!-- Personal Information -->
-                <div class="section-title">Персональна інформація</div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="birthDate">Дата народження</label>
-                        <input type="date" id="birthDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="city">Місто *</label>
-                        <input type="text" id="city" required placeholder="Київ">
                     </div>
                 </div>
 
                 <!-- Professional Information -->
-                <div class="section-title">Професійна інформація</div>
+                <div class="section-title">🏫 Професійна інформація</div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="schoolSelect">Навчальний заклад *</label>
                         <select id="schoolSelect" required>
-                            <option value="">Оберіть заклад...</option>
+                            <option value="">Завантаження...</option>
                         </select>
+                        <small class="help-text">Виберіть вашу школу з даного списку</small>
                     </div>
                     <div class="form-group">
-                        <label for="experienceYears">Стаж роботи (років)</label>
-                        <input type="number" id="experienceYears" placeholder="10" min="0" max="70">
+                        <label for="experienceYears">Стаж (років)</label>
+                        <input type="number" id="experienceYears" min="0" max="70" placeholder="10">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="subjectsSelect">Предмети викладання *</label>
                     <select id="subjectsSelect" multiple required>
-                        <option value="">Виберіть предмети...</option>
+                        <option value="">Завантаження...</option>
                     </select>
-                    <small class="help-text">* Утримуйте Ctrl/Cmd для множинного вибору</small>
+                    <small class="help-text">Виберіть один або кілька предметів (Ctrl/Cmd + клік)</small>
                 </div>
 
                 <div class="form-group">
@@ -106,65 +93,39 @@
                         title="Укажіть номери класів через кому">
                 </div>
 
-                <div class="form-group">
-                    <label for="specialization">Спеціалізація/Кваліфікація</label>
-                    <input type="text" id="specialization" placeholder="Учитель математики вищої категорії">
-                </div>
-
-                <div class="form-group">
-                    <label for="awards">Визнання та нагороди</label>
-                    <textarea id="awards" rows="3" placeholder="Опишіть основні визнання та нагороди..."></textarea>
-                </div>
-
                 <!-- For Teachers Only -->
                 <div id="teacherSection" class="teacher-section">
-                    <div class="section-title">Інформація про учнів</div>
+                    <div class="section-title">👥 Мої учні</div>
                     <div class="info-box">
-                        <p>Ви можете переглядати тільки учнів з вашого навчального закладу</p>
+                        <p>Переглядайте учнів вашого навчального закладу та їхні результати у конкурсах</p>
                     </div>
                     <button type="button" class="btn btn-secondary" onclick="viewStudents()">
-                        Переглянути моїх учнів
+                        Переглянути моїх учнів →
                     </button>
                 </div>
 
                 <!-- For Methodists Only -->
                 <div id="methodistSection" style="display: none;" class="methodist-section">
-                    <div class="section-title">Область курування</div>
-                    <div class="form-group">
-                        <label for="methodistArea">Зона курування</label>
-                        <textarea id="methodistArea" rows="3"
-                            placeholder="Опишіть область, яку ви курируєте..."></textarea>
-                    </div>
-
+                    <div class="section-title">📚 Зона курування та консультацій</div>
                     <div class="form-group">
                         <label for="consultationAreasSelect">Напрями консультацій</label>
                         <select id="consultationAreasSelect" multiple>
-                            <option value="">Виберіть напрями...</option>
                             <option value="методика">Методика викладання</option>
-                            <option value="планування">Планування уроків</option>
-                            <option value="атестація">Атестація педагогів</option>
                             <option value="інновації">Інноваційні технології</option>
-                            <option value="педагогіка">Сучасна педагогіка</option>
-                            <option value="психологія">Педагогічна психологія</option>
+                            <option value="планування">Планування навчальних заходів</option>
                         </select>
-                        <small class="help-text">* Утримуйте Ctrl/Cmd для множинного вибору</small>
+                        <small class="help-text">Виберіть напрями вашої експертизи</small>
                     </div>
                 </div>
 
-                <!-- About Section -->
-                <div class="section-title">Про мене</div>
+                <!-- Bio Section -->
+                <div class="section-title">✍️ Про себе</div>
                 <div class="form-group">
-                    <label for="bio">Про себе</label>
-                    <textarea id="bio" rows="5"
-                        placeholder="Розкажіть про свій педагогічний досвід, методи роботи та прагнення..."></textarea>
+                    <label for="bio">Коротко про педагогічний досвід</label>
+                    <textarea id="bio" rows="4" placeholder="Розкажіть про ваш досвід та методи роботи..."></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label for="interests">Профільні інтереси</label>
-                    <textarea id="interests" rows="4" placeholder="Опишіть свої інтереси та хобі..."></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Зберегти профіль</button>
+                <button type="submit" class="btn btn-primary">💾 Зберегти профіль</button>
                 <div id="profileMessage" class="message"></div>
             </form>
         </div>
@@ -174,7 +135,7 @@
 
     <script src="js/role.js"></script>
     <script src="js/components.js"></script>
-    <script src="js/profilesT.js"></script>
+    <script src="js/profileT.js"></script>
 </body>
 
 </html>
