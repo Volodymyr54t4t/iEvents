@@ -26,10 +26,63 @@
             <form id="profileForm" class="profile-form">
                 <!-- Static Avatar Section -->
                 <div class="avatar-section">
-                    <div class="avatar-preview">
+                    <div class="avatar-preview" id="avatarPreview">
                         <span class="avatar-placeholder">👨‍🏫</span>
                     </div>
-                    <span class="avatar-info">Профіль педагога іEvents</span>
+                    <div class="avatar-controls">
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-avatar"
+                            onclick="document.getElementById('avatarInput').click()">
+                            📷 Завантажити фото
+                        </button>
+                        <button type="button" class="btn btn-avatar-clear" id="clearAvatarBtn" onclick="clearAvatar()"
+                            style="display: none;">
+                            ✖️ Видалити фото
+                        </button>
+                    </div>
+                    <span class="avatar-info">Рекомендація: Квадратне фото 500x500px, максимум 5MB</span>
+                </div>
+
+                <!-- Avatar editor modal with canvas and controls -->
+                <div id="avatarEditorModal" class="avatar-editor-modal">
+                    <div class="avatar-editor-container">
+                        <div class="avatar-editor-header">
+                            <h3>✏️ Редагування фото профіля</h3>
+                            <button type="button" class="close-btn" onclick="closeAvatarEditor()">✕</button>
+                        </div>
+
+                        <canvas id="avatarCanvas" class="avatar-canvas" style="cursor: grab;"></canvas>
+
+                        <div class="avatar-controls-panel">
+                            <div class="control-group">
+                                <label>🔍 Масштаб: <span id="scaleValue">100%</span></label>
+                                <input type="range" id="scaleSlider" min="0.5" max="3" step="0.1" value="1">
+                            </div>
+
+                            <div class="control-group">
+                                <label>🔄 Поворот: <span id="rotateValue">0°</span></label>
+                                <input type="range" id="rotateSlider" min="0" max="360" step="1" value="0">
+                            </div>
+
+                            <div class="control-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="flipHorizontal"> ↔️ Відзеркалити горизонтально
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="flipVertical"> ↕️ Відзеркалити вертикально
+                                </label>
+                            </div>
+
+                            <p class="hint-text">Підказка: Перетягуйте мишкою для переміщення фото</p>
+
+                            <div class="avatar-editor-buttons">
+                                <button type="button" class="btn btn-secondary-modal" onclick="resetAvatarEditor()">🔄
+                                    Скинути</button>
+                                <button type="button" class="btn btn-primary-modal" onclick="confirmAvatar()">✅
+                                    Підтвердити</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Full Name Section -->
