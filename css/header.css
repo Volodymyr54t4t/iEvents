@@ -2,21 +2,22 @@
 .site-header {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: fixed; /* Changed from sticky to fixed position */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
   border-bottom: 2px solid #f7fafc;
-  /* Added height variable for consistency */
-  height: 70px;
+  /* Increased height for better spacing */
+  height: 80px;
 }
 
 #header:empty {
-  min-height: 70px;
+  /* Increased min-height to match new header height */
+  min-height: 80px;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: fixed; /* Changed from sticky to fixed position */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -38,7 +39,8 @@
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 16px 20px;
+  /* Increased padding for better vertical spacing */
+  padding: 20px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -46,7 +48,8 @@
 }
 
 .logo {
-  font-size: 24px;
+  /* Reduced font size for more compact look */
+  font-size: 22px;
   font-weight: 700;
   color: #2d3748;
   text-decoration: none;
@@ -61,12 +64,15 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: 24px;
+  /* Reduced gap between navigation items */
+  gap: 16px;
 }
 
 .nav-link {
   color: #4a5568;
   text-decoration: none;
+  /* Reduced font size for navigation links */
+  font-size: 15px;
   font-weight: 500;
   transition: all 0.2s ease;
   position: relative;
@@ -107,7 +113,8 @@
 }
 
 .user-email {
-  font-size: 14px;
+  /* Slightly reduced email font size */
+  font-size: 13px;
   color: #2d3748;
   font-weight: 600;
 }
@@ -123,11 +130,14 @@
 }
 
 .btn-logout {
-  padding: 10px 20px;
+  /* Slightly reduced button padding */
+  padding: 9px 18px;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
   border: none;
   border-radius: 8px;
+  /* Reduced button font size */
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -145,11 +155,14 @@
 }
 
 .btn-login {
-  padding: 10px 20px;
+  /* Slightly reduced button padding */
+  padding: 9px 18px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 8px;
+  /* Reduced button font size */
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -252,7 +265,8 @@
 
 @media (max-width: 480px) {
   .logo {
-    font-size: 20px;
+    /* Further reduced logo size for mobile */
+    font-size: 18px;
   }
 
   .user-email {

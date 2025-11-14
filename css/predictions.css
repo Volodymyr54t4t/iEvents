@@ -5,17 +5,15 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacMacSystemFont, "Segoe UI", Roboto, Oxygen,
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
   background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
   min-height: 100vh;
   /* Added smooth transitions for all elements */
-  padding: 20px 20px 40px 20px;
-  padding-top: 90px;
+  padding: 40px 20px 80px 20px;
+  /* Updated padding-top to 80px (was 140px) to match header height */
+  padding-top: 80px;
   transition: padding 0.3s ease;
-  /* Added flex layout for sticky footer */
-  display: flex;
-  flex-direction: column;
 }
 
 .container {
@@ -24,9 +22,6 @@ body {
   /* Added fade-in animation */
   margin-bottom: 60px;
   animation: fadeIn 0.6s ease-out;
-  /* Added flex-grow for proper footer positioning */
-  flex: 1;
-  width: 100%;
 }
 
 /* Added keyframe animations */
@@ -340,12 +335,23 @@ body {
 }
 
 .header-content h1 {
+  font-size: 42px;
+  color: #2d3748;
+  margin-bottom: 15px;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Applied dramatic bounce-in animation with 1.2s duration */
+  animation: titleBounceIn 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.header-content h1 {
   /* Increased size and added animated gradient text */
   font-size: 42px;
   color: #2d3748;
   margin-bottom: 15px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(135deg, #0a5f7f 0%, #2d3748 50%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #7ec8e3 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -357,7 +363,7 @@ body {
 
 .page-header:hover .header-content h1 {
   /* Animated gradient shift on hover */
-  background: linear-gradient(135deg, #5eb3d6 0%, #4a9fb8 50%, #0a5f7f 100%);
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 50%, #4a9fb8 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -653,34 +659,6 @@ body {
   border-color: #7ec8e3;
   box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.2);
   transform: translateY(-2px);
-}
-
-/* Added styles for search input */
-.filter-group input[type="text"] {
-  padding: 10px 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 100%;
-}
-
-.filter-group input[type="text"]:hover {
-  border-color: #cbd5e0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.filter-group input[type="text"]:focus {
-  outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.2);
-  transform: translateY(-2px);
-}
-
-.filter-group input[type="text"]::placeholder {
-  color: #a0aec0;
 }
 
 .btn-refresh {
@@ -991,6 +969,7 @@ body {
   padding: 15px;
   border-radius: 8px;
   border-left: 4px solid #80deea;
+  /* Added transition and animation */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: slideInFromRight 0.5s ease-out backwards;
 }
@@ -1008,6 +987,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Added transition */
   transition: color 0.3s ease;
 }
 
@@ -1019,6 +999,7 @@ body {
   font-size: 14px;
   color: #4a5568;
   line-height: 1.6;
+  /* Added transition */
   transition: color 0.3s ease;
 }
 
@@ -1026,8 +1007,11 @@ body {
   text-align: center;
   padding: 60px 20px;
   color: #718096;
+  /* Added animation */
   animation: fadeIn 0.5s ease-out;
 }
+
+/* Enhanced responsive design for better mobile experience */
 
 @media (max-width: 1200px) {
   .container {
@@ -1047,6 +1031,7 @@ body {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
+    /* Adjusted padding for tablets */
     padding: 35px 30px;
   }
 
@@ -1066,15 +1051,18 @@ body {
 
 @media (max-width: 768px) {
   body {
+    /* Adjusted mobile padding for better spacing */
     padding: 15px 10px 60px 10px;
     padding-top: 100px;
   }
 
   .container {
+    /* Added mobile bottom margin */
     margin-bottom: 40px;
   }
 
   .page-header {
+    /* Adjusted mobile padding */
     padding: 30px 25px;
     gap: 18px;
     margin-bottom: 30px;
@@ -1128,12 +1116,6 @@ body {
     min-height: 48px;
   }
 
-  .filter-group input[type="text"] {
-    padding: 12px 15px;
-    font-size: 16px;
-    min-height: 48px;
-  }
-
   .btn-refresh {
     width: 100%;
     min-height: 48px;
@@ -1142,6 +1124,7 @@ body {
 
   .predictions-section {
     padding: 20px;
+    /* Mobile bottom margin */
     margin-bottom: 30px;
   }
 
@@ -1204,15 +1187,18 @@ body {
 
 @media (max-width: 480px) {
   body {
+    /* Small screen padding adjustments */
     padding: 12px 8px 50px 8px;
     padding-top: 90px;
   }
 
   .container {
+    /* Small screen bottom margin */
     margin-bottom: 30px;
   }
 
   .page-header {
+    /* Small screen header padding */
     padding: 20px 16px;
     gap: 12px;
   }
@@ -1255,6 +1241,7 @@ body {
 
   .predictions-section {
     padding: 16px;
+    /* Small screen bottom margin */
     margin-bottom: 25px;
   }
 
@@ -1337,15 +1324,18 @@ body {
 
 @media (max-width: 360px) {
   body {
+    /* Extra small screen padding */
     padding: 10px 6px 40px 6px;
     padding-top: 85px;
   }
 
   .container {
+    /* Extra small screen bottom margin */
     margin-bottom: 25px;
   }
 
   .page-header {
+    /* Extra small screen header padding */
     padding: 16px 12px;
     gap: 10px;
   }
@@ -1384,11 +1374,6 @@ body {
     font-size: 14px;
   }
 
-  .filter-group input[type="text"] {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-
   .btn-refresh {
     padding: 10px 16px;
     font-size: 13px;
@@ -1396,6 +1381,7 @@ body {
 
   .predictions-section {
     padding: 12px;
+    /* Extra small screen bottom margin */
     margin-bottom: 20px;
   }
 
@@ -1471,16 +1457,19 @@ body {
   }
 }
 
+/* Added smooth scrolling behavior */
 html {
   scroll-behavior: smooth;
 }
 
+/* Added focus visible styles for accessibility */
 *:focus-visible {
   outline: 3px solid #7ec8e3;
   outline-offset: 2px;
   border-radius: 4px;
 }
 
+/* Reduced motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
