@@ -6,13 +6,7 @@ const { Pool } = require("pg")
 const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
-const {
-  initBot,
-  shutdownBot,
-  notifyUserAddedToCompetition,
-  notifyUserNewResult,
-  notifyNewCompetition,
-} = require("./bot")
+const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCompetition } = require("./bot")
 
 const app = express()
 const PORT = 3000
@@ -22,8 +16,18 @@ const PORT = 3000
 // Store chat IDs for notifications (in production, store in database)
 const subscribedChats = new Set()
 
+// Telegram bot commands
+// Note: These commands are typically handled within bot.js. If they are intended to be here,
+// ensure the bot instance is correctly managed or remove them if the bot is fully managed in bot.js.
+// For now, assuming the bot initialization and command handling are intended to be in bot.js as per the CHANGE instruction.
+
 // Function to send Telegram notifications
 async function sendTelegramNotification(message) {
+  // This function relies on the 'bot' instance, which is now removed from this file.
+  // If this function is still needed here, the 'bot' instance needs to be re-introduced
+  // or this function needs to be moved to bot.js.
+  // Based on the update, we'll assume the bot instance and its related logic are in bot.js.
+  // If this function is meant to be a utility here, it would need to be refactored to accept the bot instance.
   console.log("sendTelegramNotification called with message:", message)
   // Placeholder: If bot is in bot.js, this would need to be called from there or the bot instance passed.
   // For now, we comment out the actual sending part.
@@ -571,55 +575,6 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "auth.html"))
 })
 
-app.get("/auth.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "auth.html"))
-})
-
-app.get("/index.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"))
-})
-
-app.get("/profile.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "profile.html"))
-})
-
-app.get("/profilesT.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "profilesT.html"))
-})
-
-// </CHANGE> Оновлено маршрут з profilesT.html на profileT.html
-app.get("/profileT.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "profileT.html"))
-})
-
-app.get("/competitionsP.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "competitionsP.html"))
-})
-
-app.get("/competitionsT.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "competitionsT.html"))
-})
-
-app.get("/admin.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin.html"))
-})
-
-app.get("/results.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "results.html"))
-})
-
-app.get("/statistics.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "statistics.html"))
-})
-
-app.get("/predictions.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "predictions.html"))
-})
-
-app.get("/students-list.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "students-list.html"))
-})
-
 app.post("/api/register", async (req, res) => {
   const { email, password } = req.body
 
@@ -1043,43 +998,6 @@ app.get("/api/admin/users", async (req, res) => {
   }
 })
 
-app.delete("/api/admin/delete-user/:id", async (req, res) => {
-  const { id } = req.params
-
-  console.log("Видалення користувача ID:", id)
-
-  try {
-    const client = await pool.connect()
-
-    try {
-      await client.query("BEGIN")
-
-      // Delete all related data
-      await client.query("DELETE FROM competition_results WHERE user_id = $1", [id])
-      await client.query("DELETE FROM competition_participants WHERE user_id = $1", [id])
-      await client.query("DELETE FROM profiles WHERE user_id = $1", [id])
-      await client.query("DELETE FROM users WHERE id = $1", [id])
-
-      await client.query("COMMIT")
-      console.log("✓ Користувача видалено")
-
-      res.json({
-        message: "Користувача успішно видалено",
-      })
-    } catch (error) {
-      await client.query("ROLLBACK")
-      throw error
-    } finally {
-      client.release()
-    }
-  } catch (error) {
-    console.error("❌ Помилка видалення користувача:", error.message)
-    res.status(500).json({
-      error: "Помилка видалення користувача",
-    })
-  }
-})
-
 app.post("/api/admin/change-role", async (req, res) => {
   const { userId, role } = req.body
 
@@ -1181,55 +1099,6 @@ app.get("/api/students", async (req, res) => {
   }
 })
 
-app.get("/api/admin/schools", async (req, res) => {
-  console.log("Запит списку шкіл")
-
-  try {
-    const result = await pool.query(`
-      SELECT id, name, created_at
-      FROM schools
-      ORDER BY name ASC
-    `)
-
-    console.log("✓ Знайдено шкіл:", result.rows.length)
-    res.json({
-      schools: result.rows,
-    })
-  } catch (error) {
-    console.error("❌ Помилка отримання шкіл:", error.message)
-    res.status(500).json({
-      error: "Помилка отримання шкіл",
-    })
-  }
-})
-
-app.delete("/api/admin/schools/:id", async (req, res) => {
-  const { id } = req.params
-
-  console.log("Видалення школи ID:", id)
-
-  try {
-    const result = await pool.query("DELETE FROM schools WHERE id = $1 RETURNING id", [id])
-
-    if (result.rows.length === 0) {
-      console.log("Помилка: школу не знайдено")
-      return res.status(404).json({
-        error: "Школу не знайдено",
-      })
-    }
-
-    console.log("✓ Школу видалено")
-    res.json({
-      message: "Школу успішно видалено",
-    })
-  } catch (error) {
-    console.error("❌ Помилка видалення школи:", error.message)
-    res.status(500).json({
-      error: "Помилка видалення школи",
-    })
-  }
-})
-
 app.get("/api/subjects", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM subjects ORDER BY name")
@@ -1237,55 +1106,6 @@ app.get("/api/subjects", async (req, res) => {
   } catch (error) {
     console.error("Помилка отримання предметів:", error)
     res.status(500).json({ error: "Помилка отримання предметів" })
-  }
-})
-
-app.get("/api/admin/subjects", async (req, res) => {
-  console.log("Запит списку предметів")
-
-  try {
-    const result = await pool.query(`
-      SELECT id, name, created_at
-      FROM subjects
-      ORDER BY name ASC
-    `)
-
-    console.log("✓ Знайдено предметів:", result.rows.length)
-    res.json({
-      subjects: result.rows,
-    })
-  } catch (error) {
-    console.error("❌ Помилка отримання предметів:", error.message)
-    res.status(500).json({
-      error: "Помилка отримання предметів",
-    })
-  }
-})
-
-app.delete("/api/admin/subjects/:id", async (req, res) => {
-  const { id } = req.params
-
-  console.log("Видалення предмету ID:", id)
-
-  try {
-    const result = await pool.query("DELETE FROM subjects WHERE id = $1 RETURNING id", [id])
-
-    if (result.rows.length === 0) {
-      console.log("Помилка: предмет не знайдено")
-      return res.status(404).json({
-        error: "Предмет не знайдено",
-      })
-    }
-
-    console.log("✓ Предмет видалено")
-    res.json({
-      message: "Предмет успішно видалено",
-    })
-  } catch (error) {
-    console.error("❌ Помилка видалення предмету:", error.message)
-    res.status(500).json({
-      error: "Помилка видалення предмету",
-    })
   }
 })
 
@@ -1377,8 +1197,7 @@ app.post("/api/competitions", async (req, res) => {
 Не пропустіть можливість взяти участь!
     `.trim()
 
-    // await sendTelegramNotification(notificationMessage) // Use the local sendTelegramNotification
-    console.log("New competition created. Notification sending needs to be re-integrated or managed in bot.js.")
+    // await sendTelegramNotification(notificationMessage) // Use the local sendTelegramNotification - This will fail if sendTelegramNotification is not fully implemented or bot is not initialized here.
 
     res.json({
       competition: competition,
@@ -2701,7 +2520,7 @@ app.get("/api/profile/teacher/:userId", async (req, res) => {
 })
 
 // POST/UPDATE teacher profile
-app.post("/api/profile/teacher", async (req, res) => {
+app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
   const {
     userId,
     firstName,
@@ -2709,80 +2528,88 @@ app.post("/api/profile/teacher", async (req, res) => {
     middleName,
     telegram,
     phone,
-    birthDate,
-    city,
     schoolId,
     experienceYears,
     subjectsIds,
     gradesCatering,
-    specialization,
-    awards,
     bio,
-    interests,
     userRole,
-    methodistArea,
     consultationAreas,
   } = req.body
 
-  console.log("Оновлення профілю педагога для користувача:", userId)
+  console.log("[v0] Received profile update - userId:", userId, "Type:", typeof userId)
 
-  if (!userId || userId === "undefined" || userId === "null") {
+  let parsedUserId = null
+  
+  if (!userId) {
     return res.status(400).json({
       error: "Невірний ID користувача",
     })
   }
+
+  parsedUserId = Number.parseInt(String(userId).trim(), 10)
+  
+  if (Number.isNaN(parsedUserId) || parsedUserId <= 0) {
+    console.error("[v0] Invalid userId after parsing:", parsedUserId)
+    return res.status(400).json({
+      error: "ID користувача має бути числом більшим за 0",
+    })
+  }
+
+  console.log("[v0] Parsed userId:", parsedUserId)
 
   const client = await pool.connect()
 
   try {
     await client.query("BEGIN")
 
-    // Check if user exists
-    const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [userId])
+    const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [parsedUserId])
     if (userCheck.rows.length === 0) {
       await client.query("ROLLBACK")
+      console.error("[v0] User not found:", parsedUserId)
       return res.status(404).json({
-        error: "Користувача не знайдено",
+        error: "Користувача не знайдено в системі",
       })
     }
 
-    // Check if profile exists
-    const existingProfile = await client.query("SELECT id FROM profiles WHERE user_id = $1", [userId])
+    let avatarPath = null
+    if (req.file) {
+      avatarPath = `/uploads/${req.file.filename}`
+      console.log("[v0] Avatar uploaded:", avatarPath)
+    }
+
+    const existingProfile = await client.query("SELECT id, avatar FROM profiles WHERE user_id = $1", [parsedUserId])
 
     if (existingProfile.rows.length === 0) {
-      console.log("Створення нового профілю педагога...")
+      console.log("[v0] Creating new teacher profile for userId:", parsedUserId)
       await client.query(
         `INSERT INTO profiles (
           user_id, first_name, last_name, middle_name, 
-          telegram, phone, birth_date, city, school_id,
+          telegram, phone, school_id,
           experience_years, subjects_ids, grades_catering,
-          specialization, awards, bio, interests,
-          methodist_area, consultation_areas
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+          bio, consultation_areas, avatar
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
-          userId,
-          firstName || null,
-          lastName || null,
-          middleName || null,
-          telegram || null,
-          phone || null,
-          birthDate || null,
-          city || null,
-          schoolId || null,
-          experienceYears || 0,
-          subjectsIds || null,
-          gradesCatering || null,
-          specialization || null,
-          awards || null,
-          bio || null,
-          interests || null,
-          methodistArea || null,
-          consultationAreas || null,
+          parsedUserId,
+          firstName && firstName.trim() ? firstName.trim() : null,
+          lastName && lastName.trim() ? lastName.trim() : null,
+          middleName && middleName.trim() ? middleName.trim() : null,
+          telegram && telegram.trim() ? telegram.trim() : null,
+          phone && phone.trim() ? phone.trim() : null,
+          schoolId ? Number.parseInt(String(schoolId).trim(), 10) : null,
+          experienceYears ? Number.parseInt(String(experienceYears).trim(), 10) : 0,
+          subjectsIds && subjectsIds.trim() ? subjectsIds.trim() : null,
+          gradesCatering && gradesCatering.trim() ? gradesCatering.trim() : null,
+          bio && bio.trim() ? bio.trim() : null,
+          consultationAreas && consultationAreas.trim() ? consultationAreas.trim() : null,
+          avatarPath,
         ],
       )
-      console.log("✓ Новий профіль педагога створено")
     } else {
-      console.log("Оновлення існуючого профілю педагога...")
+      console.log("[v0] Updating existing teacher profile for userId:", parsedUserId)
+
+      const currentAvatar = existingProfile.rows[0].avatar
+      const finalAvatarPath = avatarPath || currentAvatar
 
       await client.query(
         `UPDATE profiles SET
@@ -2791,60 +2618,50 @@ app.post("/api/profile/teacher", async (req, res) => {
           middle_name = $4,
           telegram = $5,
           phone = $6,
-          birth_date = $7,
-          city = $8,
-          school_id = $9,
-          experience_years = $10,
-          subjects_ids = $11,
-          grades_catering = $12,
-          specialization = $13,
-          awards = $14,
-          bio = $15,
-          interests = $16,
-          methodist_area = $17,
-          consultation_areas = $18,
+          school_id = $7,
+          experience_years = $8,
+          subjects_ids = $9,
+          grades_catering = $10,
+          bio = $11,
+          consultation_areas = $12,
+          avatar = $13,
           updated_at = CURRENT_TIMESTAMP
         WHERE user_id = $1`,
         [
-          userId,
-          firstName || null,
-          lastName || null,
-          middleName || null,
-          telegram || null,
-          phone || null,
-          birthDate || null,
-          city || null,
-          schoolId || null,
-          experienceYears || 0,
-          subjectsIds || null,
-          gradesCatering || null,
-          specialization || null,
-          awards || null,
-          bio || null,
-          interests || null,
-          methodistArea || null,
-          consultationAreas || null,
+          parsedUserId,
+          firstName && firstName.trim() ? firstName.trim() : null,
+          lastName && lastName.trim() ? lastName.trim() : null,
+          middleName && middleName.trim() ? middleName.trim() : null,
+          telegram && telegram.trim() ? telegram.trim() : null,
+          phone && phone.trim() ? phone.trim() : null,
+          schoolId ? Number.parseInt(String(schoolId).trim(), 10) : null,
+          experienceYears ? Number.parseInt(String(experienceYears).trim(), 10) : 0,
+          subjectsIds && subjectsIds.trim() ? subjectsIds.trim() : null,
+          gradesCatering && gradesCatering.trim() ? gradesCatering.trim() : null,
+          bio && bio.trim() ? bio.trim() : null,
+          consultationAreas && consultationAreas.trim() ? consultationAreas.trim() : null,
+          finalAvatarPath,
         ],
       )
-      console.log("✓ Профіль педагога оновлено")
     }
 
     await client.query("COMMIT")
+    console.log("[v0] Profile saved successfully for userId:", parsedUserId)
     res.json({
       message: "Профіль успішно оновлено",
     })
   } catch (error) {
     await client.query("ROLLBACK")
-    console.error("Error updating teacher profile:", error)
+    console.error("[v0] Error updating teacher profile:", error.message)
     res.status(500).json({
-      error: "Помилка оновлення профілю",
+      error: "Помилка оновлення профіля: " + error.message,
     })
   } finally {
     client.release()
   }
 })
 
-// GET teacher profile
+// GET teacher students
 app.get("/api/teacher/:teacherId/students", async (req, res) => {
   try {
     const { teacherId } = req.params
@@ -2947,14 +2764,6 @@ app.get("/api/students/:studentId/participations", async (req, res) => {
   }
 })
 
-app.use((req, res, next) => {
-  if (req.path.endsWith(".html")) {
-    res.status(404).sendFile(path.join(__dirname, "auth.html"))
-  } else {
-    next()
-  }
-})
-
 app.use((err, req, res, next) => {
   console.error("❌ Необроблена помилка сервера:")
   console.error("URL:", req.url)
@@ -2976,19 +2785,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     error: "Внутрішня помилка сервера",
   })
-})
-
-// Server shutdown handlers
-process.on("SIGINT", async () => {
-  console.log("\n🛑 Отримано SIGINT, завершення роботи сервера...")
-  await shutdownBot()
-  process.exit(0)
-})
-
-process.on("SIGTERM", async () => {
-  console.log("\n🛑 Отримано SIGTERM, завершення роботи сервера...")
-  await shutdownBot()
-  process.exit(0)
 })
 
 // Запуск сервера

@@ -5,14 +5,34 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 
-const userId = localStorage.getItem("userId")
+const userIdFromStorage = localStorage.getItem("userId")
+const userId = userIdFromStorage ? Number.parseInt(userIdFromStorage, 10) : null
 const userRole = localStorage.getItem("userRole") || "вчитель"
 
-if (!userId || userId === "undefined" || userId === "null") {
+if (!userId || Number.isNaN(userId)) {
+  console.error("[v0] Invalid userId:", userIdFromStorage)
   window.location.href = "auth.html"
 }
 
-// Toggle sections based on role
+console.log("[v0] Loaded userId:", userId, "Role:", userRole)
+
+let avatarFile = null
+let originalImage = null
+let imageState = {
+  scale: 1,
+  rotate: 0,
+  flipH: false,
+  flipV: false,
+  offsetX: 0,
+  offsetY: 0
+}
+
+let isDragging = false
+let dragStartX = 0
+let dragStartY = 0
+let dragStartOffsetX = 0
+let dragStartOffsetY = 0
+
 function toggleFieldsByRole() {
   const isMethodist = userRole === "методист"
   document.getElementById("teacherSection").style.display = isMethodist ? "none" : "block"
@@ -20,7 +40,6 @@ function toggleFieldsByRole() {
   document.getElementById("roleValue").textContent = isMethodist ? "Методист" : "Вчитель"
 }
 
-// Load schools from database
 async function loadSchools() {
   try {
     const response = await fetch(`${BASE_URL}/api/schools`)
@@ -35,16 +54,12 @@ async function loadSchools() {
         option.textContent = school.name
         select.appendChild(option)
       })
-    } else {
-      document.getElementById("schoolSelect").innerHTML = '<option value="">Помилка завантаження</option>'
     }
   } catch (error) {
     console.error("Error loading schools:", error)
-    document.getElementById("schoolSelect").innerHTML = '<option value="">Помилка завантаження</option>'
   }
 }
 
-// Load subjects from database
 async function loadSubjects() {
   try {
     const response = await fetch(`${BASE_URL}/api/subjects`)
@@ -59,16 +74,12 @@ async function loadSubjects() {
         option.textContent = subject.name
         select.appendChild(option)
       })
-    } else {
-      document.getElementById("subjectsSelect").innerHTML = "<option>Помилка завантаження</option>"
     }
   } catch (error) {
     console.error("Error loading subjects:", error)
-    document.getElementById("subjectsSelect").innerHTML = "<option>Помилка завантаження</option>"
   }
 }
 
-// Load teacher profile from database
 async function loadProfile() {
   try {
     const response = await fetch(`${BASE_URL}/api/profile/teacher/${userId}`)
@@ -86,12 +97,10 @@ async function loadProfile() {
       document.getElementById("gradesCatering").value = profile.grades_catering || ""
       document.getElementById("bio").value = profile.bio || ""
 
-      // Set school
       if (profile.school_id) {
         document.getElementById("schoolSelect").value = String(profile.school_id)
       }
 
-      // Set subjects
       if (profile.subjects_ids) {
         const subjectIds = profile.subjects_ids.split(",").map((id) => id.trim())
         const subjectsSelect = document.getElementById("subjectsSelect")
@@ -100,15 +109,12 @@ async function loadProfile() {
         })
       }
 
-      // Methodist fields
-      if (userRole === "методист") {
-        if (profile.consultation_areas) {
-          const areas = profile.consultation_areas.split(",").map((a) => a.trim())
-          const consultationSelect = document.getElementById("consultationAreasSelect")
-          Array.from(consultationSelect.options).forEach((option) => {
-            option.selected = areas.includes(option.value)
-          })
-        }
+      if (userRole === "методист" && profile.consultation_areas) {
+        const areas = profile.consultation_areas.split(",").map((a) => a.trim())
+        const consultationSelect = document.getElementById("consultationAreasSelect")
+        Array.from(consultationSelect.options).forEach((option) => {
+          option.selected = areas.includes(option.value)
+        })
       }
 
       const avatarPreview = document.getElementById("avatarPreview")
@@ -120,15 +126,12 @@ async function loadProfile() {
         avatarPreview.innerHTML = '<span class="avatar-placeholder">👨‍🏫</span>'
         document.getElementById("clearAvatarBtn").style.display = "none"
       }
-
-      document.getElementById("roleValue").textContent = userRole === "методист" ? "Методист" : "Вчитель"
     }
   } catch (error) {
     console.error("Error loading profile:", error)
   }
 }
 
-// Save profile to database
 document.getElementById("profileForm").addEventListener("submit", async (e) => {
   e.preventDefault()
 
@@ -136,7 +139,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   messageDiv.style.display = "none"
 
   const formData = new FormData()
-  formData.append("userId", userId)
+  formData.append("userId", String(userId))
   formData.append("firstName", document.getElementById("firstName").value.trim())
   formData.append("lastName", document.getElementById("lastName").value.trim())
   formData.append("middleName", document.getElementById("middleName").value.trim())
@@ -144,9 +147,9 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   formData.append("phone", document.getElementById("phone").value.trim())
 
   const schoolId = document.getElementById("schoolSelect").value
-  formData.append("schoolId", schoolId ? Number.parseInt(schoolId, 10) : "")
+  formData.append("schoolId", schoolId || "")
 
-  formData.append("experienceYears", document.getElementById("experienceYears").value || 0)
+  formData.append("experienceYears", document.getElementById("experienceYears").value || "0")
   formData.append("gradesCatering", document.getElementById("gradesCatering").value.trim())
   formData.append("bio", document.getElementById("bio").value.trim())
   formData.append("userRole", userRole)
@@ -170,6 +173,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   }
 
   try {
+    console.log("[v0] Sending profile update for userId:", userId)
     const response = await fetch(`${BASE_URL}/api/profile/teacher`, {
       method: "POST",
       body: formData,
@@ -196,44 +200,25 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
       messageDiv.textContent = "❌ " + (data.error || "Помилка збереження")
       messageDiv.className = "message error"
       messageDiv.style.display = "block"
+      console.error("[v0] Server error:", data)
     }
   } catch (error) {
-    console.error("Error saving profile:", error)
+    console.error("[v0] Error saving profile:", error)
     messageDiv.textContent = "❌ Помилка з'єднання з сервером"
     messageDiv.className = "message error"
     messageDiv.style.display = "block"
   }
 })
 
-// Navigate to students list
 function viewStudents() {
   window.location.href = `students-list.html?teacher_id=${userId}`
 }
 
-let avatarFile = null
-let originalImage = null
-let imageState = {
-  scale: 1,
-  rotate: 0,
-  flipH: false,
-  flipV: false,
-  offsetX: 0,
-  offsetY: 0
-}
-
-let isDragging = false
-let dragStartX = 0
-let dragStartY = 0
-let dragStartOffsetX = 0
-let dragStartOffsetY = 0
-
 function openAvatarEditor() {
-  const file = avatarFile
-  if (!file) {
+  if (!avatarFile) {
     alert("Спочатку завантажте фото")
     return
   }
-
   document.getElementById("avatarEditorModal").style.display = "flex"
   redrawCanvas()
 }
@@ -255,20 +240,16 @@ function redrawCanvas() {
 
   ctx.save()
   ctx.translate(canvas.width / 2, canvas.height / 2)
-
   ctx.translate(imageState.offsetX, imageState.offsetY)
 
-  // Поворот
   if (imageState.rotate !== 0) {
     ctx.rotate((imageState.rotate * Math.PI) / 180)
   }
 
-  // Відзеркалення
   if (imageState.flipH || imageState.flipV) {
     ctx.scale(imageState.flipH ? -1 : 1, imageState.flipV ? -1 : 1)
   }
 
-  // Масштабування
   const scale = imageState.scale
   const w = (img.width * scale) / 2
   const h = (img.height * scale) / 2
@@ -276,7 +257,6 @@ function redrawCanvas() {
   ctx.drawImage(img, -w, -h, img.width * scale, img.height * scale)
   ctx.restore()
 
-  // Додаємо бордюр
   ctx.strokeStyle = "#7ec8e3"
   ctx.lineWidth = 3
   ctx.beginPath()
@@ -355,13 +335,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     canvas.addEventListener("mousemove", (e) => {
       if (!isDragging) return
-
       const deltaX = e.clientX - dragStartX
       const deltaY = e.clientY - dragStartY
-
       imageState.offsetX = dragStartOffsetX + deltaX
       imageState.offsetY = dragStartOffsetY + deltaY
-
       redrawCanvas()
     })
 
@@ -458,7 +435,6 @@ document.getElementById("avatarInput").addEventListener("change", (e) => {
   }
 })
 
-// Initialize
 toggleFieldsByRole()
 loadSchools()
 loadSubjects()

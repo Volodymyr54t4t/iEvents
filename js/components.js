@@ -42,7 +42,7 @@ function renderHeader() {
         <a href="results.html" class="nav-link">Результати</a>
         <a href="statistics.html" class="nav-link">Статистика</a>
         <a href="predictions.html" class="nav-link">Прогнози</a>
-        <a href="profilesT.html" class="nav-link">Профіль</a>
+        <a href="profileT.html" class="nav-link">Профіль</a>
       `
       break
     case "методист":
@@ -51,7 +51,7 @@ function renderHeader() {
         <a href="results.html" class="nav-link">Результати</a>
         <a href="statistics.html" class="nav-link">Статистика</a>
         <a href="predictions.html" class="nav-link">Прогнози</a>
-        <a href="profilesT.html" class="nav-link">Профіль</a>
+        <a href="profileT.html" class="nav-link">Профіль</a>
         <a href="admin.html" class="nav-link">Адмін</a>
       `
       break
