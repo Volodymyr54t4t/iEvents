@@ -1,0 +1,101 @@
+/* Global page spacing and container styles for consistent layout across all pages */
+
+/* Main container with proper max-width and centered padding */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 60px;
+}
+
+/* Page header with proper spacing */
+.page-header {
+  text-align: center;
+  margin-bottom: 48px;
+  color: #0a5f7f;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.page-header h1 {
+  font-size: 36px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  animation: slideInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.85;
+  margin-bottom: 16px;
+  color: #5a7a8a;
+  animation: fadeIn 0.8s ease-out 0.2s both;
+}
+
+/* Content sections with proper padding */
+.filters-section {
+  margin-bottom: 32px;
+  padding: 0;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(10, 95, 127, 0.08);
+  animation: slideInUp 0.7s ease-out 0.1s both;
+}
+
+/* Responsive adjustments for tablets and mobile */
+@media (max-width: 1024px) {
+  .main-container {
+    padding: 32px 40px;
+  }
+
+  .page-header {
+    margin-bottom: 40px;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    padding: 24px 24px;
+  }
+
+  .page-header {
+    margin-bottom: 32px;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .filters-section {
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-container {
+    padding: 16px 16px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}

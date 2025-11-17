@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,17 +8,20 @@
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/profile.css">
+    <!-- Added global page spacing styles -->
+    <link rel="stylesheet" href="css/page-spacing.css">
     <!-- Load config.js first -->
     <script src="js/config.js"></script>
 </head>
+
 <body>
     <!-- Changed div to header element for semantic HTML -->
     <header id="header"></header>
-    
+
     <main class="main-content">
         <div class="profile-container">
             <h1 class="page-title">Мій профіль</h1>
-            
+
             <div class="role-badge" id="roleBadge">
                 <span class="role-label">Роль:</span>
                 <span class="role-value" id="roleValue">Учень</span>
@@ -31,10 +35,12 @@
                     </div>
                     <input type="file" id="avatarInput" accept="image/*" style="display: none;">
                     <div class="avatar-button-group">
-                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('avatarInput').click()">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="document.getElementById('avatarInput').click()">
                             📤 Завантажити фото
                         </button>
-                        <button type="button" class="btn btn-secondary" id="clearAvatarBtn" style="display: none;" onclick="clearAvatar()">
+                        <button type="button" class="btn btn-secondary" id="clearAvatarBtn" style="display: none;"
+                            onclick="clearAvatar()">
                             ✕ Видалити фото
                         </button>
                     </div>
@@ -71,15 +77,18 @@
                                         <label>↕️ Вертикальне відзеркалення</label>
                                         <input type="checkbox" id="flipVertical" class="checkbox">
                                     </div>
-                                    <button type="button" class="btn btn-secondary btn-full" onclick="resetAvatarEditor()">
+                                    <button type="button" class="btn btn-secondary btn-full"
+                                        onclick="resetAvatarEditor()">
                                         ↻ Скинути зміни
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" onclick="closeAvatarEditor()">Скасувати</button>
-                            <button type="button" class="btn btn-primary" onclick="confirmAvatar()">✓ Підтвердити</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="closeAvatarEditor()">Скасувати</button>
+                            <button type="button" class="btn btn-primary" onclick="confirmAvatar()">✓
+                                Підтвердити</button>
                         </div>
                     </div>
                 </div>
@@ -189,4 +198,5 @@
     <script src="js/components.js"></script>
     <script src="js/profile.js"></script>
 </body>
+
 </html>
