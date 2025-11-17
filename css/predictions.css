@@ -9,9 +9,7 @@ body {
     Ubuntu, Cantarell, sans-serif;
   background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
   min-height: 100vh;
-  /* Added smooth transitions for all elements */
   padding: 40px 20px 80px 20px;
-  /* Updated padding-top to 80px (was 140px) to match header height */
   padding-top: 80px;
   transition: padding 0.3s ease;
 }
@@ -19,12 +17,11 @@ body {
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  /* Added fade-in animation */
   margin-bottom: 60px;
   animation: fadeIn 0.6s ease-out;
 }
 
-/* Added keyframe animations */
+/* Keyframe animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -104,53 +101,6 @@ body {
   }
 }
 
-@keyframes titleSlide {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes subtitleFade {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes buttonPop {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) rotate(-10deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes slideDownBounce {
-  0% {
-    opacity: 0;
-    transform: translateY(-100px) scale(0.9);
-  }
-  50% {
-    transform: translateY(10px) scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 @keyframes rotateGradient {
   0% {
     transform: rotate(0deg);
@@ -183,34 +133,6 @@ body {
   }
 }
 
-@keyframes subtitleSlide {
-  0% {
-    opacity: 0;
-    transform: translateX(-30px);
-    filter: blur(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-    filter: blur(0);
-  }
-}
-
-@keyframes buttonPopIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) rotate(-15deg);
-  }
-  50% {
-    transform: scale(1.1) rotate(5deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-/* Added dramatic, highly visible animations for header section */
 @keyframes headerSlideDown {
   0% {
     opacity: 0;
@@ -281,6 +203,13 @@ body {
   }
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Page header with enhanced animations */
 .page-header {
   background: linear-gradient(135deg, #ffffff 0%, #f8fcfd 100%);
   padding: 45px 40px;
@@ -288,12 +217,12 @@ body {
   box-shadow: 0 15px 50px rgba(126, 200, 227, 0.15),
     0 5px 15px rgba(0, 0, 0, 0.08);
   margin-bottom: 40px;
+  margin-top: 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 25px;
-  /* Applied dramatic slide-down animation with 1.5s duration */
   animation: headerSlideDown 1.5s cubic-bezier(0.34, 1.56, 0.64, 1),
     glowPulse 3s ease-in-out infinite;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -302,7 +231,6 @@ body {
   border: 1px solid rgba(126, 200, 227, 0.1);
 }
 
-/* Added animated gradient background overlay */
 .page-header::before {
   content: "";
   position: absolute;
@@ -320,14 +248,12 @@ body {
 }
 
 .page-header:hover {
-  /* Enhanced hover with dramatic lift and glow */
   box-shadow: 0 25px 70px rgba(126, 200, 227, 0.25),
     0 10px 25px rgba(0, 0, 0, 0.12);
   transform: translateY(-5px);
   border-color: rgba(126, 200, 227, 0.3);
 }
 
-/* Made header content a positioned element for proper layering */
 .header-content {
   animation: fadeInUp 1s ease-out 0.3s backwards;
   position: relative;
@@ -335,18 +261,6 @@ body {
 }
 
 .header-content h1 {
-  font-size: 42px;
-  color: #2d3748;
-  margin-bottom: 15px;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Applied dramatic bounce-in animation with 1.2s duration */
-  animation: titleBounceIn 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.header-content h1 {
-  /* Increased size and added animated gradient text */
   font-size: 42px;
   color: #2d3748;
   margin-bottom: 15px;
@@ -362,7 +276,6 @@ body {
 }
 
 .page-header:hover .header-content h1 {
-  /* Animated gradient shift on hover */
   background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 50%, #4a9fb8 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -374,27 +287,11 @@ body {
 
 .subtitle {
   color: #718096;
-  /* Increased size and added better animation */
   font-size: 18px;
   line-height: 1.6;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Applied slide-in animation with blur effect, 1s duration */
   animation: subtitleSlideIn 1s ease-out 0.6s backwards;
   font-weight: 400;
-}
-
-/* Enhanced subtitle animation */
-@keyframes subtitleSlide {
-  0% {
-    opacity: 0;
-    transform: translateX(-30px);
-    filter: blur(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-    filter: blur(0);
-  }
 }
 
 .page-header:hover .subtitle {
@@ -411,32 +308,14 @@ body {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  /* Enhanced transition with dramatic spring effect */
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
-  /* Applied dramatic bounce animation with rotation, 1.2s duration */
   animation: buttonBounce 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s backwards;
   z-index: 1;
   box-shadow: 0 4px 15px rgba(126, 200, 227, 0.3);
 }
 
-/* Enhanced button pop-in animation */
-@keyframes buttonPopIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) rotate(-15deg);
-  }
-  50% {
-    transform: scale(1.1) rotate(5deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-/* Enhanced ripple effect with multiple waves */
 .btn-back::before {
   content: "";
   position: absolute;
@@ -450,7 +329,6 @@ body {
   transition: width 0.8s ease-out, height 0.8s ease-out;
 }
 
-/* Enhanced shine effect overlay */
 .btn-back::after {
   content: "";
   position: absolute;
@@ -487,6 +365,7 @@ body {
   transform: translateY(-3px) scale(1.03);
 }
 
+/* Stat cards section */
 .overview-section {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -502,28 +381,17 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  /* Enhanced transition with transform and shadow */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   animation: scaleIn 0.5s ease-out backwards;
   position: relative;
   overflow: hidden;
 }
 
-/* Added staggered animation delay for cards */
-.stat-card:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.stat-card:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.stat-card:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.stat-card:nth-child(4) {
-  animation-delay: 0.4s;
-}
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
 
-/* Added shine effect on hover */
 .stat-card::before {
   content: "";
   position: absolute;
@@ -552,7 +420,6 @@ body {
 .stat-icon {
   font-size: 48px;
   line-height: 1;
-  /* Added icon animation on hover */
   transition: transform 0.3s ease;
 }
 
@@ -570,7 +437,6 @@ body {
   font-weight: bold;
   color: #2d3748;
   margin-bottom: 5px;
-  /* Added smooth transition */
   transition: color 0.3s ease, transform 0.3s ease;
 }
 
@@ -582,10 +448,10 @@ body {
 .stat-label {
   color: #718096;
   font-size: 14px;
-  /* Added transition */
   transition: color 0.3s ease;
 }
 
+/* Enhanced filter section with smooth animations */
 .filters-section {
   background: white;
   padding: 25px;
@@ -596,8 +462,7 @@ body {
   flex-wrap: wrap;
   gap: 20px;
   align-items: flex-end;
-  /* Added animation */
-  animation: slideInFromRight 0.6s ease-out;
+  animation: slideInFromRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   transition: all 0.3s ease;
 }
 
@@ -611,73 +476,80 @@ body {
   gap: 8px;
   flex: 1;
   min-width: 200px;
-  /* Added animation */
-  animation: fadeIn 0.6s ease-out backwards;
+  animation: fadeIn 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  transition: all 0.3s ease;
 }
 
-.filter-group:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.filter-group:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.filter-group:nth-child(3) {
-  animation-delay: 0.3s;
-}
+.filter-group:nth-child(1) { animation-delay: 0.1s; }
+.filter-group:nth-child(2) { animation-delay: 0.2s; }
+.filter-group:nth-child(3) { animation-delay: 0.3s; }
 
 .filter-group label {
   font-weight: 600;
   color: #2d3748;
   font-size: 14px;
-  /* Added transition */
-  transition: color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
 }
 
 .filter-group:hover label {
   color: #7ec8e3;
+  transform: translateX(4px);
 }
 
+/* Dropdown select with smooth transitions and hover effects */
 .filter-group select {
-  padding: 10px 15px;
+  padding: 12px 15px;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 14px;
   background: white;
   cursor: pointer;
-  /* Enhanced transition */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  font-family: inherit;
 }
 
 .filter-group select:hover {
-  border-color: #cbd5e0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #7ec8e3;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(126, 200, 227, 0.15);
+  background: linear-gradient(white, white), linear-gradient(135deg, #7ec8e3, #4dd0e1);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
 }
 
 .filter-group select:focus {
   outline: none;
   border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.2);
-  transform: translateY(-2px);
+  box-shadow: 0 0 0 4px rgba(126, 200, 227, 0.15), 0 6px 16px rgba(126, 200, 227, 0.2);
+  transform: translateY(-3px);
+  background-color: #f8fcfd;
 }
 
+.filter-group select:active {
+  transform: translateY(-1px);
+}
+
+/* Refresh button with enhanced ripple and animations */
 .btn-refresh {
   background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
-  /* Enhanced transition */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
-  animation: fadeIn 0.6s ease-out 0.4s backwards;
+  animation: fadeIn 0.7s ease-out 0.4s backwards;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.25);
 }
 
-/* Added ripple effect */
 .btn-refresh::before {
   content: "";
   position: absolute;
@@ -686,9 +558,9 @@ body {
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition: width 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), height 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .btn-refresh:active::before {
@@ -698,20 +570,21 @@ body {
 
 .btn-refresh:hover {
   background: linear-gradient(135deg, #4dd0e1 0%, #26c6da 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(77, 208, 225, 0.4);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 10px 24px rgba(77, 208, 225, 0.35);
 }
 
 .btn-refresh:active {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.25);
 }
 
+/* Predictions section */
 .predictions-section {
   background: white;
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  /* Added animation */
   margin-bottom: 40px;
   animation: fadeIn 0.8s ease-out;
   transition: all 0.3s ease;
@@ -725,14 +598,12 @@ body {
   font-size: 24px;
   color: #2d3748;
   margin-bottom: 25px;
-  /* Added transition */
   transition: color 0.3s ease;
 }
 
 .loading {
   text-align: center;
   padding: 60px 20px;
-  /* Added animation */
   animation: fadeIn 0.5s ease-out;
 }
 
@@ -746,16 +617,9 @@ body {
   margin: 0 auto 20px;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .loading p {
   color: #718096;
   font-size: 16px;
-  /* Added pulsing animation */
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -769,31 +633,18 @@ body {
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
-  /* Enhanced transition */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   animation: scaleIn 0.5s ease-out backwards;
   position: relative;
   overflow: hidden;
 }
 
-/* Added staggered animation for prediction cards */
-.prediction-card:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.prediction-card:nth-child(2) {
-  animation-delay: 0.15s;
-}
-.prediction-card:nth-child(3) {
-  animation-delay: 0.2s;
-}
-.prediction-card:nth-child(4) {
-  animation-delay: 0.25s;
-}
-.prediction-card:nth-child(5) {
-  animation-delay: 0.3s;
-}
+.prediction-card:nth-child(1) { animation-delay: 0.1s; }
+.prediction-card:nth-child(2) { animation-delay: 0.15s; }
+.prediction-card:nth-child(3) { animation-delay: 0.2s; }
+.prediction-card:nth-child(4) { animation-delay: 0.25s; }
+.prediction-card:nth-child(5) { animation-delay: 0.3s; }
 
-/* Added gradient overlay on hover */
 .prediction-card::before {
   content: "";
   position: absolute;
@@ -834,7 +685,6 @@ body {
   border-radius: 50%;
   object-fit: cover;
   background: #e2e8f0;
-  /* Added transition and border */
   transition: all 0.3s ease;
   border: 3px solid transparent;
 }
@@ -854,7 +704,6 @@ body {
   font-weight: 600;
   color: #2d3748;
   margin-bottom: 4px;
-  /* Added transition */
   transition: color 0.3s ease;
 }
 
@@ -865,7 +714,6 @@ body {
 .student-meta {
   color: #718096;
   font-size: 14px;
-  /* Added transition */
   transition: color 0.3s ease;
 }
 
@@ -877,7 +725,6 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  /* Added transition and animation */
   transition: all 0.3s ease;
   animation: scaleIn 0.4s ease-out backwards;
 }
@@ -919,303 +766,157 @@ body {
   padding: 15px;
   border-radius: 8px;
   border-left: 4px solid #7ec8e3;
-  /* Added transition and animation */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: slideInFromLeft 0.4s ease-out backwards;
 }
 
-.stat-item:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.stat-item:nth-child(2) {
-  animation-delay: 0.15s;
-}
-.stat-item:nth-child(3) {
-  animation-delay: 0.2s;
-}
-.stat-item:nth-child(4) {
-  animation-delay: 0.25s;
-}
+.stat-item:nth-child(1) { animation-delay: 0.1s; }
+.stat-item:nth-child(2) { animation-delay: 0.15s; }
+.stat-item:nth-child(3) { animation-delay: 0.2s; }
 
-.prediction-card:hover .stat-item {
-  transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-left-width: 6px;
+.stat-item:hover {
+  transform: translateX(6px);
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.2);
+  background: #f0f9fc;
 }
 
 .stat-item-label {
   font-size: 12px;
   color: #718096;
   margin-bottom: 5px;
-  /* Added transition */
   transition: color 0.3s ease;
+}
+
+.stat-item:hover .stat-item-label {
+  color: #7ec8e3;
 }
 
 .stat-item-value {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
   color: #2d3748;
-  /* Added transition */
+  transition: color 0.3s ease;
+}
+
+.stat-item:hover .stat-item-value {
+  color: #7ec8e3;
+}
+
+.prediction-notes {
+  background: #f7fafc;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #ffa500;
+  color: #4a5568;
+  font-size: 14px;
+  line-height: 1.6;
   transition: all 0.3s ease;
 }
 
-.prediction-card:hover .stat-item-value {
-  color: #7ec8e3;
-  transform: scale(1.05);
-}
-
-.recommendation-box {
+.prediction-card:hover .prediction-notes {
   background: white;
-  padding: 15px;
-  border-radius: 8px;
-  border-left: 4px solid #80deea;
-  /* Added transition and animation */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideInFromRight 0.5s ease-out backwards;
-}
-
-.prediction-card:hover .recommendation-box {
-  transform: translateX(-5px);
-  box-shadow: 0 4px 12px rgba(128, 222, 234, 0.2);
-  border-left-width: 6px;
-}
-
-.recommendation-box h4 {
-  font-size: 14px;
-  color: #2d3748;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  /* Added transition */
-  transition: color 0.3s ease;
-}
-
-.prediction-card:hover .recommendation-box h4 {
-  color: #4dd0e1;
-}
-
-.recommendation-box p {
-  font-size: 14px;
-  color: #4a5568;
-  line-height: 1.6;
-  /* Added transition */
-  transition: color 0.3s ease;
+  border-left-color: #7ec8e3;
+  transform: translateX(4px);
 }
 
 .no-data {
   text-align: center;
   padding: 60px 20px;
   color: #718096;
-  /* Added animation */
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Enhanced responsive design for better mobile experience */
-
-@media (max-width: 1200px) {
-  .container {
-    max-width: 100%;
-  }
-
-  .overview-section {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .prediction-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.no-data-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
 }
 
-@media (max-width: 1024px) {
+.no-data p {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.no-data-description {
+  font-size: 14px;
+  color: #a0aec0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  body {
+    padding: 20px 10px 40px 10px;
+    padding-top: 60px;
+  }
+
   .page-header {
+    padding: 25px 20px;
+    margin-top: 40px;
     flex-direction: column;
     align-items: flex-start;
-    /* Adjusted padding for tablets */
-    padding: 35px 30px;
+    gap: 15px;
   }
 
   .header-content h1 {
-    font-size: 32px;
+    font-size: 28px;
   }
 
   .subtitle {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .btn-back {
     width: 100%;
-    min-height: 52px;
-  }
-}
-
-@media (max-width: 768px) {
-  body {
-    /* Adjusted mobile padding for better spacing */
-    padding: 15px 10px 60px 10px;
-    padding-top: 100px;
-  }
-
-  .container {
-    /* Added mobile bottom margin */
-    margin-bottom: 40px;
-  }
-
-  .page-header {
-    /* Adjusted mobile padding */
-    padding: 30px 25px;
-    gap: 18px;
-    margin-bottom: 30px;
-  }
-
-  .header-content h1 {
-    font-size: 28px;
-    line-height: 1.3;
-  }
-
-  .subtitle {
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
-  .overview-section {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .stat-card {
-    padding: 20px;
-    gap: 15px;
-  }
-
-  .stat-icon {
-    font-size: 36px;
-  }
-
-  .stat-value {
-    font-size: 28px;
-  }
-
-  .stat-label {
-    font-size: 13px;
+    padding: 12px 16px;
   }
 
   .filters-section {
-    padding: 20px;
-    gap: 15px;
+    flex-direction: column;
   }
 
   .filter-group {
-    min-width: 100%;
-    flex: none;
-  }
-
-  .filter-group select {
-    padding: 12px 15px;
-    font-size: 16px;
-    min-height: 48px;
+    width: 100%;
   }
 
   .btn-refresh {
     width: 100%;
-    min-height: 48px;
-    padding: 12px 20px;
   }
 
   .predictions-section {
     padding: 20px;
-    /* Mobile bottom margin */
-    margin-bottom: 30px;
-  }
-
-  .predictions-section h2 {
-    font-size: 20px;
-    margin-bottom: 20px;
-  }
-
-  .prediction-card {
-    padding: 16px;
-  }
-
-  .student-header {
-    gap: 12px;
-  }
-
-  .student-avatar {
-    width: 50px;
-    height: 50px;
-  }
-
-  .student-name {
-    font-size: 16px;
-  }
-
-  .student-meta {
-    font-size: 13px;
-  }
-
-  .trend-badge {
-    padding: 5px 10px;
-    font-size: 11px;
-  }
-
-  .prediction-stats {
-    grid-template-columns: 1fr;
-    gap: 12px;
   }
 
   .stat-item {
     padding: 12px;
   }
-
-  .stat-item-value {
-    font-size: 18px;
-  }
-
-  .recommendation-box {
-    padding: 12px;
-  }
-
-  .recommendation-box h4 {
-    font-size: 13px;
-  }
-
-  .recommendation-box p {
-    font-size: 13px;
-  }
 }
 
 @media (max-width: 480px) {
-  body {
-    /* Small screen padding adjustments */
-    padding: 12px 8px 50px 8px;
-    padding-top: 90px;
-  }
-
   .container {
-    /* Small screen bottom margin */
-    margin-bottom: 30px;
+    margin-bottom: 40px;
   }
 
   .page-header {
-    /* Small screen header padding */
-    padding: 20px 16px;
-    gap: 12px;
+    padding: 15px 15px;
+    margin-top: 30px;
   }
 
   .header-content h1 {
     font-size: 20px;
+    margin-bottom: 10px;
   }
 
   .subtitle {
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .overview-section {
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
 
   .stat-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 16px;
-    gap: 10px;
+    padding: 15px;
+    gap: 15px;
   }
 
   .stat-icon {
@@ -1226,278 +927,28 @@ body {
     font-size: 24px;
   }
 
-  .stat-label {
-    font-size: 12px;
-  }
-
-  .filters-section {
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .filter-group label {
-    font-size: 13px;
-  }
-
-  .predictions-section {
-    padding: 16px;
-    /* Small screen bottom margin */
-    margin-bottom: 25px;
-  }
-
-  .predictions-section h2 {
-    font-size: 18px;
-    margin-bottom: 16px;
+  .predictions-grid {
+    gap: 15px;
   }
 
   .prediction-card {
-    padding: 14px;
+    padding: 15px;
   }
 
   .student-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 10px;
-  }
-
-  .student-info {
-    width: 100%;
-  }
-
-  .student-name {
-    font-size: 15px;
-  }
-
-  .student-meta {
-    font-size: 12px;
-  }
-
-  .trend-badge {
-    display: inline-flex;
-    margin-top: 8px;
-  }
-
-  .stat-item {
-    padding: 10px;
-  }
-
-  .stat-item-label {
-    font-size: 11px;
-  }
-
-  .stat-item-value {
-    font-size: 16px;
-  }
-
-  .recommendation-box {
-    padding: 10px;
-  }
-
-  .recommendation-box h4 {
-    font-size: 12px;
-  }
-
-  .recommendation-box p {
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .btn-back {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-
-  .loading {
-    padding: 40px 16px;
-  }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-  }
-
-  .loading p {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 360px) {
-  body {
-    /* Extra small screen padding */
-    padding: 10px 6px 40px 6px;
-    padding-top: 85px;
-  }
-
-  .container {
-    /* Extra small screen bottom margin */
-    margin-bottom: 25px;
-  }
-
-  .page-header {
-    /* Extra small screen header padding */
-    padding: 16px 12px;
-    gap: 10px;
-  }
-
-  .header-content h1 {
-    font-size: 18px;
-  }
-
-  .subtitle {
-    font-size: 12px;
-  }
-
-  .stat-card {
-    padding: 12px;
-  }
-
-  .stat-icon {
-    font-size: 28px;
-  }
-
-  .stat-value {
-    font-size: 20px;
-  }
-
-  .stat-label {
-    font-size: 11px;
-  }
-
-  .filters-section {
-    padding: 12px;
-    gap: 10px;
-  }
-
-  .filter-group select {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-
-  .btn-refresh {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
-  .predictions-section {
-    padding: 12px;
-    /* Extra small screen bottom margin */
-    margin-bottom: 20px;
-  }
-
-  .predictions-section h2 {
-    font-size: 16px;
-    margin-bottom: 12px;
-  }
-
-  .prediction-card {
-    padding: 12px;
+    gap: 12px;
   }
 
   .student-avatar {
-    width: 45px;
-    height: 45px;
+    width: 48px;
+    height: 48px;
   }
 
   .student-name {
-    font-size: 14px;
-  }
-
-  .student-meta {
-    font-size: 11px;
-  }
-
-  .trend-badge {
-    padding: 4px 8px;
-    font-size: 10px;
-  }
-
-  .stat-item {
-    padding: 8px;
-  }
-
-  .stat-item-value {
-    font-size: 15px;
-  }
-
-  .recommendation-box {
-    padding: 8px;
-  }
-
-  .recommendation-box h4 {
-    font-size: 11px;
-  }
-
-  .recommendation-box p {
-    font-size: 11px;
-  }
-
-  .btn-back {
-    padding: 8px 14px;
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 768px) and (orientation: landscape) {
-  body {
-    padding-top: 70px;
-  }
-
-  .overview-section {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stat-card {
-    flex-direction: row;
-    text-align: left;
+    font-size: 16px;
   }
 
   .prediction-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Added smooth scrolling behavior */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Added focus visible styles for accessibility */
-*:focus-visible {
-  outline: 3px solid #7ec8e3;
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* Reduced motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-@media print {
-  body {
-    background: white;
-    padding: 0;
-  }
-
-  .btn-back,
-  .btn-refresh,
-  .filters-section {
-    display: none;
-  }
-
-  .page-header,
-  .stat-card,
-  .predictions-section,
-  .prediction-card {
-    box-shadow: none;
-    border: 1px solid #e2e8f0;
-    animation: none;
+    grid-template-columns: 1fr;
   }
 }

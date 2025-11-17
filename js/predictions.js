@@ -35,11 +35,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Setup filter event listeners
 function setupFilters() {
-  document.getElementById("searchInput").addEventListener("input", filterPredictions)
-  document.getElementById("gradeFilter").addEventListener("change", filterPredictions)
-  document.getElementById("trendFilter").addEventListener("change", filterPredictions)
-  document.getElementById("activityFilter").addEventListener("change", filterPredictions)
-  document.getElementById("sortBy").addEventListener("change", filterPredictions)
+  const searchInput = document.getElementById("searchInput")
+  const gradeFilter = document.getElementById("gradeFilter")
+  const trendFilter = document.getElementById("trendFilter")
+  const activityFilter = document.getElementById("activityFilter")
+  const sortBy = document.getElementById("sortBy")
+
+  if (searchInput) searchInput.addEventListener("input", filterPredictions)
+  if (gradeFilter) gradeFilter.addEventListener("change", filterPredictions)
+  if (trendFilter) trendFilter.addEventListener("change", filterPredictions)
+  if (activityFilter) activityFilter.addEventListener("change", filterPredictions)
+  if (sortBy) sortBy.addEventListener("change", filterPredictions)
 }
 
 // Load and calculate predictions
@@ -47,28 +53,11 @@ async function loadPredictions() {
   showLoading(true)
 
   try {
-    const profileRes = await fetch(`${BASE_URL}/api/profile/teacher/${currentUserId}`)
-    if (!profileRes.ok) {
-      throw new Error("Не вдалося завантажити профіль. Будь ласка, заповніть свій профіль.")
-    }
-
-    const profileData = await profileRes.json()
-    currentUserSchoolId = profileData.profile?.school_id
-
-    if (!currentUserSchoolId) {
-      showLoading(false)
-      showNoData(true)
-      document.getElementById("noData").innerHTML = `
-        <p>Будь ласка, вкажіть навчальний заклад у своєму профілі</p>
-        <a href="profilesT.html" style="color: #7ec8e3; text-decoration: underline;">Перейти до профілю</a>
-      `
-      return
-    }
-
-    console.log("[v0] Current user school_id:", currentUserSchoolId)
-
-    const studentsRes = await fetch(`${BASE_URL}/api/teacher/${currentUserId}/students`)
-    const resultsRes = await fetch(`${BASE_URL}/api/admin/all-results`)
+    // Fetch all necessary data from the server
+    const [studentsRes, resultsRes] = await Promise.all([
+      fetch(`${BASE_URL}/api/students`),
+      fetch(`${BASE_URL}/api/admin/all-results`),
+    ])
 
     if (!studentsRes.ok || !resultsRes.ok) {
       throw new Error("Failed to fetch data from server")
@@ -77,13 +66,7 @@ async function loadPredictions() {
     const studentsData = await studentsRes.json()
     const resultsData = await resultsRes.json()
 
-    const students = (studentsData.students || []).filter((student) => {
-      const studentSchoolId = student.school_id ? Number.parseInt(student.school_id, 10) : null
-      return studentSchoolId === Number.parseInt(currentUserSchoolId, 10)
-    })
-
-    console.log("[v0] Students from same institution:", students.length)
-
+    const students = studentsData.students || []
     const allResults = resultsData.results || []
 
     // Group results by student
@@ -117,7 +100,6 @@ async function loadPredictions() {
     console.error("Error loading predictions:", error)
     showLoading(false)
     showNoData(true)
-    document.getElementById("noData").innerHTML = `<p>${error.message || "Помилка завантаження даних"}</p>`
   }
 }
 
@@ -295,12 +277,19 @@ function updateOverviewStats(predictions) {
   document.getElementById("needAttention").textContent = needAttention
 }
 
+// Filter predictions
 function filterPredictions() {
-  const searchTerm = document.getElementById("searchInput").value.toLowerCase()
-  const gradeFilter = document.getElementById("gradeFilter").value
-  const trendFilter = document.getElementById("trendFilter").value
-  const activityFilter = document.getElementById("activityFilter").value
-  const sortBy = document.getElementById("sortBy").value
+  const searchInput = document.getElementById("searchInput")
+  const gradeFilter = document.getElementById("gradeFilter")
+  const trendFilter = document.getElementById("trendFilter")
+  const activityFilter = document.getElementById("activityFilter")
+  const sortBy = document.getElementById("sortBy")
+
+  const searchTerm = searchInput ? searchInput.value.toLowerCase() : ""
+  const gradeFilterValue = gradeFilter ? gradeFilter.value : "all"
+  const trendFilterValue = trendFilter ? trendFilter.value : "all"
+  const activityFilterValue = activityFilter ? activityFilter.value : "all"
+  const sortByValue = sortBy ? sortBy.value : "name"
 
   let filtered = [...allPredictions]
 
@@ -314,23 +303,23 @@ function filterPredictions() {
   }
 
   // Apply grade filter
-  if (gradeFilter !== "all") {
-    filtered = filtered.filter((p) => p.student.grade === gradeFilter)
+  if (gradeFilterValue !== "all") {
+    filtered = filtered.filter((p) => p.student.grade === gradeFilterValue)
   }
 
   // Apply trend filter
-  if (trendFilter !== "all") {
-    filtered = filtered.filter((p) => p.trend === trendFilter)
+  if (trendFilterValue !== "all") {
+    filtered = filtered.filter((p) => p.trend === trendFilterValue)
   }
 
   // Apply activity filter
-  if (activityFilter !== "all") {
-    filtered = filtered.filter((p) => p.activityLevel === activityFilter)
+  if (activityFilterValue !== "all") {
+    filtered = filtered.filter((p) => p.activityLevel === activityFilterValue)
   }
 
   // Apply sorting
   filtered.sort((a, b) => {
-    switch (sortBy) {
+    switch (sortByValue) {
       case "name":
         const nameA = `${a.student.last_name || ""} ${a.student.first_name || ""}`.toLowerCase()
         const nameB = `${b.student.last_name || ""} ${b.student.first_name || ""}`.toLowerCase()
