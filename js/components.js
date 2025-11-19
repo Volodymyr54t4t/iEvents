@@ -10,9 +10,9 @@ function renderHeader() {
   if (!header) return
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
-    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" || userRole === "методист"
+      ? '<a href="competitionsT.html" class="nav-link">Конкурси</a>'
+      : '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
@@ -24,13 +24,15 @@ function renderHeader() {
     userRole === "вчитель" || userRole === "методист" ? '<a href="predictions.html" class="nav-link">Прогнози</a>' : ""
 
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
-
-  const studentAdminLink = userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Учнівська адмін панель</a>' : ""
+  
+  const studentAdminLink = userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Адмінка користувача</a>' : ""
+  
+  const teacherAdminLink = userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">👨‍🏫 Адмінка вчителя</a>' : ""
 
   const profileLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="profilesT.html" class="nav-link">Профіль</a>' :
-    '<a href="profile.html" class="nav-link">Профіль</a>'
+    userRole === "вчитель" || userRole === "методист"
+      ? '<a href="profilesT.html" class="nav-link">Профіль</a>'
+      : '<a href="profile.html" class="nav-link">Профіль</a>'
 
   header.innerHTML = `
         <header class="site-header">
@@ -43,6 +45,7 @@ function renderHeader() {
                     ${statisticsLink}
                     ${predictionsLink}
                     ${studentAdminLink}
+                    ${teacherAdminLink}
                     ${profileLink}
                     ${adminLink}
                     <div class="user-info">
@@ -81,5 +84,13 @@ function logout() {
   window.location.href = "auth.html"
 }
 
-renderHeader()
-renderFooter()
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    renderHeader()
+    renderFooter()
+  })
+} else {
+  // DOM is already ready
+  renderHeader()
+  renderFooter()
+}

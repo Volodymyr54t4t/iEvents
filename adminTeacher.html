@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Адмінка вчителя - iEvents</title>
+    <link rel="stylesheet" href="css/adminTeacher.css" />
+    <link rel="stylesheet" href="css/header.css" />
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <div class="admin-header">
+            <h1>👨‍🏫 Адмінка вчителя</h1>
+            <p class="subtitle">Керування конкурсами та результатами учнів</p>
+        </div>
+
+        <!-- Added tabs for different sections -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('students')">📋 Учні закладу</button>
+            <button class="tab-btn" onclick="switchTab('competitions')">🏆 Конкурси</button>
+            <button class="tab-btn" onclick="switchTab('results')">📊 Результати</button>
+            <button class="tab-btn" onclick="switchTab('statistics')">📈 Статистика</button>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="studentsTab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-label">Всього учнів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="activeStudents">0</div>
+                        <div class="stat-label">Активних учнів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalParticipations">0</div>
+                        <div class="stat-label">Участей у конкурсах</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="averageScore">0</div>
+                        <div class="stat-label">Середній бал</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="search-box">
+                    <input type="text" id="searchStudents" placeholder="🔍 Пошук учня..." />
+                </div>
+                <div class="filters">
+                    <select id="filterGrade">
+                        <option value="">Всі класи</option>
+                    </select>
+                    <select id="filterStatus">
+                        <option value="">Всі статуси</option>
+                        <option value="active">Активні</option>
+                        <option value="inactive">Неактивні</option>
+                    </select>
+                    <button class="btn-reset" onclick="resetFilters()">Скинути фільтри</button>
+                </div>
+            </div>
+
+            <div class="students-table-container">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ПІБ</th>
+                            <th>Email</th>
+                            <th>Клас</th>
+                            <th>Телефон</th>
+                            <th>Статус</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <tr>
+                            <td colspan="7" class="loading">Завантаження учнів...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Competitions Tab -->
+        <div id="competitionsTab" class="tab-content">
+            <div class="section-header">
+                <h2>Управління конкурсами</h2>
+                <button class="btn-primary" onclick="openAddCompetitionModal()">+ Створити конкурс</button>
+            </div>
+
+            <div class="controls-panel">
+                <div class="search-box">
+                    <input type="text" id="searchCompetitions" placeholder="🔍 Пошук конкурсу..." />
+                </div>
+                <div class="filters">
+                    <select id="filterCompStatus" onchange="filterCompetitions()">
+                        <option value="">Всі статуси</option>
+                        <option value="активний">Активні</option>
+                        <option value="майбутній">Майбутні</option>
+                        <option value="завершений">Завершені</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Назва</th>
+                            <th>Дата початку</th>
+                            <th>Дата закінчення</th>
+                            <th>Учасників</th>
+                            <th>Статус</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="competitionsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">Завантаження конкурсів...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Results Tab -->
+        <div id="resultsTab" class="tab-content">
+            <div class="section-header">
+                <h2>Управління результатами</h2>
+                <button class="btn-primary" onclick="openAddResultModal()">+ Додати результат</button>
+            </div>
+
+            <div class="controls-panel">
+                <div class="search-box">
+                    <input type="text" id="searchResults" placeholder="🔍 Пошук..." />
+                </div>
+                <div class="filters">
+                    <select id="filterResultCompetition" onchange="filterResults()">
+                        <option value="">Всі конкурси</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Учень</th>
+                            <th>Конкурс</th>
+                            <th>Місце</th>
+                            <th>Бали</th>
+                            <th>Досягнення</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">Завантаження результатів...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statisticsTab" class="tab-content">
+            <h2 class="stats-section-title">📈 Статистика</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTotalCompetitions">0</div>
+                        <div class="stat-label">Всього конкурсів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTotalResults">0</div>
+                        <div class="stat-label">Всього результатів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👑</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTopPlaces">0</div>
+                        <div class="stat-label">Призових місць</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statAvgScore">0</div>
+                        <div class="stat-label">Середній бал</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>Топ-10 активних учнів</h3>
+                <div id="topStudentsList" class="top-students-list">
+                    <p>Завантаження...</p>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>Розподіл по класах</h3>
+                <div id="classDistribution" class="class-distribution">
+                    <p>Завантаження...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Competition Modal -->
+    <div id="competitionModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="competitionModalTitle">Створити конкурс</h2>
+                <button class="close-btn" onclick="closeCompetitionModal()">&times;</button>
+            </div>
+            <form id="competitionForm">
+                <div class="form-group">
+                    <label for="compTitle">Назва конкурсу *</label>
+                    <input type="text" id="compTitle" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="compDescription">Опис</label>
+                    <textarea id="compDescription" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="compStartDate">Дата початку *</label>
+                        <input type="date" id="compStartDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="compEndDate">Дата закінчення *</label>
+                        <input type="date" id="compEndDate" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="compOrganizer">Організатор</label>
+                        <input type="text" id="compOrganizer" />
+                    </div>
+                    <div class="form-group">
+                        <label for="compLocation">Місце проведення</label>
+                        <input type="text" id="compLocation" />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeCompetitionModal()">Скасувати</button>
+                    <button type="submit" class="btn-primary">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="resultModalTitle">Додати результат</h2>
+                <button class="close-btn" onclick="closeResultModal()">&times;</button>
+            </div>
+            <form id="resultForm">
+                <div class="form-group">
+                    <label for="resultCompetition">Конкурс *</label>
+                    <select id="resultCompetition" required>
+                        <option value="">Оберіть конкурс</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="resultStudent">Учень *</label>
+                    <select id="resultStudent" required>
+                        <option value="">Оберіть учня</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="resultPlace">Місце</label>
+                        <input type="number" id="resultPlace" min="1" />
+                    </div>
+                    <div class="form-group">
+                        <label for="resultScore">Бали</label>
+                        <input type="text" id="resultScore" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="resultAchievement">Досягнення</label>
+                    <input type="text" id="resultAchievement" placeholder="Переможець, Призер, Учасник" />
+                </div>
+
+                <div class="form-group">
+                    <label for="resultNotes">Примітки</label>
+                    <textarea id="resultNotes" rows="2"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeResultModal()">Скасувати</button>
+                    <button type="submit" class="btn-primary">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Detail Modal -->
+    <div id="studentDetailModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalStudentName">Деталі учня</h2>
+                <button class="close-btn" onclick="closeStudentDetailModal()">&times;</button>
+            </div>
+            <div class="student-details">
+                <div class="detail-section">
+                    <h3>Особиста інформація</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">ПІБ:</span>
+                            <span class="detail-value" id="detailFullName"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value" id="detailEmail"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Телефон:</span>
+                            <span class="detail-value" id="detailPhone"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Telegram:</span>
+                            <span class="detail-value" id="detailTelegram"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Дата народження:</span>
+                            <span class="detail-value" id="detailBirthDate"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Місто:</span>
+                            <span class="detail-value" id="detailCity"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Клас:</span>
+                            <span class="detail-value" id="detailGrade"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Статус:</span>
+                            <span class="detail-value" id="detailStatus"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Участь у конкурсах</h3>
+                    <div id="participationList" class="participation-list">
+                        <p>Завантаження...</p>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Результати</h3>
+                    <div id="resultsList" class="results-list">
+                        <p>Завантаження...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeStudentDetailModal()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/adminTeacher.js"></script>
+</body>
+
+</html>

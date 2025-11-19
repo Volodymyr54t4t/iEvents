@@ -1609,7 +1609,7 @@ app.put("/api/results/:resultId", async (req, res) => {
         await client.query("ROLLBACK")
         console.log("Помилка: вчитель не може редагувати підтверджений результат")
         return res.status(403).json({
-          error: "Ви не можете редагувати підтверджений ре��ультат",
+          error: "Ви не можете редагувати підтверджений результат",
         })
       }
     }
@@ -2127,7 +2127,7 @@ app.put("/api/competitions/:id", async (req, res) => {
   }
 })
 
-app.post("/api/admin/create-user", async (req, res) => {
+app.post("/api/create-user", async (req, res) => {
   const { email, password, firstName, lastName, role, phone, telegram } = req.body
 
   console.log("Створення користувача адміністратором:", email, "з роллю:", role)
@@ -2857,6 +2857,296 @@ app.post("/api/change-password", async (req, res) => {
   }
 })
 
+app.post("/api/teacher/students", async (req, res) => {
+  const {
+    firstName,
+    lastName,
+    middleName,
+    email,
+    password,
+    phone,
+    gradeNumber,
+    gradeLetter,
+    birthDate,
+    city,
+    telegram,
+    isActive,
+    schoolId
+  } = req.body;
+
+  console.log("[v0] Creating new student:", { email, schoolId });
+
+  if (!email || !password || !firstName || !lastName || !schoolId) {
+    return res.status(400).json({ error: "Заповніть всі обов'язкові поля" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Check if email already exists
+    const existingUser = await client.query("SELECT id FROM users WHERE email = $1", [email]);
+    if (existingUser.rows.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Користувач з таким email вже існує" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const userResult = await client.query(
+      "INSERT INTO users (email, password, role) VALUES ($1, $2, 'учень') RETURNING id",
+      [email, hashedPassword]
+    );
+
+    const userId = userResult.rows[0].id;
+
+    // Create profile
+    const grade = gradeNumber && gradeLetter ? `${gradeNumber}${gradeLetter}` : gradeNumber || null;
+    
+    await client.query(
+      `INSERT INTO profiles (
+        user_id, first_name, last_name, middle_name, phone, 
+        grade_number, grade_letter, grade, birth_date, city, 
+        telegram, is_active, school_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      [
+        userId,
+        firstName,
+        lastName,
+        middleName || null,
+        phone || null,
+        gradeNumber || null,
+        gradeLetter || null,
+        grade,
+        birthDate || null,
+        city || null,
+        telegram || null,
+        isActive !== false,
+        schoolId
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    console.log("[v0] Student created successfully:", userId);
+    res.json({ message: "Учня успішно створено", userId });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("[v0] Error creating student:", error);
+    res.status(500).json({ error: "Помилка створення учня" });
+  } finally {
+    client.release();
+  }
+});
+
+app.put("/api/teacher/students/:studentId", async (req, res) => {
+  const { studentId } = req.params;
+  const {
+    firstName,
+    lastName,
+    middleName,
+    email,
+    password,
+    phone,
+    gradeNumber,
+    gradeLetter,
+    birthDate,
+    city,
+    telegram,
+    isActive,
+    schoolId
+  } = req.body;
+
+  console.log("[v0] Updating student:", studentId);
+
+  if (!email || !firstName || !lastName) {
+    return res.status(400).json({ error: "Заповніть всі обов'язкові поля" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Check if email exists for another user
+    const existingUser = await client.query(
+      "SELECT id FROM users WHERE email = $1 AND id != $2",
+      [email, studentId]
+    );
+    if (existingUser.rows.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Email вже використовується іншим користувачем" });
+    }
+
+    // Update user email
+    await client.query("UPDATE users SET email = $1 WHERE id = $2", [email, studentId]);
+
+    // Update password if provided
+    if (password && password.trim()) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await client.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, studentId]);
+    }
+
+    // Update profile
+    const grade = gradeNumber && gradeLetter ? `${gradeNumber}${gradeLetter}` : gradeNumber || null;
+    
+    await client.query(
+      `UPDATE profiles SET
+        first_name = $1,
+        last_name = $2,
+        middle_name = $3,
+        phone = $4,
+        grade_number = $5,
+        grade_letter = $6,
+        grade = $7,
+        birth_date = $8,
+        city = $9,
+        telegram = $10,
+        is_active = $11,
+        school_id = $12,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = $13`,
+      [
+        firstName,
+        lastName,
+        middleName || null,
+        phone || null,
+        gradeNumber || null,
+        gradeLetter || null,
+        grade,
+        birthDate || null,
+        city || null,
+        telegram || null,
+        isActive !== false,
+        schoolId,
+        studentId
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    console.log("[v0] Student updated successfully:", studentId);
+    res.json({ message: "Учня успішно оновлено" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("[v0] Error updating student:", error);
+    res.status(500).json({ error: "Помилка оновлення учня" });
+  } finally {
+    client.release();
+  }
+});
+
+app.delete("/api/teacher/students/:studentId", async (req, res) => {
+  const { studentId } = req.params;
+
+  console.log("[v0] Deleting student:", studentId);
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Delete student's participations
+    // Note: The table 'competition_participants' uses 'user_id', not 'student_id'.
+    // Assuming 'studentId' corresponds to 'user_id' here.
+    await client.query("DELETE FROM competition_participants WHERE user_id = $1", [studentId]);
+
+    // Delete student's results
+    // Note: The table 'competition_results' uses 'user_id', not 'student_id'.
+    // Assuming 'studentId' corresponds to 'user_id' here.
+    // Also, the table name was 'results', corrected to 'competition_results' based on other queries.
+    await client.query("DELETE FROM competition_results WHERE user_id = $1", [studentId]);
+
+    // Delete profile
+    await client.query("DELETE FROM profiles WHERE user_id = $1", [studentId]);
+
+    // Delete user
+    await client.query("DELETE FROM users WHERE id = $1", [studentId]);
+
+    await client.query("COMMIT");
+
+    console.log("[v0] Student deleted successfully:", studentId);
+    res.json({ message: "Учня успішно видалено" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("[v0] Error deleting student:", error);
+    res.status(500).json({ error: "Помилка видалення учня" });
+  } finally {
+    client.release();
+  }
+});
+
+app.get("/api/students/:studentId", async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    const result = await pool.query(
+      `SELECT 
+        u.id,
+        u.email,
+        p.first_name,
+        p.last_name,
+        p.middle_name,
+        p.phone,
+        p.grade_number,
+        p.grade_letter,
+        p.grade,
+        p.birth_date,
+        p.city,
+        p.telegram,
+        p.is_active,
+        p.school_id
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE u.id = $1`,
+      [studentId]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Учня не знайдено" });
+    }
+    
+    res.json({ success: true, student: result.rows[0] });
+  } catch (error) {
+    console.error("Error getting student details:", error);
+    res.status(500).json({ error: "Помилка завантаження деталей учня" });
+  }
+});
+
+app.get("/api/students/:studentId/results", async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    const results = await pool.query(
+      `SELECT 
+        cr.id,
+        cr.competition_id,
+        c.title as competition_title,
+        cr.place,
+        cr.score,
+        cr.achievement,
+        cr.notes,
+        cr.created_at
+      FROM competition_results cr
+      JOIN competitions c ON cr.competition_id = c.id
+      WHERE cr.user_id = $1
+      ORDER BY cr.created_at DESC`,
+      [studentId]
+    );
+    
+    res.json({ success: true, results: results.rows });
+  } catch (error) {
+    console.error("Error getting student results:", error);
+    res.status(500).json({ error: "Помилка завантаження результатів" });
+  }
+});
+
+app.get("/api/students/:studentId/participations", async (req, res) => {
+});
+
 app.use((err, req, res, next) => {
   console.error("❌ Необроблена помилка сервера:")
   console.error("URL:", req.url)
@@ -2892,3 +3182,5 @@ app.listen(PORT, async () => {
     console.error("❌ Помилка при запуску Telegram бота:", error)
   }
 })
+error("❌ Помилка при запуску Telegram бота:", error)
+
