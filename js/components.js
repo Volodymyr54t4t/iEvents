@@ -1,84 +1,59 @@
-// Header component with role-based navigation
+// Header component
 function renderHeader() {
   const userId = localStorage.getItem("userId")
   const userEmail = localStorage.getItem("userEmail")
   const userRole = localStorage.getItem("userRole")
 
+  if (!userId) return
+
   const header = document.getElementById("header")
   if (!header) return
 
-  if (!userId) {
-    header.innerHTML = `
-      <header class="site-header">
-        <div class="header-container">
-          <a href="index.html" class="logo">🎯 iEvents</a>
-          <nav class="nav">
-            <a href="index.html" class="nav-link">Головна</a>
-            <button class="btn-login" onclick="window.location.href='auth.html'">Вхід / Реєстрація</button>
-          </nav>
-          <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </div>
-      </header>
-    `
-    return
-  }
+  const competitionsLink =
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
+    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
-  let navLinks = `<a href="index.html" class="nav-link">Головна</a>`
+  const resultsLink =
+    userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
 
-  switch (userRole) {
-    case "учень":
-      navLinks += `
-        <a href="competitionsP.html" class="nav-link">Конкурси</a>
-        <a href="profile.html" class="nav-link">Профіль</a>
-      `
-      break
-    case "вчитель":
-      navLinks += `
-        <a href="competitionsT.html" class="nav-link">Конкурси</a>
-        <a href="results.html" class="nav-link">Результати</a>
-        <a href="statistics.html" class="nav-link">Статистика</a>
-        <a href="predictions.html" class="nav-link">Прогнози</a>
-        <a href="profileT.html" class="nav-link">Профіль</a>
-      `
-      break
-    case "методист":
-      navLinks += `
-        <a href="competitionsT.html" class="nav-link">Конкурси</a>
-        <a href="results.html" class="nav-link">Результати</a>
-        <a href="statistics.html" class="nav-link">Статистика</a>
-        <a href="predictions.html" class="nav-link">Прогнози</a>
-        <a href="profileT.html" class="nav-link">Профіль</a>
-        <a href="admin.html" class="nav-link">Адмін</a>
-      `
-      break
-    default:
-      navLinks += `<a href="profile.html" class="nav-link">Профіль</a>`
-  }
+  const statisticsLink =
+    userRole === "вчитель" || userRole === "методист" ? '<a href="statistics.html" class="nav-link">Статистика</a>' : ""
+
+  const predictionsLink =
+    userRole === "вчитель" || userRole === "методист" ? '<a href="predictions.html" class="nav-link">Прогнози</a>' : ""
+
+  const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
+
+  const studentAdminLink = userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Учнівська адмін панель</a>' : ""
+
+  const profileLink =
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="profilesT.html" class="nav-link">Профіль</a>' :
+    '<a href="profile.html" class="nav-link">Профіль</a>'
 
   header.innerHTML = `
-    <header class="site-header">
-      <div class="header-container">
-        <a href="index.html" class="logo">🎯 iEvents</a>
-        <nav class="nav" id="mainNav">
-          ${navLinks}
-          <div class="user-info">
-            <span class="user-email">${userEmail}</span>
-            <span class="user-role">${userRole}</span>
-          </div>
-          <button class="btn-logout" onclick="logout()">Вийти</button>
-        </nav>
-        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-    </header>
-  `
+        <header class="site-header">
+            <div class="header-container">
+                <a href="index.html" class="logo">🎯 iEvents</a>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Головна</a>
+                    ${competitionsLink}
+                    ${resultsLink}
+                    ${statisticsLink}
+                    ${predictionsLink}
+                    ${studentAdminLink}
+                    ${profileLink}
+                    ${adminLink}
+                    <div class="user-info">
+                        <span class="user-email">${userEmail}</span>
+                        <span class="user-role">${userRole}</span>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">Вийти</button>
+                </nav>
+            </div>
+        </header>
+    `
 }
 
 // Footer component
@@ -87,31 +62,17 @@ function renderFooter() {
   if (!footer) return
 
   footer.innerHTML = `
-    <footer class="site-footer">
-      <div class="footer-container">
-        <p>&copy; 2025 iEvents. Всі права захищені.</p>
-        <div class="footer-links">
-          <a href="#">Про нас</a>
-          <a href="#">Контакти</a>
-          <a href="#">Підтримка</a>
-        </div>
-      </div>
-    </footer>
-  `
-}
-
-// Toggle mobile menu
-function toggleMobileMenu() {
-  const nav = document.getElementById("mainNav")
-  const toggle = document.querySelector(".mobile-menu-toggle")
-
-  if (nav) {
-    nav.classList.toggle("active")
-  }
-
-  if (toggle) {
-    toggle.classList.toggle("active")
-  }
+        <footer class="site-footer">
+            <div class="footer-container">
+                <p>&copy; 2025 iEvents. Всі права захищені.</p>
+                <div class="footer-links">
+                    <a href="#">Про нас</a>
+                    <a href="#">Контакти</a>
+                    <a href="#">Підтримка</a>
+                </div>
+            </div>
+        </footer>
+    `
 }
 
 // Logout function

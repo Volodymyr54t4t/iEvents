@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Особистий кабінет - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/adminUser.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>📋 Особистий кабінет учня</h1>
+            <p class="subtitle">Керуйте своїм профілем, конкурсами та результатами</p>
+        </div>
+
+        <!-- Персональна інформація -->
+        <div class="card">
+            <div class="card-header">
+                <h2>👤 Персональна інформація</h2>
+                <button class="btn btn-primary" onclick="toggleEditMode('personal')">
+                    <span id="editPersonalBtn">✏️ Редагувати</span>
+                </button>
+            </div>
+            <div id="personalInfo" class="info-section">
+                <div class="loading">Завантаження...</div>
+            </div>
+            <form id="personalForm" class="edit-form" style="display: none;">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editFirstName">Ім'я *</label>
+                        <input type="text" id="editFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLastName">Прізвище *</label>
+                        <input type="text" id="editLastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editMiddleName">По батькові</label>
+                        <input type="text" id="editMiddleName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPhone">Телефон</label>
+                        <input type="tel" id="editPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTelegram">Telegram</label>
+                        <input type="text" id="editTelegram">
+                    </div>
+                    <div class="form-group">
+                        <label for="editCity">Місто</label>
+                        <input type="text" id="editCity">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">💾 Зберегти</button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelEdit('personal')">❌
+                        Скасувати</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Зміна пароля -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🔐 Зміна пароля</h2>
+            </div>
+            <form id="passwordForm" class="password-form">
+                <div class="form-group">
+                    <label for="currentPassword">Поточний пароль</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Новий пароль (мінімум 6 символів)</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Підтвердіть новий пароль</label>
+                    <input type="password" id="confirmPassword" required minlength="6">
+                </div>
+                <div id="passwordMessage" class="message" style="display: none;"></div>
+                <button type="submit" class="btn btn-primary">🔄 Змінити пароль</button>
+            </form>
+        </div>
+
+        <!-- Мої конкурси -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🎯 Мої конкурси</h2>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="active">Активні</button>
+                <button class="tab-btn" data-tab="upcoming">Майбутні</button>
+                <button class="tab-btn" data-tab="completed">Завершені</button>
+            </div>
+            <div id="competitionsContainer">
+                <div id="activeTab" class="tab-content active">
+                    <div class="loading">Завантаження...</div>
+                </div>
+                <div id="upcomingTab" class="tab-content">
+                    <div class="loading">Завантаження...</div>
+                </div>
+                <div id="completedTab" class="tab-content">
+                    <div class="loading">Завантаження...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Мої результати -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🏆 Мої результати</h2>
+            </div>
+            <div id="resultsContainer">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/components.js"></script>
+    <script src="js/adminUser.js"></script>
+</body>
+
+</html>

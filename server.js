@@ -1609,7 +1609,7 @@ app.put("/api/results/:resultId", async (req, res) => {
         await client.query("ROLLBACK")
         console.log("Помилка: вчитель не може редагувати підтверджений результат")
         return res.status(403).json({
-          error: "Ви не можете редагувати підтверджений результат",
+          error: "Ви не можете редагувати підтверджений ре��ультат",
         })
       }
     }
@@ -1812,11 +1812,18 @@ app.get("/api/statistics/by-grade", async (req, res) => {
 
 // Топ активних учнів
 app.get("/api/statistics/top-students", async (req, res) => {
-  const limit = req.query.limit || 10
+  const limit = parseInt(req.query.limit) || 10
 
-  console.log("Запит топ активних учнів")
+  console.log("[v0] Запит топ активних учнів, limit:", limit)
 
   try {
+    if (isNaN(limit) || limit < 1 || limit > 100) {
+      return res.status(400).json({
+        error: "Невірний параметр limit",
+        students: []
+      })
+    }
+
     const result = await pool.query(
       `
       SELECT 
@@ -1830,22 +1837,37 @@ app.get("/api/statistics/top-students", async (req, res) => {
       FROM users u
       LEFT JOIN profiles p ON u.id = p.user_id
       LEFT JOIN competition_participants cp ON u.id = cp.user_id
-      WHERE u.role = 'учень'
+      WHERE u.role = $1
       GROUP BY u.id, u.email, p.first_name, p.last_name, p.grade, p.avatar
       ORDER BY participations_count DESC
-      LIMIT $1
-    `,
-      [limit],
+      LIMIT $2
+      `,
+      ["учень", limit],
     )
 
-    console.log("✓ Топ активних учнів отримано")
+    console.log("[v0] Топ активних учнів отримано, кількість:", result.rows.length)
+    
+    const students = result.rows.map(row => ({
+      id: row.id,
+      email: row.email,
+      first_name: row.first_name || '',
+      last_name: row.last_name || '',
+      grade: row.grade || '',
+      avatar: row.avatar || null,
+      participations_count: parseInt(row.participations_count) || 0
+    }))
+
     res.json({
-      students: result.rows,
+      success: true,
+      students: students,
+      count: students.length
     })
   } catch (error) {
-    console.error("❌ Помилка отримання топ учнів:", error.message)
+    console.error("[v0] Помилка отримання топ учнів:", error.message)
     res.status(500).json({
+      success: false,
       error: "Помилка отримання статистики",
+      students: []
     })
   }
 })
@@ -2761,6 +2783,77 @@ app.get("/api/students/:studentId/participations", async (req, res) => {
   } catch (error) {
     console.error("Error getting student participations:", error)
     res.status(500).json({ error: "Помилка сервера при отриманні участей студента" })
+  }
+})
+
+app.post("/api/change-password", async (req, res) => {
+  const { userId, currentPassword, newPassword } = req.body
+
+  console.log("Запит на зміну пароля для користувача ID:", userId)
+
+  if (!userId || !currentPassword || !newPassword) {
+    console.log("Помилка: відсутні обов'язкові поля")
+    return res.status(400).json({
+      error: "Всі поля обов'язкові",
+    })
+  }
+
+  if (newPassword.length < 6) {
+    console.log("Помилка: пароль занадто короткий")
+    return res.status(400).json({
+      error: "Новий пароль повинен містити мінімум 6 символів",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    // Отримання поточного пароля користувача
+    const userResult = await client.query("SELECT id, email, password FROM users WHERE id = $1", [userId])
+
+    if (userResult.rows.length === 0) {
+      await client.query("ROLLBACK")
+      console.log("Помилка: користувача не знайдено")
+      return res.status(404).json({
+        error: "Користувача не знайдено",
+      })
+    }
+
+    const user = userResult.rows[0]
+
+    // Перевірка поточного пароля
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
+
+    if (!isPasswordValid) {
+      await client.query("ROLLBACK")
+      console.log("Помилка: невірний поточний пароль")
+      return res.status(400).json({
+        error: "Невірний поточний пароль",
+      })
+    }
+
+    // Хешування нового пароля
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    // Оновлення пароля в базі даних
+    await client.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, userId])
+
+    await client.query("COMMIT")
+    console.log("✓ Пароль успішно змінено для користувача:", user.email)
+
+    res.json({
+      message: "Пароль успішно змінено",
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("❌ Помилка зміни пароля:", error.message)
+    res.status(500).json({
+      error: "Помилка зміни пароля",
+    })
+  } finally {
+    client.release()
   }
 })
 
