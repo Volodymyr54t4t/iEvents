@@ -11,45 +11,12 @@ const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCom
 const app = express()
 const PORT = 3000
 
-// The bot will be initialized only in bot.js
-
-// Store chat IDs for notifications (in production, store in database)
+// Зберігаємо ID чатів для сповіщень
 const subscribedChats = new Set()
 
-// Telegram bot commands
-// Note: These commands are typically handled within bot.js. If they are intended to be here,
-// ensure the bot instance is correctly managed or remove them if the bot is fully managed in bot.js.
-// For now, assuming the bot initialization and command handling are intended to be in bot.js as per the CHANGE instruction.
-
-// Function to send Telegram notifications
+// Функція відправки Telegram сповіщень
 async function sendTelegramNotification(message) {
-  // This function relies on the 'bot' instance, which is now removed from this file.
-  // If this function is still needed here, the 'bot' instance needs to be re-introduced
-  // or this function needs to be moved to bot.js.
-  // Based on the update, we'll assume the bot instance and its related logic are in bot.js.
-  // If this function is meant to be a utility here, it would need to be refactored to accept the bot instance.
-  console.log("sendTelegramNotification called with message:", message)
-  // Placeholder: If bot is in bot.js, this would need to be called from there or the bot instance passed.
-  // For now, we comment out the actual sending part.
-  /*
-  if (subscribedChats.size === 0) {
-    console.log("Немає підписників для відправки сповіщення")
-    return
-  }
-
-  for (const chatId of subscribedChats) {
-    try {
-      await bot.sendMessage(chatId, message, { parse_mode: "HTML" })
-      console.log(`Сповіщення відправлено в чат: ${chatId}`)
-    } catch (error) {
-      console.error(`Помилка відправки в чат ${chatId}:`, error.message)
-      // If chat is not found, remove it from subscribers
-      if (error.response && error.response.statusCode === 403) {
-        subscribedChats.delete(chatId)
-      }
-    }
-  }
-  */
+  console.log("sendTelegramNotification викликано з повідомленням:", message)
 }
 
 // Middleware
@@ -58,12 +25,12 @@ app.use(express.json())
 app.use(express.static(path.join(__dirname)))
 app.use("/uploads", express.static("uploads"))
 
-// Create uploads directory if it doesn't exist
+// Створення папки для завантажень
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads")
 }
 
-// Multer configuration for file uploads
+// Налаштування Multer для завантаження файлів
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/")
@@ -77,7 +44,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024, // 5MB
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif/
@@ -86,12 +53,12 @@ const upload = multer({
     if (mimetype && extname) {
       return cb(null, true)
     } else {
-      cb(new Error("Only images are allowed"))
+      cb(new Error("Тільки зображення дозволені"))
     }
   },
 })
 
-// PostgreSQL connection
+// Підключення до PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -99,14 +66,14 @@ const pool = new Pool({
   },
 })
 
+// Ініціалізація бази даних
 async function initializeDatabase() {
-  // Renamed from initDatabase to match the call in listen
   const client = await pool.connect()
   try {
     console.log("=== Початок ініціалізації бази даних ===")
 
-    // Крок 1: Перевірка та створення enum типу
-    console.log("Крок 1: Перевірка enum типу user_role...")
+    // Перевірка та створення enum типу
+    console.log("Перевірка enum типу user_role...")
     const enumCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM pg_type WHERE typname = 'user_role'
@@ -114,15 +81,14 @@ async function initializeDatabase() {
     `)
 
     if (!enumCheck.rows[0].exists) {
-      console.log("  → Створення enum типу user_role...")
       await client.query(`CREATE TYPE user_role AS ENUM ('учень', 'вчитель', 'методист')`)
-      console.log("  ✓ Enum тип user_role створено")
+      console.log("Enum тип user_role створено")
     } else {
-      console.log("  ✓ Enum тип user_role вже існує")
+      console.log("Enum тип user_role вже існує")
     }
 
-    // Крок 2: Перевірка та створення таблиці users
-    console.log("Крок 2: Перевірка таблиці users...")
+    // Перевірка та створення таблиці users
+    console.log("Перевірка таблиці users...")
     const usersTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -145,6 +111,7 @@ async function initializeDatabase() {
     } else {
       console.log("  ✓ Таблиця users вже існує")
 
+      // Видалення зайвої колонки name
       console.log("  → Перевірка та видалення зайвої колонки name...")
       const nameColumnCheck = await client.query(`
         SELECT EXISTS (
@@ -157,6 +124,8 @@ async function initializeDatabase() {
         console.log("  → Видалення колонки name...")
         await client.query(`ALTER TABLE users DROP COLUMN IF EXISTS name`)
         console.log("  ✓ Колонка name видалена")
+      } else {
+        console.log("  ✓ Колонка name відсутня")
       }
 
       // Перевірка колонки role
@@ -177,8 +146,8 @@ async function initializeDatabase() {
       }
     }
 
-    // Крок 3: Перевірка та створення таблиці profiles
-    console.log("Крок 3: Перевірка таблиці profiles...")
+    // Перевірка та створення таблиці profiles
+    console.log("Перевірка таблиці profiles...")
     const profilesTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -222,7 +191,7 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця profiles створена")
     } else {
       console.log("  ✓ Таблиця profiles вже існує")
-
+      // Додавання колонок до profiles
       const columnsToAdd = [
         { name: "school_id", type: "INTEGER" },
         { name: "grade_number", type: "INTEGER" },
@@ -238,6 +207,7 @@ async function initializeDatabase() {
         { name: "consultation_areas", type: "TEXT" },
       ]
 
+      console.log("  → Перевірка та додавання колонок до profiles...")
       for (const col of columnsToAdd) {
         try {
           const columnCheck = await client.query(`
@@ -251,14 +221,17 @@ async function initializeDatabase() {
             console.log(`  → Додавання колонки ${col.name}...`)
             await client.query(`ALTER TABLE profiles ADD COLUMN ${col.name} ${col.type}`)
             console.log(`  ✓ Колонка ${col.name} додана`)
+          } else {
+            console.log(`  ✓ Колонка ${col.name} вже існує`)
           }
         } catch (colError) {
-          // Колонка вже існує, пропускаємо
+          // Колонка вже існує
+          console.log(`  ⚠️  Помилка при перевірці/додаванні ${col.name} (можливо, вже існує): ${colError.message}`)
         }
       }
     }
 
-    // Add these columns for teacher/methodist profiles
+    // Додавання колонок для профілів вчителів/методистів
     const teacherProfileColumns = [
       { name: "experience_years", type: "INTEGER DEFAULT 0" },
       { name: "subjects_ids", type: "TEXT" },
@@ -267,8 +240,8 @@ async function initializeDatabase() {
       { name: "awards", type: "TEXT" },
       { name: "methodist_area", type: "TEXT" },
       { name: "consultation_areas", type: "TEXT" },
-      { name: "is_active", type: "BOOLEAN DEFAULT TRUE" }, // Added is_active
-      { name: "average_score", type: "NUMERIC(5, 2)" }, // Added average_score
+      { name: "is_active", type: "BOOLEAN DEFAULT TRUE" },
+      { name: "average_score", type: "NUMERIC(5, 2)" },
     ]
 
     console.log("  → Перевірка та додавання колонок для профілю вчителя/методиста...")
@@ -292,8 +265,8 @@ async function initializeDatabase() {
       }
     }
 
-    // Крок 4: Перевірка та створення таблиці competitions
-    console.log("Крок 4: Перевірка таблиці competitions...")
+    // Перевірка та створення таблиці competitions
+    console.log("Перевірка таблиці competitions...")
     const competitionsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -318,7 +291,6 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця competitions створена")
     } else {
       console.log("  ✓ Таблиця competitions вже існує")
-
       // Перевірка колонки manual_status
       console.log("  → Перевірка колонки manual_status...")
       const manualStatusColumnCheck = await client.query(`
@@ -337,8 +309,7 @@ async function initializeDatabase() {
       }
     }
 
-    // Додавання нових колонок до таблиці competitions
-    console.log("  → Перевірка та додавання нових колонок до competitions...")
+    // Додавання нових колонок до competitions
     const newCompetitionColumns = [
       { name: "subject_id", type: "INTEGER REFERENCES subjects(id) ON DELETE SET NULL" },
       { name: "level", type: "VARCHAR(50)" },
@@ -351,10 +322,11 @@ async function initializeDatabase() {
       { name: "contact_info", type: "TEXT" },
       { name: "website_url", type: "VARCHAR(255)" },
       { name: "is_online", type: "BOOLEAN DEFAULT FALSE" },
-      { name: "custom_fields", type: "JSONB" }, // Added custom_fields
-      { name: "updated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" }, // Added updated_at
+      { name: "custom_fields", type: "JSONB" },
+      { name: "updated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" },
     ]
 
+    console.log("  → Перевірка та додавання нових колонок до competitions...")
     for (const col of newCompetitionColumns) {
       const columnCheck = await client.query(`
         SELECT EXISTS (
@@ -371,8 +343,8 @@ async function initializeDatabase() {
       }
     }
 
-    // Крок 5: Перевірка та створення таблиці competition_participants
-    console.log("Крок 5: Перевірка таблиці competition_participants...")
+    // Перевірка та створення таблиці competition_participants
+    console.log("Перевірка таблиці competition_participants...")
     const participantsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -396,8 +368,8 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця competition_participants вже існує")
     }
 
-    // Крок 6: Перевірка та створення таблиці competition_results
-    console.log("Крок 6: Перевірка таблиці competition_results...")
+    // Перевірка та створення таблиці competition_results
+    console.log("Перевірка таблиці competition_results...")
     const resultsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -425,107 +397,35 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця competition_results створена")
     } else {
       console.log("  ✓ Таблиця competition_results вже існує")
+      // Перевірка та додавання колонок до competition_results
+      const resultColumns = [
+        { name: "score", type: "VARCHAR(50)" },
+        { name: "place", type: "INTEGER" },
+        { name: "notes", type: "TEXT" },
+        { name: "added_by", type: "INTEGER REFERENCES users(id) ON DELETE SET NULL" },
+        { name: "updated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" },
+        { name: "achievement", type: "VARCHAR(255) NOT NULL" },
+      ]
 
       console.log("  → Перевірка колонок таблиці competition_results...")
+      for (const col of resultColumns) {
+        const columnCheck = await client.query(`
+          SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'competition_results' AND column_name = '${col.name}'
+          ) as exists
+        `)
 
-      // Перевірка колонки score
-      const scoreColumnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competition_results' AND column_name = 'score'
-        ) as exists
-      `)
-
-      if (!scoreColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки score...")
-        await client.query(`ALTER TABLE competition_results ADD COLUMN score VARCHAR(50)`)
-        console.log("  ✓ Колонка score додана")
-      } else {
-        console.log("  ✓ Колонка score вже існує")
+        if (!columnCheck.rows[0].exists) {
+          console.log(`  → Додавання колонки ${col.name}...`)
+          await client.query(`ALTER TABLE competition_results ADD COLUMN ${col.name} ${col.type}`)
+          console.log(`  ✓ Колонка ${col.name} додана`)
+        } else {
+          console.log(`  ✓ Колонка ${col.name} вже існує`)
+        }
       }
 
-      // Перевірка колонки place
-      const placeColumnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competition_results' AND column_name = 'place'
-        ) as exists
-      `)
-
-      if (!placeColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки place...")
-        await client.query(`ALTER TABLE competition_results ADD COLUMN place INTEGER`)
-        console.log("  ✓ Колонка place додана")
-      } else {
-        console.log("  ✓ Колонка place вже існує")
-      }
-
-      // Перевірка колонки notes
-      const notesColumnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competition_results' AND column_name = 'notes'
-        ) as exists
-      `)
-
-      if (!notesColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки notes...")
-        await client.query(`ALTER TABLE competition_results ADD COLUMN notes TEXT`)
-        console.log("  ✓ Колонка notes додана")
-      } else {
-        console.log("  ✓ Колонка notes вже існує")
-      }
-
-      // Перевірка колонки added_by
-      const addedByColumnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competition_results' AND column_name = 'added_by'
-        ) as exists
-      `)
-
-      if (!addedByColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки added_by...")
-        await client.query(
-          `ALTER TABLE competition_results ADD COLUMN added_by INTEGER REFERENCES users(id) ON DELETE SET NULL`,
-        )
-        console.log("  ✓ Колонка added_by додана")
-      } else {
-        console.log("  ✓ Колонка added_by вже існує")
-      }
-
-      // Перевірка колонки updated_at
-      const updatedAtColumnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competition_results' AND column_name = 'updated_at'
-        ) as exists
-      `)
-
-      if (!updatedAtColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки updated_at...")
-        await client.query(`ALTER TABLE competition_results ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`)
-        console.log("  ✓ Колонка updated_at додана")
-      } else {
-        console.log("  ✓ Колонка updated_at вже існує")
-      }
-
-      // Перевірка колонки achievement
-      const achievementColumnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competition_results' AND column_name = 'achievement'
-        ) as exists
-      `)
-
-      if (!achievementColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки achievement...")
-        await client.query(`ALTER TABLE competition_results ADD COLUMN achievement VARCHAR(255) NOT NULL`)
-        console.log("  ✓ Колонка achievement додана")
-      } else {
-        console.log("  ✓ Колонка achievement вже існує")
-      }
-
+      // Перевірка колонки is_confirmed
       const columnCheck = await client.query(`
         SELECT column_name 
         FROM information_schema.columns 
@@ -533,17 +433,23 @@ async function initializeDatabase() {
       `)
 
       if (columnCheck.rows.length === 0) {
+        console.log("  → Додавання колонки is_confirmed...")
         await client.query(`
           ALTER TABLE competition_results 
           ADD COLUMN is_confirmed BOOLEAN DEFAULT FALSE
         `)
-        console.log("✓ Додано колонку is_confirmed")
+        console.log("  ✓ Додано колонку is_confirmed")
+      } else {
+        console.log("  ✓ Колонка is_confirmed вже існує")
       }
 
+      //ALTER COLUMN place TYPE VARCHAR(10) USING place::VARCHAR(10)
+      console.log("  → Альтерація колонки place...")
       await client.query(`
         ALTER TABLE competition_results 
         ALTER COLUMN place TYPE VARCHAR(10) USING place::VARCHAR(10)
       `)
+      console.log("  ✓ Колонка place змінена на VARCHAR(10)")
     }
 
     console.log("=== База даних готова до роботи! ===\n")
@@ -563,9 +469,8 @@ async function initializeDatabase() {
   }
 }
 
-// Запуск ініціалізації бази даних
+// Запуск ініціалізації БД
 initializeDatabase().catch((err) => {
-  // Changed initDatabase to initializeDatabase
   console.error("Не вдалося ініціалізувати базу даних. Сервер не запущено.")
   process.exit(1)
 })
@@ -575,6 +480,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "auth.html"))
 })
 
+// Реєстрація користувача
 app.post("/api/register", async (req, res) => {
   const { email, password } = req.body
 
@@ -682,6 +588,7 @@ app.post("/api/register", async (req, res) => {
   }
 })
 
+// Вхід користувача
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body
 
@@ -731,6 +638,7 @@ app.post("/api/login", async (req, res) => {
   }
 })
 
+// Отримання ролі користувача
 app.get("/api/user/role/:userId", async (req, res) => {
   const { userId } = req.params
 
@@ -765,6 +673,7 @@ app.get("/api/user/role/:userId", async (req, res) => {
   }
 })
 
+// Отримання профілю
 app.get("/api/profile/:userId", async (req, res) => {
   const { userId } = req.params
 
@@ -828,6 +737,7 @@ app.get("/api/profile/:userId", async (req, res) => {
   }
 })
 
+// Оновлення профілю
 app.post("/api/profile", upload.single("avatar"), async (req, res) => {
   const {
     userId,
@@ -974,6 +884,7 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
   }
 })
 
+// Отримання всіх користувачів
 app.get("/api/admin/users", async (req, res) => {
   console.log("Запит списку всіх користувачів")
 
@@ -998,6 +909,7 @@ app.get("/api/admin/users", async (req, res) => {
   }
 })
 
+// Зміна ролі користувача
 app.post("/api/admin/change-role", async (req, res) => {
   const { userId, role } = req.body
 
@@ -1045,6 +957,7 @@ app.post("/api/admin/change-role", async (req, res) => {
   }
 })
 
+// Валідація адмін пароля
 app.post("/api/admin/validate", (req, res) => {
   const { password } = req.body
   const ADMIN_PASSWORD = "319560"
@@ -1073,7 +986,7 @@ app.post("/api/admin/validate", (req, res) => {
   }
 })
 
-// Отримання списку всіх учнів (сортовано по класах)
+// Отримання списку учнів (сортовано по класах)
 app.get("/api/students", async (req, res) => {
   console.log("Запит списку учнів")
 
@@ -1099,6 +1012,7 @@ app.get("/api/students", async (req, res) => {
   }
 })
 
+// Отримання предметів
 app.get("/api/subjects", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM subjects ORDER BY name")
@@ -1109,6 +1023,7 @@ app.get("/api/subjects", async (req, res) => {
   }
 })
 
+// Отримання шкіл
 app.get("/api/schools", async (req, res) => {
   try {
     const result = await pool.query("SELECT id, name FROM schools ORDER BY name")
@@ -1119,6 +1034,7 @@ app.get("/api/schools", async (req, res) => {
   }
 })
 
+// Створення конкурсу
 app.post("/api/competitions", async (req, res) => {
   const {
     title,
@@ -1198,6 +1114,9 @@ app.post("/api/competitions", async (req, res) => {
     `.trim()
 
     // await sendTelegramNotification(notificationMessage) // Use the local sendTelegramNotification - This will fail if sendTelegramNotification is not fully implemented or bot is not initialized here.
+    console.log(
+      "`/api/competitions` endpoint called. Notification sending needs to be re-integrated or managed in bot.js.",
+    )
 
     res.json({
       competition: competition,
@@ -2054,6 +1973,7 @@ app.get("/api/admin/all-results", async (req, res) => {
   }
 })
 
+// Оновлення конкурсу
 app.put("/api/competitions/:id", async (req, res) => {
   const { id } = req.params
   const {
@@ -2127,6 +2047,7 @@ app.put("/api/competitions/:id", async (req, res) => {
   }
 })
 
+// Створення користувача адміністратором
 app.post("/api/create-user", async (req, res) => {
   const { email, password, firstName, lastName, role, phone, telegram } = req.body
 
@@ -2233,6 +2154,7 @@ app.post("/api/create-user", async (req, res) => {
   }
 })
 
+// Середні бали
 app.get("/api/statistics/average-scores", async (req, res) => {
   console.log("Запит середніх балів")
 
@@ -2271,6 +2193,7 @@ app.get("/api/statistics/average-scores", async (req, res) => {
   }
 })
 
+// Статистика успішності по конкурсах
 app.get("/api/statistics/competition-success", async (req, res) => {
   console.log("Запит статистики успішності по конкурсах")
 
@@ -2303,6 +2226,7 @@ app.get("/api/statistics/competition-success", async (req, res) => {
   }
 })
 
+// Рівень участі
 app.get("/api/statistics/participation-rate", async (req, res) => {
   console.log("Запит рівня участі")
 
@@ -2334,6 +2258,7 @@ app.get("/api/statistics/participation-rate", async (req, res) => {
   }
 })
 
+// Детальна статистика класів
 app.get("/api/statistics/class-details", async (req, res) => {
   console.log("Запит детальної статистики класів")
 
@@ -2369,6 +2294,7 @@ app.get("/api/statistics/class-details", async (req, res) => {
   }
 })
 
+// Детальна статистика конкурсів
 app.get("/api/statistics/competitions-detailed", async (req, res) => {
   console.log("Запит детальної статистики конкурсів")
 
@@ -2405,6 +2331,7 @@ app.get("/api/statistics/competitions-detailed", async (req, res) => {
   }
 })
 
+// Telegram сповіщення
 app.post("/api/telegram/notify", async (req, res) => {
   const { message } = req.body
 
@@ -2432,6 +2359,7 @@ app.post("/api/telegram/notify", async (req, res) => {
   }
 })
 
+// Отримання підписників
 app.get("/api/telegram/subscribers", (req, res) => {
   // This relies on subscribedChats, which might be tied to the bot instance removed from this file.
   // If this endpoint is still needed, the management of subscribedChats needs to be handled,
@@ -2444,7 +2372,7 @@ app.get("/api/telegram/subscribers", (req, res) => {
   })
 })
 
-// Interval to check for upcoming deadlines
+// Перевірка дедлайнів
 setInterval(async () => {
   try {
     const tomorrow = new Date()
@@ -2786,6 +2714,7 @@ app.get("/api/students/:studentId/participations", async (req, res) => {
   }
 })
 
+// Зміна пароля
 app.post("/api/change-password", async (req, res) => {
   const { userId, currentPassword, newPassword } = req.body
 
@@ -2857,6 +2786,7 @@ app.post("/api/change-password", async (req, res) => {
   }
 })
 
+// Створення учня вчителем
 app.post("/api/teacher/students", async (req, res) => {
   const {
     firstName,
@@ -2942,6 +2872,7 @@ app.post("/api/teacher/students", async (req, res) => {
   }
 })
 
+// Оновлення учня вчителем
 app.put("/api/teacher/students/:studentId", async (req, res) => {
   const { studentId } = req.params
   const {
@@ -3036,6 +2967,7 @@ app.put("/api/teacher/students/:studentId", async (req, res) => {
   }
 })
 
+// Видалення учня вчителем
 app.delete("/api/teacher/students/:studentId", async (req, res) => {
   const { studentId } = req.params
 
@@ -3076,6 +3008,7 @@ app.delete("/api/teacher/students/:studentId", async (req, res) => {
   }
 })
 
+// Отримання деталей учня
 app.get("/api/students/:studentId", async (req, res) => {
   try {
     const { studentId } = req.params
@@ -3113,6 +3046,7 @@ app.get("/api/students/:studentId", async (req, res) => {
   }
 })
 
+// Отримання результатів учня
 app.get("/api/students/:studentId/results", async (req, res) => {
   try {
     const { studentId } = req.params
@@ -3141,8 +3075,7 @@ app.get("/api/students/:studentId/results", async (req, res) => {
   }
 })
 
-app.get("/api/students/:studentId/participations", async (req, res) => {})
-
+// Обробка помилок
 app.use((err, req, res, next) => {
   console.error("❌ Необроблена помилка сервера:")
   console.error("URL:", req.url)
