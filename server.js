@@ -1812,7 +1812,7 @@ app.get("/api/statistics/by-grade", async (req, res) => {
 
 // Топ активних учнів
 app.get("/api/statistics/top-students", async (req, res) => {
-  const limit = parseInt(req.query.limit) || 10
+  const limit = Number.parseInt(req.query.limit) || 10
 
   console.log("[v0] Запит топ активних учнів, limit:", limit)
 
@@ -1820,7 +1820,7 @@ app.get("/api/statistics/top-students", async (req, res) => {
     if (isNaN(limit) || limit < 1 || limit > 100) {
       return res.status(400).json({
         error: "Невірний параметр limit",
-        students: []
+        students: [],
       })
     }
 
@@ -1846,28 +1846,28 @@ app.get("/api/statistics/top-students", async (req, res) => {
     )
 
     console.log("[v0] Топ активних учнів отримано, кількість:", result.rows.length)
-    
-    const students = result.rows.map(row => ({
+
+    const students = result.rows.map((row) => ({
       id: row.id,
       email: row.email,
-      first_name: row.first_name || '',
-      last_name: row.last_name || '',
-      grade: row.grade || '',
+      first_name: row.first_name || "",
+      last_name: row.last_name || "",
+      grade: row.grade || "",
       avatar: row.avatar || null,
-      participations_count: parseInt(row.participations_count) || 0
+      participations_count: Number.parseInt(row.participations_count) || 0,
     }))
 
     res.json({
       success: true,
       students: students,
-      count: students.length
+      count: students.length,
     })
   } catch (error) {
     console.error("[v0] Помилка отримання топ учнів:", error.message)
     res.status(500).json({
       success: false,
       error: "Помилка отримання статистики",
-      students: []
+      students: [],
     })
   }
 })
@@ -2562,7 +2562,7 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
   console.log("[v0] Received profile update - userId:", userId, "Type:", typeof userId)
 
   let parsedUserId = null
-  
+
   if (!userId) {
     return res.status(400).json({
       error: "Невірний ID користувача",
@@ -2570,7 +2570,7 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
   }
 
   parsedUserId = Number.parseInt(String(userId).trim(), 10)
-  
+
   if (Number.isNaN(parsedUserId) || parsedUserId <= 0) {
     console.error("[v0] Invalid userId after parsing:", parsedUserId)
     return res.status(400).json({
@@ -2871,41 +2871,41 @@ app.post("/api/teacher/students", async (req, res) => {
     city,
     telegram,
     isActive,
-    schoolId
-  } = req.body;
+    schoolId,
+  } = req.body
 
-  console.log("[v0] Creating new student:", { email, schoolId });
+  console.log("[v0] Creating new student:", { email, schoolId })
 
   if (!email || !password || !firstName || !lastName || !schoolId) {
-    return res.status(400).json({ error: "Заповніть всі обов'язкові поля" });
+    return res.status(400).json({ error: "Заповніть всі обов'язкові поля" })
   }
 
-  const client = await pool.connect();
+  const client = await pool.connect()
 
   try {
-    await client.query("BEGIN");
+    await client.query("BEGIN")
 
     // Check if email already exists
-    const existingUser = await client.query("SELECT id FROM users WHERE email = $1", [email]);
+    const existingUser = await client.query("SELECT id FROM users WHERE email = $1", [email])
     if (existingUser.rows.length > 0) {
-      await client.query("ROLLBACK");
-      return res.status(400).json({ error: "Користувач з таким email вже існує" });
+      await client.query("ROLLBACK")
+      return res.status(400).json({ error: "Користувач з таким email вже існує" })
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user
     const userResult = await client.query(
       "INSERT INTO users (email, password, role) VALUES ($1, $2, 'учень') RETURNING id",
-      [email, hashedPassword]
-    );
+      [email, hashedPassword],
+    )
 
-    const userId = userResult.rows[0].id;
+    const userId = userResult.rows[0].id
 
     // Create profile
-    const grade = gradeNumber && gradeLetter ? `${gradeNumber}${gradeLetter}` : gradeNumber || null;
-    
+    const grade = gradeNumber && gradeLetter ? `${gradeNumber}${gradeLetter}` : gradeNumber || null
+
     await client.query(
       `INSERT INTO profiles (
         user_id, first_name, last_name, middle_name, phone, 
@@ -2925,25 +2925,25 @@ app.post("/api/teacher/students", async (req, res) => {
         city || null,
         telegram || null,
         isActive !== false,
-        schoolId
-      ]
-    );
+        schoolId,
+      ],
+    )
 
-    await client.query("COMMIT");
+    await client.query("COMMIT")
 
-    console.log("[v0] Student created successfully:", userId);
-    res.json({ message: "Учня успішно створено", userId });
+    console.log("[v0] Student created successfully:", userId)
+    res.json({ message: "Учня успішно створено", userId })
   } catch (error) {
-    await client.query("ROLLBACK");
-    console.error("[v0] Error creating student:", error);
-    res.status(500).json({ error: "Помилка створення учня" });
+    await client.query("ROLLBACK")
+    console.error("[v0] Error creating student:", error)
+    res.status(500).json({ error: "Помилка створення учня" })
   } finally {
-    client.release();
+    client.release()
   }
-});
+})
 
 app.put("/api/teacher/students/:studentId", async (req, res) => {
-  const { studentId } = req.params;
+  const { studentId } = req.params
   const {
     firstName,
     lastName,
@@ -2957,42 +2957,39 @@ app.put("/api/teacher/students/:studentId", async (req, res) => {
     city,
     telegram,
     isActive,
-    schoolId
-  } = req.body;
+    schoolId,
+  } = req.body
 
-  console.log("[v0] Updating student:", studentId);
+  console.log("[v0] Updating student:", studentId)
 
   if (!email || !firstName || !lastName) {
-    return res.status(400).json({ error: "Заповніть всі обов'язкові поля" });
+    return res.status(400).json({ error: "Заповніть всі обов'язкові поля" })
   }
 
-  const client = await pool.connect();
+  const client = await pool.connect()
 
   try {
-    await client.query("BEGIN");
+    await client.query("BEGIN")
 
     // Check if email exists for another user
-    const existingUser = await client.query(
-      "SELECT id FROM users WHERE email = $1 AND id != $2",
-      [email, studentId]
-    );
+    const existingUser = await client.query("SELECT id FROM users WHERE email = $1 AND id != $2", [email, studentId])
     if (existingUser.rows.length > 0) {
-      await client.query("ROLLBACK");
-      return res.status(400).json({ error: "Email вже використовується іншим користувачем" });
+      await client.query("ROLLBACK")
+      return res.status(400).json({ error: "Email вже використовується іншим користувачем" })
     }
 
     // Update user email
-    await client.query("UPDATE users SET email = $1 WHERE id = $2", [email, studentId]);
+    await client.query("UPDATE users SET email = $1 WHERE id = $2", [email, studentId])
 
     // Update password if provided
     if (password && password.trim()) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      await client.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, studentId]);
+      const hashedPassword = await bcrypt.hash(password, 10)
+      await client.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, studentId])
     }
 
     // Update profile
-    const grade = gradeNumber && gradeLetter ? `${gradeNumber}${gradeLetter}` : gradeNumber || null;
-    
+    const grade = gradeNumber && gradeLetter ? `${gradeNumber}${gradeLetter}` : gradeNumber || null
+
     await client.query(
       `UPDATE profiles SET
         first_name = $1,
@@ -3022,67 +3019,67 @@ app.put("/api/teacher/students/:studentId", async (req, res) => {
         telegram || null,
         isActive !== false,
         schoolId,
-        studentId
-      ]
-    );
+        studentId,
+      ],
+    )
 
-    await client.query("COMMIT");
+    await client.query("COMMIT")
 
-    console.log("[v0] Student updated successfully:", studentId);
-    res.json({ message: "Учня успішно оновлено" });
+    console.log("[v0] Student updated successfully:", studentId)
+    res.json({ message: "Учня успішно оновлено" })
   } catch (error) {
-    await client.query("ROLLBACK");
-    console.error("[v0] Error updating student:", error);
-    res.status(500).json({ error: "Помилка оновлення учня" });
+    await client.query("ROLLBACK")
+    console.error("[v0] Error updating student:", error)
+    res.status(500).json({ error: "Помилка оновлення учня" })
   } finally {
-    client.release();
+    client.release()
   }
-});
+})
 
 app.delete("/api/teacher/students/:studentId", async (req, res) => {
-  const { studentId } = req.params;
+  const { studentId } = req.params
 
-  console.log("[v0] Deleting student:", studentId);
+  console.log("[v0] Deleting student:", studentId)
 
-  const client = await pool.connect();
+  const client = await pool.connect()
 
   try {
-    await client.query("BEGIN");
+    await client.query("BEGIN")
 
     // Delete student's participations
     // Note: The table 'competition_participants' uses 'user_id', not 'student_id'.
     // Assuming 'studentId' corresponds to 'user_id' here.
-    await client.query("DELETE FROM competition_participants WHERE user_id = $1", [studentId]);
+    await client.query("DELETE FROM competition_participants WHERE user_id = $1", [studentId])
 
     // Delete student's results
     // Note: The table 'competition_results' uses 'user_id', not 'student_id'.
     // Assuming 'studentId' corresponds to 'user_id' here.
     // Also, the table name was 'results', corrected to 'competition_results' based on other queries.
-    await client.query("DELETE FROM competition_results WHERE user_id = $1", [studentId]);
+    await client.query("DELETE FROM competition_results WHERE user_id = $1", [studentId])
 
     // Delete profile
-    await client.query("DELETE FROM profiles WHERE user_id = $1", [studentId]);
+    await client.query("DELETE FROM profiles WHERE user_id = $1", [studentId])
 
     // Delete user
-    await client.query("DELETE FROM users WHERE id = $1", [studentId]);
+    await client.query("DELETE FROM users WHERE id = $1", [studentId])
 
-    await client.query("COMMIT");
+    await client.query("COMMIT")
 
-    console.log("[v0] Student deleted successfully:", studentId);
-    res.json({ message: "Учня успішно видалено" });
+    console.log("[v0] Student deleted successfully:", studentId)
+    res.json({ message: "Учня успішно видалено" })
   } catch (error) {
-    await client.query("ROLLBACK");
-    console.error("[v0] Error deleting student:", error);
-    res.status(500).json({ error: "Помилка видалення учня" });
+    await client.query("ROLLBACK")
+    console.error("[v0] Error deleting student:", error)
+    res.status(500).json({ error: "Помилка видалення учня" })
   } finally {
-    client.release();
+    client.release()
   }
-});
+})
 
 app.get("/api/students/:studentId", async (req, res) => {
   try {
-    const { studentId } = req.params;
-    
+    const { studentId } = req.params
+
     const result = await pool.query(
       `SELECT 
         u.id,
@@ -3102,24 +3099,24 @@ app.get("/api/students/:studentId", async (req, res) => {
       FROM users u
       LEFT JOIN profiles p ON u.id = p.user_id
       WHERE u.id = $1`,
-      [studentId]
-    );
-    
+      [studentId],
+    )
+
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Учня не знайдено" });
+      return res.status(404).json({ error: "Учня не знайдено" })
     }
-    
-    res.json({ success: true, student: result.rows[0] });
+
+    res.json({ success: true, student: result.rows[0] })
   } catch (error) {
-    console.error("Error getting student details:", error);
-    res.status(500).json({ error: "Помилка завантаження деталей учня" });
+    console.error("Error getting student details:", error)
+    res.status(500).json({ error: "Помилка завантаження деталей учня" })
   }
-});
+})
 
 app.get("/api/students/:studentId/results", async (req, res) => {
   try {
-    const { studentId } = req.params;
-    
+    const { studentId } = req.params
+
     const results = await pool.query(
       `SELECT 
         cr.id,
@@ -3134,18 +3131,17 @@ app.get("/api/students/:studentId/results", async (req, res) => {
       JOIN competitions c ON cr.competition_id = c.id
       WHERE cr.user_id = $1
       ORDER BY cr.created_at DESC`,
-      [studentId]
-    );
-    
-    res.json({ success: true, results: results.rows });
-  } catch (error) {
-    console.error("Error getting student results:", error);
-    res.status(500).json({ error: "Помилка завантаження результатів" });
-  }
-});
+      [studentId],
+    )
 
-app.get("/api/students/:studentId/participations", async (req, res) => {
-});
+    res.json({ success: true, results: results.rows })
+  } catch (error) {
+    console.error("Error getting student results:", error)
+    res.status(500).json({ error: "Помилка завантаження результатів" })
+  }
+})
+
+app.get("/api/students/:studentId/participations", async (req, res) => {})
 
 app.use((err, req, res, next) => {
   console.error("❌ Необроблена помилка сервера:")
@@ -3182,5 +3178,3 @@ app.listen(PORT, async () => {
     console.error("❌ Помилка при запуску Telegram бота:", error)
   }
 })
-error("❌ Помилка при запуску Telegram бота:", error)
-
