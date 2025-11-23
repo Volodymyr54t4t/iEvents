@@ -1,7 +1,7 @@
 // Centralized API configuration
 // This file must be loaded BEFORE any other JS files in HTML
 
-const AppConfig = (() => {
+window.AppConfig = (() => {
   // Determine the correct API URL based on environment
   const getApiUrl = () => {
     const hostname = window.location.hostname
@@ -46,6 +46,6 @@ const AppConfig = (() => {
 })()
 
 // Make API_URL available globally for backward compatibility
-window.API_URL = AppConfig.API_URL
+window.API_URL = window.AppConfig.API_URL
 
-console.log("[Config] API URL configured:", AppConfig.API_URL)
+console.log("[Config] API URL configured:", window.AppConfig.API_URL)

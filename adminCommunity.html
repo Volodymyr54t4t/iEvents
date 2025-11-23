@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адмін панель громади - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/adminCommunity.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <header id="header"></header>
+    <script src="js/components.js"></script>
+
+    <!-- Community Admin Authentication Modal -->
+    <div id="communityAuth" class="auth-overlay">
+        <div class="auth-modal">
+            <h2>🔐 Вхід для Адміністратора Громади</h2>
+            <form id="communityAuthForm">
+                <div class="form-group">
+                    <label for="communityEmail">Email</label>
+                    <input type="email" id="communityEmail" required placeholder="admincommunityzt@ievents.com">
+                </div>
+                <div class="form-group">
+                    <label for="communityPassword">Пароль</label>
+                    <input type="password" id="communityPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary">Увійти</button>
+                <div id="authError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Community Admin Content -->
+    <main class="main-content" id="communityContent" style="display: none;">
+        <div class="admin-container">
+            <div class="admin-header">
+                <div class="admin-title">
+                    <h1>🏛️ Адміністративна панель громади</h1>
+                    <p class="admin-subtitle">Управління методистами та вчителями <span id="adminName">Житомира</span>
+                    </p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Вихід</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="dashboard">📊 Дашборд</button>
+                <button class="tab-btn" data-tab="methodists">📋 Методисти</button>
+                <button class="tab-btn" data-tab="teachers">👨‍🏫 Вчителі</button>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalMethodists">0</div>
+                            <div class="stat-label">Методистів</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👨‍🏫</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalTeachers">0</div>
+                            <div class="stat-label">Вчителів</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-label">Всього користувачів</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodists Section -->
+            <div id="methodists-section" class="tab-content">
+                <div class="section-header">
+                    <h2>Управління методистами</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <input type="text" id="methodistSearch" placeholder="🔍 Пошук методистів...">
+                        </div>
+                        <button class="btn btn-primary" onclick="openAddMethodistModal()">+ Додати методиста</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>ПІБ</th>
+                                <th>Телефон</th>
+                                <th>Область методиста</th>
+                                <th>Дата реєстрації</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="methodistsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Teachers Section -->
+            <div id="teachers-section" class="tab-content">
+                <div class="section-header">
+                    <h2>Управління вчителями</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <input type="text" id="teacherSearch" placeholder="🔍 Пошук вчителів...">
+                        </div>
+                        <button class="btn btn-primary" onclick="openAddTeacherModal()">+ Додати вчителя</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>ПІБ</th>
+                                <th>Телефон</th>
+                                <th>Школа</th>
+                                <th>Предметів</th>
+                                <th>Дата реєстрації</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Methodist Modal -->
+    <div id="editMethodistModal" class="modal">
+        <div class="modal-content modal-large">
+            <h3>Редагування методиста</h3>
+            <form id="editMethodistForm">
+                <input type="hidden" id="editMethodistId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editMethodistFirstName">Ім'я</label>
+                        <input type="text" id="editMethodistFirstName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editMethodistLastName">Прізвище</label>
+                        <input type="text" id="editMethodistLastName">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editMethodistPhone">Телефон</label>
+                        <input type="tel" id="editMethodistPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="editMethodistArea">Область методиста</label>
+                        <input type="text" id="editMethodistArea">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editMethodistConsultation">Області консультування</label>
+                    <textarea id="editMethodistConsultation"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeEditMethodistModal()">Скасувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Teacher Modal -->
+    <div id="editTeacherModal" class="modal">
+        <div class="modal-content modal-large">
+            <h3>Редагування вчителя</h3>
+            <form id="editTeacherForm">
+                <input type="hidden" id="editTeacherId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editTeacherFirstName">Ім'я</label>
+                        <input type="text" id="editTeacherFirstName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTeacherLastName">Прізвище</label>
+                        <input type="text" id="editTeacherLastName">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editTeacherPhone">Телефон</label>
+                        <input type="tel" id="editTeacherPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTeacherSchool">Школа</label>
+                        <input type="text" id="editTeacherSchool">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditTeacherModal()">Скасувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/role.js"></script>
+    <script src="js/adminCommunity.js"></script>
+</body>
+
+</html>
