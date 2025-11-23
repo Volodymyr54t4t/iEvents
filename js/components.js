@@ -40,7 +40,7 @@ function renderHeader() {
       teacher: '<a href="profilesT.html" class="nav-link">Профіль</a>',
       methodist: '<a href="profilesT.html" class="nav-link">Профіль</a>',
     },
-    adminUser: '<a href="adminUser.html" class="nav-link">📋 Кабінет</a>',
+    adminUser: '<a href="adminUser.html" class="nav-link">Адмін панель користувача</a>',
     adminTeacher: '<a href="adminTeacher.html" class="nav-link">👨‍🏫 Адмінка</a>',
     admin: '<a href="admin.html" class="nav-link">⚙️ Адмін</a>',
   }
