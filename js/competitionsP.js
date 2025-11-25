@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -112,6 +112,13 @@ function displayCompetitions(containerId, competitions, type) {
             <span>📅 Закінчення: ${endDate.toLocaleDateString("uk-UA")}</span>
           </div>
           ${daysInfo}
+          ${
+            type === "active" || type === "upcoming"
+              ? `<button class="btn-upload" onclick="openUploadModal(${competition.id})">
+              📎 Завантажити файл
+            </button>`
+              : ""
+          }
         </div>
       `
     })
@@ -203,5 +210,176 @@ async function loadMyResults() {
   } catch (error) {
     console.error("Помилка завантаження результатів:", error)
     container.innerHTML = '<div class="empty-state"><p>Помилка завантаження результатів</p></div>'
+  }
+}
+
+function openUploadModal(competitionId) {
+  document.getElementById("uploadCompetitionId").value = competitionId
+  document.getElementById("uploadFileModal").classList.add("active")
+  document.getElementById("fileInput").value = ""
+  document.getElementById("fileDescription").value = ""
+  document.getElementById("uploadProgress").style.display = "none"
+  loadMyDocuments(competitionId)
+}
+
+function closeUploadModal() {
+  document.getElementById("uploadFileModal").classList.remove("active")
+}
+
+async function uploadFile() {
+  const competitionId = document.getElementById("uploadCompetitionId").value
+  const fileInput = document.getElementById("fileInput")
+  const description = document.getElementById("fileDescription").value
+  const file = fileInput.files[0]
+
+  if (!file) {
+    alert("Будь ласка, оберіть файл")
+    return
+  }
+
+  // Перевірка розміру файлу (50MB)
+  if (file.size > 50 * 1024 * 1024) {
+    alert("Файл занадто великий. Максимальний розмір: 50 МБ")
+    return
+  }
+
+  const formData = new FormData()
+  formData.append("file", file)
+  formData.append("userId", userId)
+  formData.append("description", description)
+
+  const progressDiv = document.getElementById("uploadProgress")
+  const progressFill = document.getElementById("progressFill")
+  const progressText = document.getElementById("progressText")
+
+  progressDiv.style.display = "block"
+  progressText.textContent = "Завантаження..."
+  progressFill.style.width = "0%"
+
+  try {
+    const xhr = new XMLHttpRequest()
+
+    // Відстеження прогресу
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const percentComplete = (e.loaded / e.total) * 100
+        progressFill.style.width = percentComplete + "%"
+        progressText.textContent = `Завантаження... ${Math.round(percentComplete)}%`
+      }
+    })
+
+    // Обробка завершення
+    xhr.addEventListener("load", () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText)
+        progressText.textContent = "Файл успішно завантажено!"
+        progressFill.style.width = "100%"
+
+        setTimeout(() => {
+          progressDiv.style.display = "none"
+          fileInput.value = ""
+          document.getElementById("fileDescription").value = ""
+          loadMyDocuments(competitionId)
+        }, 1500)
+      } else {
+        const error = JSON.parse(xhr.responseText)
+        alert(`Помилка: ${error.error || "Не вдалося завантажити файл"}`)
+        progressDiv.style.display = "none"
+      }
+    })
+
+    // Обробка помилок
+    xhr.addEventListener("error", () => {
+      alert("Помилка завантаження файлу")
+      progressDiv.style.display = "none"
+    })
+
+    xhr.open("POST", `${BASE_URL}/api/competitions/${competitionId}/documents/upload`)
+    xhr.send(formData)
+  } catch (error) {
+    console.error("Помилка завантаження файлу:", error)
+    alert("Помилка завантаження файлу")
+    progressDiv.style.display = "none"
+  }
+}
+
+async function loadMyDocuments(competitionId) {
+  const container = document.getElementById("myDocumentsList")
+  container.innerHTML = '<div class="loading">Завантаження...</div>'
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/documents/my/${userId}`)
+    const data = await response.json()
+
+    if (!response.ok) {
+      container.innerHTML = '<div class="empty-state"><p>Помилка завантаження файлів</p></div>'
+      return
+    }
+
+    if (data.documents.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>Ви ще не завантажили жодного файлу</p></div>'
+      return
+    }
+
+    container.innerHTML = data.documents
+      .map((doc) => {
+        const uploadDate = new Date(doc.uploaded_at).toLocaleDateString("uk-UA")
+        const fileSize = (doc.file_size / 1024 / 1024).toFixed(2)
+
+        return `
+          <div class="document-item">
+            <div class="document-info">
+              <div class="document-name">📄 ${doc.original_name}</div>
+              <div class="document-meta">
+                <span>📅 ${uploadDate}</span>
+                <span>💾 ${fileSize} МБ</span>
+              </div>
+              ${doc.description ? `<div class="document-description">${doc.description}</div>` : ""}
+            </div>
+            <div class="document-actions">
+              <button class="btn btn-sm btn-primary" onclick="window.open('${BASE_URL}${doc.file_path}', '_blank')">
+                Завантажити
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="deleteDocument(${doc.id}, ${competitionId})">
+                Видалити
+              </button>
+            </div>
+          </div>
+        `
+      })
+      .join("")
+  } catch (error) {
+    console.error("Помилка завантаження документів:", error)
+    container.innerHTML = '<div class="empty-state"><p>Помилка завантаження файлів</p></div>'
+  }
+}
+
+async function deleteDocument(documentId, competitionId) {
+  if (!confirm("Ви впевнені, що хочете видалити цей файл?")) {
+    return
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/competitions/documents/${documentId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: userId,
+        userRole: "учень",
+      }),
+    })
+
+    if (response.ok) {
+      alert("Файл успішно видалено")
+      loadMyDocuments(competitionId)
+    } else {
+      const data = await response.json()
+      alert(`Помилка: ${data.error || "Не вдалося видалити файл"}`)
+    }
+  } catch (error) {
+    console.error("Помилка видалення файлу:", error)
+    alert("Помилка видалення файлу")
   }
 }

@@ -228,6 +228,49 @@
         </div>
     </div>
 
+    <!-- Нове модальне вікно для перегляду завантажених файлів -->
+    <div id="viewDocumentsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>📎 Завантажені файли учнів</h2>
+                <button class="modal-close" onclick="closeViewDocumentsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="documents-filters">
+                    <input type="text" id="searchDocuments" class="filter-input"
+                        placeholder="Пошук по імені учня або файлу...">
+                    <select id="filterStudent" class="filter-select">
+                        <option value="">Всі учні</option>
+                    </select>
+                </div>
+
+                <div id="documentsContainer" class="teacher-documents-view">
+                    <div class="loading">Завантаження файлів...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeViewDocumentsModal()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нове модальне вікно для перегляду завантажених файлів -->
+    <div id="filePreviewModal" class="file-preview-modal">
+        <div class="file-preview-content">
+            <div class="file-preview-header">
+                <h2 id="previewFileName">Перегляд файлу</h2>
+                <button class="modal-close" onclick="closeFilePreview()">&times;</button>
+            </div>
+            <div class="file-preview-body" id="previewBody">
+                <!-- File preview will be inserted here -->
+            </div>
+            <div class="file-preview-footer">
+                <button class="btn btn-secondary" onclick="closeFilePreview()">Закрити</button>
+                <button class="btn btn-primary" id="downloadPreviewBtn">⬇️ Завантажити</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/components.js"></script>
     <script src="js/competitionsT.js"></script>
 </body>

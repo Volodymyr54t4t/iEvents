@@ -8,9 +8,7 @@
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/competitionsP.css">
-    <!-- Added global page spacing styles -->
     <link rel="stylesheet" href="css/page-spacing.css">
-    <!-- Load config.js first -->
     <script src="js/config.js"></script>
 </head>
 
@@ -47,7 +45,6 @@
             </div>
         </div>
 
-        <!-- Added results section -->
         <div class="card">
             <h2>🏆 Мої результати</h2>
             <div id="myResults" class="results-section">
@@ -57,6 +54,68 @@
     </main>
 
     <div id="footer"></div>
+
+    <!-- Модальне вікно для завантаження файлів -->
+    <div id="uploadFileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Завантажити файл</h2>
+                <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadFileForm">
+                    <input type="hidden" id="uploadCompetitionId">
+
+                    <div class="form-group">
+                        <label for="fileInput">Оберіть файл *</label>
+                        <input type="file" id="fileInput" name="file" required>
+                        <small class="file-hint">Максимальний розмір: 50 МБ. Підтримуються всі типи файлів.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fileDescription">Опис файлу (необов'язково)</label>
+                        <textarea id="fileDescription" name="description" rows="3"
+                            placeholder="Додайте опис або коментар до файлу..."></textarea>
+                    </div>
+
+                    <div id="uploadProgress" class="upload-progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p id="progressText">Завантаження...</p>
+                    </div>
+                </form>
+
+                <div id="myDocuments" class="my-documents">
+                    <h3>Мої завантажені файли</h3>
+                    <div id="myDocumentsList" class="documents-list">
+                        <div class="loading">Завантаження...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUploadModal()">Закрити</button>
+                <button class="btn btn-primary" onclick="uploadFile()">Завантажити файл</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Added file preview modal for students -->
+    <div id="filePreviewModal" class="file-preview-modal">
+        <div class="file-preview-content">
+            <div class="file-preview-header">
+                <h2 id="previewFileName">Перегляд файлу</h2>
+                <button class="modal-close" onclick="closeFilePreview()">&times;</button>
+            </div>
+            <div class="file-preview-body" id="previewBody">
+                <!-- File preview will be inserted here -->
+            </div>
+            <div class="file-preview-footer">
+                <button class="btn btn-secondary" onclick="closeFilePreview()">Закрити</button>
+                <button class="btn btn-primary" id="downloadPreviewBtn">⬇️ Завантажити</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/components.js"></script>
     <script src="js/competitionsP.js"></script>

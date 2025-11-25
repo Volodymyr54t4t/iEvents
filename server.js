@@ -25,9 +25,15 @@ app.use(express.json())
 app.use(express.static(path.join(__dirname)))
 app.use("/uploads", express.static("uploads"))
 
-// Створення папки для завантажень
+app.use("/documents", express.static("documents"))
+
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads")
+}
+
+if (!fs.existsSync("documents")) {
+  fs.mkdirSync("documents")
+  console.log("📁 Створено папку documents/")
 }
 
 // Налаштування Multer для завантаження файлів
@@ -55,6 +61,24 @@ const upload = multer({
     } else {
       cb(new Error("Тільки зображення дозволені"))
     }
+  },
+})
+
+const documentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "documents/")
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_")
+    cb(null, uniqueSuffix + "-" + sanitizedName)
+  },
+})
+
+const uploadDocument = multer({
+  storage: documentStorage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB максимальний розмір
   },
 })
 
@@ -450,6 +474,36 @@ async function initializeDatabase() {
         ALTER COLUMN place TYPE VARCHAR(10) USING place::VARCHAR(10)
       `)
       console.log("  ✓ Колонка place змінена на VARCHAR(10)")
+    }
+
+    // Створення таблиці competition_documents
+    console.log("Перевірка таблиці competition_documents...")
+    const documentsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'competition_documents'
+      ) as exists
+    `)
+
+    if (!documentsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці competition_documents...")
+      await client.query(`
+        CREATE TABLE competition_documents (
+          id SERIAL PRIMARY KEY,
+          competition_id INTEGER REFERENCES competitions(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          file_name VARCHAR(255) NOT NULL,
+          original_name VARCHAR(255) NOT NULL,
+          file_path VARCHAR(255) NOT NULL,
+          file_size BIGINT NOT NULL,
+          file_type VARCHAR(100),
+          description TEXT,
+          uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця competition_documents створена")
+    } else {
+      console.log("  ✓ Таблиця competition_documents вже існує")
     }
 
     console.log("=== База даних готова до роботи! ===\n")
@@ -1534,7 +1588,7 @@ app.put("/api/results/:resultId", async (req, res) => {
     }
 
     // Оновлення результату
-    const result = await pool.query(
+    const result = await client.query(
       `UPDATE competition_results 
        SET score = $1, place = $2, notes = $3, achievement = $4, is_confirmed = $5, updated_at = CURRENT_TIMESTAMP
        WHERE id = $6 
@@ -2203,12 +2257,17 @@ app.get("/api/statistics/competition-success", async (req, res) => {
         c.title,
         c.id,
         COUNT(DISTINCT cp.id) as participants_count,
-        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score
+        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
+        CASE 
+          WHEN c.end_date < CURRENT_DATE THEN 'завершений'
+          WHEN c.start_date > CURRENT_DATE THEN 'майбутній'
+          ELSE 'активний'
+        END as status
       FROM competitions c
       LEFT JOIN competition_participants cp ON c.id = cp.competition_id
       LEFT JOIN competition_results cr ON c.id = cr.competition_id
       WHERE c.end_date >= CURRENT_DATE - INTERVAL '6 months'
-      GROUP BY c.id, c.title
+      GROUP BY c.id, c.title, c.start_date, c.end_date
       HAVING COUNT(DISTINCT cp.id) > 0
       ORDER BY c.start_date DESC
       LIMIT 10
@@ -2345,7 +2404,7 @@ app.post("/api/telegram/notify", async (req, res) => {
     // This will fail if sendTelegramNotification relies on a bot instance not present here.
     // await sendTelegramNotification(message)
     console.log(
-      "'/api/telegram/notify' endpoint called. Notification sending functionality needs to be re-integrated or managed in bot.js.",
+      "'/api/telegram/notify' endpoint called. Notification sending needs to be re-integrated or managed in bot.js.",
     )
     res.json({
       message: "Сповіщення відправлено (функціонал сповіщень потребує перевірки)",
@@ -3072,6 +3131,235 @@ app.get("/api/students/:studentId/results", async (req, res) => {
   } catch (error) {
     console.error("Error getting student results:", error)
     res.status(500).json({ error: "Помилка завантаження результатів" })
+  }
+})
+
+app.post("/api/competitions/:competitionId/documents/upload", uploadDocument.single("file"), async (req, res) => {
+  const { competitionId } = req.params
+  const { userId, description } = req.body
+
+  console.log(`📤 Завантаження файлу для конкурсу ${competitionId} від користувача ${userId}`)
+
+  if (!userId || !req.file) {
+    return res.status(400).json({
+      error: "Не вказано користувача або файл не завантажено",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    // Перевірка, чи учень є учасником конкурсу
+    const participantCheck = await client.query(
+      `SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2`,
+      [competitionId, userId],
+    )
+
+    if (participantCheck.rows.length === 0) {
+      await client.query("ROLLBACK")
+      // Видаляємо завантажений файл
+      fs.unlinkSync(req.file.path)
+      return res.status(403).json({
+        error: "Ви не є учасником цього конкурсу",
+      })
+    }
+
+    // Отримання інформації про учня та конкурс для організації файлів
+    const userInfo = await client.query(
+      `SELECT u.email, p.first_name, p.last_name FROM users u 
+       LEFT JOIN profiles p ON u.id = p.user_id WHERE u.id = $1`,
+      [userId],
+    )
+
+    const competitionInfo = await client.query(`SELECT title FROM competitions WHERE id = $1`, [competitionId])
+
+    const user = userInfo.rows[0]
+    const competition = competitionInfo.rows[0]
+
+    // Створення структури папок: documents/competition_id/user_id/
+    const competitionFolder = path.join(__dirname, "documents", `competition_${competitionId}`)
+    const userFolder = path.join(competitionFolder, `user_${userId}`)
+
+    // Створення папок, якщо їх немає
+    if (!fs.existsSync(competitionFolder)) {
+      fs.mkdirSync(competitionFolder, { recursive: true })
+      console.log(`📁 Створено папку: ${competitionFolder}`)
+    }
+
+    if (!fs.existsSync(userFolder)) {
+      fs.mkdirSync(userFolder, { recursive: true })
+      console.log(`📁 Створено папку: ${userFolder}`)
+    }
+
+    // Переміщення файлу до організованої структури
+    const newFilePath = path.join(userFolder, req.file.filename)
+    fs.renameSync(req.file.path, newFilePath)
+
+    const relativeFilePath = `/documents/competition_${competitionId}/user_${userId}/${req.file.filename}`
+
+    // Збереження інформації про файл у базу даних
+    const result = await client.query(
+      `INSERT INTO competition_documents (
+        competition_id, user_id, file_name, original_name, 
+        file_path, file_size, file_type, description
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      RETURNING *`,
+      [
+        competitionId,
+        userId,
+        req.file.filename,
+        req.file.originalname,
+        relativeFilePath,
+        req.file.size,
+        req.file.mimetype,
+        description || null,
+      ],
+    )
+
+    await client.query("COMMIT")
+
+    console.log(`✓ Файл успішно завантажено та організовано: ${req.file.originalname}`)
+    console.log(`  → Шлях: ${relativeFilePath}`)
+
+    res.json({
+      message: "Файл успішно завантажено",
+      document: result.rows[0],
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+
+    // Видаляємо файл у разі помилки
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path)
+    }
+
+    console.error("❌ Помилка завантаження файлу:", error.message)
+
+    res.status(500).json({
+      error: "Помилка завантаження файлу",
+    })
+  } finally {
+    client.release()
+  }
+})
+
+app.get("/api/competitions/:competitionId/documents", async (req, res) => {
+  const { competitionId } = req.params
+
+  console.log(`📋 Запит файлів для конкурсу ${competitionId}`)
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        cd.*,
+        u.email,
+        p.first_name,
+        p.last_name,
+        p.grade,
+        p.avatar
+      FROM competition_documents cd
+      INNER JOIN users u ON cd.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE cd.competition_id = $1
+      ORDER BY cd.uploaded_at DESC`,
+      [competitionId],
+    )
+
+    console.log(`✓ Знайдено файлів: ${result.rows.length}`)
+
+    res.json({
+      documents: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання файлів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання файлів",
+    })
+  }
+})
+
+app.get("/api/competitions/:competitionId/documents/my/:userId", async (req, res) => {
+  const { competitionId, userId } = req.params
+
+  console.log(`📋 Запит файлів учня ${userId} для конкурсу ${competitionId}`)
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM competition_documents 
+       WHERE competition_id = $1 AND user_id = $2
+       ORDER BY uploaded_at DESC`,
+      [competitionId, userId],
+    )
+
+    console.log(`✓ Знайдено файлів учня: ${result.rows.length}`)
+
+    res.json({
+      documents: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання файлів учня:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання файлів",
+    })
+  }
+})
+
+app.delete("/api/competitions/documents/:documentId", async (req, res) => {
+  const { documentId } = req.params
+  const { userId, userRole } = req.body
+
+  console.log(`🗑️ Видалення файлу ${documentId} користувачем ${userId}`)
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    // Отримання інформації про файл
+    const docResult = await client.query(`SELECT * FROM competition_documents WHERE id = $1`, [documentId])
+
+    if (docResult.rows.length === 0) {
+      await client.query("ROLLBACK")
+      return res.status(404).json({
+        error: "Файл не знайдено",
+      })
+    }
+
+    const document = docResult.rows[0]
+
+    // Перевірка прав доступу
+    if (document.user_id !== Number.parseInt(userId) && userRole !== "вчитель" && userRole !== "методист") {
+      await client.query("ROLLBACK")
+      return res.status(403).json({
+        error: "У вас немає прав для видалення цього файлу",
+      })
+    }
+
+    // Видалення запису з бази
+    await client.query(`DELETE FROM competition_documents WHERE id = $1`, [documentId])
+
+    // Видалення файлу з файлової системи
+    const filePath = path.join(__dirname, document.file_path)
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+      console.log(`✓ Файл видалено: ${filePath}`)
+    }
+
+    await client.query("COMMIT")
+
+    res.json({
+      message: "Файл успішно видалено",
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("❌ Помилка видалення файлу:", error.message)
+    res.status(500).json({
+      error: "Помилка видалення файлу",
+    })
+  } finally {
+    client.release()
   }
 })
 

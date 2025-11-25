@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -14,6 +14,10 @@ let allStudents = []
 let allCompetitions = []
 let allSubjects = []
 const currentResultsCompetitionId = null
+
+let currentDocumentsCompetitionId = null
+let allDocuments = []
+let currentDocumentsStudents = []
 
 let dynamicFieldCount = 0
 
@@ -383,6 +387,9 @@ function displayCompetitions(competitions) {
               </div>
             </div>
             <div class="competition-actions">
+              <button class="btn btn-view-docs" onclick="openViewDocumentsModal(${competition.id})">
+                📎 Файли учнів
+              </button>
               <button class="btn btn-info" onclick="window.location.href='results.html'">
                 📊 Результати
               </button>
@@ -568,4 +575,354 @@ async function addSelectedStudents() {
     console.error("Помилка:", error)
     alert("Помилка додавання учнів")
   }
+}
+
+async function openViewDocumentsModal(competitionId) {
+  currentDocumentsCompetitionId = competitionId
+  const modal = document.getElementById("viewDocumentsModal")
+  modal.classList.add("active")
+
+  // Завантаження документів та учасників
+  await loadCompetitionDocuments(competitionId)
+
+  // Додавання обробників подій для фільтрів
+  document.getElementById("searchDocuments").addEventListener("input", filterDocuments)
+  document.getElementById("filterStudent").addEventListener("change", filterDocuments)
+}
+
+function closeViewDocumentsModal() {
+  const modal = document.getElementById("viewDocumentsModal")
+  modal.classList.remove("active")
+  currentDocumentsCompetitionId = null
+  allDocuments = []
+  currentDocumentsStudents = []
+  document.getElementById("searchDocuments").value = ""
+  document.getElementById("filterStudent").innerHTML = '<option value="">Всі учні</option>'
+}
+
+async function loadCompetitionDocuments(competitionId) {
+  const container = document.getElementById("documentsContainer")
+  container.innerHTML = '<div class="loading">Завантаження файлів...</div>'
+
+  try {
+    // Завантаження документів
+    const docsResponse = await fetch(`${BASE_URL}/api/competitions/${competitionId}/documents`)
+    const docsData = await docsResponse.json()
+
+    if (docsResponse.ok) {
+      allDocuments = docsData.documents
+
+      // Отримання унікальних учнів
+      const uniqueStudents = {}
+      allDocuments.forEach((doc) => {
+        if (!uniqueStudents[doc.user_id]) {
+          uniqueStudents[doc.user_id] = {
+            id: doc.user_id,
+            email: doc.email,
+            first_name: doc.first_name,
+            last_name: doc.last_name,
+            grade: doc.grade,
+            avatar: doc.avatar,
+          }
+        }
+      })
+
+      currentDocumentsStudents = Object.values(uniqueStudents)
+
+      // Заповнення фільтру учнів
+      const filterSelect = document.getElementById("filterStudent")
+      filterSelect.innerHTML = '<option value="">Всі учні</option>'
+      currentDocumentsStudents
+        .sort((a, b) => {
+          const nameA = [a.last_name, a.first_name].filter(Boolean).join(" ")
+          const nameB = [b.last_name, b.first_name].filter(Boolean).join(" ")
+          return nameA.localeCompare(nameB)
+        })
+        .forEach((student) => {
+          const fullName = [student.last_name, student.first_name].filter(Boolean).join(" ") || student.email
+          const option = document.createElement("option")
+          option.value = student.id
+          option.textContent = `${fullName}${student.grade ? ` (${student.grade})` : ""}`
+          filterSelect.appendChild(option)
+        })
+
+      displayDocuments(allDocuments)
+    } else {
+      container.innerHTML = '<div class="empty-state"><p>Помилка завантаження файлів</p></div>'
+    }
+  } catch (error) {
+    console.error("Помилка завантаження документів:", error)
+    container.innerHTML = '<div class="empty-state"><p>Помилка завантаження файлів</p></div>'
+  }
+}
+
+function filterDocuments() {
+  const searchTerm = document.getElementById("searchDocuments").value.toLowerCase()
+  const selectedStudent = document.getElementById("filterStudent").value
+
+  let filtered = allDocuments
+
+  // Фільтр по учню
+  if (selectedStudent) {
+    filtered = filtered.filter((doc) => doc.user_id == selectedStudent)
+  }
+
+  // Пошук
+  if (searchTerm) {
+    filtered = filtered.filter((doc) => {
+      const fullName = [doc.last_name, doc.first_name].filter(Boolean).join(" ").toLowerCase()
+      const fileName = (doc.original_name || "").toLowerCase()
+      const description = (doc.description || "").toLowerCase()
+
+      return fullName.includes(searchTerm) || fileName.includes(searchTerm) || description.includes(searchTerm)
+    })
+  }
+
+  displayDocuments(filtered)
+}
+
+function displayDocuments(documents) {
+  const container = document.getElementById("documentsContainer")
+
+  if (documents.length === 0) {
+    container.innerHTML = `
+      <div class="no-documents-message">
+        <p><strong>📂 Файлів не знайдено</strong></p>
+        <p>Учні ще не завантажили жодного файлу для цього конкурсу</p>
+      </div>
+    `
+    return
+  }
+
+  // Групування документів по учнях
+  const groupedDocs = {}
+  documents.forEach((doc) => {
+    if (!groupedDocs[doc.user_id]) {
+      groupedDocs[doc.user_id] = {
+        student: {
+          id: doc.user_id,
+          email: doc.email,
+          first_name: doc.first_name,
+          last_name: doc.last_name,
+          grade: doc.grade,
+          avatar: doc.avatar,
+        },
+        documents: [],
+      }
+    }
+    groupedDocs[doc.user_id].documents.push(doc)
+  })
+
+  // Сортування груп по імені учня
+  const sortedGroups = Object.values(groupedDocs).sort((a, b) => {
+    const nameA = [a.student.last_name, a.student.first_name].filter(Boolean).join(" ")
+    const nameB = [b.student.last_name, b.student.first_name].filter(Boolean).join(" ")
+    return nameA.localeCompare(nameB)
+  })
+
+  container.innerHTML = sortedGroups
+    .map((group) => {
+      const student = group.student
+      const docs = group.documents
+      const fullName = [student.last_name, student.first_name].filter(Boolean).join(" ") || student.email
+      const initials = fullName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+
+      return `
+      <div class="student-documents-group">
+        <div class="student-group-header">
+          <div class="student-avatar-large">
+            ${student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : `<span>${initials}</span>`}
+          </div>
+          <div class="student-group-info">
+            <div class="student-group-name">${fullName}</div>
+            <div class="student-group-meta">
+              ${student.grade ? `<span>📚 Клас: ${student.grade}</span>` : ""}
+              <span>📧 ${student.email}</span>
+              <span class="file-count-badge">📎 Файлів: ${docs.length}</span>
+            </div>
+          </div>
+        </div>
+        <div class="student-documents-list">
+          ${docs
+            .map((doc) => {
+              const uploadDate = new Date(doc.uploaded_at).toLocaleString("uk-UA")
+              const fileSize = formatFileSize(doc.file_size)
+              const fileIcon = getFileIcon(doc.file_type)
+
+              return `
+              <div class="teacher-document-item">
+                <div class="document-icon">${fileIcon}</div>
+                <div class="teacher-document-info">
+                  <div class="teacher-document-name">${doc.original_name}</div>
+                  <div class="teacher-document-meta">
+                    <span>📅 ${uploadDate}</span>
+                    <span>💾 ${fileSize}</span>
+                    ${doc.file_type ? `<span>📄 ${doc.file_type}</span>` : ""}
+                  </div>
+                  ${doc.description ? `<div class="teacher-document-description">💬 ${doc.description}</div>` : ""}
+                </div>
+                <div class="teacher-document-actions">
+                  <button class="btn btn-view btn-sm" onclick="previewFile('${doc.file_path}', '${doc.original_name}', '${doc.file_type}')">
+                    👁️ Переглянути
+                  </button>
+                  <button class="btn btn-download btn-sm" onclick="downloadDocument('${doc.file_path}', '${doc.original_name}')">
+                    ⬇️ Завантажити
+                  </button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteTeacherDocument(${doc.id})">
+                    🗑️ Видалити
+                  </button>
+                </div>
+              </div>
+            `
+            })
+            .join("")}
+        </div>
+      </div>
+    `
+    })
+    .join("")
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return "0 Bytes"
+  const k = 1024
+  const sizes = ["Bytes", "KB", "MB", "GB"]
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
+}
+
+function getFileIcon(fileType) {
+  if (!fileType) return "📄"
+
+  if (fileType.includes("pdf")) return "📕"
+  if (fileType.includes("word") || fileType.includes("document")) return "📘"
+  if (fileType.includes("excel") || fileType.includes("spreadsheet")) return "📊"
+  if (fileType.includes("powerpoint") || fileType.includes("presentation")) return "📙"
+  if (fileType.includes("image")) return "🖼️"
+  if (fileType.includes("video")) return "🎥"
+  if (fileType.includes("audio")) return "🎵"
+  if (fileType.includes("zip") || fileType.includes("rar") || fileType.includes("archive")) return "📦"
+  if (fileType.includes("text")) return "📝"
+
+  return "📄"
+}
+
+function downloadDocument(filePath, originalName) {
+  const link = document.createElement("a")
+  link.href = `${BASE_URL}${filePath}`
+  link.download = originalName
+  link.target = "_blank"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+async function deleteTeacherDocument(documentId) {
+  if (!confirm("Ви впевнені, що хочете видалити цей файл?")) {
+    return
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/competitions/documents/${documentId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: userId,
+        userRole: userRole,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      alert(data.message)
+      // Перезавантаження документів
+      await loadCompetitionDocuments(currentDocumentsCompetitionId)
+    } else {
+      alert(data.error || "Помилка видалення файлу")
+    }
+  } catch (error) {
+    console.error("Помилка видалення файлу:", error)
+    alert("Помилка видалення файлу")
+  }
+}
+
+function previewFile(filePath, fileName, fileType) {
+  const modal = document.getElementById("filePreviewModal")
+  const previewBody = document.getElementById("previewBody")
+  const fileNameElement = document.getElementById("previewFileName")
+  const downloadBtn = document.getElementById("downloadPreviewBtn")
+
+  fileNameElement.textContent = fileName
+  modal.classList.add("active")
+
+  // Set up download button
+  downloadBtn.onclick = () => {
+    downloadDocument(filePath, fileName)
+  }
+
+  // Clear previous content
+  previewBody.innerHTML = ""
+
+  // Check file type and render appropriate preview
+  if (fileType && fileType.includes("image")) {
+    // Image preview
+    previewBody.innerHTML = `<img src="${BASE_URL}${filePath}" alt="${fileName}" class="file-preview-image">`
+  } else if (fileType && fileType.includes("pdf")) {
+    // PDF preview
+    previewBody.innerHTML = `<iframe src="${BASE_URL}${filePath}" class="file-preview-iframe"></iframe>`
+  } else if (
+    fileType &&
+    (fileType.includes("text") ||
+      fileType.includes("javascript") ||
+      fileType.includes("json") ||
+      fileType.includes("xml"))
+  ) {
+    // Text file preview
+    fetch(`${BASE_URL}${filePath}`)
+      .then((response) => response.text())
+      .then((text) => {
+        previewBody.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word; padding: 20px; background: #f5f5f5; border-radius: 8px; max-height: 60vh; overflow-y: auto;">${text}</pre>`
+      })
+      .catch((error) => {
+        console.error("Error loading text file:", error)
+        showUnsupportedPreview(fileName)
+      })
+  } else if (
+    fileType &&
+    (fileType.includes("word") ||
+      fileType.includes("document") ||
+      fileType.includes("presentation") ||
+      fileType.includes("spreadsheet"))
+  ) {
+    // Office documents - use Google Docs Viewer
+    previewBody.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(
+      BASE_URL + filePath,
+    )}&embedded=true" class="file-preview-iframe"></iframe>`
+  } else {
+    // Unsupported file type
+    showUnsupportedPreview(fileName)
+  }
+}
+
+function showUnsupportedPreview(fileName) {
+  const previewBody = document.getElementById("previewBody")
+  previewBody.innerHTML = `
+    <div class="file-preview-unsupported">
+      <p><strong>📄 ${fileName}</strong></p>
+      <p>Попередній перегляд недоступний для цього типу файлу</p>
+      <p>Натисніть "Завантажити", щоб відкрити файл на вашому пристрої</p>
+    </div>
+  `
+}
+
+function closeFilePreview() {
+  const modal = document.getElementById("filePreviewModal")
+  modal.classList.remove("active")
 }
