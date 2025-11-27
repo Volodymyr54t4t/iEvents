@@ -25,7 +25,7 @@ app.use(express.json())
 app.use(express.static(path.join(__dirname)))
 app.use("/uploads", express.static("uploads"))
 
-app.use("/documents", express.static("documents"))
+app.use("/documents", express.static(path.join(__dirname, "documents")))
 
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads")
@@ -506,6 +506,33 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця competition_documents вже існує")
     }
 
+    // Перевірка таблиці competition_form_responses
+    console.log("Перевірка таблиці competition_form_responses...")
+    const formResponsesTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'competition_form_responses'
+      ) as exists
+    `)
+
+    if (!formResponsesTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці competition_form_responses...")
+      await client.query(`
+        CREATE TABLE competition_form_responses (
+          id SERIAL PRIMARY KEY,
+          competition_id INTEGER REFERENCES competitions(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          form_data JSONB NOT NULL,
+          submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(competition_id, user_id)
+        )
+      `)
+      console.log("  ✓ Таблиця competition_form_responses створена")
+    } else {
+      console.log("  ✓ Таблиця competition_form_responses вже існує")
+    }
+
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -513,7 +540,7 @@ async function initializeDatabase() {
     console.error("Повідомлення:", error.message)
     console.error("Код помилки:", error.code)
     console.error("\n⚠️  РІШЕННЯ:")
-    console.error("1. Відкрийте файл scripts/reset-database.sql")
+    console.error("1. Відкрийте файл scripts/init-competitions-forms.sql")
     console.error("2. Скопіюйте весь SQL код")
     console.error("3. Виконайте його в SQL редакторі вашої бази даних Neon")
     console.error("4. Перезапустіть сервер командою: npm start\n")
@@ -1108,6 +1135,7 @@ app.post("/api/competitions", async (req, res) => {
     contactInfo,
     websiteUrl,
     isOnline,
+    customFields, // Added customFields parameter
   } = req.body
 
   console.log("Створення конкурсу:", title)
@@ -1125,9 +1153,9 @@ app.post("/api/competitions", async (req, res) => {
         title, description, start_date, end_date, manual_status, created_by,
         subject_id, level, organizer, location, max_participants,
         registration_deadline, requirements, prizes, contact_info,
-        website_url, is_online
+        website_url, is_online, custom_fields
       ) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) 
        RETURNING *`,
       [
         title,
@@ -1147,6 +1175,7 @@ app.post("/api/competitions", async (req, res) => {
         contactInfo || null,
         websiteUrl || null,
         isOnline || false,
+        customFields ? JSON.stringify(customFields) : null, // Stringify customFields
       ],
     )
 
@@ -1205,6 +1234,76 @@ app.get("/api/competitions", async (req, res) => {
     console.error("❌ Помилка отримання конкурсів:", error.message)
     res.status(500).json({
       error: "Помилка отримання конкурсів",
+    })
+  }
+})
+
+// Отримання конкретного конкурсу за ID
+app.get("/api/competitions/:id", async (req, res) => {
+  const { id } = req.params
+
+  console.log("=======================================")
+  console.log("[SERVER] 🔍 Запит конкурсу з ID:", id)
+  console.log("[SERVER] Request method:", req.method)
+  console.log("[SERVER] Request URL:", req.url)
+  console.log("[SERVER] Request params:", req.params)
+  console.log("=======================================")
+
+  try {
+    const result = await pool.query(
+      `SELECT c.*, 
+              COUNT(cp.id) as participants_count
+       FROM competitions c
+       LEFT JOIN competition_participants cp ON c.id = cp.competition_id
+       WHERE c.id = $1
+       GROUP BY c.id`,
+      [id],
+    )
+
+    console.log("[SERVER] Query executed, rows found:", result.rows.length)
+
+    if (result.rows.length === 0) {
+      console.log("[SERVER] ❌ Конкурс не знайдено для ID:", id)
+      return res.status(404).json({
+        error: "Конкурс не знайдено",
+      })
+    }
+
+    const competition = result.rows[0]
+    console.log("[SERVER] Конкурс знайдено:", competition.title)
+    console.log("[SERVER] Custom fields (raw):", competition.custom_fields)
+    console.log("[SERVER] Custom fields type:", typeof competition.custom_fields)
+
+    if (competition.custom_fields) {
+      if (typeof competition.custom_fields === "string") {
+        try {
+          competition.custom_fields = JSON.parse(competition.custom_fields)
+          console.log("[SERVER] ✓ Custom fields парсинуто з рядка")
+        } catch (e) {
+          console.error("[SERVER] ❌ Помилка парсування custom_fields:", e)
+          console.error("[SERVER] Значення:", competition.custom_fields)
+          competition.custom_fields = []
+        }
+      } else if (!Array.isArray(competition.custom_fields)) {
+        console.log("[SERVER] ⚠️ Custom fields не є масивом, конвертую в масив")
+        competition.custom_fields = []
+      }
+    } else {
+      competition.custom_fields = []
+    }
+
+    console.log("[SERVER] Custom fields (фінальні):", competition.custom_fields)
+    console.log("[SERVER] ✓ Відправляю відповідь клієнту")
+
+    res.json({
+      competition: competition,
+    })
+  } catch (error) {
+    console.error("[SERVER] ❌ Помилка отримання конкурсу:", error.message)
+    console.error("[SERVER] Error stack:", error.stack)
+    res.status(500).json({
+      error: "Помилка отримання конкурсу",
+      details: error.message,
     })
   }
 })
@@ -1533,6 +1632,44 @@ app.post("/api/results", async (req, res) => {
     })
   } finally {
     client.release()
+  }
+})
+
+// Отримання результатів конкретного конкурсу
+app.get("/api/results/:competitionId", async (req, res) => {
+  const { competitionId } = req.params
+
+  console.log("=======================================")
+  console.log("[SERVER] 🔍 Запит результатів конкурсу ID:", competitionId)
+  console.log("[SERVER] Request URL:", req.url)
+  console.log("=======================================")
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        cr.*,
+        u.email,
+        p.first_name,
+        p.last_name,
+        p.grade,
+        p.avatar
+      FROM competition_results cr
+      INNER JOIN users u ON cr.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE cr.competition_id = $1
+      ORDER BY cr.place ASC NULLS LAST, cr.score DESC NULLS LAST`,
+      [competitionId],
+    )
+
+    console.log("✓ Знайдено результатів:", result.rows.length)
+    res.json({
+      results: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання результатів:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання результатів",
+    })
   }
 })
 
@@ -2084,7 +2221,7 @@ app.put("/api/competitions/:id", async (req, res) => {
         contactInfo || null,
         websiteUrl || null,
         isOnline || false,
-        customFields || null, // Added customFields value
+        customFields ? JSON.stringify(customFields) : null, // Stringify customFields
         id,
       ],
     )
@@ -3397,5 +3534,230 @@ app.listen(PORT, async () => {
     console.log("✅ Telegram бот успішно запущено")
   } catch (error) {
     console.error("❌ Помилка при запуску Telegram бота:", error)
+  }
+})
+
+// API ендпоінти для роботи з відповідями на форми конкурсів
+
+// Збереження відповіді учня на форму конкурсу
+app.post("/api/competitions/:id/form-response", async (req, res) => {
+  const { id } = req.params
+  const { userId, formData } = req.body
+
+  console.log("Збереження відповіді на форму конкурсу ID:", id, "від користувача:", userId)
+
+  if (!userId || !formData) {
+    return res.status(400).json({
+      error: "userId та formData обов'язкові",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    const participantCheck = await client.query(
+      "SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2",
+      [id, userId],
+    )
+
+    if (participantCheck.rows.length === 0) {
+      // Automatically register student as participant
+      await client.query("INSERT INTO competition_participants (competition_id, user_id) VALUES ($1, $2)", [id, userId])
+      console.log("✓ Учень автоматично доданий як учасник")
+    }
+
+    // Збереження або оновлення відповіді
+    const result = await client.query(
+      `INSERT INTO competition_form_responses (competition_id, user_id, form_data, submitted_at, updated_at)
+       VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       ON CONFLICT (competition_id, user_id) 
+       DO UPDATE SET form_data = $3, updated_at = CURRENT_TIMESTAMP
+       RETURNING *`,
+      [id, userId, JSON.stringify(formData)],
+    )
+
+    await client.query("COMMIT")
+    console.log("✓ Відповідь збережено")
+
+    res.json({
+      message: "Відповідь успішно збережено",
+      response: result.rows[0],
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("❌ Помилка збереження відповіді:", error.message)
+    res.status(500).json({
+      error: "Помилка збереження відповіді: " + error.message,
+    })
+  } finally {
+    client.release()
+  }
+})
+
+// Отримання відповіді конкретного учня на форму конкурсу
+app.get("/api/competitions/:id/form-response/:userId", async (req, res) => {
+  const { id, userId } = req.params
+
+  console.log("Запит відповіді на форму конкурсу ID:", id, "від користувача:", userId)
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM competition_form_responses 
+       WHERE competition_id = $1 AND user_id = $2`,
+      [id, userId],
+    )
+
+    if (result.rows.length === 0) {
+      return res.json({
+        response: null,
+      })
+    }
+
+    console.log("✓ Відповідь знайдено")
+    res.json({
+      response: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання відповіді:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання відповіді",
+    })
+  }
+})
+
+// Отримання всіх відповідей на форму конкурсу (для вчителів/методистів)
+app.get("/api/competitions/:id/form-responses", async (req, res) => {
+  const { id } = req.params
+
+  console.log("Запит всіх відповідей на форму конкурсу ID:", id)
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        cfr.*,
+        u.email,
+        p.first_name,
+        p.last_name,
+        p.grade,
+        p.avatar
+      FROM competition_form_responses cfr
+      INNER JOIN users u ON cfr.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE cfr.competition_id = $1
+      ORDER BY cfr.submitted_at DESC`,
+      [id],
+    )
+
+    console.log("✓ Знайдено відповідей:", result.rows.length)
+    res.json({
+      responses: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання відповідей:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання відповідей",
+    })
+  }
+})
+
+// CHANGE: Added new endpoint for form file uploads
+app.post("/api/competitions/:competitionId/form-file-upload", uploadDocument.single("file"), async (req, res) => {
+  const { competitionId } = req.params
+  const { userId, fieldIndex, description } = req.body
+
+  console.log(`📤 Завантаження файлу форми для конкурсу ${competitionId} від користувача ${userId}`)
+
+  if (!userId || !req.file) {
+    return res.status(400).json({
+      error: "Не вказано користувача або файл не завантажено",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    // Перевірка, чи учень є учасником конкурсу
+    const participantCheck = await client.query(
+      `SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2`,
+      [competitionId, userId],
+    )
+
+    if (participantCheck.rows.length === 0) {
+      await client.query("ROLLBACK")
+      fs.unlinkSync(req.file.path)
+      return res.status(403).json({
+        error: "Ви не є учасником цього конкурсу",
+      })
+    }
+
+    // Отримання інформації про конкурс
+    const competitionInfo = await client.query(`SELECT title FROM competitions WHERE id = $1`, [competitionId])
+    const competition = competitionInfo.rows[0]
+
+    // Організація папок: documents/(конкурс)/(id учня)/
+    const competitionFolderName = competition.title.replace(/[^a-zA-Z0-9_-]/g, "_")
+    const competitionFolder = path.join(__dirname, "documents", competitionFolderName)
+    const userFolder = path.join(competitionFolder, `${userId}`)
+
+    // Створення папок, якщо їх немає
+    if (!fs.existsSync(competitionFolder)) {
+      fs.mkdirSync(competitionFolder, { recursive: true })
+      console.log(`📁 Створено папку: ${competitionFolder}`)
+    }
+
+    if (!fs.existsSync(userFolder)) {
+      fs.mkdirSync(userFolder, { recursive: true })
+      console.log(`📁 Створено папку: ${userFolder}`)
+    }
+
+    // Переміщення файлу до організованої структури
+    const newFilePath = path.join(userFolder, req.file.filename)
+    fs.renameSync(req.file.path, newFilePath)
+
+    const relativeFilePath = `/documents/${competitionFolderName}/${userId}/${req.file.filename}`
+
+    // Збереження інформації про файл у базу даних
+    const result = await client.query(
+      `INSERT INTO competition_documents (
+        competition_id, user_id, file_name, original_name, 
+        file_path, file_size, file_type, description
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      RETURNING *`,
+      [
+        competitionId,
+        userId,
+        req.file.filename,
+        req.file.originalname,
+        relativeFilePath,
+        req.file.size,
+        req.file.mimetype,
+        description || null,
+      ],
+    )
+
+    await client.query("COMMIT")
+
+    console.log(`✓ Файл успішно завантажено та організовано: ${req.file.originalname}`)
+    console.log(`  → Шлях: ${relativeFilePath}`)
+
+    res.json({
+      message: "Файл успішно завантажено",
+      document: result.rows[0],
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    if (req.file) {
+      fs.unlinkSync(req.file.path)
+    }
+    console.error("❌ Помилка завантаження файлу форми:", error.message)
+    res.status(500).json({
+      error: "Помилка завантаження файлу: " + error.message,
+    })
+  } finally {
+    client.release()
   }
 })

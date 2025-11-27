@@ -55,6 +55,25 @@
 
     <div id="footer"></div>
 
+    <!-- Модальне вікно для заповнення форми конкурсу -->
+    <div id="competitionFormModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="formModalTitle">Форма реєстрації на конкурс</h2>
+                <button class="modal-close" onclick="closeCompetitionForm()">&times;</button>
+            </div>
+            <div class="modal-body" id="formModalBody">
+                <div class="loading">Завантаження форми...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCompetitionForm()">Закрити</button>
+                <button class="btn btn-primary" onclick="submitCompetitionForm()" id="submitFormBtn">
+                    Надіслати форму
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Модальне вікно для завантаження файлів -->
     <div id="uploadFileModal" class="modal">
         <div class="modal-content">

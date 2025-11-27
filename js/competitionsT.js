@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -20,6 +20,7 @@ let allDocuments = []
 let currentDocumentsStudents = []
 
 let dynamicFieldCount = 0
+let currentResponses = []
 
 // Перевірка авторизації
 const userId = localStorage.getItem("userId")
@@ -46,6 +47,18 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("filterStatus").addEventListener("change", filterAndSortCompetitions)
   document.getElementById("filterOwnership").addEventListener("change", filterAndSortCompetitions)
   document.getElementById("sortBy").addEventListener("change", filterAndSortCompetitions)
+
+  // Додаємо обробник для пошуку відповідей
+  const searchResponsesInput = document.getElementById("searchResponses")
+  if (searchResponsesInput) {
+    searchResponsesInput.addEventListener("input", (e) => {
+      const searchTerm = e.target.value.toLowerCase()
+      const filtered = currentResponses.filter((response) =>
+        (response.student_name || "").toLowerCase().includes(searchTerm),
+      )
+      displayFormResponses(filtered)
+    })
+  }
 })
 
 async function loadSubjects() {
@@ -81,12 +94,45 @@ document.getElementById("createCompetitionForm").addEventListener("submit", asyn
   saveCompetition()
 })
 
+function switchTab(tabName) {
+  // Приховуємо всі вкладки
+  document.querySelectorAll(".tab-content").forEach((tab) => {
+    tab.classList.remove("active")
+  })
+
+  // Прибираємо активний клас з усіх кнопок
+  document.querySelectorAll(".tab-button").forEach((btn) => {
+    btn.classList.remove("active")
+  })
+
+  // Показуємо потрібну вкладку
+  document.getElementById(`tab-content-${tabName}`).classList.add("active")
+  document.getElementById(`tab-${tabName}`).classList.add("active")
+
+  // Якщо відкрили вкладку "Відповіді", завантажуємо їх
+  if (tabName === "responses") {
+    const competitionId = document.getElementById("editCompetitionId").value
+    if (competitionId) {
+      loadFormResponses(competitionId)
+    }
+  }
+}
+
 function openCreateCompetitionModal() {
   document.getElementById("modalTitle").textContent = "Створити новий конкурс"
   document.getElementById("editCompetitionId").value = ""
   document.getElementById("createCompetitionForm").reset()
   dynamicFieldCount = 0
   document.getElementById("dynamicFieldsContainer").innerHTML = ""
+
+  switchTab("info")
+
+  document.getElementById("responsesContainer").innerHTML = `
+    <div class="empty-state">
+      <p>Виберіть конкурс для перегляду відповідей або створіть новий конкурс</p>
+    </div>
+  `
+
   document.getElementById("createCompetitionModal").classList.add("active")
 }
 
@@ -95,6 +141,7 @@ function closeCreateCompetitionModal() {
   document.getElementById("createCompetitionForm").reset()
   dynamicFieldCount = 0
   document.getElementById("dynamicFieldsContainer").innerHTML = ""
+  currentResponses = []
 }
 
 function addDynamicField() {
@@ -108,8 +155,19 @@ function addDynamicField() {
 
   fieldWrapper.innerHTML = `
     <div class="dynamic-field-row">
-      <input type="text" class="dynamic-field-label" placeholder="Назва поля (напр. Вимоги)" required>
-      <textarea class="dynamic-field-value" placeholder="Значення поля..." rows="2"></textarea>
+      <input type="text" class="dynamic-field-label" placeholder="Назва поля (напр. Клас, Вік)" required>
+      <select class="dynamic-field-type">
+        <option value="text">Текст</option>
+        <option value="email">Email</option>
+        <option value="tel">Телефон</option>
+        <option value="url">Посилання</option>
+        <option value="number">Число</option>
+        <option value="date">Дата</option>
+        <option value="textarea">Багато тексту</option>
+      </select>
+      <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}">
+      <label for="required-${dynamicFieldCount}">Обов'язкове</label>
+      <input type="text" class="dynamic-field-placeholder" placeholder="Підказка (необов'язково)">
       <button type="button" class="btn btn-danger btn-sm" onclick="removeDynamicField(${dynamicFieldCount})">✕ Видалити</button>
     </div>
   `
@@ -172,7 +230,18 @@ function openEditCompetitionModal(competition) {
           fieldWrapper.innerHTML = `
             <div class="dynamic-field-row">
               <input type="text" class="dynamic-field-label" placeholder="Назва поля" value="${(field.label || "").replace(/"/g, "&quot;")}" required>
-              <textarea class="dynamic-field-value" placeholder="Значення поля..." rows="2">${(field.value || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</textarea>
+              <select class="dynamic-field-type">
+                <option value="text" ${field.type === "text" ? "selected" : ""}>Текст</option>
+                <option value="email" ${field.type === "email" ? "selected" : ""}>Email</option>
+                <option value="tel" ${field.type === "tel" ? "selected" : ""}>Телефон</option>
+                <option value="url" ${field.type === "url" ? "selected" : ""}>Посилання</option>
+                <option value="number" ${field.type === "number" ? "selected" : ""}>Число</option>
+                <option value="date" ${field.type === "date" ? "selected" : ""}>Дата</option>
+                <option value="textarea" ${field.type === "textarea" ? "selected" : ""}>Багато тексту</option>
+              </select>
+              <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}" ${field.required ? "checked" : ""}>
+              <label for="required-${dynamicFieldCount}">Обов'язкове</label>
+              <input type="text" class="dynamic-field-placeholder" placeholder="Підказка" value="${(field.placeholder || "").replace(/"/g, "&quot;")}">
               <button type="button" class="btn btn-danger btn-sm" onclick="removeDynamicField(${dynamicFieldCount})">✕ Видалити</button>
             </div>
           `
@@ -184,6 +253,8 @@ function openEditCompetitionModal(competition) {
     }
   }
 
+  switchTab("info")
+
   document.getElementById("createCompetitionModal").classList.add("active")
 }
 
@@ -194,10 +265,17 @@ async function saveCompetition() {
   const customFields = []
   document.querySelectorAll(".dynamic-field-wrapper").forEach((wrapper) => {
     const label = wrapper.querySelector(".dynamic-field-label").value.trim()
-    const value = wrapper.querySelector(".dynamic-field-value").value.trim()
+    const type = wrapper.querySelector(".dynamic-field-type").value
+    const required = wrapper.querySelector(".dynamic-field-required").checked
+    const placeholder = wrapper.querySelector(".dynamic-field-placeholder").value.trim()
 
-    if (label || value) {
-      customFields.push({ label, value })
+    if (label) {
+      customFields.push({
+        label,
+        type,
+        required,
+        placeholder: placeholder || null,
+      })
     }
   })
 
@@ -252,6 +330,166 @@ async function saveCompetition() {
     console.error("Помилка:", error)
     alert("Помилка збереження конкурсу")
   }
+}
+
+async function loadFormResponses(competitionId) {
+  const container = document.getElementById("responsesContainer")
+  container.innerHTML = '<div class="loading">Завантаження відповідей...</div>'
+
+  try {
+    console.log("[v0] Завантаження відповідей для конкурсу:", competitionId)
+    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/form-responses`)
+    console.log("[v0] Відповідь сервера:", response.status)
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log("[v0] Отримано відповідей:", data.responses?.length || 0)
+
+    currentResponses = data.responses || []
+    displayFormResponses(currentResponses)
+  } catch (error) {
+    console.error("Помилка завантаження відповідей:", error)
+    container.innerHTML = '<div class="empty-state"><p>Помилка завантаження відповідей</p></div>'
+  }
+}
+
+function displayFormResponses(responses) {
+  const container = document.getElementById("responsesContainer")
+
+  if (!responses || responses.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>Поки немає відповідей</h3>
+        <p>Відповіді учнів з'являться тут після заповнення форми</p>
+      </div>
+    `
+    return
+  }
+
+  container.innerHTML = responses
+    .map((response) => {
+      const submittedDate = new Date(response.submitted_at).toLocaleString("uk-UA")
+      let formData = {}
+      try {
+        formData = typeof response.form_data === "string" ? JSON.parse(response.form_data) : response.form_data || {}
+      } catch (e) {
+        console.error("Помилка парсингу form_data:", e)
+        formData = {}
+      }
+
+      // Формуємо ПІБ з даних профілю або з form_data
+      const fullName =
+        response.first_name && response.last_name
+          ? `${response.last_name} ${response.first_name}`
+          : formData.fullName || formData["ПІБ"] || "Невідомий учень"
+
+      const initials = fullName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+
+      return `
+      <div class="response-item">
+        <div class="response-header">
+          <div class="response-student-info">
+            ${
+              response.avatar
+                ? `<img src="${response.avatar}" alt="Avatar" class="response-avatar-img">`
+                : `<div class="response-avatar">${initials}</div>`
+            }
+            <div class="response-student-details">
+              <h4>${fullName}</h4>
+              <p>${response.email || "Немає email"}</p>
+              ${response.grade ? `<p>Клас: ${response.grade}</p>` : ""}
+            </div>
+          </div>
+          <div class="response-date">
+            📅 ${submittedDate}
+          </div>
+        </div>
+        <div class="response-body">
+          <h4>Відповіді на форму:</h4>
+          ${Object.entries(formData)
+            .map(
+              ([key, value]) => `
+            <div class="response-field">
+              <div class="response-field-label">${key}:</div>
+              <div class="response-field-value">${Array.isArray(value) ? value.join(", ") : value || "-"}</div>
+            </div>
+          `,
+            )
+            .join("")}
+        </div>
+      </div>
+    `
+    })
+    .join("")
+}
+
+function exportResponsesToExcel() {
+  if (!currentResponses || currentResponses.length === 0) {
+    alert("Немає відповідей для експорту")
+    return
+  }
+
+  // Створюємо CSV дані
+  const headers = ["ПІБ учня", "Дата відправки"]
+  const firstResponse = currentResponses[0]
+  let formDataForHeaders = {}
+  try {
+    formDataForHeaders =
+      typeof firstResponse.form_data === "string" ? JSON.parse(firstResponse.form_data) : firstResponse.form_data || {}
+  } catch (e) {
+    console.error("Помилка парсингу form_data для заголовків:", e)
+  }
+
+  // Додаємо заголовки полів форми
+  Object.keys(formDataForHeaders).forEach((key) => {
+    headers.push(key)
+  })
+
+  let csvContent = headers.join(",") + "\n"
+
+  // Додаємо рядки даних
+  currentResponses.forEach((response) => {
+    let data = {}
+    try {
+      data = typeof response.form_data === "string" ? JSON.parse(response.form_data) : response.form_data || {}
+    } catch (e) {
+      console.error("Помилка парсингу form_data для рядка:", e)
+    }
+
+    // Формуємо ПІБ з даних профілю або з form_data
+    const fullName =
+      response.first_name && response.last_name
+        ? `${response.last_name} ${response.first_name}`
+        : data.fullName || data["ПІБ"] || "Невідомий"
+
+    const row = [fullName, new Date(response.submitted_at).toLocaleString("uk-UA")]
+
+    Object.keys(formDataForHeaders).forEach((key) => {
+      // Ensure value is a string and escape quotes
+      const cellValue = String(data[key] || "").replace(/"/g, '""')
+      row.push(cellValue)
+    })
+
+    csvContent += row.map((cell) => `"${cell}"`).join(",") + "\n"
+  })
+
+  // Створюємо та завантажуємо файл
+  const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" })
+  const link = document.createElement("a")
+  const url = URL.createObjectURL(blob)
+  link.setAttribute("href", url)
+  link.setAttribute("download", `відповіді_${Date.now()}.csv`)
+  link.style.visibility = "hidden"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 async function loadCompetitions() {
@@ -387,6 +625,9 @@ function displayCompetitions(competitions) {
               </div>
             </div>
             <div class="competition-actions">
+              <button class="btn btn-info" onclick="openCompetitionDetailsModal(${competition.id})">
+                📋 Детальніше
+              </button>
               <button class="btn btn-view-docs" onclick="openViewDocumentsModal(${competition.id})">
                 📎 Файли учнів
               </button>
@@ -419,6 +660,362 @@ function displayCompetitions(competitions) {
       `
     })
     .join("")
+}
+
+async function openCompetitionDetailsModal(competitionId) {
+  const competition = allCompetitions.find((c) => c.id === competitionId)
+  if (!competition) {
+    alert("Конкурс не знайдено")
+    return
+  }
+
+  let modal = document.getElementById("competitionDetailsModal")
+  if (!modal) {
+    modal = document.createElement("div")
+    modal.id = "competitionDetailsModal"
+    modal.className = "modal"
+    modal.innerHTML = `
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h2>Детальна інформація про конкурс</h2>
+          <button class="modal-close" onclick="closeCompetitionDetailsModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="competitionDetailsBody">
+          <div class="loading">Завантаження...</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeCompetitionDetailsModal()">Закрити</button>
+        </div>
+      </div>
+    `
+    document.body.appendChild(modal)
+  }
+
+  modal.classList.add("active")
+  const detailsBody = document.getElementById("competitionDetailsBody")
+  detailsBody.innerHTML = '<div class="loading">Завантаження...</div>'
+
+  try {
+    let customFields = []
+    if (competition.custom_fields) {
+      try {
+        customFields =
+          typeof competition.custom_fields === "string"
+            ? JSON.parse(competition.custom_fields)
+            : competition.custom_fields
+
+        if (!Array.isArray(customFields)) {
+          customFields = []
+        }
+      } catch (e) {
+        console.error("Помилка парсування custom_fields:", e)
+        customFields = []
+      }
+    }
+
+    const subjectName = allSubjects.find((s) => s.id == competition.subject_id)?.name || "Не вказано"
+
+    let detailsHTML = `
+      <div class="competition-detail-section">
+        <h3>${competition.title}</h3>
+        ${competition.description ? `<p>${competition.description}</p>` : ""}
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-icon">📚</span>
+            <div>
+              <strong>Предмет:</strong>
+              <span>${subjectName}</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <span class="detail-icon">📊</span>
+            <div>
+              <strong>Рівень:</strong>
+              <span>${competition.level || "Не вказано"}</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <span class="detail-icon">📅</span>
+            <div>
+              <strong>Початок:</strong>
+              <span>${new Date(competition.start_date).toLocaleDateString("uk-UA")}</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <span class="detail-icon">📅</span>
+            <div>
+              <strong>Закінчення:</strong>
+              <span>${new Date(competition.end_date).toLocaleDateString("uk-UA")}</span>
+            </div>
+          </div>
+          ${
+            competition.registration_deadline
+              ? `
+          <div class="detail-item">
+            <span class="detail-icon">⏰</span>
+            <div>
+              <strong>Дедлайн реєстрації:</strong>
+              <span>${new Date(competition.registration_deadline).toLocaleDateString("uk-UA")}</span>
+            </div>
+          </div>
+          `
+              : ""
+          }
+          <div class="detail-item">
+            <span class="detail-icon">${competition.is_online ? "💻" : "📍"}</span>
+            <div>
+              <strong>Формат:</strong>
+              <span>${competition.is_online ? "Онлайн" : "Офлайн"}</span>
+            </div>
+          </div>
+          ${
+            competition.location
+              ? `
+          <div class="detail-item">
+            <span class="detail-icon">📍</span>
+            <div>
+              <strong>Місце проведення:</strong>
+              <span>${competition.location}</span>
+            </div>
+          </div>
+          `
+              : ""
+          }
+          ${
+            competition.max_participants
+              ? `
+          <div class="detail-item">
+            <span class="detail-icon">👥</span>
+            <div>
+              <strong>Макс. учасників:</strong>
+              <span>${competition.max_participants}</span>
+            </div>
+          </div>
+          `
+              : ""
+          }
+          <div class="detail-item">
+            <span class="detail-icon">👥</span>
+            <div>
+              <strong>Учасників зараз:</strong>
+              <span>${competition.participants_count || 0}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      ${
+        competition.organizer
+          ? `
+      <div class="competition-detail-section">
+        <h4>Організатор</h4>
+        <p>🏛️ ${competition.organizer}</p>
+      </div>
+      `
+          : ""
+      }
+
+      ${
+        competition.requirements
+          ? `
+      <div class="competition-detail-section">
+        <h4>Вимоги до учасників</h4>
+        <p>${competition.requirements}</p>
+      </div>
+      `
+          : ""
+      }
+
+      ${
+        competition.prizes
+          ? `
+      <div class="competition-detail-section">
+        <h4>Призи та нагороди</h4>
+        <p>${competition.prizes}</p>
+      </div>
+      `
+          : ""
+      }
+
+      ${
+        customFields.length > 0
+          ? `
+      <div class="competition-detail-section">
+        <h4>Додаткові поля для учнів</h4>
+        <div class="custom-fields-list">
+          ${customFields
+            .map((field) => {
+              const requiredMark = field.required ? '<span class="required-badge">Обов\'язкове</span>' : ""
+              return `
+              <div class="custom-field-preview">
+                <strong>${field.label}</strong> ${requiredMark}
+                <span class="field-type-badge">${getFieldTypeLabel(field.type)}</span>
+                ${field.placeholder ? `<div class="field-placeholder">Підказка: ${field.placeholder}</div>` : ""}
+              </div>
+            `
+            })
+            .join("")}
+        </div>
+      </div>
+      `
+          : ""
+      }
+
+      ${
+        competition.contact_info || competition.website_url
+          ? `
+      <div class="competition-detail-section">
+        <h4>Контактна інформація</h4>
+        <div class="detail-grid">
+          ${
+            competition.contact_info
+              ? `
+          <div class="detail-item">
+            <span class="detail-icon">📧</span>
+            <div>
+              <strong>Контакт:</strong>
+              <span>${competition.contact_info}</span>
+            </div>
+          </div>
+          `
+              : ""
+          }
+          ${
+            competition.website_url
+              ? `
+          <div class="detail-item">
+            <span class="detail-icon">🌐</span>
+            <div>
+              <strong>Веб-сайт:</strong>
+              <span><a href="${competition.website_url}" target="_blank">${competition.website_url}</a></span>
+            </div>
+          </div>
+          `
+              : ""
+          }
+        </div>
+      </div>
+      `
+          : ""
+      }
+    `
+
+    if (customFields.length > 0) {
+      try {
+        const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/form-responses`)
+        const data = await response.json()
+
+        if (response.ok && data.responses && data.responses.length > 0) {
+          detailsHTML += `
+            <div class="competition-detail-section">
+              <h4>Відповіді учнів (${data.responses.length})</h4>
+              <div class="responses-container">
+                ${data.responses
+                  .map((resp) => {
+                    // Формуємо ПІБ з даних профілю або з form_data
+                    const fullName =
+                      resp.first_name && resp.last_name
+                        ? `${resp.last_name} ${resp.first_name}`
+                        : resp.form_data?.fullName || resp.form_data?.["ПІБ"] || resp.email || "Невідомий учень"
+
+                    let formData = {}
+                    try {
+                      formData = typeof resp.form_data === "string" ? JSON.parse(resp.form_data) : resp.form_data || {}
+                    } catch (e) {
+                      console.error("Помилка парсування form_data:", e)
+                      formData = resp.form_data || {}
+                    }
+                    const submittedDate = new Date(resp.submitted_at).toLocaleString("uk-UA")
+
+                    return `
+                    <div class="response-card">
+                      <div class="response-header">
+                        <div class="student-info">
+                          ${
+                            resp.avatar
+                              ? `<img src="${resp.avatar}" alt="${fullName}" class="student-avatar-small">`
+                              : ""
+                          }
+                          <div>
+                            <strong>${fullName}</strong>
+                            ${resp.grade ? `<span class="grade-badge-small">${resp.grade} клас</span>` : ""}
+                          </div>
+                        </div>
+                        <div class="response-meta">
+                          <small>📅 ${submittedDate}</small>
+                        </div>
+                      </div>
+                      <div class="response-body">
+                        ${Object.entries(formData)
+                          .map(([key, value]) => {
+                            return `
+                            <div class="response-field">
+                              <strong>${key}:</strong>
+                              <span>${Array.isArray(value) ? value.join(", ") : value || "-"}</span>
+                            </div>
+                          `
+                          })
+                          .join("")}
+                      </div>
+                    </div>
+                  `
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `
+        } else if (customFields.length > 0) {
+          detailsHTML += `
+            <div class="competition-detail-section">
+              <div class="info-message" style="background: #fff3e0; border-color: #ff9800;">
+                <p style="color: #e65100;">Учні ще не заповнили форму з додатковими полями</p>
+              </div>
+            </div>
+          `
+        }
+      } catch (error) {
+        console.error("Помилка завантаження відповідей:", error)
+        detailsHTML += `
+          <div class="competition-detail-section">
+            <div class="info-message" style="background: #ffebee; border-color: #ef5350;">
+              <p style="color: #c62828;">Помилка завантаження відповідей учнів</p>
+            </div>
+          </div>
+        `
+      }
+    }
+
+    detailsBody.innerHTML = detailsHTML
+  } catch (error) {
+    console.error("Помилка завантаження деталей конкурсу:", error)
+    detailsBody.innerHTML = `
+      <div class="error-message">
+        <p>Помилка завантаження даних конкурсу</p>
+        <button class="btn btn-primary" onclick="openCompetitionDetailsModal(${competitionId})">Спробувати ще раз</button>
+      </div>
+    `
+  }
+}
+
+function closeCompetitionDetailsModal() {
+  const modal = document.getElementById("competitionDetailsModal")
+  if (modal) {
+    modal.classList.remove("active")
+  }
+}
+
+function getFieldTypeLabel(type) {
+  const types = {
+    text: "Текст",
+    email: "Email",
+    tel: "Телефон",
+    url: "Посилання",
+    number: "Число",
+    date: "Дата",
+    textarea: "Багато тексту",
+  }
+  return types[type] || "Текст"
 }
 
 // Завантаження списку учнів
@@ -482,6 +1079,7 @@ function displayStudents(students) {
           <h4 style="margin: 16px 0 8px 0; color: #4a5568;">${grade}</h4>
           ${students
             .map((student) => {
+              // Формуємо ПІБ з даних профілю
               const fullName = [student.last_name, student.first_name].filter(Boolean).join(" ") || student.email
               const initials = fullName
                 .split(" ")
@@ -598,6 +1196,11 @@ function closeViewDocumentsModal() {
   currentDocumentsStudents = []
   document.getElementById("searchDocuments").value = ""
   document.getElementById("filterStudent").innerHTML = '<option value="">Всі учні</option>'
+  // Reset teacher upload fields
+  document.getElementById("teacherFileInput").value = ""
+  document.getElementById("teacherFileDescription").value = ""
+  document.getElementById("teacherFileStudent").value = ""
+  document.getElementById("teacherUploadProgress").style.display = "none"
 }
 
 async function loadCompetitionDocuments(competitionId) {
@@ -609,8 +1212,39 @@ async function loadCompetitionDocuments(competitionId) {
     const docsResponse = await fetch(`${BASE_URL}/api/competitions/${competitionId}/documents`)
     const docsData = await docsResponse.json()
 
+    const formResponse = await fetch(`${BASE_URL}/api/competitions/${competitionId}/form-responses`)
+    const formData = await formResponse.json()
+
     if (docsResponse.ok) {
       allDocuments = docsData.documents
+
+      if (formResponse.ok && formData.responses && formData.responses.length > 0) {
+        // Додаємо відповіді форми до документів
+        formData.responses.forEach((response) => {
+          // Формуємо ПІБ з даних профілю або з form_data
+          const fullName =
+            response.first_name && response.last_name
+              ? `${response.last_name} ${response.first_name}`
+              : response.form_data?.fullName || response.form_data?.["ПІБ"] || response.email || "Невідомий учень"
+
+          allDocuments.push({
+            id: `form-${response.user_id}`,
+            user_id: response.user_id,
+            original_name: "📋 Відповіді на форму конкурсу",
+            file_type: "form-response",
+            file_size: 0,
+            uploaded_at: response.submitted_at,
+            description: "Заповнена форма учня",
+            email: response.email,
+            first_name: response.first_name,
+            last_name: response.last_name,
+            grade: response.grade,
+            avatar: response.avatar,
+            form_data: response.form_data,
+            file_path: null,
+          })
+        })
+      }
 
       // Отримання унікальних учнів
       const uniqueStudents = {}
@@ -632,6 +1266,10 @@ async function loadCompetitionDocuments(competitionId) {
       // Заповнення фільтру учнів
       const filterSelect = document.getElementById("filterStudent")
       filterSelect.innerHTML = '<option value="">Всі учні</option>'
+
+      const teacherFileStudentSelect = document.getElementById("teacherFileStudent")
+      teacherFileStudentSelect.innerHTML = '<option value="">-- Оберіть учня --</option>'
+
       currentDocumentsStudents
         .sort((a, b) => {
           const nameA = [a.last_name, a.first_name].filter(Boolean).join(" ")
@@ -643,7 +1281,10 @@ async function loadCompetitionDocuments(competitionId) {
           const option = document.createElement("option")
           option.value = student.id
           option.textContent = `${fullName}${student.grade ? ` (${student.grade})` : ""}`
-          filterSelect.appendChild(option)
+          filterSelect.appendChild(option.cloneNode(true))
+
+          const teacherOption = option.cloneNode(true)
+          teacherFileStudentSelect.appendChild(teacherOption)
         })
 
       displayDocuments(allDocuments)
@@ -670,7 +1311,12 @@ function filterDocuments() {
   // Пошук
   if (searchTerm) {
     filtered = filtered.filter((doc) => {
-      const fullName = [doc.last_name, doc.first_name].filter(Boolean).join(" ").toLowerCase()
+      // Формуємо ПІБ з даних профілю або з form_data
+      const fullName =
+        doc.first_name && doc.last_name
+          ? `${doc.last_name} ${doc.first_name}`
+          : (doc.form_data?.fullName || doc.form_data?.["ПІБ"] || doc.email || "").toLowerCase()
+
       const fileName = (doc.original_name || "").toLowerCase()
       const description = (doc.description || "").toLowerCase()
 
@@ -753,6 +1399,27 @@ function displayDocuments(documents) {
               const fileSize = formatFileSize(doc.file_size)
               const fileIcon = getFileIcon(doc.file_type)
 
+              if (doc.file_type === "form-response") {
+                return `
+                <div class="teacher-document-item form-response-item">
+                  <div class="document-icon">📋</div>
+                  <div class="teacher-document-info">
+                    <div class="teacher-document-name">${doc.original_name}</div>
+                    <div class="teacher-document-meta">
+                      <span>📅 ${uploadDate}</span>
+                      <span>📝 Форма</span>
+                    </div>
+                    ${doc.description ? `<div class="teacher-document-description">💬 ${doc.description}</div>` : ""}
+                  </div>
+                  <div class="teacher-document-actions">
+                    <button class="btn btn-view btn-sm" onclick='viewFormResponse(${JSON.stringify(doc.form_data)}, "${fullName}")'>
+                      👁️ Переглянути відповіді
+                    </button>
+                  </div>
+                </div>
+              `
+              }
+
               return `
               <div class="teacher-document-item">
                 <div class="document-icon">${fileIcon}</div>
@@ -785,6 +1452,71 @@ function displayDocuments(documents) {
     `
     })
     .join("")
+}
+
+async function uploadFileByTeacher() {
+  const competitionId = currentDocumentsCompetitionId
+  const fileInput = document.getElementById("teacherFileInput")
+  const fileDescription = document.getElementById("teacherFileDescription").value
+  const studentId = document.getElementById("teacherFileStudent").value
+
+  if (!fileInput.files[0]) {
+    alert("Будь ласка, оберіть файл")
+    return
+  }
+
+  if (!studentId) {
+    alert("Будь ласка, оберіть учня")
+    return
+  }
+
+  const maxSize = 50 * 1024 * 1024
+  if (fileInput.files[0].size > maxSize) {
+    alert("Файл занадто великий. Максимальний розмір: 50 МБ")
+    return
+  }
+
+  const formData = new FormData()
+  formData.append("file", fileInput.files[0])
+  formData.append("userId", studentId)
+  formData.append("description", fileDescription)
+  formData.append("uploadedBy", userId)
+  formData.append("uploadedByRole", userRole)
+
+  try {
+    const uploadBtn = document.querySelector("[onclick='uploadFileByTeacher()']")
+    uploadBtn.disabled = true
+    uploadBtn.textContent = "Завантаження..."
+
+    const progressDiv = document.getElementById("teacherUploadProgress")
+    progressDiv.style.display = "block"
+
+    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/documents/upload-teacher`, {
+      method: "POST",
+      body: formData,
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      alert("Файл успішно завантажено!")
+      document.getElementById("teacherFileInput").value = ""
+      document.getElementById("teacherFileDescription").value = ""
+      document.getElementById("teacherFileStudent").value = ""
+      progressDiv.style.display = "none"
+      await loadCompetitionDocuments(competitionId)
+    } else {
+      alert(`Помилка: ${data.error}`)
+    }
+  } catch (error) {
+    console.error("Помилка завантаження файлу:", error)
+    alert("Помилка завантаження файлу. Спробуйте ще раз.")
+  } finally {
+    const uploadBtn = document.querySelector("[onclick='uploadFileByTeacher()']")
+    uploadBtn.disabled = false
+    uploadBtn.textContent = "📤 Завантажити файл"
+    document.getElementById("teacherUploadProgress").style.display = "none"
+  }
 }
 
 function formatFileSize(bytes) {
@@ -832,7 +1564,7 @@ async function deleteTeacherDocument(documentId) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+      body: JSON.JSON.stringify({
         userId: userId,
         userRole: userRole,
       }),
@@ -916,8 +1648,8 @@ function showUnsupportedPreview(fileName) {
   previewBody.innerHTML = `
     <div class="file-preview-unsupported">
       <p><strong>📄 ${fileName}</strong></p>
-      <p>Попередній перегляд недоступний для цього типу файлу</p>
-      <p>Натисніть "Завантажити", щоб відкрити файл на вашому пристрої</p>
+      <p>Предварительный просмотр недоступен для этого типа файла</p>
+      <p>Нажмите "Загрузить", чтобы открыть файл на вашем устройстве</p>
     </div>
   `
 }
@@ -925,4 +1657,52 @@ function showUnsupportedPreview(fileName) {
 function closeFilePreview() {
   const modal = document.getElementById("filePreviewModal")
   modal.classList.remove("active")
+
+  const downloadBtn = document.getElementById("downloadPreviewBtn")
+  downloadBtn.style.display = ""
+}
+
+function viewFormResponse(formData, studentName) {
+  const modal = document.getElementById("filePreviewModal")
+  const previewBody = document.getElementById("previewBody")
+  const fileNameElement = document.getElementById("previewFileName")
+  const downloadBtn = document.getElementById("downloadPreviewBtn")
+
+  fileNameElement.textContent = `Відповіді форми: ${studentName}`
+  modal.classList.add("active")
+
+  downloadBtn.style.display = "none"
+
+  // Parse form data if it's a string
+  let responses = formData
+  if (typeof formData === "string") {
+    try {
+      responses = JSON.parse(formData)
+    } catch (e) {
+      console.error("Error parsing form data:", e)
+      responses = {}
+    }
+  }
+
+  // Create HTML to display form responses
+  let formHTML = '<div class="form-response-view">'
+
+  if (typeof responses === "object" && responses !== null) {
+    formHTML += '<div class="form-responses-list">'
+    for (const [label, value] of Object.entries(responses)) {
+      formHTML += `
+        <div class="form-response-field">
+          <div class="form-response-label">${label}</div>
+          <div class="form-response-value">${Array.isArray(value) ? value.join(", ") : value || "<em>Не заповнено</em>"}</div>
+        </div>
+      `
+    }
+    formHTML += "</div>"
+  } else {
+    formHTML += "<p>Немає даних відповідей</p>"
+  }
+
+  formHTML += "</div>"
+
+  previewBody.innerHTML = formHTML
 }

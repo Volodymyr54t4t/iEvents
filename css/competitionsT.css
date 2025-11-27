@@ -11,6 +11,7 @@ body {
   min-height: 100vh;
   color: #2d3748;
   padding-top: 100px;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .main-container {
@@ -489,7 +490,21 @@ body {
   text-align: center;
   padding: 40px;
   color: #5a7a8a;
-  animation: fadeInUp 0.5s ease-out;
+  animation: pulse 2s ease-in-out infinite;
+  position: relative;
+}
+
+.loading::after {
+  content: "";
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  margin-left: 12px;
+  border: 4px solid #a8d8ea;
+  border-top-color: #7ec8e3;
+  border-radius: 50%;
+  animation: rotate 1s linear infinite;
+  vertical-align: middle;
 }
 
 .empty-state {
@@ -539,11 +554,17 @@ body {
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideInScale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal-large {
   max-width: 900px;
+}
+
+/* Збільшений розмір модального вікна для трьох вкладок */
+.modal-extra-large {
+  max-width: 1100px;
+  max-height: 90vh;
 }
 
 .modal-header {
@@ -637,17 +658,34 @@ body {
   animation: slideInUp 0.4s ease-out both;
 }
 
+.student-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.student-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.student-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.student-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.student-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
 .student-item:hover {
   border-color: #7ec8e3;
   background: #f0f9fc;
-  transform: translateX(8px);
-  box-shadow: 0 6px 16px rgba(126, 200, 227, 0.25);
+  transform: translateX(12px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(126, 200, 227, 0.3);
 }
 
 .student-item.selected {
   border-color: #7ec8e3;
   background: #e6f7fb;
   animation: pulse 0.6s ease-out;
+  box-shadow: 0 4px 16px rgba(126, 200, 227, 0.2);
 }
 
 .student-checkbox {
@@ -667,11 +705,12 @@ body {
   font-weight: 700;
   color: white;
   animation: scaleIn 0.4s ease-out;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .student-item:hover .student-avatar {
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(5deg);
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
 }
 
 .student-avatar img {
@@ -696,9 +735,139 @@ body {
   color: #7ec8e3;
 }
 
-.student-grade {
+/* Стилі для вкладок */
+.modal-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 16px 24px 0;
+  background: #f0f9fc;
+  border-bottom: 2px solid #a8d8ea;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  background: white;
+  color: #5a7a8a;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 10px 10px 0 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  border-bottom: none;
+}
+
+.tab-button:hover {
+  background: #e6f7fb;
+  color: #0a5f7f;
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: white;
+  color: #0a5f7f;
+  border-color: #a8d8ea;
+  border-bottom-color: white;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 -4px 12px rgba(10, 95, 127, 0.08);
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-section-title {
+  font-size: 20px;
+  color: #0a5f7f;
+  margin-bottom: 16px;
+  font-weight: 700;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #a8d8ea;
+}
+
+.tab-description {
   font-size: 14px;
   color: #5a7a8a;
+  margin-bottom: 24px;
+  padding: 12px;
+  background: #f0f9fc;
+  border-radius: 8px;
+  border-left: 4px solid #7ec8e3;
+}
+
+/* Стилі для стандартних полів форми */
+.standard-fields-section {
+  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 2px solid #a8d8ea;
+}
+
+.standard-fields-section h4 {
+  font-size: 16px;
+  color: #0a5f7f;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.standard-fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.standard-field-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-radius: 10px;
+  border: 2px solid #a8d8ea;
+  transition: all 0.3s ease;
+}
+
+.standard-field-item:hover {
+  border-color: #7ec8e3;
+  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.2);
+  transform: translateX(4px);
+}
+
+.field-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.field-info {
+  flex: 1;
+}
+
+.field-info strong {
+  display: block;
+  color: #0a5f7f;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.field-info small {
+  color: #5a7a8a;
+  font-size: 13px;
 }
 
 .dynamic-fields-header {
@@ -711,14 +880,10 @@ body {
 .dynamic-fields-header label {
   font-weight: 600;
   color: #0a5f7f;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .dynamic-field-wrapper {
-  animation: slideIn 0.3s ease-out;
-}
-
-.dynamic-field-wrapper.animate-in {
   animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -735,6 +900,16 @@ body {
   border-radius: 12px;
   border: 2px solid #e8f4f8;
   transition: all 0.3s ease;
+  min-height: 100px;
+}
+
+.dynamic-fields-container:empty::before {
+  content: "Додайте додаткові поля для форми учня, якщо потрібно";
+  display: block;
+  text-align: center;
+  color: #5a7a8a;
+  padding: 40px 20px;
+  font-style: italic;
 }
 
 .dynamic-fields-container:hover {
@@ -744,499 +919,5 @@ body {
 
 .dynamic-field-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 100px;
-  gap: 12px;
-  align-items: start;
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
-  border: 2px solid #a8d8ea;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(10, 95, 127, 0.06);
-}
-
-.dynamic-field-row:hover {
-  border-color: #7ec8e3;
-  box-shadow: 0 4px 16px rgba(126, 200, 227, 0.2);
-  transform: translateY(-2px);
-}
-
-.dynamic-field-label,
-.dynamic-field-value {
-  padding: 12px 16px;
-  border: 2px solid #a8d8ea;
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  color: #0a5f7f;
-  transition: all 0.3s ease;
-}
-
-.dynamic-field-label::placeholder,
-.dynamic-field-value::placeholder {
-  color: #a8d8ea;
-}
-
-.dynamic-field-label:focus,
-.dynamic-field-value:focus {
-  outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 4px rgba(126, 200, 227, 0.15);
-  background: #f8fbfd;
-}
-
-.dynamic-field-label {
-  font-weight: 600;
-}
-
-.dynamic-field-value {
-  resize: vertical;
-  min-height: 60px;
-}
-
-.dynamic-field-row .btn-danger {
-  height: fit-content;
-  margin-top: 2px;
-  transition: all 0.2s ease;
-}
-
-.dynamic-field-row .btn-danger:hover {
-  transform: scale(1.05) translateY(-2px);
-}
-
-.results-form-section {
-  background: #f0f9fc;
-  padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 24px;
-  border: 2px solid #a8d8ea;
-}
-
-.results-form-section h3 {
-  font-size: 18px;
-  margin-bottom: 16px;
-  color: #0a5f7f;
-  font-weight: 700;
-}
-
-.result-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.result-form select {
-  padding: 12px 16px;
-  border: 2px solid #a8d8ea;
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-}
-
-/* Стилі для модального вікна перегляду файлів вчителем */
-.documents-filters {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.documents-filters .filter-input {
-  flex: 2;
-  min-width: 250px;
-}
-
-.documents-filters .filter-select {
-  flex: 1;
-  min-width: 200px;
-}
-
-.teacher-documents-view {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.student-documents-group {
-  background: #f0f9fc;
-  border: 2px solid #a8d8ea;
-  border-radius: 16px;
-  padding: 20px;
-  transition: all 0.3s ease;
-}
-
-.student-documents-group:hover {
-  border-color: #7ec8e3;
-  box-shadow: 0 6px 20px rgba(126, 200, 227, 0.2);
-}
-
-.student-group-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #a8d8ea;
-  margin-bottom: 16px;
-}
-
-.student-avatar-large {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #7ec8e3 0%, #4dd0e1 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-  font-size: 20px;
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.3);
-  flex-shrink: 0;
-}
-
-.student-avatar-large img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.student-group-info {
-  flex: 1;
-}
-
-.student-group-name {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0a5f7f;
-  margin-bottom: 4px;
-}
-
-.student-group-meta {
-  font-size: 14px;
-  color: #5a7a8a;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.student-documents-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.teacher-document-item {
-  /* Fixed vertical layout and improved spacing */
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: white;
-  border: 2px solid #a8d8ea;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.teacher-document-item:hover {
-  border-color: #7ec8e3;
-  box-shadow: 0 4px 16px rgba(126, 200, 227, 0.25);
-  transform: translateX(4px);
-}
-
-.document-icon {
-  font-size: 32px;
-  flex-shrink: 0;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.teacher-document-item:hover .document-icon {
-  transform: scale(1.1);
-  background: linear-gradient(135deg, #7ec8e3 0%, #4dd0e1 100%);
-}
-
-.teacher-document-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.teacher-document-name {
-  font-weight: 600;
-  color: #0a5f7f;
-  font-size: 15px;
-  margin-bottom: 6px;
-  word-break: break-word;
-  line-height: 1.4;
-}
-
-.teacher-document-meta {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  font-size: 13px;
-  color: #5a7a8a;
-  margin-bottom: 4px;
-}
-
-.teacher-document-description {
-  font-size: 13px;
-  color: #5a7a8a;
-  font-style: italic;
-  margin-top: 6px;
-  line-height: 1.4;
-}
-
-.teacher-document-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-  flex-direction: column;
-}
-
-.btn-download {
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
-  color: white;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(77, 208, 225, 0.3);
-  white-space: nowrap;
-}
-
-.btn-download:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.4);
-  background: linear-gradient(135deg, #4dd0e1 0%, #26c6da 100%);
-}
-
-.btn-view {
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
-  color: white;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(126, 200, 227, 0.3);
-  white-space: nowrap;
-}
-
-.btn-view:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
-  background: linear-gradient(135deg, #5eb3d6 0%, #3da5c3 100%);
-}
-
-.file-count-badge {
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(77, 208, 225, 0.3);
-}
-
-.no-documents-message {
-  text-align: center;
-  padding: 60px 20px;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
-  border-radius: 16px;
-  border: 2px dashed #a8d8ea;
-}
-
-.no-documents-message p {
-  color: #5a7a8a;
-  font-size: 16px;
-  line-height: 1.6;
-  margin: 8px 0;
-}
-
-.no-documents-message strong {
-  color: #0a5f7f;
-  font-size: 18px;
-}
-
-/* File preview modal styles */
-.file-preview-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 1001;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 0.3s ease-out;
-}
-
-.file-preview-modal.active {
-  display: flex;
-}
-
-.file-preview-content {
-  background: white;
-  border-radius: 20px;
-  width: 90%;
-  max-width: 900px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  animation: slideInScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.file-preview-header {
-  padding: 24px;
-  border-bottom: 2px solid #a8d8ea;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
-  border-radius: 20px 20px 0 0;
-}
-
-.file-preview-header h2 {
-  font-size: 18px;
-  margin: 0;
-  color: #0a5f7f;
-  font-weight: 700;
-  max-width: 70%;
-  word-break: break-word;
-}
-
-.file-preview-body {
-  padding: 24px;
-  overflow-y: auto;
-  flex: 1;
-  background: #f9fafb;
-}
-
-.file-preview-iframe {
-  width: 100%;
-  height: 60vh;
-  border: 2px solid #a8d8ea;
-  border-radius: 12px;
-  background: white;
-}
-
-.file-preview-image {
-  width: 100%;
-  max-height: 70vh;
-  object-fit: contain;
-  border-radius: 12px;
-  border: 2px solid #a8d8ea;
-}
-
-.file-preview-unsupported {
-  text-align: center;
-  padding: 60px 20px;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
-  border-radius: 16px;
-  border: 2px dashed #a8d8ea;
-}
-
-.file-preview-unsupported p {
-  color: #5a7a8a;
-  font-size: 16px;
-  margin: 12px 0;
-  line-height: 1.6;
-}
-
-.file-preview-footer {
-  padding: 20px 24px;
-  border-top: 2px solid #a8d8ea;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
-  border-radius: 0 0 20px 20px;
-}
-
-.btn-view-docs {
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.3);
-}
-
-.btn-view-docs:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(126, 200, 227, 0.4);
-  background: linear-gradient(135deg, #5eb3d6 0%, #3da5c3 100%);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .teacher-document-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .teacher-document-actions {
-    width: 100%;
-    flex-direction: row;
-    justify-content: flex-end;
-  }
-
-  .document-icon {
-    align-self: center;
-  }
-
-  .file-preview-content {
-    width: 95%;
-    max-height: 95vh;
-  }
-
-  .file-preview-header h2 {
-    font-size: 16px;
-    max-width: 60%;
-  }
-
-  .file-preview-iframe {
-    height: 50vh;
-  }
-}
-
-@media (max-width: 480px) {
-  .teacher-document-actions {
-    flex-direction: column;
-  }
-
-  .teacher-document-actions .btn {
-    width: 100%;
-  }
-
-  .file-preview-footer {
-    flex-direction: column;
-  }
-
-  .file-preview-footer .btn {
-    width: 100%;
-  }
+  grid-template-columns: 2fr 3fr 1fr;
 }
