@@ -2,7 +2,7 @@ let BASE_URL
 if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 
 const userIdFromStorage = localStorage.getItem("userId")
@@ -24,7 +24,7 @@ let imageState = {
   flipH: false,
   flipV: false,
   offsetX: 0,
-  offsetY: 0
+  offsetY: 0,
 }
 
 let isDragging = false
@@ -271,7 +271,7 @@ function resetAvatarEditor() {
     flipH: false,
     flipV: false,
     offsetX: 0,
-    offsetY: 0
+    offsetY: 0,
   }
   document.getElementById("scaleSlider").value = 1
   document.getElementById("rotateSlider").value = 0
@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (scaleSlider) {
     scaleSlider.addEventListener("input", (e) => {
-      imageState.scale = parseFloat(e.target.value)
+      imageState.scale = Number.parseFloat(e.target.value)
       updateSliderValues()
       redrawCanvas()
     })
@@ -303,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (rotateSlider) {
     rotateSlider.addEventListener("input", (e) => {
-      imageState.rotate = parseInt(e.target.value)
+      imageState.rotate = Number.parseInt(e.target.value)
       updateSliderValues()
       redrawCanvas()
     })
@@ -366,7 +366,8 @@ function confirmAvatar() {
 
     const reader = new FileReader()
     reader.onload = (e) => {
-      document.getElementById("avatarPreview").innerHTML = `<img src="${e.target.result}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`
+      document.getElementById("avatarPreview").innerHTML =
+        `<img src="${e.target.result}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`
       document.getElementById("clearAvatarBtn").style.display = "block"
     }
     reader.readAsDataURL(blob)
@@ -387,7 +388,7 @@ function clearAvatar() {
     flipH: false,
     flipV: false,
     offsetX: 0,
-    offsetY: 0
+    offsetY: 0,
   }
 }
 
@@ -420,7 +421,7 @@ document.getElementById("avatarInput").addEventListener("change", (e) => {
           flipH: false,
           flipV: false,
           offsetX: 0,
-          offsetY: 0
+          offsetY: 0,
         }
         document.getElementById("scaleSlider").value = 1
         document.getElementById("rotateSlider").value = 0

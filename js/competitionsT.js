@@ -164,6 +164,7 @@ function addDynamicField() {
         <option value="number">Число</option>
         <option value="date">Дата</option>
         <option value="textarea">Багато тексту</option>
+        <option value="file">📎 Файл</option>
       </select>
       <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}">
       <label for="required-${dynamicFieldCount}">Обов'язкове</label>
@@ -238,6 +239,7 @@ function openEditCompetitionModal(competition) {
                 <option value="number" ${field.type === "number" ? "selected" : ""}>Число</option>
                 <option value="date" ${field.type === "date" ? "selected" : ""}>Дата</option>
                 <option value="textarea" ${field.type === "textarea" ? "selected" : ""}>Багато тексту</option>
+                <option value="file" ${field.type === "file" ? "selected" : ""}>📎 Файл</option>
               </select>
               <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}" ${field.required ? "checked" : ""}>
               <label for="required-${dynamicFieldCount}">Обов'язкове</label>
@@ -1021,14 +1023,46 @@ function getFieldTypeLabel(type) {
 // Завантаження списку учнів
 async function loadStudents() {
   try {
-    const response = await fetch(`${BASE_URL}/api/students`)
+    console.log("[v0] Loading students for teacher ID:", userId)
+
+    // Get teacher's profile to check school_id
+    const teacherResponse = await fetch(`${BASE_URL}/api/profile/teacher/${userId}`)
+    const teacherData = await teacherResponse.json()
+
+    if (!teacherResponse.ok) {
+      console.log("[v0] Error loading teacher profile:", teacherData.error)
+      allStudents = []
+      return
+    }
+
+    const teacherSchoolId = teacherData.profile?.school_id ? Number.parseInt(teacherData.profile.school_id, 10) : null
+    console.log("[v0] Teacher school ID:", teacherSchoolId)
+
+    if (!teacherSchoolId) {
+      console.log("[v0] Teacher has no school assigned")
+      allStudents = []
+      return
+    }
+
+    // Use teacher-specific endpoint that filters by school
+    const response = await fetch(`${BASE_URL}/api/teacher/${userId}/students`)
     const data = await response.json()
 
-    if (response.ok) {
-      allStudents = data.students
+    if (response.ok && data.students) {
+      // Additional client-side filter to ensure school_id matches
+      allStudents = (data.students || []).filter((student) => {
+        const studentSchoolId = student.school_id ? Number.parseInt(student.school_id, 10) : null
+        return studentSchoolId === teacherSchoolId
+      })
+
+      console.log("[v0] Students loaded and filtered by school:", allStudents.length)
+    } else {
+      console.log("[v0] Error loading students:", data.error)
+      allStudents = []
     }
   } catch (error) {
-    console.error("Помилка завантаження учнів:", error)
+    console.error("[v0] Error loading students:", error)
+    allStudents = []
   }
 }
 
