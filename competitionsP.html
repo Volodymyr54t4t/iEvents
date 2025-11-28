@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мої конкурси - iEvents</title>
+    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/competitionsP.css">
@@ -16,38 +17,55 @@
     <div id="header"></div>
 
     <main class="main-container">
-        <div class="page-header">
-            <h1>Мої конкурси</h1>
-            <p class="subtitle">Перегляньте конкурси, в яких ви берете участь</p>
+        <!-- Updated header section with modern design -->
+        <div class="page-hero">
+            <div class="hero-content-wrapper">
+                <h1 class="page-title">Мої конкурси</h1>
+                <p class="page-subtitle">Перегляньте конкурси, в яких ви берете участь та відстежуйте свої результати
+                </p>
+            </div>
         </div>
 
         <!-- Активні конкурси -->
-        <div class="card">
-            <h2>🔥 Активні конкурси</h2>
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">🔥 Активні конкурси</h2>
+                <p class="section-subtitle">Конкурси, в яких ви зараз можете брати участь</p>
+            </div>
             <div id="activeCompetitions" class="competitions-list">
                 <div class="loading">Завантаження...</div>
             </div>
         </div>
 
         <!-- Майбутні конкурси -->
-        <div class="card">
-            <h2>📅 Майбутні конкурси</h2>
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">📅 Майбутні конкурси</h2>
+                <p class="section-subtitle">Конкурси, які скоро стартуватимуть</p>
+            </div>
             <div id="upcomingCompetitions" class="competitions-list">
                 <div class="loading">Завантаження...</div>
             </div>
         </div>
 
         <!-- Завершені конкурси -->
-        <div class="card">
-            <h2>✅ Завершені конкурси</h2>
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">✅ Завершені конкурси</h2>
+                <p class="section-subtitle">Конкурси, які вже закінчилися</p>
+            </div>
             <div id="inactiveCompetitions" class="competitions-list">
                 <div class="loading">Завантаження...</div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>🏆 Мої результати</h2>
-            <div id="myResults" class="results-section">
+        <!-- Мої результати -->
+        <div class="section-card results-section">
+            <div class="section-header">
+                <h2 class="section-title">🏆 Мої результати</h2>
+                <p class="section-subtitle">Ваші досягнення та нагороди</p>
+            </div>
+            <div id="myResults" class="results-grid">
                 <div class="loading">Завантаження результатів...</div>
             </div>
         </div>
@@ -119,7 +137,7 @@
         </div>
     </div>
 
-    <!-- Added file preview modal for students -->
+    <!-- File preview modal for students -->
     <div id="filePreviewModal" class="file-preview-modal">
         <div class="file-preview-content">
             <div class="file-preview-header">
