@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="uk">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,20 +7,16 @@
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/profile.css">
-    <!-- Added global page spacing styles -->
     <link rel="stylesheet" href="css/page-spacing.css">
-    <!-- Load config.js first -->
     <script src="js/config.js"></script>
 </head>
-
 <body>
-    <!-- Changed div to header element for semantic HTML -->
     <header id="header"></header>
-
+    
     <main class="main-content">
         <div class="profile-container">
             <h1 class="page-title">Мій профіль</h1>
-
+            
             <div class="role-badge" id="roleBadge">
                 <span class="role-label">Роль:</span>
                 <span class="role-value" id="roleValue">Учень</span>
@@ -29,24 +24,20 @@
 
             <form id="profileForm" class="profile-form">
                 <div class="avatar-section">
-                    <!-- Модальне вікно для редагування аватарки -->
                     <div class="avatar-preview" id="avatarPreview" onclick="openAvatarEditor()">
                         <span class="avatar-placeholder">📷</span>
                     </div>
                     <input type="file" id="avatarInput" accept="image/*" style="display: none;">
                     <div class="avatar-button-group">
-                        <button type="button" class="btn btn-secondary"
-                            onclick="document.getElementById('avatarInput').click()">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('avatarInput').click()">
                             📤 Завантажити фото
                         </button>
-                        <button type="button" class="btn btn-secondary" id="clearAvatarBtn" style="display: none;"
-                            onclick="clearAvatar()">
+                        <button type="button" class="btn btn-secondary" id="clearAvatarBtn" style="display: none;" onclick="clearAvatar()">
                             ✕ Видалити фото
                         </button>
                     </div>
                 </div>
 
-                <!-- Модальне вікно для редагування аватарки -->
                 <div id="avatarEditorModal" class="modal" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -77,18 +68,15 @@
                                         <label>↕️ Вертикальне відзеркалення</label>
                                         <input type="checkbox" id="flipVertical" class="checkbox">
                                     </div>
-                                    <button type="button" class="btn btn-secondary btn-full"
-                                        onclick="resetAvatarEditor()">
+                                    <button type="button" class="btn btn-secondary btn-full" onclick="resetAvatarEditor()">
                                         ↻ Скинути зміни
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary"
-                                onclick="closeAvatarEditor()">Скасувати</button>
-                            <button type="button" class="btn btn-primary" onclick="confirmAvatar()">✓
-                                Підтвердити</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeAvatarEditor()">Скасувати</button>
+                            <button type="button" class="btn btn-primary" onclick="confirmAvatar()">✓ Підтвердити</button>
                         </div>
                     </div>
                 </div>
@@ -109,7 +97,6 @@
                     <input type="text" id="middleName" placeholder="Іванович">
                 </div>
 
-                <!-- Зробили telegram та phone необов'язковими -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="telegram">Telegram (нік)</label>
@@ -131,7 +118,6 @@
                     <input type="text" id="city" required placeholder="Київ">
                 </div>
 
-                <!-- Додали dropdown для вибору закладу (тільки для учнів) -->
                 <div class="form-group" id="schoolSelectGroup" style="display: none;">
                     <label for="schoolSelect">Навчальний заклад *</label>
                     <select id="schoolSelect" required>
@@ -139,13 +125,11 @@
                     </select>
                 </div>
 
-                <!-- Для не-учнів залишаємо текстове поле -->
                 <div class="form-group" id="schoolTextGroup">
                     <label for="school">Навчальний заклад</label>
                     <input type="text" id="school" placeholder="Школа №1">
                 </div>
 
-                <!-- Розділили клас на номер та літеру (тільки для учнів) -->
                 <div class="form-row" id="gradeStudentGroup" style="display: none;">
                     <div class="form-group">
                         <label for="gradeNumber">Клас *</label>
@@ -157,13 +141,11 @@
                     </div>
                 </div>
 
-                <!-- Для не-учнів залишаємо одне поле -->
                 <div class="form-group" id="gradeTextGroup">
                     <label for="grade">Клас/Курс</label>
                     <input type="text" id="grade" placeholder="10-А">
                 </div>
 
-                <!-- Додали поля для гуртка (тільки для учнів) -->
                 <div class="form-row" id="clubGroup" style="display: none;">
                     <div class="form-group">
                         <label for="clubInstitution">Заклад гуртка</label>
@@ -193,10 +175,8 @@
 
     <div id="footer"></div>
 
-    <!-- Added role.js before other scripts for proper initialization -->
     <script src="js/role.js"></script>
     <script src="js/components.js"></script>
     <script src="js/profile.js"></script>
 </body>
-
 </html>
