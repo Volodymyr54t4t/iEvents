@@ -16,15 +16,26 @@
     <div id="header"></div>
 
     <main class="main-container">
-        <div class="page-header">
-            <h1>Особиста адмін панель корисутвача</h1>
-            <p class="subtitle">Керуйте своїм профілем, конкурсами та результатами</p>
-        </div>
+        <!-- Updated hero section with professional design -->
+        <section class="hero-section">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Особистий кабінет учня</h1>
+                    <p class="hero-description">
+                        Керуй своїм профілем, відстежуй участь у конкурсах та переглядай свої досягнення на одній
+                        платформі
+                    </p>
+                </div>
+            </div>
+        </section>
 
         <!-- Персональна інформація -->
-        <div class="card">
+        <div class="card card-fade-in">
             <div class="card-header">
-                <h2>👤 Персональна інформація</h2>
+                <div class="card-title-group">
+                    <div class="card-icon">👤</div>
+                    <h2>Персональна інформація</h2>
+                </div>
                 <button class="btn btn-primary" onclick="toggleEditMode('personal')">
                     <span id="editPersonalBtn">✏️ Редагувати</span>
                 </button>
@@ -68,9 +79,12 @@
         </div>
 
         <!-- Зміна пароля -->
-        <div class="card">
+        <div class="card card-fade-in">
             <div class="card-header">
-                <h2>🔐 Зміна пароля</h2>
+                <div class="card-title-group">
+                    <div class="card-icon">🔐</div>
+                    <h2>Зміна пароля</h2>
+                </div>
             </div>
             <form id="passwordForm" class="password-form">
                 <div class="form-group">
@@ -91,9 +105,12 @@
         </div>
 
         <!-- Мої конкурси -->
-        <div class="card">
+        <div class="card card-fade-in">
             <div class="card-header">
-                <h2>🎯 Мої конкурси</h2>
+                <div class="card-title-group">
+                    <div class="card-icon">🎯</div>
+                    <h2>Мої конкурси</h2>
+                </div>
             </div>
             <div class="tabs">
                 <button class="tab-btn active" data-tab="active">Активні</button>
@@ -114,9 +131,12 @@
         </div>
 
         <!-- Мої результати -->
-        <div class="card">
+        <div class="card card-fade-in">
             <div class="card-header">
-                <h2>🏆 Мої результати</h2>
+                <div class="card-title-group">
+                    <div class="card-icon">🏆</div>
+                    <h2>Мої результати</h2>
+                </div>
             </div>
             <div id="resultsContainer">
                 <div class="loading">Завантаження...</div>
