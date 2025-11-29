@@ -50,9 +50,9 @@ body {
   margin: 0 auto;
   padding: 60px 20px;
   width: 100%;
+  min-height: calc(100vh - 200px);
 }
 
-/* Updated to brown color scheme from index.css */
 .profile-container {
   background: white;
   border-radius: 16px;
@@ -60,6 +60,8 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid #f0ebe5;
   animation: fadeIn 0.6s ease-out;
+  width: 100%;
+  overflow: visible;
 }
 
 .page-title {
@@ -70,11 +72,14 @@ body {
   text-align: center;
   animation: fadeInUp 0.6s ease-out 0.1s both;
   letter-spacing: -0.5px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
-/* Role badge with brown gradient */
 .role-badge {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -107,7 +112,6 @@ body {
   animation: fadeInUp 0.6s ease-out 0.3s both;
 }
 
-/* Avatar with brown border and improved hover */
 .avatar-preview {
   width: 150px;
   height: 150px;
@@ -121,6 +125,7 @@ body {
   box-shadow: 0 8px 24px rgba(168, 130, 100, 0.15);
   transition: all 0.3s ease;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .avatar-preview:hover {
@@ -212,7 +217,6 @@ body {
   transition: all 0.2s ease;
 }
 
-/* Primary button with brown gradient */
 .btn-primary {
   width: 100%;
   background: linear-gradient(135deg, #a88264 0%, #927456 100%);
@@ -325,6 +329,7 @@ body {
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .modal-close:hover {
@@ -434,7 +439,23 @@ body {
   padding: 10px 24px;
 }
 
-/* Full responsive design for all screen sizes */
+/* Desktop: 1024px and up */
+@media (min-width: 1025px) {
+  .main-content {
+    padding: 60px 20px;
+  }
+
+  .profile-container {
+    padding: 40px;
+  }
+
+  .page-title {
+    font-size: 32px;
+    margin-bottom: 24px;
+  }
+}
+
+/* Tablet: 768px to 1024px */
 @media (max-width: 1024px) {
   .main-content {
     padding: 50px 16px;
@@ -443,20 +464,34 @@ body {
   .profile-container {
     padding: 32px 24px;
   }
+
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 22px;
+  }
 }
 
-@media (max-width: 768px) {
+/* Small Tablet: 481px to 767px */
+@media (max-width: 767px) {
   .main-content {
     padding: 40px 16px;
   }
 
   .profile-container {
     padding: 28px 20px;
+    border-radius: 12px;
   }
 
   .page-title {
-    font-size: 28px;
+    font-size: 26px;
     margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .role-badge {
+    padding: 10px 16px;
+    font-size: 14px;
+    margin-bottom: 24px;
   }
 
   .form-row {
@@ -466,14 +501,11 @@ body {
   .avatar-preview {
     width: 120px;
     height: 120px;
+    border: 3px solid #a88264;
   }
 
   .avatar-placeholder {
     font-size: 48px;
-  }
-
-  .role-badge {
-    padding: 10px 20px;
   }
 
   .editor-container {
@@ -507,40 +539,59 @@ body {
   }
 }
 
+/* Mobile: 361px to 480px */
 @media (max-width: 480px) {
   .main-content {
     padding: 30px 12px;
   }
 
   .profile-container {
-    padding: 20px 16px;
+    padding: 20px 14px;
     border-radius: 12px;
+    width: 100%;
+    overflow: visible;
   }
 
   .page-title {
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 22px;
+    margin-bottom: 18px;
+    line-height: 1.3;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    display: block;
+    width: 100%;
   }
 
   .role-badge {
-    padding: 10px 16px;
-    flex-direction: column;
-    gap: 4px;
+    padding: 9px 12px;
+    font-size: 13px;
+    gap: 6px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .role-label {
+    font-size: 11px;
+  }
+
+  .role-value {
     font-size: 13px;
   }
 
   .avatar-section {
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
 
   .avatar-preview {
-    width: 100px;
-    height: 100px;
+    width: 105px;
+    height: 105px;
     border: 3px solid #a88264;
+    flex-shrink: 0;
   }
 
   .avatar-placeholder {
-    font-size: 40px;
+    font-size: 45px;
   }
 
   .form-group {
@@ -548,18 +599,18 @@ body {
   }
 
   .form-group label {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .form-group input,
   .form-group textarea,
   .form-group select {
-    padding: 10px 14px;
+    padding: 10px 12px;
     font-size: 14px;
   }
 
   .btn {
-    padding: 12px 24px;
+    padding: 12px 20px;
     font-size: 14px;
   }
 
@@ -568,34 +619,72 @@ body {
   }
 
   .avatar-button-group {
-    max-width: 100%;
+    width: 100%;
+    flex-direction: column;
+    max-width: none;
+  }
+
+  .avatar-button-group .btn {
+    width: 100%;
   }
 }
 
+/* Extra Small: 360px and below */
 @media (max-width: 360px) {
+  .main-content {
+    padding: 25px 10px;
+  }
+
   .profile-container {
     padding: 16px 12px;
+    border-radius: 10px;
   }
 
   .page-title {
-    font-size: 22px;
+    font-size: 20px;
+    margin-bottom: 16px;
+    line-height: 1.3;
+    white-space: normal;
   }
 
-  .avatar-preview {
-    width: 90px;
-    height: 90px;
+  .role-badge {
+    padding: 8px 10px;
+    font-size: 12px;
+    gap: 5px;
+    margin-bottom: 18px;
   }
 
-  .avatar-placeholder {
-    font-size: 36px;
+  .role-label {
+    font-size: 10px;
   }
 
-  .form-group label {
+  .role-value {
     font-size: 12px;
   }
 
-  .btn {
-    padding: 10px 20px;
+  .avatar-preview {
+    width: 95px;
+    height: 95px;
+    border: 3px solid #a88264;
+  }
+
+  .avatar-placeholder {
+    font-size: 40px;
+  }
+
+  .form-group label {
+    font-size: 11px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 9px 11px;
     font-size: 13px;
+  }
+
+  .btn {
+    padding: 10px 18px;
+    font-size: 12px;
   }
 }
