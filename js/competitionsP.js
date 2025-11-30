@@ -1,8 +1,8 @@
-const BASE_URL = window.AppConfig
-  ? window.AppConfig.API_URL
-  : window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://ievents-qf5k.onrender.com"
+const BASE_URL = window.AppConfig ?
+  window.AppConfig.API_URL :
+  window.location.hostname === "localhost" ?
+  "http://localhost:3000" :
+  "https://ievents-qf5k.onrender.com"
 
 console.log("📡 [v0] Підключення до:", BASE_URL)
 
@@ -86,14 +86,14 @@ function displayCompetitions(containerId, competitions, type) {
         statusClass = "active"
         const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24))
         if (daysLeft > 0) {
-          daysInfo = `<div class="days-remaining">⏳ Залишилось днів: ${daysLeft}</div>`
+          daysInfo = `<div class="days-remaining">Залишилось днів: ${daysLeft}</div>`
         }
       } else if (type === "upcoming") {
         statusText = "Майбутній"
         statusClass = "upcoming"
         const daysUntil = Math.ceil((startDate - today) / (1000 * 60 * 60 * 24))
         if (daysUntil > 0) {
-          daysInfo = `<div class="days-remaining">📅 Почнеться через ${daysUntil} днів</div>`
+          daysInfo = `<div class="days-remaining">Почнеться через ${daysUntil} днів</div>`
         }
       } else {
         statusText = "Завершено"
@@ -105,64 +105,11 @@ function displayCompetitions(containerId, competitions, type) {
           <h3 class="competition-title">${competition.title}</h3>
           <span class="status-badge status-${statusClass}">${statusText}</span>
           ${competition.description ? `<p class="competition-description">${competition.description}</p>` : ""}
-          
-          <!-- Detailed information displayed directly on card -->
-          <div class="competition-info-grid">
-            <div class="info-item">
-              <span class="info-icon">📅</span>
-              <div>
-                <strong>Початок:</strong>
-                <span>${startDate.toLocaleDateString("uk-UA")}</span>
-              </div>
-            </div>
-            <div class="info-item">
-              <span class="info-icon">📅</span>
-              <div>
-                <strong>Кінець:</strong>
-                <span>${endDate.toLocaleDateString("uk-UA")}</span>
-              </div>
-            </div>
-            ${
-              competition.max_participants
-                ? `
-            <div class="info-item">
-              <span class="info-icon">👥</span>
-              <div>
-                <strong>Макс.:</strong>
-                <span>${competition.max_participants}</span>
-              </div>
-            </div>
-            `
-                : ""
-            }
-            ${
-              competition.location
-                ? `
-            <div class="info-item">
-              <span class="info-icon">📍</span>
-              <div>
-                <strong>Місце:</strong>
-                <span>${competition.location}</span>
-              </div>
-            </div>
-            `
-                : ""
-            }
+          <div class="competition-dates">
+            <span>📅 Початок: ${startDate.toLocaleDateString("uk-UA")}</span>
+            <span>📅 Закінчення: ${endDate.toLocaleDateString("uk-UA")}</span>
           </div>
-
-          ${
-            competition.organizer
-              ? `
-          <div class="competition-organizer-info">
-            <span class="info-icon">🏢</span>
-            <span>Організатор: <strong>${competition.organizer}</strong></span>
-          </div>
-          `
-              : ""
-          }
-
           ${daysInfo}
-          
           <div class="competition-actions">
             ${
               type === "active" || type === "upcoming"
@@ -176,9 +123,6 @@ function displayCompetitions(containerId, competitions, type) {
             `
                 : ""
             }
-            <button class="btn-view-details" onclick="openCompetitionDetailsModal(${competition.id}, '${competition.title.replace(/'/g, "\\'")}')">
-              👁️ Детальніше
-            </button>
           </div>
         </div>
       `
@@ -661,9 +605,9 @@ function displaySubmittedForm(competition, response) {
   if (competition.custom_fields) {
     try {
       customFields =
-        typeof competition.custom_fields === "string"
-          ? JSON.parse(competition.custom_fields)
-          : competition.custom_fields
+        typeof competition.custom_fields === "string" ?
+        JSON.parse(competition.custom_fields) :
+        competition.custom_fields
     } catch (e) {
       console.error("[v0] Помилка парсування custom_fields:", e)
     }
@@ -797,8 +741,7 @@ async function submitCompetitionForm() {
 
         try {
           const uploadResponse = await fetch(
-            `${BASE_URL}/api/competitions/${currentCompetitionFormId}/form-file-upload`,
-            {
+            `${BASE_URL}/api/competitions/${currentCompetitionFormId}/form-file-upload`, {
               method: "POST",
               body: fileFormData,
             },
@@ -824,28 +767,10 @@ async function submitCompetitionForm() {
   }
 }
 
-async function openUploadModal(competitionId) {
-  try {
-    const modal = document.getElementById("uploadFileModal")
-    const modal_body = modal?.querySelector(".modal-body")
-
-    if (modal_body) {
-      const formHTML = modal_body.innerHTML
-      modal_body.innerHTML = '<div class="loading" style="animation: fadeIn 0.3s ease-out;">Завантаження форми...</div>'
-
-      setTimeout(() => {
-        modal_body.innerHTML = formHTML
-      }, 300)
-    }
-
-    modal.classList.add("active")
-    document.getElementById("uploadCompetitionId").value = competitionId
-
-    await loadMyDocuments(competitionId)
-  } catch (error) {
-    console.error("[v0] Помилка при відкритті модалю завантаження:", error)
-    showNotification("Помилка при відкритті форми завантаження", "error")
-  }
+function openUploadModal(competitionId) {
+  document.getElementById("uploadCompetitionId").value = competitionId
+  document.getElementById("uploadFileModal").style.display = "flex"
+  loadMyDocuments(competitionId)
 }
 
 function closeUploadModal() {
@@ -1039,166 +964,4 @@ function previewFile(filePath, fileName, fileType) {
 function logout() {
   localStorage.removeItem("userId")
   window.location.href = "auth.html"
-}
-
-async function openCompetitionDetailsModal(competitionId, title) {
-  const modal = document.getElementById("competitionDetailsModal")
-  const modalBody = document.getElementById("detailsModalBody")
-
-  modal.classList.add("active")
-  document.getElementById("detailsModalTitle").textContent = title
-
-  try {
-    console.log("[v0] Завантаження деталей конкурсу:", competitionId)
-
-    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}`)
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
-    }
-
-    const data = await response.json()
-    const competition = data.competition
-
-    const detailsHTML = `
-      <div class="competition-details-modal-content">
-        <div class="competition-details-section">
-          <h3>Основна інформація</h3>
-          ${
-            competition.description
-              ? `
-          <div class="competition-detail-item">
-            <span class="competition-detail-label">Опис:</span>
-            <p class="competition-detail-value">${competition.description}</p>
-          </div>
-          `
-              : ""
-          }
-          
-          <div class="competition-detail-item">
-            <span class="competition-detail-label">Статус:</span>
-            <span class="competition-detail-value">${getCompetitionStatus(competition.start_date, competition.end_date)}</span>
-          </div>
-          
-          <div class="competition-detail-item">
-            <span class="competition-detail-label">Дати:</span>
-            <span class="competition-detail-value">
-              ${new Date(competition.start_date).toLocaleDateString("uk-UA")} - 
-              ${new Date(competition.end_date).toLocaleDateString("uk-UA")}
-            </span>
-          </div>
-        </div>
-        
-        <div class="competition-details-section">
-          <h3>Додаткові деталі</h3>
-          ${
-            competition.location
-              ? `
-          <div class="competition-detail-item">
-            <span class="competition-detail-label">Місце:</span>
-            <span class="competition-detail-value">${competition.location}</span>
-          </div>
-          `
-              : ""
-          }
-          
-          ${
-            competition.organizer
-              ? `
-          <div class="competition-detail-item">
-            <span class="competition-detail-label">Організатор:</span>
-            <span class="competition-detail-value">${competition.organizer}</span>
-          </div>
-          `
-              : ""
-          }
-          
-          ${
-            competition.max_participants
-              ? `
-          <div class="competition-detail-item">
-            <span class="competition-detail-label">Макс. учасників:</span>
-            <span class="competition-detail-value">${competition.max_participants}</span>
-          </div>
-          `
-              : ""
-          }
-          
-          ${
-            competition.is_online
-              ? `
-          <div class="competition-detail-item">
-            <span class="competition-detail-label">Формат:</span>
-            <span class="competition-detail-value">${competition.is_online ? "🌐 Онлайн" : "📍 Офлайн"}</span>
-          </div>
-          `
-              : ""
-          }
-        </div>
-        
-        ${
-          competition.requirements
-            ? `
-        <div class="competition-details-section">
-          <h3>Вимоги до учасників</h3>
-          <p class="competition-detail-value">${competition.requirements}</p>
-        </div>
-        `
-            : ""
-        }
-        
-        ${
-          competition.prizes
-            ? `
-        <div class="competition-details-section">
-          <h3>Призи та нагороди</h3>
-          <p class="competition-detail-value">${competition.prizes}</p>
-        </div>
-        `
-            : ""
-        }
-      </div>
-    `
-
-    modalBody.innerHTML = detailsHTML
-  } catch (error) {
-    console.error("[v0] Помилка завантаження деталей конкурсу:", error)
-    modalBody.innerHTML = `
-      <div class="empty-state">
-        <h3>Помилка завантаження</h3>
-        <p>Не вдалося завантажити деталі конкурсу. Будь ласка, спробуйте ще раз.</p>
-      </div>
-    `
-  }
-}
-
-function closeCompetitionDetails() {
-  const modal = document.getElementById("competitionDetailsModal")
-  modal.classList.remove("active")
-}
-
-function getCompetitionStatus(startDate, endDate) {
-  const today = new Date()
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-
-  if (today < start) {
-    return "⏱️ Майбутній"
-  } else if (today > end) {
-    return "✓ Завершено"
-  } else {
-    return "🔥 Активний"
-  }
-}
-
-function showNotification(message, type) {
-  const notificationContainer = document.getElementById("notificationContainer")
-  const notification = document.createElement("div")
-  notification.className = `notification ${type}`
-  notification.textContent = message
-  notificationContainer.appendChild(notification)
-
-  setTimeout(() => {
-    notification.remove()
-  }, 3000)
 }
