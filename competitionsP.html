@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="uk">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мої конкурси - iEvents</title>
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/competitionsP.css">
     <link rel="stylesheet" href="css/page-spacing.css">
     <script src="js/config.js"></script>
 </head>
-
 <body>
     <div id="header"></div>
 
@@ -21,8 +18,7 @@
         <div class="page-hero">
             <div class="hero-content-wrapper">
                 <h1 class="page-title">Мої конкурси</h1>
-                <p class="page-subtitle">Перегляньте конкурси, в яких ви берете участь та відстежуйте свої результати
-                </p>
+                <p class="page-subtitle">Перегляньте конкурси, в яких ви берете участь та відстежуйте свої результати</p>
             </div>
         </div>
 
@@ -102,19 +98,18 @@
             <div class="modal-body">
                 <form id="uploadFileForm">
                     <input type="hidden" id="uploadCompetitionId">
-
+                    
                     <div class="form-group">
                         <label for="fileInput">Оберіть файл *</label>
                         <input type="file" id="fileInput" name="file" required>
                         <small class="file-hint">Максимальний розмір: 50 МБ. Підтримуються всі типи файлів.</small>
                     </div>
-
+                    
                     <div class="form-group">
                         <label for="fileDescription">Опис файлу (необов'язково)</label>
-                        <textarea id="fileDescription" name="description" rows="3"
-                            placeholder="Додайте опис або коментар до файлу..."></textarea>
+                        <textarea id="fileDescription" name="description" rows="3" placeholder="Додайте опис або коментар до файлу..."></textarea>
                     </div>
-
+                    
                     <div id="uploadProgress" class="upload-progress" style="display: none;">
                         <div class="progress-bar">
                             <div class="progress-fill" id="progressFill"></div>
@@ -122,7 +117,7 @@
                         <p id="progressText">Завантаження...</p>
                     </div>
                 </form>
-
+                
                 <div id="myDocuments" class="my-documents">
                     <h3>Мої завантажені файли</h3>
                     <div id="myDocumentsList" class="documents-list">
@@ -154,8 +149,23 @@
         </div>
     </div>
 
+    <!-- Модальне вікно для деталей конкурсу -->
+    <div id="competitionDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="detailsModalTitle">Деталі конкурсу</h2>
+                <button class="modal-close" onclick="closeCompetitionDetails()">&times;</button>
+            </div>
+            <div class="modal-body" id="detailsModalBody">
+                <div class="loading">Завантаження...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCompetitionDetails()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/components.js"></script>
     <script src="js/competitionsP.js"></script>
 </body>
-
 </html>
