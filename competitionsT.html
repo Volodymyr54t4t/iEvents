@@ -8,9 +8,7 @@
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/page-spacing.css">
-    <!-- Added global page spacing CSS -->
     <link rel="stylesheet" href="css/competitionsT.css">
-    <!-- Load config.js first -->
     <script src="js/config.js"></script>
 </head>
 
@@ -23,35 +21,35 @@
             <p class="subtitle">Створюйте конкурси та додавайте учнів</p>
         </div>
 
-        <!-- Додано кнопку створення конкурсу та фільтри -->
+        <!-- Filters section with add button -->
         <div class="filters-section">
             <button class="btn-add-competition" onclick="openCreateCompetitionModal()">
                 Додати конкурс
             </button>
-            
+
             <div class="filters-row">
                 <input type="text" id="searchCompetitions" class="filter-input" placeholder="Пошук конкурсів...">
-                
+
                 <select id="filterSubject" class="filter-select">
                     <option value="">Всі предмети</option>
                 </select>
-                
+
                 <select id="filterLevel" class="filter-select">
                     <option value="">Всі рівні</option>
                 </select>
-                
+
                 <select id="filterStatus" class="filter-select">
                     <option value="">Всі статуси</option>
                     <option value="active">Активні</option>
                     <option value="upcoming">Майбутні</option>
                     <option value="inactive">Завершені</option>
                 </select>
-                
+
                 <select id="filterOwnership" class="filter-select">
                     <option value="all">Всі конкурси</option>
                     <option value="my">Мої конкурси</option>
                 </select>
-                
+
                 <select id="sortBy" class="filter-select">
                     <option value="date_desc">Спочатку нові</option>
                     <option value="date_asc">Спочатку старі</option>
@@ -62,9 +60,10 @@
             </div>
         </div>
 
-        <!-- Список конкурсів -->
+        <!-- Updated card title -->
         <div class="card">
             <h2>Конкурси</h2>
+            <!-- Competitions list now displays 3 per row with expanded details inline -->
             <div id="competitionsList" class="competitions-list">
                 <div class="loading">Завантаження...</div>
             </div>
@@ -73,15 +72,14 @@
 
     <div id="footer"></div>
 
-    <!-- Повністю перероблене модальне вікно для створення/редагування конкурсу з трьома вкладками -->
+    <!-- Modals with enhanced animations -->
     <div id="createCompetitionModal" class="modal">
         <div class="modal-content modal-extra-large">
             <div class="modal-header">
                 <h2 id="modalTitle">Створити новий конкурс</h2>
                 <button class="modal-close" onclick="closeCreateCompetitionModal()">&times;</button>
             </div>
-            
-            <!-- Вкладки -->
+
             <div class="modal-tabs">
                 <button class="tab-button active" onclick="switchTab('info')" id="tab-info">
                     📋 Інформація про конкурс
@@ -93,21 +91,21 @@
                     📊 Відповіді учнів
                 </button>
             </div>
-            
+
             <div class="modal-body">
                 <form id="createCompetitionForm" class="competition-form">
                     <input type="hidden" id="editCompetitionId">
-                    
-                    <!-- Вкладка 1: Інформація про конкурс -->
+
                     <div id="tab-content-info" class="tab-content active">
                         <h3 class="tab-section-title">Основна інформація</h3>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="title">Назва конкурсу *</label>
-                                <input type="text" id="title" name="title" required placeholder="Наприклад: Олімпіада з математики">
+                                <input type="text" id="title" name="title" required
+                                    placeholder="Наприклад: Олімпіада з математики">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="subject">Предмет *</label>
                                 <select id="subject" name="subject" required>
@@ -129,16 +127,18 @@
                                     <option value="Міжнародний">Міжнародний</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="organizer">Організатор</label>
-                                <input type="text" id="organizer" name="organizer" placeholder="Хто організовує конкурс">
+                                <input type="text" id="organizer" name="organizer"
+                                    placeholder="Хто організовує конкурс">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="description">Опис конкурсу</label>
-                            <textarea id="description" name="description" rows="4" placeholder="Детальний опис конкурсу..."></textarea>
+                            <textarea id="description" name="description" rows="4"
+                                placeholder="Детальний опис конкурсу..."></textarea>
                         </div>
 
                         <div class="form-row">
@@ -151,7 +151,7 @@
                                 <label for="endDate">Дата закінчення *</label>
                                 <input type="date" id="endDate" name="endDate" required>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="registrationDeadline">Дедлайн реєстрації</label>
                                 <input type="date" id="registrationDeadline" name="registrationDeadline">
@@ -163,12 +163,13 @@
                                 <label for="location">Місце проведення</label>
                                 <input type="text" id="location" name="location" placeholder="Адреса або назва закладу">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="maxParticipants">Макс. кількість учасників</label>
-                                <input type="number" id="maxParticipants" name="maxParticipants" min="1" placeholder="Необмежено">
+                                <input type="number" id="maxParticipants" name="maxParticipants" min="1"
+                                    placeholder="Необмежено">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="isOnline">Формат</label>
                                 <select id="isOnline" name="isOnline">
@@ -180,33 +181,35 @@
 
                         <div class="form-group">
                             <label for="requirements">Вимоги до учасників</label>
-                            <textarea id="requirements" name="requirements" rows="3" placeholder="Вікові обмеження, необхідні документи тощо..."></textarea>
+                            <textarea id="requirements" name="requirements" rows="3"
+                                placeholder="Вікові обмеження, необхідні документи тощо..."></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="prizes">Призи та нагороди</label>
-                            <textarea id="prizes" name="prizes" rows="3" placeholder="Опишіть призи для переможців..."></textarea>
+                            <textarea id="prizes" name="prizes" rows="3"
+                                placeholder="Опишіть призи для переможців..."></textarea>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="contactInfo">Контактна інформація</label>
-                                <input type="text" id="contactInfo" name="contactInfo" placeholder="Email або телефон для зв'язку">
+                                <input type="text" id="contactInfo" name="contactInfo"
+                                    placeholder="Email або телефон для зв'язку">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="websiteUrl">Веб-сайт конкурсу</label>
                                 <input type="url" id="websiteUrl" name="websiteUrl" placeholder="https://example.com">
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Вкладка 2: Форма для учня (з стандартними полями та можливістю додавання нових) -->
+
                     <div id="tab-content-form" class="tab-content">
                         <h3 class="tab-section-title">Форма для заповнення учнем</h3>
-                        <p class="tab-description">Створіть форму, яку повинні заповнити учні при реєстрації на конкурс. Стандартні поля (ПІБ, номер телефону, email) додаються автоматично.</p>
-                        
-                        <!-- Стандартні поля (readonly для показу) -->
+                        <p class="tab-description">Створіть форму, яку повинні заповнити учні при реєстрації на конкурс.
+                            Стандартні поля (ПІБ, номер телефону, email) додаються автоматично.</p>
+
                         <div class="standard-fields-section">
                             <h4>Стандартні поля (додаються автоматично)</h4>
                             <div class="standard-fields-list">
@@ -233,8 +236,7 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Додаткові поля -->
+
                         <div class="form-group">
                             <div class="dynamic-fields-header">
                                 <label>Додаткові поля форми</label>
@@ -243,23 +245,22 @@
                                 </button>
                             </div>
                             <div id="dynamicFieldsContainer" class="dynamic-fields-container">
-                                <!-- Dynamic fields will be added here -->
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Вкладка 3: Відповіді учнів -->
+
                     <div id="tab-content-responses" class="tab-content">
                         <h3 class="tab-section-title">Відповіді учнів на форму</h3>
                         <p class="tab-description">Тут відображаються всі відповіді учнів на форму реєстрації.</p>
-                        
+
                         <div class="responses-filters">
-                            <input type="text" id="searchResponses" class="filter-input" placeholder="Пошук за ім'ям учня...">
+                            <input type="text" id="searchResponses" class="filter-input"
+                                placeholder="Пошук за ім'ям учня...">
                             <button class="btn btn-sm btn-secondary" onclick="exportResponsesToExcel()">
                                 📥 Експортувати в Excel
                             </button>
                         </div>
-                        
+
                         <div id="responsesContainer" class="responses-container">
                             <div class="empty-state">
                                 <p>Виберіть конкурс для перегляду відповідей або створіть новий конкурс</p>
@@ -268,7 +269,7 @@
                     </div>
                 </form>
             </div>
-            
+
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeCreateCompetitionModal()">Скасувати</button>
                 <button class="btn btn-primary" onclick="saveCompetition()">Зберегти конкурс</button>
@@ -276,7 +277,6 @@
         </div>
     </div>
 
-    <!-- Модальне вікно для додавання учнів -->
     <div id="addStudentsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -298,7 +298,6 @@
         </div>
     </div>
 
-    <!-- Нове модальне вікно для перегляду завантажених файлів -->
     <div id="viewDocumentsModal" class="modal">
         <div class="modal-content modal-large">
             <div class="modal-header">
@@ -306,7 +305,6 @@
                 <button class="modal-close" onclick="closeViewDocumentsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Added upload file section for teachers -->
                 <div class="documents-upload-section">
                     <div class="upload-box">
                         <h3>➕ Додати файл для учня</h3>
@@ -317,7 +315,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="teacherFileDescription">Опис (необов'язково)</label>
-                                <textarea id="teacherFileDescription" rows="2" placeholder="Додайте опис файлу..."></textarea>
+                                <textarea id="teacherFileDescription" rows="2"
+                                    placeholder="Додайте опис файлу..."></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="teacherFileStudent">Оберіть учня *</label>
@@ -325,7 +324,8 @@
                                     <option value="">-- Оберіть учня --</option>
                                 </select>
                             </div>
-                            <button type="button" class="btn btn-primary" onclick="uploadFileByTeacher()">📤 Завантажити файл</button>
+                            <button type="button" class="btn btn-primary" onclick="uploadFileByTeacher()">📤 Завантажити
+                                файл</button>
                         </div>
                         <div id="teacherUploadProgress" class="upload-progress" style="display: none;">
                             <div class="progress-bar">
@@ -335,37 +335,21 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="documents-filters">
-                    <input type="text" id="searchDocuments" class="filter-input" placeholder="Пошук по імені учня або файлу...">
+                    <input type="text" id="searchDocuments" class="filter-input"
+                        placeholder="Пошук по імені учня або файлу...">
                     <select id="filterStudent" class="filter-select">
                         <option value="">Всі учні</option>
                     </select>
                 </div>
-                
+
                 <div id="documentsContainer" class="teacher-documents-view">
                     <div class="loading">Завантаження файлів...</div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeViewDocumentsModal()">Закрити</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Нове модальне вікно для перегляду завантажених файлів -->
-    <div id="filePreviewModal" class="file-preview-modal">
-        <div class="file-preview-content">
-            <div class="file-preview-header">
-                <h2 id="previewFileName">Перегляд файлу</h2>
-                <button class="modal-close" onclick="closeFilePreview()">&times;</button>
-            </div>
-            <div class="file-preview-body" id="previewBody">
-                <!-- File preview will be inserted here -->
-            </div>
-            <div class="file-preview-footer">
-                <button class="btn btn-secondary" onclick="closeFilePreview()">Закрити</button>
-                <button class="btn btn-primary" id="downloadPreviewBtn">⬇️ Завантажити</button>
             </div>
         </div>
     </div>
