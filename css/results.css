@@ -7,7 +7,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
+  background: linear-gradient(135deg, #f5f1eb 0%, #f9f7f4 100%);
   min-height: 100vh;
   color: #2d3748;
   /* Added padding-top: 80px to prevent header overlap */
@@ -23,7 +23,7 @@ body {
 .page-header {
   text-align: center;
   margin-bottom: 40px;
-  color: #0a5f7f;
+  color: #78643a;
   padding: 32px 20px;
   background: rgba(255, 255, 255, 0.6);
   border-radius: 16px;
@@ -33,14 +33,14 @@ body {
 .page-header h1 {
   font-size: 36px;
   margin-bottom: 8px;
-  color: #0a5f7f;
+  color: #78643a;
   font-weight: 700;
 }
 
 .subtitle {
   font-size: 18px;
   opacity: 1;
-  color: #5a7a8a;
+  color: #a09080;
   font-weight: 500;
 }
 
@@ -49,10 +49,11 @@ body {
   margin-bottom: 24px;
 }
 
+/* Changed button gradient from blue to brown theme */
 .add-result-btn {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #8b7355 0%, #78643a 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -64,9 +65,9 @@ body {
 }
 
 .add-result-btn:hover {
-  background: linear-gradient(135deg, #5eb3d6 0%, #4a9fc4 100%);
+  background: linear-gradient(135deg, #78643a 0%, #6a5530 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.4);
 }
 
 .filters-row {
@@ -86,11 +87,12 @@ body {
   transition: all 0.2s;
 }
 
+/* Changed filter focus border to brown */
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
+  border-color: #a88264;
+  box-shadow: 0 0 0 3px rgba(168, 130, 100, 0.1);
 }
 
 .filter-input::placeholder {
@@ -136,9 +138,10 @@ body {
   cursor: pointer;
 }
 
+/* Changed select focus border to brown */
 .competition-selector select:focus {
   outline: none;
-  border-color: #7ec8e3;
+  border-color: #a88264;
 }
 
 .participants-list {
@@ -158,9 +161,10 @@ body {
   background: white;
 }
 
+/* Changed hover border to brown */
 .participant-item:hover {
-  border-color: #7ec8e3;
-  box-shadow: 0 2px 8px rgba(126, 200, 227, 0.1);
+  border-color: #a88264;
+  box-shadow: 0 2px 8px rgba(168, 130, 100, 0.1);
 }
 
 .participant-item.has-result {
@@ -175,11 +179,12 @@ body {
   flex: 1;
 }
 
+/* Changed avatar gradient to brown */
 .participant-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #8b7355 0%, #78643a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,15 +267,16 @@ body {
   transition: all 0.2s;
 }
 
+/* Changed primary button to brown gradient */
 .btn-primary {
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #8b7355 0%, #78643a 100%);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #5eb3d6;
+  background: #78643a;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.4);
 }
 
 .btn-secondary {
@@ -422,11 +428,12 @@ body {
   transition: border-color 0.2s;
 }
 
+/* Changed form focus border to brown */
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #7ec8e3;
+  border-color: #a88264;
 }
 
 .form-row {
@@ -470,10 +477,11 @@ body {
   transition: border-color 0.2s;
 }
 
+/* Changed filter focus border to brown */
 .filter-group input:focus,
 .filter-group select:focus {
   outline: none;
-  border-color: #7ec8e3;
+  border-color: #a88264;
 }
 
 /* Added confirmed badge style */

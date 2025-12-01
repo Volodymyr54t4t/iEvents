@@ -33,16 +33,15 @@ function renderHeader() {
   }
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
-    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" || userRole === "методист"
+      ? '<a href="competitionsT.html" class="nav-link">Конкурси</a>'
+      : '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
 
-  const statisticsLink = userRole === "методист" ? '<a href="statistics.html" class="nav-link">Статистика</a>' : ""
-
-  const predictionsLink = userRole === "методист" ? '<a href="predictions.html" class="nav-link">Прогнози</a>' : ""
+  const statisticsLink = '<a href="statistics.html" class="nav-link">Статистика</a>'
+  const predictionsLink = '<a href="predictions.html" class="nav-link">Прогнози</a>'
 
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
 
