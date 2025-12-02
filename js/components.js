@@ -15,6 +15,11 @@ function renderHeader() {
     header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
+                <button class="hamburger" id="hamburger" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
                 <a href="index.html" class="logo">🎯 iEvents</a>
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
@@ -26,16 +31,30 @@ function renderHeader() {
                     </div>
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
+                <aside class="sidebar" id="sidebar">
+                    <a href="index.html" class="sidebar-link">Головна</a>
+                    <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
+                    <a href="adminCommunity.html" class="sidebar-link">🏛️ Адмін панель</a>
+                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
+                    <div style="padding: 16px 24px;">
+                        <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
+                        <p style="font-size: 13px; color: #78643a; margin: 0 0 4px 0; word-break: break-word;">${userEmail}</p>
+                        <span style="font-size: 12px; color: white; padding: 3px 10px; background: linear-gradient(135deg, #a88264 0%, #8b7355 100%); border-radius: 12px; font-weight: 500; display: inline-block; margin-top: 8px; text-transform: capitalize;">${userRole}</span>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
+                    <button class="sidebar-link" onclick="logout()" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; padding: 16px 24px; color: #78643a; font-weight: 500; font-size: 14px;">Вийти</button>
+                </aside>
             </div>
         </header>
     `
+    setupMenuToggle()
     return
   }
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист"
-      ? '<a href="competitionsT.html" class="nav-link">Конкурси</a>'
-      : '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
+    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
@@ -59,6 +78,11 @@ function renderHeader() {
   header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
+                <button class="hamburger" id="hamburger" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
                 <a href="index.html" class="logo">🎯 iEvents</a>
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
@@ -76,9 +100,29 @@ function renderHeader() {
                     </div>
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
+                <aside class="sidebar" id="sidebar">
+                    <a href="index.html" class="sidebar-link">Головна</a>
+                    ${competitionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${resultsLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${statisticsLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${predictionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${studentAdminLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${teacherAdminLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${profileLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${adminLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
+                    <div style="padding: 16px 24px;">
+                        <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
+                        <p style="font-size: 13px; color: #78643a; margin: 0 0 4px 0; word-break: break-word;">${userEmail}</p>
+                        <span style="font-size: 12px; color: white; padding: 3px 10px; background: linear-gradient(135deg, #a88264 0%, #8b7355 100%); border-radius: 12px; font-weight: 500; display: inline-block; margin-top: 8px; text-transform: capitalize;">${userRole}</span>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
+                    <button class="sidebar-link" onclick="logout()" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; padding: 16px 24px; color: #78643a; font-weight: 500; font-size: 14px;">Вийти</button>
+                </aside>
             </div>
         </header>
     `
+  setupMenuToggle()
 }
 
 // Footer component
@@ -116,6 +160,36 @@ function checkAdminPageAccess(userRole) {
     console.warn(`[v0] Admin user tried to access unauthorized page: ${currentPage}. Redirecting to index.html`)
     window.location.href = "index.html"
   }
+}
+
+function setupMenuToggle() {
+  const hamburger = document.getElementById("hamburger")
+  const sidebar = document.getElementById("sidebar")
+
+  if (!hamburger || !sidebar) return
+
+  hamburger.addEventListener("click", (e) => {
+    e.stopPropagation()
+    hamburger.classList.toggle("active")
+    sidebar.classList.toggle("active")
+  })
+
+  // Close sidebar when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".sidebar") && !e.target.closest(".hamburger")) {
+      hamburger.classList.remove("active")
+      sidebar.classList.remove("active")
+    }
+  })
+
+  // Close sidebar when clicking on a link
+  const sidebarLinks = sidebar.querySelectorAll(".sidebar-link")
+  sidebarLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      hamburger.classList.remove("active")
+      sidebar.classList.remove("active")
+    })
+  })
 }
 
 if (document.readyState === "loading") {

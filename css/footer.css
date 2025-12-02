@@ -1,14 +1,28 @@
-/* Modern Footer Styles with Comprehensive Responsive Design */
-
-.site-footer {
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
-  color: #0a5f7f;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
+/* Modern Footer Styles with Brown Theme and Responsive Design */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Enhanced neon separator with better visibility */
+main,
+.main-content,
+.statistics-page,
+.admin-container,
+.container {
+  flex: 1;
+}
+
+/* Updated footer to brown theme */
+.site-footer {
+  background: linear-gradient(135deg, #f5f1e8 0%, #ede6d9 100%);
+  color: #78643a;
+  margin-top: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Enhanced separator with brown gradient */
 .site-footer::before {
   content: "";
   position: absolute;
@@ -16,8 +30,8 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #0a5f7f 0%, #5eb3d6 50%, #0a5f7f 100%);
-  box-shadow: 0 0 10px rgba(10, 95, 127, 0.6), 0 0 20px rgba(10, 95, 127, 0.4);
+  background: linear-gradient(90deg, #78643a 0%, #a88264 50%, #78643a 100%);
+  box-shadow: 0 0 10px rgba(120, 100, 58, 0.6), 0 0 20px rgba(120, 100, 58, 0.4);
 }
 
 .footer-container {
@@ -36,7 +50,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 600;
-  color: #0a5f7f;
+  color: #78643a;
   line-height: 1.5;
 }
 
@@ -46,12 +60,12 @@
   align-items: center;
 }
 
+/* Updated footer links to brown theme */
 .footer-links a {
-  color: #0a5f7f;
+  color: #78643a;
   text-decoration: none;
   font-weight: 600;
   font-size: 15px;
-  transition: all 0.3s ease;
   position: relative;
   padding-bottom: 4px;
   white-space: nowrap;
@@ -64,13 +78,11 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: #7ec8e3;
-  transition: width 0.3s ease;
+  background: #a88264;
 }
 
 .footer-links a:hover {
-  color: #7ec8e3;
-  transform: translateY(-2px);
+  color: #a88264;
 }
 
 .footer-links a:hover::after {
@@ -113,7 +125,6 @@
   .footer-links a {
     display: block;
     padding: 8px 16px;
-    /* Better touch targets for mobile */
     min-height: 44px;
     display: flex;
     align-items: center;
