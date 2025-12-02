@@ -5,14 +5,11 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #fafaf9;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* Updated padding-top to 80px to match new header height */
-  padding-top: 80px;
 }
 
 main {
@@ -63,18 +60,19 @@ main {
   background: white;
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 8px 32px rgba(10, 95, 127, 0.08);
+  box-shadow: 0 8px 32px rgba(31, 41, 55, 0.08);
+  border: 1px solid #e5ddd3;
 }
 
 .page-title {
   font-size: 32px;
-  color: #0a5f7f;
+  color: #1f2937;
   margin-bottom: 32px;
   text-align: center;
   font-weight: 700;
 }
 
-/* Updated color palette to soft blue-cyan tones */
+/* Updated color palette to brown tones from index.css */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
@@ -83,14 +81,14 @@ main {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   padding: 40px 40px;
   border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 32px;
   color: white;
-  box-shadow: 0 8px 24px rgba(126, 200, 227, 0.25);
+  box-shadow: 0 8px 24px rgba(168, 130, 100, 0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -104,17 +102,13 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 60%
-  );
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
   pointer-events: none;
 }
 
 .stat-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(126, 200, 227, 0.35);
+  box-shadow: 0 12px 32px rgba(168, 130, 100, 0.35);
 }
 
 .stat-icon {
@@ -176,7 +170,7 @@ main {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
 }
 
 .data-table {
@@ -189,7 +183,7 @@ main {
 }
 
 .data-table th {
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #9d7560 0%, #8b6951 100%);
   color: white;
   font-weight: 700;
   font-size: 13px;
@@ -204,7 +198,7 @@ main {
   color: #2d3748;
   font-size: 14px;
   padding: 16px 24px;
-  border-bottom: 1px solid #e8f4f8;
+  border-bottom: 1px solid #f0ebe4;
   vertical-align: middle;
 }
 
@@ -237,7 +231,7 @@ main {
 }
 
 .data-table tbody tr:hover {
-  background-color: #f0f9fc;
+  background-color: #fafaf9;
 }
 
 .role-badge {
@@ -249,18 +243,18 @@ main {
 }
 
 .role-badge.учень {
-  background: #b3e5fc;
-  color: #01579b;
+  background: #f0ebe4;
+  color: #78643a;
 }
 
 .role-badge.вчитель {
-  background: #a8d8ea;
-  color: #0a5f7f;
+  background: #e8dfd2;
+  color: #6b5938;
 }
 
 .role-badge.методист {
-  background: #80deea;
-  color: #00838f;
+  background: #ddd3c4;
+  color: #5d5030;
 }
 
 .btn {
@@ -275,36 +269,36 @@ main {
 
 .btn-primary {
   width: 100%;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(126, 200, 227, 0.3);
+  box-shadow: 0 8px 16px rgba(168, 130, 100, 0.3);
 }
 
 .btn-secondary {
-  background: #e8f4f8;
-  color: #0a5f7f;
+  background: #f0ebe4;
+  color: #78643a;
   width: 100%;
   margin-top: 12px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #ddd3c4;
 }
 
 .btn-secondary:hover {
-  background: #d4ecf5;
+  background: #e8dfd2;
 }
 
 .btn-change-role {
-  background: #7ec8e3;
+  background: #a88264;
   color: white;
   padding: 8px 16px;
   font-size: 12px;
 }
 
 .btn-change-role:hover {
-  background: #5eb3d6;
+  background: #9d7560;
 }
 
 .form-group {
@@ -314,7 +308,7 @@ main {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #0a5f7f;
+  color: #78643a;
   font-size: 14px;
   font-weight: 600;
 }
@@ -324,7 +318,7 @@ main {
 .form-group select {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #ddd3c4;
   border-radius: 10px;
   font-size: 14px;
   transition: all 0.2s;
@@ -335,8 +329,8 @@ main {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
+  border-color: #a88264;
+  box-shadow: 0 0 0 3px rgba(168, 130, 100, 0.1);
 }
 
 .error-message {
@@ -354,7 +348,7 @@ main {
 }
 
 .super-methodist-badge {
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
   padding: 16px 24px;
   border-radius: 16px;
@@ -362,7 +356,7 @@ main {
   font-weight: 600;
   font-size: 16px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.3);
+  box-shadow: 0 4px 12px rgba(168, 130, 100, 0.3);
   animation: fadeIn 0.5s ease-in;
 }
 
@@ -406,13 +400,13 @@ main {
 
 .modal-content h3 {
   margin-bottom: 16px;
-  color: #0a5f7f;
+  color: #78643a;
   font-size: 20px;
 }
 
 .modal-content p {
   margin-bottom: 24px;
-  color: #5a7a8a;
+  color: #6b7280;
 }
 
 .role-buttons {
@@ -423,7 +417,7 @@ main {
 
 .role-btn {
   padding: 16px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #ddd3c4;
   background: white;
   border-radius: 10px;
   font-size: 16px;
@@ -431,19 +425,19 @@ main {
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
-  color: #0a5f7f;
+  color: #78643a;
 }
 
 .role-btn:hover {
-  border-color: #7ec8e3;
-  background: #f0f9fc;
+  border-color: #a88264;
+  background: #fafaf9;
 }
 
 .admin-tabs {
   display: flex;
   gap: 8px;
   margin-bottom: 32px;
-  border-bottom: 2px solid #a8d8ea;
+  border-bottom: 2px solid #ddd3c4;
   overflow-x: auto;
   padding-bottom: 0;
 }
@@ -452,7 +446,7 @@ main {
   padding: 12px 24px;
   border: none;
   background: transparent;
-  color: #5a7a8a;
+  color: #6b7280;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -462,12 +456,12 @@ main {
 }
 
 .tab-btn:hover {
-  color: #7ec8e3;
+  color: #a88264;
 }
 
 .tab-btn.active {
-  color: #0a5f7f;
-  border-bottom-color: #7ec8e3;
+  color: #78643a;
+  border-bottom-color: #a88264;
 }
 
 .tab-content {
@@ -489,7 +483,7 @@ main {
 
 .section-header h2 {
   font-size: 24px;
-  color: #0a5f7f;
+  color: #78643a;
   margin: 0;
   font-weight: 700;
 }
@@ -508,44 +502,44 @@ main {
 
 .search-box input {
   padding: 10px 16px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #ddd3c4;
   border-radius: 10px;
   font-size: 14px;
   width: 100%;
   max-width: 300px;
-  color: #0a5f7f;
+  color: #78643a;
 }
 
 .search-box input::placeholder {
-  color: #7ec8e3;
+  color: #a88264;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
+  border-color: #a88264;
+  box-shadow: 0 0 0 3px rgba(168, 130, 100, 0.1);
 }
 
 .filter-select {
   padding: 10px 16px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #ddd3c4;
   border-radius: 10px;
   font-size: 14px;
   cursor: pointer;
-  color: #0a5f7f;
+  color: #78643a;
   background: white;
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
+  border-color: #a88264;
+  box-shadow: 0 0 0 3px rgba(168, 130, 100, 0.1);
 }
 
 .id-badge {
   display: inline-block;
-  background: #e8f4f8;
-  color: #0a5f7f;
+  background: #f0ebe4;
+  color: #78643a;
   padding: 6px 12px;
   border-radius: 8px;
   font-weight: 700;
@@ -554,7 +548,7 @@ main {
 }
 
 .comp-title {
-  color: #0a5f7f;
+  color: #78643a;
   font-size: 15px;
   font-weight: 600;
   display: block;
@@ -562,15 +556,15 @@ main {
 }
 
 .comp-description {
-  color: #5a7a8a;
+  color: #6b7280;
   font-size: 13px;
   line-height: 1.4;
 }
 
 .date-badge {
   display: inline-block;
-  background: #e8f4f8;
-  color: #0a5f7f;
+  background: #f0ebe4;
+  color: #78643a;
   padding: 6px 12px;
   border-radius: 8px;
   font-weight: 600;
@@ -582,26 +576,26 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
   padding: 10px 20px;
   border-radius: 20px;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(126, 200, 227, 0.3);
+  box-shadow: 0 2px 8px rgba(168, 130, 100, 0.3);
   min-width: 80px;
   justify-content: center;
 }
 
 .grade-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
-  box-shadow: 0 2px 6px rgba(77, 208, 225, 0.3);
+  box-shadow: 0 2px 6px rgba(168, 130, 100, 0.3);
   min-width: 70px;
   text-align: center;
 }
@@ -649,34 +643,34 @@ main {
 }
 
 .place-badge:not(.place-1):not(.place-2):not(.place-3) {
-  background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
 }
 
 .score-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(77, 208, 225, 0.3);
+  box-shadow: 0 2px 8px rgba(168, 130, 100, 0.3);
 }
 
 .achievement-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
   padding: 6px 12px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 13px;
-  box-shadow: 0 2px 6px rgba(77, 208, 225, 0.3);
+  box-shadow: 0 2px 6px rgba(168, 130, 100, 0.3);
 }
 
 .notes-text {
-  color: #5a7a8a;
+  color: #6b7280;
   font-size: 13px;
   font-style: italic;
   line-height: 1.4;
@@ -694,12 +688,12 @@ main {
 }
 
 .status-badge.активний {
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
 }
 
 .status-badge.майбутній {
-  background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
+  background: linear-gradient(135deg, #c9b5a0 0%, #b5a490 100%);
   color: white;
 }
 
@@ -726,13 +720,13 @@ main {
 }
 
 .btn-edit {
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
 }
 
 .btn-edit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.4);
+  box-shadow: 0 4px 12px rgba(168, 130, 100, 0.4);
 }
 
 .btn-delete {
@@ -746,20 +740,20 @@ main {
 }
 
 .btn-view {
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
 }
 
 .btn-view:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(77, 208, 225, 0.4);
+  box-shadow: 0 4px 12px rgba(168, 130, 100, 0.4);
 }
 
 .form-hint {
   display: block;
   margin-top: 6px;
   font-size: 12px;
-  color: #5a7a8a;
+  color: #6b7280;
   font-style: italic;
 }
 
@@ -789,23 +783,24 @@ main {
   padding: 24px;
   border-radius: 16px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
+  border: 1px solid #e5ddd3;
 }
 
 .stats-section h3 {
   font-size: 20px;
-  color: #0a5f7f;
+  color: #78643a;
   margin-bottom: 16px;
   font-weight: 700;
 }
 
 .stats-section-title {
   font-size: 22px;
-  color: #0a5f7f;
+  color: #78643a;
   font-weight: 700;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 3px solid #7ec8e3;
+  border-bottom: 3px solid #a88264;
   display: inline-block;
 }
 
@@ -814,26 +809,26 @@ main {
 }
 
 .stat-card-highlight {
-  background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
 }
 
 .stat-card-success {
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #b89968 0%, #a88264 100%);
 }
 
 .stat-card-info {
-  background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%);
+  background: linear-gradient(135deg, #c2a97a 0%, #b89968 100%);
 }
 
 .stat-card-secondary {
-  background: linear-gradient(135deg, #a8d8ea 0%, #7ec8e3 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
 }
 
 .participation-card {
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
+  background: linear-gradient(135deg, #f5f1eb 0%, #f9f7f4 100%);
   padding: 32px;
   border-radius: 16px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #ddd3c4;
 }
 
 .participation-rate {
@@ -846,12 +841,12 @@ main {
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 8px 24px rgba(126, 200, 227, 0.3);
+  box-shadow: 0 8px 24px rgba(168, 130, 100, 0.3);
 }
 
 .rate-value {
@@ -864,7 +859,7 @@ main {
 .empty-state {
   text-align: center;
   padding: 64px 24px !important;
-  color: #5a7a8a;
+  color: #6b7280;
 }
 
 .empty-state-icon {
@@ -878,13 +873,13 @@ main {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #0a5f7f;
+  color: #78643a;
   display: block;
 }
 
 .empty-state-subtext {
   font-size: 14px;
-  color: #5a7a8a;
+  color: #6b7280;
   display: block;
 }
 
@@ -909,7 +904,7 @@ main {
 }
 
 .notification-success {
-  background: #80deea;
+  background: #a88264;
   color: white;
 }
 
@@ -919,15 +914,15 @@ main {
 }
 
 .notification-info {
-  background: #7ec8e3;
+  background: #9d7560;
   color: white;
 }
 
 .timeline-container {
-  background: #f0f9fc;
+  background: #f5f1eb;
   padding: 24px;
   border-radius: 16px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #ddd3c4;
 }
 
 .timeline-chart {
@@ -946,501 +941,37 @@ main {
 .timeline-label {
   font-size: 13px;
   font-weight: 600;
-  color: #0a5f7f;
+  color: #78643a;
   text-align: right;
 }
 
 .timeline-bar-container {
   height: 32px;
-  background: #e8f4f8;
+  background: #f0ebe4;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid #a8d8ea;
+  border: 1px solid #ddd3c4;
 }
 
 .timeline-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(90deg, #a88264 0%, #9d7560 100%);
   transition: width 0.3s ease;
 }
 
 .timeline-value {
   font-size: 13px;
   font-weight: 700;
-  color: #0a5f7f;
+  color: #78643a;
   text-align: center;
 }
 
 .participation-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #80deea 0%, #4dd0e1 100%);
+  background: linear-gradient(135deg, #a88264 0%, #9d7560 100%);
   color: white;
   padding: 6px 12px;
   border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
-  box-shadow: 0 2px 6px rgba(77, 208, 225, 0.3);
-}
-
-.participation-count {
-  display: inline-block;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 2px 8px rgba(126, 200, 227, 0.3);
-  min-width: 80px;
-  text-align: center;
-}
-
-/* Comprehensive responsive design for all screen sizes */
-
-@media (max-width: 1024px) {
-  .main-content {
-    padding: 32px 16px;
-  }
-
-  .admin-container {
-    padding: 32px 24px;
-  }
-
-  .page-title {
-    font-size: 28px;
-    margin-bottom: 28px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-  }
-
-  .stat-card {
-    padding: 32px 24px;
-    flex-direction: row;
-    text-align: left;
-    min-height: 140px;
-  }
-
-  .stat-icon {
-    font-size: 56px;
-  }
-
-  .stat-info {
-    padding: 16px 24px;
-  }
-
-  .stat-value {
-    font-size: 52px;
-  }
-
-  .admin-tabs {
-    gap: 4px;
-  }
-
-  .tab-btn {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .header-actions {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .header-actions .btn {
-    width: 100%;
-  }
-
-  .search-box input {
-    max-width: 100%;
-  }
-
-  .filter-select {
-    width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    padding: 24px 12px;
-  }
-
-  .admin-container {
-    padding: 24px 16px;
-    border-radius: 16px;
-  }
-
-  .page-title {
-    font-size: 24px;
-    margin-bottom: 24px;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .stat-card {
-    padding: 28px 20px;
-    flex-direction: row;
-    min-height: 120px;
-  }
-
-  .stat-icon {
-    font-size: 48px;
-  }
-
-  .stat-value {
-    font-size: 44px;
-  }
-
-  .stat-label {
-    font-size: 13px;
-  }
-
-  .section-header h2 {
-    font-size: 20px;
-  }
-
-  .admin-tabs {
-    gap: 4px;
-    padding-bottom: 8px;
-  }
-
-  .tab-btn {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .table-container {
-    margin: 0 -16px;
-    padding: 0 16px;
-  }
-
-  .data-table {
-    min-width: 700px;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
-
-  .btn-action {
-    padding: 8px 12px;
-    font-size: 12px;
-    margin-right: 4px;
-  }
-
-  .modal-content {
-    padding: 24px 20px;
-    max-width: 95%;
-  }
-
-  .modal-large {
-    max-width: 95%;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .form-group label {
-    font-size: 13px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-
-  .modal-actions {
-    flex-direction: column;
-  }
-
-  .modal-actions .btn {
-    width: 100%;
-  }
-
-  .role-btn {
-    padding: 14px;
-    font-size: 14px;
-  }
-
-  .auth-modal {
-    padding: 32px 24px;
-    max-width: 95%;
-  }
-
-  .auth-modal h2 {
-    font-size: 22px;
-    margin-bottom: 20px;
-  }
-
-  .super-methodist-badge {
-    padding: 14px 20px;
-    font-size: 15px;
-    margin-bottom: 20px;
-  }
-
-  .stats-section {
-    padding: 20px 16px;
-    margin-bottom: 20px;
-  }
-
-  .stats-section h3 {
-    font-size: 18px;
-    margin-bottom: 14px;
-  }
-
-  .participation-rate {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .rate-circle {
-    width: 150px;
-    height: 150px;
-  }
-
-  .rate-value {
-    font-size: 48px;
-  }
-
-  .rate-details p {
-    font-size: 14px;
-  }
-
-  .notification {
-    top: 10px;
-    right: 10px;
-    left: 10px;
-    padding: 14px 18px;
-    font-size: 13px;
-  }
-
-  .empty-state {
-    padding: 48px 20px !important;
-  }
-
-  .empty-state-icon {
-    font-size: 56px;
-  }
-
-  .empty-state-text {
-    font-size: 18px;
-  }
-
-  .empty-state-subtext {
-    font-size: 13px;
-  }
-
-  .timeline-bar {
-    grid-template-columns: 60px 1fr 50px;
-    gap: 12px;
-  }
-
-  .timeline-label {
-    font-size: 12px;
-  }
-
-  .timeline-value {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    padding: 20px 10px;
-  }
-
-  .admin-container {
-    padding: 20px 12px;
-  }
-
-  .page-title {
-    font-size: 20px;
-    margin-bottom: 20px;
-  }
-
-  .stat-card {
-    padding: 20px 16px;
-    min-height: 110px;
-  }
-
-  .stat-icon {
-    font-size: 40px;
-  }
-
-  .stat-value {
-    font-size: 36px;
-  }
-
-  .stat-label {
-    font-size: 12px;
-  }
-
-  .section-header h2 {
-    font-size: 18px;
-  }
-
-  .tab-btn {
-    padding: 8px 10px;
-    font-size: 11px;
-  }
-
-  .data-table {
-    min-width: 600px;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .btn {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
-  .btn-action {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .modal-content {
-    padding: 20px 16px;
-  }
-
-  .modal-content h3 {
-    font-size: 18px;
-    margin-bottom: 12px;
-  }
-
-  .modal-content p {
-    font-size: 13px;
-    margin-bottom: 20px;
-  }
-
-  .form-group label {
-    font-size: 12px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 9px 12px;
-    font-size: 12px;
-  }
-
-  .role-btn {
-    padding: 12px;
-    font-size: 13px;
-  }
-
-  .auth-modal {
-    padding: 24px 16px;
-  }
-
-  .auth-modal h2 {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .super-methodist-badge {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-
-  .stats-section {
-    padding: 16px 12px;
-  }
-
-  .stats-section h3 {
-    font-size: 16px;
-  }
-
-  .role-badge,
-  .status-badge,
-  .id-badge,
-  .date-badge,
-  .grade-badge,
-  .achievement-badge {
-    padding: 4px 8px;
-    font-size: 11px;
-  }
-
-  .participant-count,
-  .place-badge,
-  .score-badge {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .comp-title {
-    font-size: 14px;
-  }
-
-  .comp-description {
-    font-size: 12px;
-  }
-
-  .notes-text {
-    font-size: 12px;
-  }
-
-  .empty-state {
-    padding: 32px 16px !important;
-  }
-
-  .empty-state-icon {
-    font-size: 48px;
-  }
-
-  .empty-state-text {
-    font-size: 16px;
-  }
-
-  .empty-state-subtext {
-    font-size: 12px;
-  }
-
-  .rate-circle {
-    width: 130px;
-    height: 130px;
-  }
-
-  .rate-value {
-    font-size: 42px;
-  }
-
-  .rate-details p {
-    font-size: 13px;
-  }
-
-  .timeline-bar {
-    grid-template-columns: 50px 1fr 40px;
-    gap: 8px;
-  }
-
-  .timeline-label {
-    font-size: 11px;
-  }
-
-  .timeline-value {
-    font-size: 11px;
-  }
 }
