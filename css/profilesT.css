@@ -7,7 +7,8 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
+  background: linear-gradient(135deg, #f5f1eb 0%, #f9f7f4 100%);
+  /* replaced blue gradient with warm beige gradient from index.css */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -27,14 +28,28 @@ body {
   border-radius: 12px;
   padding: 40px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-title {
   font-size: 28px;
-  color: #1a365d;
+  color: #1f2937;
+  /* updated to dark gray-charcoal from index.css */
   margin-bottom: 24px;
   text-align: center;
   font-weight: 700;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
 }
 
 .role-badge {
@@ -43,12 +58,14 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #78643a 0%, #a88264 100%);
+  /* replaced blue gradient with warm brown palette from index.css */
   color: white;
   border-radius: 6px;
   margin-bottom: 32px;
   font-weight: 600;
   font-size: 14px;
+  animation: fadeInUp 0.6s ease-out 0.15s both;
 }
 
 .avatar-section {
@@ -58,21 +75,26 @@ body {
   gap: 10px;
   margin-bottom: 32px;
   padding: 24px;
-  background: #f8f9fa;
+  background: #fafaf9;
+  /* updated to warm light background from index.css */
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e5ddd3;
+  /* updated to warm border tone from index.css */
+  animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
 .avatar-preview {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #78643a 0%, #a88264 100%);
+  /* replaced blue-teal with warm brown gradient from index.css */
   display: flex;
   align-items: center;
   justify-content: center;
   border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 2px 8px rgba(120, 100, 58, 0.2);
+  /* updated shadow to warm tone */
 }
 
 .avatar-placeholder {
@@ -81,18 +103,21 @@ body {
 
 .avatar-info {
   font-size: 12px;
-  color: #6c757d;
+  color: #6b7280;
+  /* updated text color to match index.css palette */
   font-weight: 500;
 }
 
 .section-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1a365d;
+  color: #1f2937;
+  /* updated to dark gray-charcoal from index.css */
   margin-top: 28px;
   margin-bottom: 16px;
   padding-bottom: 10px;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 2px solid #e5ddd3;
+  /* updated border to warm tone */
 }
 
 .form-row {
@@ -108,7 +133,8 @@ body {
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  color: #2d3748;
+  color: #1f2937;
+  /* updated to dark gray from index.css */
   font-size: 13px;
   font-weight: 600;
 }
@@ -118,7 +144,8 @@ body {
 .form-group select {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #e5ddd3;
+  /* updated border to warm tone */
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -130,8 +157,10 @@ body {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+  border-color: #a88264;
+  /* updated focus color to warm brown from index.css */
+  box-shadow: 0 0 0 2px rgba(168, 130, 100, 0.1);
+  /* updated shadow to match */
 }
 
 .form-group textarea {
@@ -145,35 +174,42 @@ body {
 }
 
 .form-group select[multiple] option:checked {
-  background: linear-gradient(#667eea, #764ba2);
+  background: linear-gradient(#78643a, #a88264);
+  /* updated to warm brown gradient */
   color: white;
 }
 
 .help-text {
   display: block;
   font-size: 12px;
-  color: #6c757d;
+  color: #6b7280;
+  /* updated text color */
   margin-top: 4px;
   font-style: italic;
 }
 
 .info-box {
-  background: #e7f3ff;
-  border-left: 3px solid #667eea;
+  background: #fafaf9;
+  /* updated to warm light background */
+  border-left: 3px solid #a88264;
+  /* updated to warm brown */
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 12px;
-  color: #1a365d;
+  color: #1f2937;
+  /* updated text color */
   font-size: 13px;
 }
 
 .teacher-section,
 .methodist-section {
-  background: #f8f9fa;
+  background: #fafaf9;
+  /* updated to warm light background */
   padding: 16px;
   border-radius: 8px;
   margin-top: 24px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e5ddd3;
+  /* updated to warm border tone */
 }
 
 .btn {
@@ -188,26 +224,31 @@ body {
 
 .btn-primary {
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #78643a 0%, #a88264 100%);
+  /* replaced blue-teal with warm brown gradient */
   color: white;
   margin-top: 24px;
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.3);
+  /* updated shadow to warm tone */
 }
 
 .btn-secondary {
-  background: #e9ecef;
-  color: #1a365d;
+  background: #f0ebe4;
+  /* updated to warm light background */
+  color: #1f2937;
+  /* updated text color */
   padding: 10px 16px;
   font-size: 14px;
   width: 100%;
 }
 
 .btn-secondary:hover {
-  background: #dee2e6;
+  background: #e5ddd3;
+  /* updated hover background */
 }
 
 .message {
@@ -231,34 +272,6 @@ body {
   display: block;
 }
 
-@media (max-width: 768px) {
-  .main-content {
-    padding: 20px 12px;
-  }
-
-  .profile-container {
-    padding: 24px 16px;
-  }
-
-  .page-title {
-    font-size: 24px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .avatar-preview {
-    width: 100px;
-    height: 100px;
-  }
-
-  .avatar-placeholder {
-    font-size: 48px;
-  }
-}
-
-/* Avatar editor styles */
 .avatar-controls {
   display: flex;
   gap: 8px;
@@ -278,13 +291,15 @@ body {
 }
 
 .btn-avatar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #78643a 0%, #a88264 100%);
+  /* updated to warm brown gradient */
   color: white;
 }
 
 .btn-avatar:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.3);
+  /* updated shadow */
 }
 
 .btn-avatar-clear {
@@ -308,6 +323,16 @@ body {
   align-items: center;
   z-index: 1000;
   padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .avatar-editor-container {
@@ -327,12 +352,14 @@ body {
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 2px solid #e5ddd3;
+  /* updated border to warm tone */
 }
 
 .avatar-editor-header h3 {
   margin: 0;
-  color: #1a365d;
+  color: #1f2937;
+  /* updated color */
   font-size: 16px;
 }
 
@@ -340,7 +367,8 @@ body {
   background: none;
   border: none;
   font-size: 24px;
-  color: #6c757d;
+  color: #6b7280;
+  /* updated color */
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -354,7 +382,8 @@ body {
 
 .close-btn:hover {
   background: #f0f0f0;
-  color: #1a365d;
+  color: #a88264;
+  /* updated hover color to warm brown */
 }
 
 .avatar-canvas {
@@ -364,7 +393,8 @@ body {
   height: auto;
   margin: 0 auto 20px;
   border-radius: 8px;
-  background: #f8f9fa;
+  background: #fafaf9;
+  /* updated background to warm tone */
 }
 
 .avatar-controls-panel {
@@ -382,14 +412,16 @@ body {
 .control-group label {
   font-size: 13px;
   font-weight: 600;
-  color: #2d3748;
+  color: #1f2937;
+  /* updated color */
 }
 
 .control-group input[type="range"] {
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: linear-gradient(to right, #667eea, #764ba2);
+  background: linear-gradient(to right, #78643a, #a88264);
+  /* updated to warm brown gradient */
   outline: none;
   -webkit-appearance: none;
 }
@@ -401,7 +433,8 @@ body {
   height: 18px;
   border-radius: 50%;
   background: white;
-  border: 2px solid #667eea;
+  border: 2px solid #a88264;
+  /* updated to warm brown */
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -411,7 +444,8 @@ body {
   height: 18px;
   border-radius: 50%;
   background: white;
-  border: 2px solid #667eea;
+  border: 2px solid #a88264;
+  /* updated to warm brown */
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -437,12 +471,15 @@ body {
 
 .hint-text {
   font-size: 12px;
-  color: #6c757d;
+  color: #6b7280;
+  /* updated color */
   font-style: italic;
   margin: 0;
   padding: 8px 12px;
-  background: #e7f3ff;
-  border-left: 3px solid #667eea;
+  background: #fafaf9;
+  /* updated background to warm tone */
+  border-left: 3px solid #a88264;
+  /* updated border to warm brown */
   border-radius: 4px;
 }
 
@@ -465,25 +502,82 @@ body {
 }
 
 .btn-secondary-modal {
-  background: #e9ecef;
-  color: #1a365d;
+  background: #f0ebe4;
+  /* updated to warm light background */
+  color: #1f2937;
+  /* updated color */
 }
 
 .btn-secondary-modal:hover {
-  background: #dee2e6;
+  background: #e5ddd3;
+  /* updated hover background */
 }
 
 .btn-primary-modal {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #78643a 0%, #a88264 100%);
+  /* updated to warm brown gradient */
   color: white;
 }
 
 .btn-primary-modal:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.3);
+  /* updated shadow */
 }
 
+/* Clean mobile adaptation - 768px and below */
 @media (max-width: 768px) {
+  .main-content {
+    padding: 20px 12px;
+  }
+
+  .profile-container {
+    padding: 20px 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .role-badge {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .avatar-preview {
+    width: 100px;
+    height: 100px;
+  }
+
+  .avatar-placeholder {
+    font-size: 48px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+
   .avatar-editor-container {
     max-width: 90vw;
     padding: 16px;
@@ -495,5 +589,151 @@ body {
 
   .avatar-editor-buttons {
     flex-direction: column;
+  }
+}
+
+/* Extra small devices - 480px and below */
+@media (max-width: 480px) {
+  body {
+    padding-top: 70px;
+  }
+
+  .main-content {
+    padding: 16px 10px;
+  }
+
+  .profile-container {
+    padding: 16px 12px;
+    border-radius: 8px;
+  }
+
+  .page-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .role-badge {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .avatar-section {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .avatar-preview {
+    width: 90px;
+    height: 90px;
+  }
+
+  .avatar-placeholder {
+    font-size: 40px;
+  }
+
+  .avatar-info {
+    font-size: 11px;
+  }
+
+  .avatar-controls {
+    gap: 6px;
+  }
+
+  .btn-avatar,
+  .btn-avatar-clear {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .form-group textarea {
+    min-height: 80px;
+  }
+
+  .help-text {
+    font-size: 11px;
+  }
+
+  .info-box {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 13px;
+    padding: 10px 16px;
+    margin-top: 16px;
+  }
+
+  .message {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .avatar-editor-header h3 {
+    font-size: 14px;
+  }
+
+  .control-group label {
+    font-size: 12px;
+  }
+
+  .avatar-editor-buttons {
+    gap: 8px;
+  }
+
+  .btn-secondary-modal,
+  .btn-primary-modal {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+/* Tiny devices - 360px and below */
+@media (max-width: 360px) {
+  .main-content {
+    padding: 12px 8px;
+  }
+
+  .profile-container {
+    padding: 12px 10px;
+  }
+
+  .page-title {
+    font-size: 16px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-size: 13px;
+  }
+
+  .btn-avatar,
+  .btn-avatar-clear {
+    font-size: 11px;
+    padding: 5px 10px;
   }
 }

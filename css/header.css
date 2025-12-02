@@ -2,10 +2,13 @@
 .site-header {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   border-bottom: 2px solid #e8dcc8;
+  /* changed from sticky to fixed and added full width properties */
 }
 
 /* Added skeleton loading state for instant header display */
@@ -13,8 +16,10 @@
   min-height: 70px;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   border-bottom: 2px solid #e8dcc8;
 }
