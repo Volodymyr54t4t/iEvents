@@ -7,11 +7,9 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  background: linear-gradient(135deg, #f0f9fc 0%, #e6f7fb 100%);
+  background: linear-gradient(135deg, #f5f1eb 0%, #faf8f5 100%);
   min-height: 100vh;
   color: #2d3748;
-  /* Added padding-top: 80px to prevent header overlap */
-  padding-top: 80px;
 }
 
 .main-container {
@@ -23,23 +21,28 @@ body {
 .page-header {
   text-align: center;
   margin-bottom: 40px;
-  color: #0a5f7f;
+  color: #78643a;
   animation: fadeInDown 0.6s ease-out;
 }
 
 .page-header h1 {
+  /* Виправлення: Основний розмір заголовка */
   font-size: 36px;
   margin-bottom: 8px;
   font-weight: 700;
   animation: slideInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Додаткове забезпечення коректного переносу довгих слів */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .subtitle {
   font-size: 18px;
   opacity: 0.9;
   margin-bottom: 16px;
-  color: #5a7a8a;
+  color: #8b7355;
   animation: fadeIn 0.8s ease-out 0.2s both;
+  word-wrap: break-word;
 }
 
 .filters-section {
@@ -54,26 +57,28 @@ body {
   padding: 20px;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.08);
   animation: slideInUp 0.6s ease-out;
 }
 
 .filter-input,
 .filter-select {
   padding: 12px 16px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #a88264;
   border-radius: 10px;
   font-size: 14px;
   font-family: inherit;
   transition: all 0.3s ease;
   animation: slideInUp 0.5s ease-out both;
+  min-height: 44px;
+  width: 100%;
 }
 
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #7ec8e3;
-  box-shadow: 0 0 0 3px rgba(126, 200, 227, 0.1);
+  border-color: #8b7355;
+  box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
 }
 
 .filter-select:nth-child(2) {
@@ -92,6 +97,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 44px;
 }
 
 .btn:hover {
@@ -99,17 +105,18 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #a88264 0%, #8b7355 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   animation-delay: 0.3s;
+  width: 100%;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 8px 16px rgba(126, 200, 227, 0.3);
+  box-shadow: 0 8px 16px rgba(168, 130, 100, 0.3);
 }
 
-/* Статистика */
+/* Statistics */
 .stats-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -122,36 +129,63 @@ body {
   background: white;
   padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(10, 95, 127, 0.08);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.08);
   text-align: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-left: 4px solid #7ec8e3;
+  border-left: 4px solid #a88264;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -50px;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(
+    135deg,
+    rgba(168, 130, 100, 0.1) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(126, 200, 227, 0.2);
+  box-shadow: 0 12px 24px rgba(168, 130, 100, 0.2);
+}
+
+.stat-card:hover::before {
+  right: -30px;
+  top: -20px;
 }
 
 .stat-value {
   font-size: 32px;
   font-weight: 700;
-  color: #0a5f7f;
+  color: #78643a;
   margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #5a7a8a;
+  color: #8b7355;
   font-weight: 500;
+  position: relative;
+  z-index: 1;
 }
 
-/* Карточка контейнера */
+/* Card container */
 .card {
   background: white;
   border-radius: 20px;
   padding: 32px;
-  box-shadow: 0 8px 32px rgba(10, 95, 127, 0.08);
+  box-shadow: 0 8px 32px rgba(120, 100, 58, 0.08);
   animation: slideInUp 0.7s ease-out 0.2s both;
 }
 
@@ -161,12 +195,12 @@ body {
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #a8d8ea;
+  border-bottom: 2px solid #a88264;
 }
 
 .card-header h2 {
   font-size: 24px;
-  color: #0a5f7f;
+  color: #78643a;
   font-weight: 700;
 }
 
@@ -177,7 +211,7 @@ body {
 
 .view-btn {
   padding: 8px 12px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #a88264;
   background: white;
   border-radius: 8px;
   cursor: pointer;
@@ -186,12 +220,12 @@ body {
 }
 
 .view-btn.active {
-  background: #7ec8e3;
-  border-color: #7ec8e3;
+  background: #8b7355;
+  border-color: #8b7355;
   color: white;
 }
 
-/* Список учнів */
+/* Students list */
 .students-list {
   display: flex;
   flex-direction: column;
@@ -210,19 +244,20 @@ body {
   align-items: center;
   gap: 16px;
   padding: 20px;
-  border: 2px solid #a8d8ea;
+  border: 2px solid #a88264;
   border-radius: 16px;
   background: white;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: slideInUp 0.4s ease-out both;
+  min-height: 100px;
 }
 
 .student-item:hover {
-  border-color: #7ec8e3;
-  background: #f0f9fc;
+  border-color: #8b7355;
+  background: linear-gradient(135deg, #f5f1eb 0%, #faf8f5 100%);
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(126, 200, 227, 0.2);
+  box-shadow: 0 12px 24px rgba(168, 130, 100, 0.2);
 }
 
 .student-avatar {
@@ -230,14 +265,14 @@ body {
   height: 60px;
   min-width: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7ec8e3 0%, #5eb3d6 100%);
+  background: linear-gradient(135deg, #a88264 0%, #8b7355 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   color: white;
   font-size: 24px;
-  box-shadow: 0 4px 12px rgba(126, 200, 227, 0.3);
+  box-shadow: 0 4px 12px rgba(168, 130, 100, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -253,26 +288,32 @@ body {
 }
 
 .student-info {
+  /* Виправлення: дозволяємо контейнеру зменшуватися, але запобігаємо вертикальному тексту */
   flex: 1;
+  min-width: 0;
 }
 
 .student-name {
   font-size: 18px;
   font-weight: 700;
-  color: #0a5f7f;
+  color: #78643a;
   margin-bottom: 4px;
   transition: all 0.3s ease;
+  /* Виправлення: забезпечуємо коректне відображення імені */
+  white-space: normal; /* Дозволяє тексту переноситися, якщо він занадто довгий */
+  word-wrap: break-word; /* Для старих браузерів */
+  overflow-wrap: break-word; /* Для сучасних браузерів */
 }
 
 .student-item:hover .student-name {
-  color: #7ec8e3;
+  color: #8b7355;
 }
 
 .student-meta {
   display: flex;
   gap: 16px;
   font-size: 13px;
-  color: #5a7a8a;
+  color: #8b7355;
   flex-wrap: wrap;
 }
 
@@ -294,22 +335,26 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: #e8f4f8;
-  color: #0a5f7f;
-  border: 2px solid #a8d8ea;
+  background: #f5f1eb;
+  color: #78643a;
+  border: 2px solid #a88264;
+  font-weight: 600;
+  min-height: 40px;
+  white-space: nowrap;
 }
 
 .btn-sm:hover {
-  background: #7ec8e3;
+  background: #8b7355;
   color: white;
   transform: translateY(-2px);
 }
 
-/* Сітковий режим */
+/* Grid mode */
 .students-list.grid .student-item {
   flex-direction: column;
   text-align: center;
   padding: 24px;
+  min-height: auto;
 }
 
 .students-list.grid .student-avatar {
@@ -332,7 +377,7 @@ body {
   flex: 1;
 }
 
-/* Модальне вікно */
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -345,6 +390,7 @@ body {
   align-items: center;
   justify-content: center;
   animation: fadeIn 0.3s ease-out;
+  padding: 16px;
 }
 
 .modal.active {
@@ -370,32 +416,39 @@ body {
 
 .modal-header {
   padding: 24px;
-  border-bottom: 2px solid #a8d8ea;
+  border-bottom: 2px solid #a88264;
   display: flex;
   justify-content: space-between;
   align-items: center;
   animation: slideInDown 0.5s ease-out;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
   font-size: 20px;
   margin: 0;
-  color: #0a5f7f;
+  color: #78643a;
   font-weight: 700;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .modal-close {
   background: none;
   border: none;
   font-size: 32px;
-  color: #5a7a8a;
+  color: #8b7355;
   cursor: pointer;
   line-height: 1;
   transition: all 0.3s ease;
+  flex-shrink: 0;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .modal-close:hover {
-  color: #0a5f7f;
+  color: #78643a;
   transform: rotate(90deg) scale(1.2);
 }
 
@@ -406,7 +459,7 @@ body {
   animation: fadeIn 0.5s ease-out 0.1s both;
 }
 
-/* Деталі учня */
+/* Student details */
 .student-detail {
   display: flex;
   flex-direction: column;
@@ -414,7 +467,7 @@ body {
 }
 
 .detail-section {
-  border-bottom: 2px solid #e8f4f8;
+  border-bottom: 2px solid #f5f1eb;
   padding-bottom: 16px;
 }
 
@@ -425,7 +478,7 @@ body {
 .detail-section h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #0a5f7f;
+  color: #78643a;
   margin-bottom: 12px;
 }
 
@@ -439,7 +492,7 @@ body {
 
 .detail-label {
   font-weight: 600;
-  color: #5a7a8a;
+  color: #8b7355;
   font-size: 13px;
 }
 
@@ -456,18 +509,24 @@ body {
 
 .participation-item {
   padding: 12px;
-  background: #f0f9fc;
-  border-left: 4px solid #7ec8e3;
+  background: #f5f1eb;
+  border-left: 4px solid #a88264;
   border-radius: 8px;
   font-size: 14px;
-  color: #0a5f7f;
+  color: #78643a;
+  transition: all 0.3s ease;
 }
 
-/* Заглушки */
+.participation-item:hover {
+  background: #ede8df;
+  border-left-color: #8b7355;
+}
+
+/* Loading and empty states */
 .loading {
   text-align: center;
   padding: 60px 20px;
-  color: #5a7a8a;
+  color: #8b7355;
   font-size: 16px;
   animation: fadeInUp 0.5s ease-out;
 }
@@ -475,18 +534,18 @@ body {
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  color: #5a7a8a;
+  color: #8b7355;
   animation: fadeIn 0.6s ease-out;
 }
 
 .empty-state h3 {
   font-size: 24px;
   margin-bottom: 8px;
-  color: #0a5f7f;
+  color: #78643a;
   font-weight: 600;
 }
 
-/* Анімації */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -551,33 +610,581 @@ body {
   }
 }
 
-/* Адаптивність */
+/* Complete mobile responsivity rewrite for all screen sizes */
+
+/* Tablet - 768px and below */
 @media (max-width: 768px) {
   .main-container {
-    padding: 20px;
+    padding: 24px 12px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
   }
 
   .page-header h1 {
+    /* Виправлення: Зменшення розміру заголовка для планшетів */
     font-size: 28px;
+    margin-bottom: 6px;
   }
 
+  .subtitle {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .filters-section {
+    margin-bottom: 20px;
+  }
+
+  /* Stack all filter elements vertically on tablets */
   .filters-row {
     grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .filter-input,
+  .filter-select,
+  .btn-primary {
+    font-size: 14px;
+    padding: 11px 14px;
+    min-height: 44px;
+    width: 100%;
   }
 
   .stats-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
   }
 
   .card {
-    padding: 20px;
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 16px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    gap: 10px;
+  }
+
+  .card-header h2 {
+    font-size: 18px;
+  }
+
+  .view-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .view-btn {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+
+  .students-list {
+    gap: 12px;
   }
 
   .students-list.grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  .student-item {
+    padding: 14px;
+    gap: 12px;
+    border-radius: 14px;
+    min-height: 85px;
+  }
+
+  .student-avatar {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    font-size: 18px;
+  }
+
+  .student-name {
+    font-size: 16px; /* Трохи збільшено для кращої читабельності */
+    /* Виправлення: забезпечуємо коректне відображення імені */
+    white-space: normal;
+  }
+
+  .student-meta {
+    font-size: 11px;
+    gap: 10px;
+  }
+
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 10px;
+    min-height: 36px;
+  }
+
+  .students-list.grid .student-item {
+    padding: 16px;
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .students-list.grid .student-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .students-list.grid .student-meta {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .students-list.grid .student-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .students-list.grid .btn-sm {
+    flex: 0 1 calc(50% - 4px);
   }
 
   .modal-content {
-    width: 95%;
+    max-width: 95%;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 16px;
+  }
+
+  .modal-header {
+    padding: 14px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+
+  .modal-close {
+    font-size: 28px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .modal-body {
+    padding: 14px;
+  }
+
+  .detail-row {
+    grid-template-columns: 100px 1fr;
+    gap: 12px;
+    padding: 6px 0;
+  }
+
+  .detail-label {
+    font-size: 11px;
+  }
+
+  .detail-value {
+    font-size: 13px;
+  }
+
+  .detail-section h3 {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+}
+
+/* Mobile - 480px and below */
+@media (max-width: 480px) {
+  .main-container {
+    padding: 12px 8px;
+  }
+
+  .page-header {
+    margin-bottom: 18px;
+  }
+
+  .page-header h1 {
+    /* Виправлення: Зменшення розміру заголовка для мобільних пристроїв */
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .filters-section {
+    margin-bottom: 16px;
+  }
+
+  /* Single column layout for all filter elements */
+  .filters-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .filter-input,
+  .filter-select,
+  .btn-primary {
+    font-size: 13px;
+    padding: 9px 11px;
+    min-height: 42px;
+    width: 100%;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    padding: 12px 10px;
+    border-radius: 10px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+
+  .card {
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    gap: 8px;
+  }
+
+  .card-header h2 {
+    font-size: 16px;
+  }
+
+  .view-toggle {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .view-btn {
+    flex: 1;
+    padding: 6px;
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  .students-list {
+    gap: 9px;
+  }
+
+  /* Grid layout responsive for mobile */
+  .students-list.grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .student-item {
+    padding: 11px;
+    gap: 10px;
+    border-radius: 10px;
+    min-height: 75px;
+  }
+
+  .student-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 16px;
+  }
+
+  .student-name {
+    font-size: 14px; /* Трохи збільшено для кращої читабельності */
+    /* Виправлення: забезпечуємо коректне відображення імені */
+    white-space: normal;
+  }
+
+  .student-meta {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .student-actions {
+    width: 100%;
+    flex-direction: row;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .btn-sm {
+    flex: 1;
+    min-width: 50px;
+    padding: 6px 6px;
+    font-size: 10px;
+    min-height: 34px;
+  }
+
+  .students-list.grid .student-item {
+    padding: 12px;
+    text-align: center;
+    min-height: auto;
+  }
+
+  .students-list.grid .student-avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    margin: 0 auto 6px;
+  }
+
+  .students-list.grid .student-meta {
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 9px;
+  }
+
+  .students-list.grid .student-actions {
+    justify-content: center;
+    width: 100%;
+    gap: 4px;
+  }
+
+  .students-list.grid .btn-sm {
+    flex: 0 1 calc(50% - 2px);
+  }
+
+  /* Modal positioning and sizing optimized for mobile */
+  .modal {
+    padding: 8px;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    width: calc(100% - 16px);
+    max-width: 100%;
+    height: auto;
+    max-height: 95vh;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .modal-header {
+    padding: 11px;
+    gap: 8px;
+  }
+
+  .modal-header h2 {
+    font-size: 14px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    flex: 1;
+    max-width: calc(100% - 32px);
+  }
+
+  .modal-close {
+    font-size: 24px;
+    min-width: 32px;
+    min-height: 32px;
+    flex-shrink: 0;
+  }
+
+  .modal-body {
+    padding: 11px;
+  }
+
+  .student-detail {
+    gap: 12px;
+  }
+
+  .detail-section {
+    padding-bottom: 10px;
+  }
+
+  .detail-section h3 {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  /* Detail rows single column for better mobile readability */
+  .detail-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 4px 0;
+  }
+
+  .detail-label {
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .detail-value {
+    font-size: 12px;
+    padding-left: 0;
+  }
+
+  .participation-item {
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .loading {
+    padding: 40px 12px;
+    font-size: 12px;
+  }
+
+  .empty-state {
+    padding: 50px 12px;
+  }
+
+  .empty-state h3 {
+    font-size: 15px;
+  }
+}
+
+/* Extra small - 360px and below */
+@media (max-width: 360px) {
+  .main-container {
+    padding: 10px 6px;
+  }
+
+  .page-header h1 {
+    /* Виправлення: Зменшення розміру заголовка для найменших пристроїв */
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .filters-row {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .filter-input,
+  .filter-select,
+  .btn-primary {
+    font-size: 12px;
+    padding: 8px 9px;
+    min-height: 40px;
+  }
+
+  .stats-container {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    padding: 10px 8px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .card {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .card-header h2 {
+    font-size: 14px;
+  }
+
+  .view-btn {
+    font-size: 12px;
+  }
+
+  .students-list {
+    gap: 8px;
+  }
+
+  .students-list.grid {
+    gap: 8px;
+  }
+
+  .student-item {
+    padding: 9px;
+    min-height: 70px;
+  }
+
+  .student-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .student-name {
+    font-size: 13px; /* Трохи збільшено для кращої читабельності */
+    /* Виправлення: забезпечуємо коректне відображення імені */
+    white-space: normal;
+  }
+
+  .student-meta {
+    font-size: 9px;
+    gap: 4px;
+  }
+
+  .btn-sm {
+    padding: 5px 5px;
+    font-size: 9px;
+    min-height: 32px;
+  }
+
+  .modal-header h2 {
+    font-size: 13px;
+  }
+
+  .detail-label {
+    font-size: 9px;
+  }
+
+  .detail-value {
+    font-size: 11px;
+  }
+
+  .detail-section h3 {
+    font-size: 11px;
   }
 }
