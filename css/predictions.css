@@ -281,6 +281,7 @@ body {
   font-size: 18px;
   line-height: 1.6;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: subtitleSlideIn 1s ease-out 0.6s backwards;
   font-weight: 400;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -453,13 +454,13 @@ body {
 /* Enhanced filter section with smooth animations */
 .filters-section {
   background: white;
-  padding: 25px;
+  padding: 35px 40px;
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 30px;
   align-items: flex-end;
   animation: slideInFromRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   transition: all 0.3s ease;
@@ -472,7 +473,7 @@ body {
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   flex: 1;
   min-width: 200px;
   animation: fadeIn 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
@@ -495,6 +496,7 @@ body {
   font-size: 14px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: 0.3px;
+  padding: 0 2px;
 }
 
 .filter-group:hover label {
@@ -504,7 +506,7 @@ body {
 
 /* Dropdown select with smooth transitions and hover effects */
 .filter-group select {
-  padding: 12px 15px;
+  padding: 14px 18px;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 14px;
@@ -543,7 +545,7 @@ body {
   background: linear-gradient(135deg, #a88264 0%, #8b7355 100%);
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 14px 32px;
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
@@ -895,6 +897,8 @@ body {
 
   .filters-section {
     flex-direction: column;
+    padding: 25px 20px;
+    gap: 20px;
   }
 
   .filter-group {
@@ -949,6 +953,10 @@ body {
 
   .stat-value {
     font-size: 24px;
+  }
+
+  .filters-section {
+    padding: 20px 15px;
   }
 
   .predictions-grid {
