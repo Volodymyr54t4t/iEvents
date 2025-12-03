@@ -123,3 +123,8 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     errorDiv.classList.add("show")
   }
 })
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker зареєстровано"))
+    .catch(err => console.log("SW error:", err));
+}

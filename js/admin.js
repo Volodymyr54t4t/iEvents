@@ -1160,3 +1160,8 @@ function showNotification(message, type = "info") {
     setTimeout(() => notification.remove(), 300)
   }, 3000)
 }
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker зареєстровано"))
+    .catch(err => console.log("SW error:", err));
+}

@@ -472,3 +472,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadClassDetails()
     console.log("[v0] Статистика завантажена")
 })
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker зареєстровано"))
+    .catch(err => console.log("SW error:", err));
+}

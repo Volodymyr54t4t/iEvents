@@ -912,3 +912,8 @@ window.openAddResultModal = openAddResultModal;
 window.editResult = editResult;
 window.deleteResult = deleteResult;
 window.closeResultModal = closeResultModal;
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker зареєстровано"))
+    .catch(err => console.log("SW error:", err));
+}

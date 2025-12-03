@@ -454,3 +454,8 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
 toggleFieldsByRole()
 loadSchools()
 loadProfile()
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker зареєстровано"))
+    .catch(err => console.log("SW error:", err));
+}

@@ -452,3 +452,8 @@ function showLoading(show) {
 function showNoData(show) {
   document.getElementById("noData").style.display = show ? "block" : "none"
 }
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker зареєстровано"))
+    .catch(err => console.log("SW error:", err));
+}
