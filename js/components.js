@@ -4,10 +4,22 @@ function renderHeader() {
   const userEmail = localStorage.getItem("userEmail")
   const userRole = localStorage.getItem("userRole")
 
-  if (!userId) return
-
   const header = document.getElementById("header")
   if (!header) return
+
+  if (!userId) {
+    header.innerHTML = `
+        <header class="site-header">
+            <div class="header-container">
+                <a href="index.html" class="logo">🎯 iEvents</a>
+                <nav class="nav">
+                    <a href="auth.html" class="btn btn-primary">Увійти / Зареєструватися</a>
+                </nav>
+            </div>
+        </header>
+    `
+    return
+  }
 
   checkAdminPageAccess(userRole)
 
@@ -52,9 +64,9 @@ function renderHeader() {
   }
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
-    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" || userRole === "методист"
+      ? '<a href="competitionsT.html" class="nav-link">Конкурси</a>'
+      : '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
