@@ -77,10 +77,10 @@ function renderHeader() {
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
 
   const studentAdminLink =
-    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">📋 Особистий кабінет</a>' : ""
+    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Особистий кабінет</a>' : ""
 
   const teacherAdminLink =
-    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">👨‍🏫 Адмінка вчителя</a>' : ""
+    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка вчителя</a>' : ""
 
   let profileLink = '<a href="profile.html" class="nav-link">Профіль</a>'
   if (userRole === "вчитель" || userRole === "методист") {
