@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "https://ievents-qf5k.onrender.com"
 }
 
-console.log("[v0] Connecting to:", BASE_URL)
+console.log(" Connecting to:", BASE_URL)
 
 let allStudents = []
 let filteredStudents = []
@@ -41,8 +41,8 @@ async function loadStudents() {
   container.innerHTML = '<div class="loading">Завантаження учнів...</div>'
 
   try {
-    console.log("[v0] Loading students for teacher ID:", userId)
-    console.log("[v0] User school ID:", userSchoolId)
+    console.log(" Loading students for teacher ID:", userId)
+    console.log(" User school ID:", userSchoolId)
 
     const teacherResponse = await fetch(`${BASE_URL}/api/profile/teacher/${userId}`)
     const teacherData = await teacherResponse.json()
@@ -52,7 +52,7 @@ async function loadStudents() {
     }
 
     const teacherSchoolId = teacherData.profile?.school_id ? Number.parseInt(teacherData.profile.school_id, 10) : null
-    console.log("[v0] Teacher school ID from profile:", teacherSchoolId, "type:", typeof teacherSchoolId)
+    console.log(" Teacher school ID from profile:", teacherSchoolId, "type:", typeof teacherSchoolId)
 
     if (!teacherSchoolId) {
       container.innerHTML = `
@@ -71,12 +71,12 @@ async function loadStudents() {
     if (response.ok) {
       allStudents = (data.students || []).filter((student) => {
         const studentSchoolId = student.school_id ? Number.parseInt(student.school_id, 10) : null
-        console.log("[v0] Comparing - Student school_id:", studentSchoolId, "Teacher school_id:", teacherSchoolId)
+        console.log(" Comparing - Student school_id:", studentSchoolId, "Teacher school_id:", teacherSchoolId)
         return studentSchoolId === teacherSchoolId
       })
 
-      console.log("[v0] Total students received:", data.students?.length)
-      console.log("[v0] Filtered by school:", allStudents.length)
+      console.log(" Total students received:", data.students?.length)
+      console.log(" Filtered by school:", allStudents.length)
 
       filteredStudents = [...allStudents]
 
@@ -101,7 +101,7 @@ async function loadStudents() {
       `
     }
   } catch (error) {
-    console.error("[v0] Error loading students:", error)
+    console.error(" Error loading students:", error)
     container.innerHTML = `
       <div class="empty-state">
         <h3>Помилка з'єднання</h3>
@@ -238,7 +238,7 @@ async function openStudentModal(studentId) {
       document.getElementById("studentDetailModal").classList.add("active")
     }
   } catch (error) {
-    console.error("[v0] Error loading student details:", error)
+    console.error(" Error loading student details:", error)
     alert("Помилка завантаження деталей учня")
   }
 }
@@ -266,7 +266,7 @@ async function loadStudentParticipations(studentId) {
       participationList.innerHTML = "<p>Немає участей у конкурсах</p>"
     }
   } catch (error) {
-    console.error("[v0] Error loading participations:", error)
+    console.error(" Error loading participations:", error)
     document.getElementById("participationList").innerHTML = "<p>Помилка завантаження</p>"
   }
 }

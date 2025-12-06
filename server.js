@@ -1924,7 +1924,7 @@ app.get("/api/statistics/by-grade", async (req, res) => {
 app.get("/api/statistics/top-students", async (req, res) => {
   const limit = Number.parseInt(req.query.limit) || 10
 
-  console.log("[v0] Запит топ активних учнів, limit:", limit)
+  console.log(" Запит топ активних учнів, limit:", limit)
 
   try {
     if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -1955,7 +1955,7 @@ app.get("/api/statistics/top-students", async (req, res) => {
       ["учень", limit],
     )
 
-    console.log("[v0] Топ активних учнів отримано, кількість:", result.rows.length)
+    console.log(" Топ активних учнів отримано, кількість:", result.rows.length)
 
     const students = result.rows.map((row) => ({
       id: row.id,
@@ -1973,7 +1973,7 @@ app.get("/api/statistics/top-students", async (req, res) => {
       count: students.length,
     })
   } catch (error) {
-    console.error("[v0] Помилка отримання топ учнів:", error.message)
+    console.error(" Помилка отримання топ учнів:", error.message)
     res.status(500).json({
       success: false,
       error: "Помилка отримання статистики",
@@ -2683,7 +2683,7 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
     consultationAreas,
   } = req.body
 
-  console.log("[v0] Received profile update - userId:", userId, "Type:", typeof userId)
+  console.log(" Received profile update - userId:", userId, "Type:", typeof userId)
 
   let parsedUserId = null
 
@@ -2696,13 +2696,13 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
   parsedUserId = Number.parseInt(String(userId).trim(), 10)
 
   if (Number.isNaN(parsedUserId) || parsedUserId <= 0) {
-    console.error("[v0] Invalid userId after parsing:", parsedUserId)
+    console.error(" Invalid userId after parsing:", parsedUserId)
     return res.status(400).json({
       error: "ID користувача має бути числом більшим за 0",
     })
   }
 
-  console.log("[v0] Parsed userId:", parsedUserId)
+  console.log(" Parsed userId:", parsedUserId)
 
   const client = await pool.connect()
 
@@ -2712,7 +2712,7 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
     const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [parsedUserId])
     if (userCheck.rows.length === 0) {
       await client.query("ROLLBACK")
-      console.error("[v0] User not found:", parsedUserId)
+      console.error(" User not found:", parsedUserId)
       return res.status(404).json({
         error: "Користувача не знайдено в системі",
       })
@@ -2721,13 +2721,13 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
     let avatarPath = null
     if (req.file) {
       avatarPath = `/uploads/${req.file.filename}`
-      console.log("[v0] Avatar uploaded:", avatarPath)
+      console.log(" Avatar uploaded:", avatarPath)
     }
 
     const existingProfile = await client.query("SELECT id, avatar FROM profiles WHERE user_id = $1", [parsedUserId])
 
     if (existingProfile.rows.length === 0) {
-      console.log("[v0] Creating new teacher profile for userId:", parsedUserId)
+      console.log(" Creating new teacher profile for userId:", parsedUserId)
       await client.query(
         `INSERT INTO profiles (
           user_id, first_name, last_name, middle_name, 
@@ -2752,7 +2752,7 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
         ],
       )
     } else {
-      console.log("[v0] Updating existing teacher profile for userId:", parsedUserId)
+      console.log(" Updating existing teacher profile for userId:", parsedUserId)
 
       const currentAvatar = existingProfile.rows[0].avatar
       const finalAvatarPath = avatarPath || currentAvatar
@@ -2792,13 +2792,13 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
     }
 
     await client.query("COMMIT")
-    console.log("[v0] Profile saved successfully for userId:", parsedUserId)
+    console.log(" Profile saved successfully for userId:", parsedUserId)
     res.json({
       message: "Профіль успішно оновлено",
     })
   } catch (error) {
     await client.query("ROLLBACK")
-    console.error("[v0] Error updating teacher profile:", error.message)
+    console.error(" Error updating teacher profile:", error.message)
     res.status(500).json({
       error: "Помилка оновлення профіля: " + error.message,
     })
@@ -2812,7 +2812,7 @@ app.get("/api/teacher/:teacherId/students", async (req, res) => {
   try {
     const { teacherId } = req.params
 
-    console.log("[v0] Fetching students for teacher:", teacherId)
+    console.log(" Fetching students for teacher:", teacherId)
 
     const teacherProfile = await pool.query(
       `SELECT p.school_id, p.subjects_ids 
@@ -2823,16 +2823,16 @@ app.get("/api/teacher/:teacherId/students", async (req, res) => {
     )
 
     if (teacherProfile.rows.length === 0) {
-      console.log("[v0] Teacher not found or not a teacher/metodyst")
+      console.log(" Teacher not found or not a teacher/metodyst")
       return res.status(404).json({ error: "Вчителя не знайдено або користувач не є вчителем/методистом." })
     }
 
     const schoolId = teacherProfile.rows[0].school_id
 
-    console.log("[v0] Teacher's school ID:", schoolId)
+    console.log(" Teacher's school ID:", schoolId)
 
     if (!schoolId) {
-      console.log("[v0] Teacher has no school assigned")
+      console.log(" Teacher has no school assigned")
       return res.status(400).json({ error: "У вчителя не вказана школа. Будь ласка, заповніть профіль." })
     }
 
@@ -2862,7 +2862,7 @@ app.get("/api/teacher/:teacherId/students", async (req, res) => {
       [schoolId],
     )
 
-    console.log("[v0] Students found:", studentsResult.rows.length)
+    console.log(" Students found:", studentsResult.rows.length)
 
     res.json({
       success: true,
@@ -2871,7 +2871,7 @@ app.get("/api/teacher/:teacherId/students", async (req, res) => {
       totalStudents: studentsResult.rows.length,
     })
   } catch (error) {
-    console.error("[v0] Error getting teacher students:", error)
+    console.error(" Error getting teacher students:", error)
     res.status(500).json({ error: "Помилка сервера при отриманні списку учнів" })
   }
 })
@@ -3000,7 +3000,7 @@ app.post("/api/teacher/students", async (req, res) => {
     schoolId,
   } = req.body
 
-  console.log("[v0] Creating new student:", { email, schoolId })
+  console.log(" Creating new student:", { email, schoolId })
 
   if (!email || !password || !firstName || !lastName || !schoolId) {
     return res.status(400).json({ error: "Заповніть всі обов'язкові поля" })
@@ -3057,11 +3057,11 @@ app.post("/api/teacher/students", async (req, res) => {
 
     await client.query("COMMIT")
 
-    console.log("[v0] Student created successfully:", userId)
+    console.log(" Student created successfully:", userId)
     res.json({ message: "Учня успішно створено", userId })
   } catch (error) {
     await client.query("ROLLBACK")
-    console.error("[v0] Error creating student:", error)
+    console.error(" Error creating student:", error)
     res.status(500).json({ error: "Помилка створення учня" })
   } finally {
     client.release()
@@ -3087,7 +3087,7 @@ app.put("/api/teacher/students/:studentId", async (req, res) => {
     schoolId,
   } = req.body
 
-  console.log("[v0] Updating student:", studentId)
+  console.log(" Updating student:", studentId)
 
   if (!email || !firstName || !lastName) {
     return res.status(400).json({ error: "Заповніть всі обов'язкові поля" })
@@ -3152,11 +3152,11 @@ app.put("/api/teacher/students/:studentId", async (req, res) => {
 
     await client.query("COMMIT")
 
-    console.log("[v0] Student updated successfully:", studentId)
+    console.log(" Student updated successfully:", studentId)
     res.json({ message: "Учня успішно оновлено" })
   } catch (error) {
     await client.query("ROLLBACK")
-    console.error("[v0] Error updating student:", error)
+    console.error(" Error updating student:", error)
     res.status(500).json({ error: "Помилка оновлення учня" })
   } finally {
     client.release()
@@ -3167,7 +3167,7 @@ app.put("/api/teacher/students/:studentId", async (req, res) => {
 app.delete("/api/teacher/students/:studentId", async (req, res) => {
   const { studentId } = req.params
 
-  console.log("[v0] Deleting student:", studentId)
+  console.log(" Deleting student:", studentId)
 
   const client = await pool.connect()
 
@@ -3193,11 +3193,11 @@ app.delete("/api/teacher/students/:studentId", async (req, res) => {
 
     await client.query("COMMIT")
 
-    console.log("[v0] Student deleted successfully:", studentId)
+    console.log(" Student deleted successfully:", studentId)
     res.json({ message: "Учня успішно видалено" })
   } catch (error) {
     await client.query("ROLLBACK")
-    console.error("[v0] Error deleting student:", error)
+    console.error(" Error deleting student:", error)
     res.status(500).json({ error: "Помилка видалення учня" })
   } finally {
     client.release()

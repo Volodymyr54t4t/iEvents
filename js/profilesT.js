@@ -10,11 +10,11 @@ const userId = userIdFromStorage ? Number.parseInt(userIdFromStorage, 10) : null
 const userRole = localStorage.getItem("userRole") || "вчитель"
 
 if (!userId || Number.isNaN(userId)) {
-  console.error("[v0] Invalid userId:", userIdFromStorage)
+  console.error(" Invalid userId:", userIdFromStorage)
   window.location.href = "auth.html"
 }
 
-console.log("[v0] Loaded userId:", userId, "Role:", userRole)
+console.log(" Loaded userId:", userId, "Role:", userRole)
 
 let avatarFile = null
 let originalImage = null
@@ -173,7 +173,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   }
 
   try {
-    console.log("[v0] Sending profile update for userId:", userId)
+    console.log(" Sending profile update for userId:", userId)
     const response = await fetch(`${BASE_URL}/api/profile/teacher`, {
       method: "POST",
       body: formData,
@@ -200,10 +200,10 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
       messageDiv.textContent = "❌ " + (data.error || "Помилка збереження")
       messageDiv.className = "message error"
       messageDiv.style.display = "block"
-      console.error("[v0] Server error:", data)
+      console.error(" Server error:", data)
     }
   } catch (error) {
-    console.error("[v0] Error saving profile:", error)
+    console.error(" Error saving profile:", error)
     messageDiv.textContent = "❌ Помилка з'єднання з сервером"
     messageDiv.className = "message error"
     messageDiv.style.display = "block"

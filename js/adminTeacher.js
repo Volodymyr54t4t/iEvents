@@ -63,7 +63,7 @@ async function initializeAdmin() {
     await loadCompetitions();
     await loadResults();
   } catch (error) {
-    console.error("[v0] Error initializing admin:", error);
+    console.error("Error initializing admin:", error);
     showNotification("Помилка ініціалізації: " + error.message, "error");
   }
 }
@@ -108,7 +108,7 @@ async function loadStudents() {
       throw new Error(data.error || "Не вдалося завантажити список учнів");
     }
   } catch (error) {
-    console.error("[v0] Error loading students:", error);
+    console.error("Error loading students:", error);
     tbody.innerHTML = `
       <tr>
         <td colspan="7" class="empty-state">
@@ -244,7 +244,7 @@ async function loadParticipationsCount() {
       }
     }
   } catch (error) {
-    console.error("[v0] Error loading participations count:", error);
+    console.error("Error loading participations count:", error);
     document.getElementById("totalParticipations").textContent = "–";
   }
 }
@@ -290,7 +290,7 @@ async function viewStudentDetails(studentId) {
       throw new Error(data.error || "Учня не знайдено");
     }
   } catch (error) {
-    console.error("[v0] Error loading student details:", error);
+    console.error("Error loading student details:", error);
     showNotification("Помилка завантаження деталей учня: " + error.message, "error");
   }
 }
@@ -318,7 +318,7 @@ async function loadStudentParticipations(studentId) {
       participationList.innerHTML = "<p>Немає участей у конкурсах</p>";
     }
   } catch (error) {
-    console.error("[v0] Error loading participations:", error);
+    console.error("Error loading participations:", error);
     document.getElementById("participationList").innerHTML = "<p>Помилка завантаження</p>";
   }
 }
@@ -349,7 +349,7 @@ async function loadStudentResults(studentId) {
       resultsList.innerHTML = "<p>Немає результатів</p>";
     }
   } catch (error) {
-    console.error("[v0] Error loading results:", error);
+    console.error("Error loading results:", error);
     document.getElementById("resultsList").innerHTML = "<p>Помилка завантаження</p>";
   }
 }
@@ -377,7 +377,7 @@ async function loadCompetitions() {
       displayCompetitions(filteredCompetitions);
     }
   } catch (error) {
-    console.error("[v0] Error loading competitions:", error);
+    console.error("Error loading competitions:", error);
     tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><h3>Помилка завантаження конкурсів</h3></td></tr>`;
     showNotification("Помилка завантаження конкурсів", "error");
   }
@@ -515,7 +515,7 @@ async function handleCompetitionFormSubmit(e) {
     closeCompetitionModal();
     await loadCompetitions();
   } catch (error) {
-    console.error("[v0] Error saving competition:", error);
+    console.error("Error saving competition:", error);
     showNotification("Помилка збереження конкурсу: " + error.message, "error");
   }
 }
@@ -537,7 +537,7 @@ async function deleteCompetition(competitionId, competitionTitle) {
     showNotification("Конкурс успішно видалено", "success");
     await loadCompetitions();
   } catch (error) {
-    console.error("[v0] Error deleting competition:", error);
+    console.error(" Error deleting competition:", error);
     showNotification("Помилка видалення конкурсу: " + error.message, "error");
   }
 }
@@ -565,7 +565,7 @@ async function loadResults() {
       displayResults(filteredResults);
     }
   } catch (error) {
-    console.error("[v0] Error loading results:", error);
+    console.error("Error loading results:", error);
     tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><h3>Помилка завантаження результатів</h3></td></tr>`;
     showNotification("Помилка завантаження результатів", "error");
   }
@@ -749,7 +749,7 @@ async function handleResultFormSubmit(e) {
     closeResultModal();
     await loadResults();
   } catch (error) {
-    console.error("[v0] Error saving result:", error);
+    console.error("Error saving result:", error);
     showNotification("Помилка збереження результату: " + error.message, "error");
   }
 }
@@ -771,7 +771,7 @@ async function deleteResult(resultId) {
     showNotification("Результат успішно видалено", "success");
     await loadResults();
   } catch (error) {
-    console.error("[v0] Error deleting result:", error);
+    console.error("Error deleting result:", error);
     showNotification("Помилка видалення результату: " + error.message, "error");
   }
 }
@@ -797,7 +797,7 @@ async function loadStatistics() {
     // Load class distribution
     loadClassDistribution();
   } catch (error) {
-    console.error("[v0] Error loading statistics:", error);
+    console.error("Error loading statistics:", error);
     showNotification("Помилка завантаження статистики", "error");
   }
 }
@@ -835,7 +835,7 @@ async function loadTopStudents() {
       topStudentsList.innerHTML = "<p>Немає даних</p>";
     }
   } catch (error) {
-    console.error("[v0] Error loading top students:", error);
+    console.error("Error loading top students:", error);
     topStudentsList.innerHTML = "<p>Помилка завантаження</p>";
   }
 }

@@ -105,7 +105,7 @@ async function loadProfile() {
       if (userRole === "учень") {
         if (profile.school_id) {
           document.getElementById("schoolSelect").value = String(profile.school_id)
-          console.log("[v0] Student school_id loaded:", profile.school_id)
+          console.log(" Student school_id loaded:", profile.school_id)
         }
         document.getElementById("gradeNumber").value = profile.grade_number || ""
         document.getElementById("gradeLetter").value = profile.grade_letter || ""
@@ -394,7 +394,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   if (userRole === "учень") {
     const schoolId = document.getElementById("schoolSelect").value
     formData.append("schoolId", schoolId ? Number.parseInt(schoolId, 10) : "")
-    console.log("[v0] Submitting school_id:", schoolId)
+    console.log(" Submitting school_id:", schoolId)
     formData.append("gradeNumber", document.getElementById("gradeNumber").value.trim())
     formData.append("gradeLetter", document.getElementById("gradeLetter").value.trim())
     formData.append("clubInstitution", document.getElementById("clubInstitution").value.trim())

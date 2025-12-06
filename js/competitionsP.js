@@ -4,7 +4,7 @@ const BASE_URL = window.AppConfig ?
   "http://localhost:3000" :
   "https://ievents-qf5k.onrender.com"
 
-console.log("📡 [v0] Підключення до:", BASE_URL)
+console.log("📡  Підключення до:", BASE_URL)
 
 // Перевірка авторизації
 const userId = localStorage.getItem("userId")
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadMyCompetitions() {
   try {
-    console.log("[v0] Завантаження конкурсів для користувача:", userId)
+    console.log(" Завантаження конкурсів для користувача:", userId)
     const response = await fetch(`${BASE_URL}/api/competitions/my/${userId}`)
 
     if (!response.ok) {
@@ -42,7 +42,7 @@ async function loadMyCompetitions() {
       displayCompetitions("inactiveCompetitions", inactive, "inactive")
     }
   } catch (error) {
-    console.error("[v0] Помилка завантаження конкурсів:", error)
+    console.error(" Помилка завантаження конкурсів:", error)
     showError("activeCompetitions")
     showError("upcomingCompetitions")
     showError("inactiveCompetitions")
@@ -145,7 +145,7 @@ async function loadMyResults() {
   container.innerHTML = '<div class="loading">Завантаження результатів...</div>'
 
   try {
-    console.log("[v0] Завантаження результатів для користувача:", userId)
+    console.log(" Завантаження результатів для користувача:", userId)
     const competitionsResponse = await fetch(`${BASE_URL}/api/competitions/my/${userId}`)
 
     if (!competitionsResponse.ok) {
@@ -180,7 +180,7 @@ async function loadMyResults() {
           }
         }
       } catch (error) {
-        console.error(`[v0] Помилка завантаження результатів для конкурсу ${competition.id}:`, error)
+        console.error(` Помилка завантаження результатів для конкурсу ${competition.id}:`, error)
       }
     }
 
@@ -224,17 +224,17 @@ async function loadMyResults() {
       </div>
     `
   } catch (error) {
-    console.error("[v0] Помилка завантаження результатів:", error)
+    console.error(" Помилка завантаження результатів:", error)
     container.innerHTML = '<div class="empty-state"><p>Помилка завантаження результатів</p></div>'
   }
 }
 
 async function openCompetitionForm(competitionId) {
   console.log("=====================================")
-  console.log("[v0] 🔵 ПОЧАТОК ЗАВАНТАЖЕННЯ ФОРМИ")
-  console.log("[v0] Competition ID:", competitionId)
-  console.log("[v0] User ID:", userId)
-  console.log("[v0] BASE_URL:", BASE_URL)
+  console.log(" 🔵 ПОЧАТОК ЗАВАНТАЖЕННЯ ФОРМИ")
+  console.log(" Competition ID:", competitionId)
+  console.log(" User ID:", userId)
+  console.log(" BASE_URL:", BASE_URL)
   console.log("=====================================")
 
   currentCompetitionFormId = competitionId
@@ -270,56 +270,56 @@ async function openCompetitionForm(competitionId) {
 
   try {
     const requestUrl = `${BASE_URL}/api/competitions/${competitionId}`
-    console.log("[v0] 📡 Виконую запит до:", requestUrl)
+    console.log(" 📡 Виконую запит до:", requestUrl)
 
     const competitionResponse = await fetch(requestUrl)
-    console.log("[v0] 📥 Відповідь сервера статус:", competitionResponse.status)
-    console.log("[v0] 📥 Content-Type:", competitionResponse.headers.get("content-type"))
+    console.log(" 📥 Відповідь сервера статус:", competitionResponse.status)
+    console.log(" 📥 Content-Type:", competitionResponse.headers.get("content-type"))
 
     if (!competitionResponse.ok) {
       const errorText = await competitionResponse.text()
-      console.error("[v0] ❌ Помилка сервера:", errorText)
+      console.error(" ❌ Помилка сервера:", errorText)
       throw new Error(`Сервер повернув помилку ${competitionResponse.status}`)
     }
 
     const contentType = competitionResponse.headers.get("content-type")
     if (!contentType || !contentType.includes("application/json")) {
-      console.error("[v0] ❌ Сервер повернув не JSON:", contentType)
+      console.error(" ❌ Сервер повернув не JSON:", contentType)
       throw new Error("Сервер повернув невірний формат даних")
     }
 
     const competitionData = await competitionResponse.json()
-    console.log("[v0] ✅ Дані конкурсу отримано:", competitionData)
+    console.log(" ✅ Дані конкурсу отримано:", competitionData)
 
     if (!competitionData || !competitionData.competition) {
       throw new Error("Дані конкурсу відсутні")
     }
 
     const competition = competitionData.competition
-    console.log("[v0] 📋 Назва конкурсу:", competition.title)
-    console.log("[v0] 📋 Custom fields (raw):", competition.custom_fields)
-    console.log("[v0] 📋 Custom fields type:", typeof competition.custom_fields)
+    console.log(" 📋 Назва конкурсу:", competition.title)
+    console.log(" 📋 Custom fields (raw):", competition.custom_fields)
+    console.log(" 📋 Custom fields type:", typeof competition.custom_fields)
 
     try {
       const responseCheckUrl = `${BASE_URL}/api/competitions/${competitionId}/form-response/${userId}`
-      console.log("[v0] 🔍 Перевірка існуючої відповіді:", responseCheckUrl)
+      console.log(" 🔍 Перевірка існуючої відповіді:", responseCheckUrl)
 
       const responseResponse = await fetch(responseCheckUrl)
 
       if (responseResponse.ok) {
         const responseData = await responseResponse.json()
-        console.log("[v0] 📝 Відповідь з сервера:", responseData)
+        console.log(" 📝 Відповідь з сервера:", responseData)
 
         if (responseData.response && responseData.response.form_data) {
-          console.log("[v0] ✅ Форма вже заповнена, показуємо відповідь")
+          console.log(" ✅ Форма вже заповнена, показуємо відповідь")
           displaySubmittedForm(competition, responseData.response)
           return
         }
       }
 
-      console.log("[v0] ℹ️ Форма ще не заповнена, показуємо форму")
+      console.log(" ℹ️ Форма ще не заповнена, показуємо форму")
     } catch (e) {
-      console.log("[v0] ℹ️ Помилка перевірки відповіді (не критично):", e.message)
+      console.log(" ℹ️ Помилка перевірки відповіді (не критично):", e.message)
     }
 
     let customFields = []
@@ -327,23 +327,23 @@ async function openCompetitionForm(competitionId) {
     if (competition.custom_fields) {
       if (Array.isArray(competition.custom_fields)) {
         customFields = competition.custom_fields
-        console.log("[v0] ✅ Custom fields це вже масив:", customFields)
+        console.log(" ✅ Custom fields це вже масив:", customFields)
       } else if (typeof competition.custom_fields === "string") {
         try {
           customFields = JSON.parse(competition.custom_fields)
-          console.log("[v0] ✅ Custom fields парсинуто з рядка:", customFields)
+          console.log(" ✅ Custom fields парсинуто з рядка:", customFields)
         } catch (e) {
-          console.error("[v0] ❌ Помилка парсування:", e)
+          console.error(" ❌ Помилка парсування:", e)
           customFields = []
         }
       } else if (typeof competition.custom_fields === "object") {
         customFields = [competition.custom_fields]
-        console.log("[v0] ✅ Custom fields конвертовано в масив:", customFields)
+        console.log(" ✅ Custom fields конвертовано в масив:", customFields)
       }
     }
 
-    console.log("[v0] 📋 Фінальні custom fields для відображення:", customFields)
-    console.log("[v0] 📋 Кількість кастомних полів:", customFields.length)
+    console.log(" 📋 Фінальні custom fields для відображення:", customFields)
+    console.log(" 📋 Кількість кастомних полів:", customFields.length)
 
     document.getElementById("formModalTitle").textContent = competition.title
 
@@ -442,7 +442,7 @@ async function openCompetitionForm(competitionId) {
               customFields && customFields.length > 0
                 ? customFields
                     .map((field, index) => {
-                      console.log(`[v0] 🔨 Генерую поле ${index}:`, field)
+                      console.log(` 🔨 Генерую поле ${index}:`, field)
 
                       const fieldId = `field_custom_${index}`
                       const isRequired = field.required ? "required" : ""
@@ -562,7 +562,7 @@ async function openCompetitionForm(competitionId) {
                     </div>
                   `
                         default:
-                          console.warn(`[v0] ⚠️ Невідомий тип поля: ${field.type}`)
+                          console.warn(` ⚠️ Невідомий тип поля: ${field.type}`)
                           return ""
                       }
                     })
@@ -575,11 +575,11 @@ async function openCompetitionForm(competitionId) {
     `
 
     formBody.innerHTML = formHTML
-    console.log("[v0] ✅ Форма успішно згенерована!")
+    console.log(" ✅ Форма успішно згенерована!")
     console.log("=====================================")
   } catch (error) {
-    console.error("[v0] ❌ КРИТИЧНА ПОМИЛКА:", error)
-    console.error("[v0] Error stack:", error.stack)
+    console.error(" ❌ КРИТИЧНА ПОМИЛКА:", error)
+    console.error(" Error stack:", error.stack)
 
     formBody.innerHTML = `
       <div class="empty-state">
@@ -596,7 +596,7 @@ async function openCompetitionForm(competitionId) {
 }
 
 function displaySubmittedForm(competition, response) {
-  console.log("[v0] Відображення заповненої форми")
+  console.log(" Відображення заповненої форми")
   const formBody = document.getElementById("formModalBody")
   const submitBtn = document.getElementById("submitFormBtn")
   submitBtn.style.display = "none"
@@ -609,7 +609,7 @@ function displaySubmittedForm(competition, response) {
         JSON.parse(competition.custom_fields) :
         competition.custom_fields
     } catch (e) {
-      console.error("[v0] Помилка парсування custom_fields:", e)
+      console.error(" Помилка парсування custom_fields:", e)
     }
   }
 
@@ -705,8 +705,8 @@ async function submitCompetitionForm() {
     }
   }
 
-  console.log("[v0] Відправка даних форми:", data)
-  console.log("[v0] Файли для завантаження:", filesToUpload.length)
+  console.log(" Відправка даних форми:", data)
+  console.log(" Файли для завантаження:", filesToUpload.length)
 
   try {
     const response = await fetch(`${BASE_URL}/api/competitions/${currentCompetitionFormId}/form-response`, {
@@ -723,15 +723,15 @@ async function submitCompetitionForm() {
     const result = await response.json()
 
     if (!response.ok) {
-      console.error("[v0] ❌ Помилка відправки форми:", result.error)
+      console.error(" ❌ Помилка відправки форми:", result.error)
       alert(`❌ Помилка: ${result.error}`)
       return
     }
 
-    console.log("[v0] ✅ Форма успішно відправлена")
+    console.log(" ✅ Форма успішно відправлена")
 
     if (filesToUpload.length > 0) {
-      console.log("[v0] 📤 Початок завантаження файлів...")
+      console.log(" 📤 Початок завантаження файлів...")
       for (const fileData of filesToUpload) {
         const fileFormData = new FormData()
         fileFormData.append("file", fileData.file)
@@ -748,12 +748,12 @@ async function submitCompetitionForm() {
           )
 
           if (uploadResponse.ok) {
-            console.log("[v0] ✅ Файл успішно завантажено:", fileData.file.name)
+            console.log(" ✅ Файл успішно завантажено:", fileData.file.name)
           } else {
-            console.error("[v0] ⚠️ Помилка завантаження файлу:", fileData.file.name)
+            console.error(" ⚠️ Помилка завантаження файлу:", fileData.file.name)
           }
         } catch (fileError) {
-          console.error("[v0] ⚠️ Помилка завантаження файлу:", fileError)
+          console.error(" ⚠️ Помилка завантаження файлу:", fileError)
         }
       }
     }
@@ -762,7 +762,7 @@ async function submitCompetitionForm() {
     closeCompetitionForm()
     loadMyCompetitions()
   } catch (error) {
-    console.error("[v0] ❌ Помилка відправки форми:", error)
+    console.error(" ❌ Помилка відправки форми:", error)
     alert("❌ Помилка відправки форми. Спробуйте ще раз.")
   }
 }

@@ -169,7 +169,7 @@ function checkAdminPageAccess(userRole) {
   const allowedPages = ["index.html", "profileCommunity.html", "adminCommunity.html"]
 
   if (!allowedPages.includes(currentPage) && currentPage !== "") {
-    console.warn(`[v0] Admin user tried to access unauthorized page: ${currentPage}. Redirecting to index.html`)
+    console.warn(` Admin user tried to access unauthorized page: ${currentPage}. Redirecting to index.html`)
     window.location.href = "index.html"
   }
 }

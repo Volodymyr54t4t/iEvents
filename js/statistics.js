@@ -413,7 +413,7 @@ function closePlanningForm() {
 
 // Ініціалізація сторінки
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("[v0] Завантаження статистики...")
+    console.log(" Завантаження статистики...")
 
     // Check user role and show planning button for teachers and methodists
     if (userRole === "вчитель" || userRole === "методист") {
@@ -470,7 +470,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadCompetitionsStats()
     await loadSchoolsStats()
     await loadClassDetails()
-    console.log("[v0] Статистика завантажена")
+    console.log(" Статистика завантажена")
 })
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js")
