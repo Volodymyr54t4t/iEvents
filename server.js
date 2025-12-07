@@ -8,51 +8,6 @@ const path = require("path")
 const fs = require("fs")
 const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCompetition } = require("./bot")
 
-
-// Placeholder for authenticateToken middleware
-// In a real application, this would be imported from a separate file (e.g., middleware/auth.js)
-// and would involve JWT validation.
-const authenticateToken = (req, res, next) => {
-  // Dummy implementation: Assume token is valid and user info is attached.
-  // Replace with actual JWT validation logic.
-  console.log("🚀 authenticateToken middleware called (dummy implementation).")
-  // Example: Mocking a logged-in user
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
-    // Simulate extracting user ID and role from a valid token
-    req.user = {
-      userId: Number.parseInt(req.headers.authorization.split(" ")[1], 10) || 1, // Example userId
-      role: "teacher", // Example role, could be 'student', 'teacher', 'admin' etc.
-    }
-    console.log(`✅ authenticateToken: User authenticated as ID ${req.user.userId}, Role: ${req.user.role}`)
-  } else {
-    // If no token or invalid format, simulate a logged-in user for testing certain endpoints
-    // In a real app, you would return 401 Unauthorized here.
-    console.warn("⚠️ authenticateToken: No valid token found, simulating logged-in user for testing purposes.")
-    req.user = {
-      userId: 1, // Default user for testing if no auth header
-      role: "teacher",
-    }
-  }
-  next()
-}
-
-// Placeholder for createNotification function
-// In a real application, this would likely call a database insert operation.
-const createNotification = async (userId, title, message, type, relatedId, relatedType, actionUrl) => {
-  console.log(`🔔 createNotification called for user ${userId}: ${title} - ${message}`)
-  // Dummy implementation: In a real scenario, you'd insert into a 'notifications' table.
-  try {
-    await pool.query(
-      `INSERT INTO notifications (user_id, title, message, type, related_id, related_type, action_url) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [userId, title, message, type, relatedId, relatedType, actionUrl],
-    )
-    console.log(`🔔 Notification created in DB for user ${userId}.`)
-  } catch (error) {
-    console.error(`❌ Error creating notification in DB for user ${userId}:`, error.message)
-  }
-}
-
 const app = express()
 const PORT = 3000
 
@@ -135,7 +90,7 @@ const pool = new Pool({
   },
 })
 
-// CHANGE: Додано створення таблиці notifications
+// Ініціалізація бази даних
 async function initializeDatabase() {
   const client = await pool.connect()
   try {
@@ -578,139 +533,7 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця competition_form_responses вже існує")
     }
 
-    // Перевірка та створення таблиці schools (для ІСУО)
-    console.log("Перевірка таблиці schools...")
-    const schoolsTableCheck = await client.query(`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.tables 
-        WHERE table_name = 'schools'
-      ) as exists
-    `)
-
-    if (!schoolsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці schools...")
-      await client.query(`
-        CREATE TABLE schools (
-          id SERIAL PRIMARY KEY,
-          isuo_id INTEGER UNIQUE NOT NULL,
-          name VARCHAR(255) NOT NULL,
-          address TEXT,
-          director VARCHAR(255),
-          phone VARCHAR(50),
-          email VARCHAR(255),
-          website VARCHAR(255),
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-      `)
-      console.log("  ✓ Таблиця schools створена")
-    } else {
-      console.log("  ✓ Таблиця schools вже існує")
-    }
-
-    // CHANGE: Додано створення таблиці notifications
-    console.log("Перевірка таблиці notifications...")
-    const notificationsTableCheck = await client.query(`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.tables 
-        WHERE table_name = 'notifications'
-      ) as exists
-    `)
-
-    if (!notificationsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці notifications...")
-      await client.query(`
-        CREATE TABLE notifications (
-          id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          title VARCHAR(255) NOT NULL,
-          message TEXT NOT NULL,
-          type VARCHAR(50) NOT NULL,
-          related_id INTEGER,
-          related_type VARCHAR(50),
-          is_read BOOLEAN DEFAULT FALSE,
-          action_url VARCHAR(255),
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          read_at TIMESTAMP
-        )
-      `)
-
-      await client.query(`CREATE INDEX idx_notifications_user_id ON notifications(user_id)`)
-      await client.query(`CREATE INDEX idx_notifications_is_read ON notifications(is_read)`)
-      await client.query(`CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC)`)
-      await client.query(`CREATE INDEX idx_notifications_user_read ON notifications(user_id, is_read)`)
-
-      console.log("  ✓ Таблиця notifications створена")
-    } else {
-      console.log("  ✓ Таблиця notifications вже існує")
-    }
-
-    // CHANGE: Виправлено створення таблиці sync_history для уникнення помилки duplicate key
-    console.log("Перевірка таблиці sync_history...")
-    const syncHistoryTableCheck = await client.query(`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.tables 
-        WHERE table_name = 'sync_history'
-      ) as exists
-    `)
-
-    if (!syncHistoryTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці sync_history...")
-      // Спочатку видаляємо можливі конфлікти
-      await client.query(`DROP TABLE IF EXISTS sync_history CASCADE`)
-      await client.query(`DROP SEQUENCE IF EXISTS sync_history_id_seq CASCADE`)
-
-      // Тепер створюємо таблицю заново
-      await client.query(`
-        CREATE TABLE sync_history (
-          id SERIAL PRIMARY KEY,
-          sync_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          sync_type VARCHAR(50) NOT NULL,
-          created_count INTEGER DEFAULT 0,
-          updated_count INTEGER DEFAULT 0,
-          deleted_count INTEGER DEFAULT 0,
-          total_count INTEGER DEFAULT 0,
-          has_errors BOOLEAN DEFAULT FALSE,
-          error_message TEXT,
-          details JSONB,
-          duration_ms INTEGER,
-          initiated_by INTEGER REFERENCES users(id) ON DELETE SET NULL
-        )
-      `)
-      console.log("  ✓ Таблиця sync_history створена")
-    } else {
-      console.log("  ✓ Таблиця sync_history вже існує")
-
-      // Перевірка та додавання нових колонок
-      const syncHistoryColumns = [
-        { name: "details", type: "JSONB" },
-        { name: "duration_ms", type: "INTEGER" },
-        { name: "initiated_by", type: "INTEGER REFERENCES users(id) ON DELETE SET NULL" },
-      ]
-
-      for (const col of syncHistoryColumns) {
-        const columnCheck = await client.query(`
-          SELECT EXISTS (
-            SELECT 1 FROM information_schema.columns 
-            WHERE table_name = 'sync_history' AND column_name = '${col.name}'
-          ) as exists
-        `)
-
-        if (!columnCheck.rows[0].exists) {
-          console.log(`  → Додавання колонки ${col.name}...`)
-          try {
-            await client.query(`ALTER TABLE sync_history ADD COLUMN ${col.name} ${col.type}`)
-            console.log(`  ✓ Колонка ${col.name} додана`)
-          } catch (colError) {
-            console.log(`  ⚠️  Помилка при додаванні ${col.name}: ${colError.message}`)
-          }
-        } else {
-          console.log(`  ✓ Колонка ${col.name} вже існує`)
-        }
-      }
-    }
-
-    console.log("=== База даних готова до роботи! ===")
+    console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
     console.error("Тип помилки:", error.name)
@@ -807,17 +630,6 @@ app.post("/api/register", async (req, res) => {
     await client.query("COMMIT")
     console.log("Транзакція завершена успішно")
     console.log("✓ Реєстрація успішна для:", email)
-
-    // CHANGE: Створення сповіщення про успішну реєстрацію
-    await createNotification(
-      user.id,
-      "Вітаємо!",
-      "Ви успішно зареєструвалися в системі.",
-      "system",
-      null,
-      null,
-      "index.html",
-    )
 
     res.json({
       userId: user.id,
@@ -1213,17 +1025,6 @@ app.post("/api/admin/change-role", async (req, res) => {
       })
     }
 
-    // CHANGE: Створення сповіщення про зміну ролі
-    await createNotification(
-      result.rows[0].id,
-      "Зміна ролі",
-      `Вашу роль було змінено на "${role}".`,
-      "system",
-      null,
-      null,
-      "index.html",
-    )
-
     console.log("✓ Роль успішно змінено на:", role)
     res.json({
       message: "Роль успішно змінено",
@@ -1400,18 +1201,6 @@ app.post("/api/competitions", async (req, res) => {
       "`/api/competitions` endpoint called. Notification sending needs to be re-integrated or managed in bot.js.",
     )
 
-    // CHANGE: Створення сповіщення про новий конкурс
-    await createNotification(
-      createdBy, // Повідомлення для адміністратора, який створив конкурс
-      "Створено новий конкурс",
-      `Конкурс "${title}" успішно створено.`,
-      "competition",
-      competition.id,
-      "competition",
-      `competitionsP.html#competition-${competition.id}`,
-    )
-    // Можна також розіслати сповіщення всім користувачам або певним групам, якщо це потрібно
-
     res.json({
       competition: competition,
     })
@@ -1504,7 +1293,7 @@ app.get("/api/competitions/:id", async (req, res) => {
     }
 
     console.log("[SERVER] Custom fields (фінальні):", competition.custom_fields)
-    console.log("[SERVER] ✓ Відправлю відповідь клієнту")
+    console.log("[SERVER] ✓ Відправляю відповідь клієнту")
 
     res.json({
       competition: competition,
@@ -1564,7 +1353,7 @@ app.get("/api/competitions/my/:userId", async (req, res) => {
 // Додавання учнів на конкурс
 app.post("/api/competitions/:id/participants", async (req, res) => {
   const { id } = req.params
-  const { studentIds } = req.body // studentIds is expected to be an array of user IDs
+  const { studentIds } = req.body
 
   console.log("Додавання учнів на конкурс ID:", id)
 
@@ -1605,25 +1394,12 @@ app.post("/api/competitions/:id/participants", async (req, res) => {
         const addedUserId = insertedParticipant.rows[0].user_id
         // This call relies on bot.js. Ensure it's correctly imported and works.
         await notifyUserAddedToCompetition(addedUserId, id) // Call the bot notification function
-
-        // CHANGE: Створення сповіщення через createNotification
-        const competitionResult = await pool.query("SELECT title FROM competitions WHERE id = $1", [id])
-        const competitionTitle = competitionResult.rows[0]?.title || "конкурс"
-        await createNotification(
-          addedUserId,
-          "Додано до конкурсу!",
-          `Ви додані до конкурсу "${competitionTitle}".`,
-          "competition",
-          id,
-          "competition",
-          `competitionsP.html#competition-${id}`,
-        )
       } catch (error) {
         if (error.code === "23505") {
           // Учень вже доданий
           skippedCount++
         } else {
-          throw error // Re-throw other errors to be caught by the outer catch block
+          throw error
         }
       }
     }
@@ -1687,7 +1463,7 @@ app.get("/api/competitions/:id/participants-with-results", async (req, res) => {
   try {
     const result = await pool.query(
       `
-      SELECT DISTINCT ON (u.id)
+      SELECT 
         u.id as student_id,
         u.email,
         p.first_name, 
@@ -1705,7 +1481,7 @@ app.get("/api/competitions/:id/participants-with-results", async (req, res) => {
       LEFT JOIN profiles p ON u.id = p.user_id
       LEFT JOIN competition_results r ON r.competition_id = cp.competition_id AND r.user_id = u.id
       WHERE cp.competition_id = $1
-      ORDER BY u.id, r.created_at DESC NULLS LAST, p.grade ASC NULLS LAST, p.last_name ASC
+      ORDER BY p.grade ASC NULLS LAST, p.last_name ASC
     `,
       [id],
     )
@@ -1751,9 +1527,8 @@ app.delete("/api/competitions/:id", async (req, res) => {
 })
 
 // Створення результату (новий ендпоінт)
-app.post("/api/results", authenticateToken, async (req, res) => {
-  const { competitionId, studentId, score, place, notes, isConfirmed } = req.body
-  const addedBy = req.user.userId // Assuming authenticateToken middleware adds user info to req.user
+app.post("/api/results", async (req, res) => {
+  const { competitionId, studentId, score, place, notes, addedBy, isConfirmed } = req.body
 
   console.log("Додавання результату для учня ID:", studentId, "на конкурс ID:", competitionId)
 
@@ -1791,7 +1566,7 @@ app.post("/api/results", authenticateToken, async (req, res) => {
     }
 
     // Перевірка чи викладач має права (вчитель або методист)
-    const teacherCheck = await pool.query("SELECT role FROM users WHERE id = $1", [addedBy])
+    const teacherCheck = await client.query("SELECT role FROM users WHERE id = $1", [addedBy])
 
     if (teacherCheck.rows.length === 0 || !["вчитель", "методист"].includes(teacherCheck.rows[0].role)) {
       await client.query("ROLLBACK")
@@ -1832,20 +1607,11 @@ app.post("/api/results", authenticateToken, async (req, res) => {
     console.log("✓ Результат додано з ID:", result.rows[0].id)
 
     // Notify the student about the new result
-    await notifyUserNewResult(studentId, competitionId) // Call the bot notification function
-
-    // CHANGE: Створення сповіщення через createNotification
-    const competitionResult = await pool.query("SELECT title FROM competitions WHERE id = $1", [competitionId])
-    const competitionTitle = competitionResult.rows[0]?.title || "конкурс"
-    await createNotification(
-      studentId,
-      "Новий результат!",
-      `Вчитель додав ваш результат у конкурсі "${competitionTitle}".`,
-      "result",
-      competitionId,
-      "competition",
-      `results.html?competition=${competitionId}`,
-    )
+    try {
+      await notifyUserNewResult(studentId, competitionId)
+    } catch (notifyError) {
+      console.log("Помилка сповіщення:", notifyError.message)
+    }
 
     res.json({
       message: "Результат успішно додано",
@@ -1908,10 +1674,9 @@ app.get("/api/results/:competitionId", async (req, res) => {
 })
 
 // Оновлення результату (новий ендпоінт)
-app.put("/api/results/:resultId", authenticateToken, async (req, res) => {
+app.put("/api/results/:resultId", async (req, res) => {
   const { resultId } = req.params
-  const { competitionId, studentId, score, place, notes, isConfirmed } = req.body
-  const userId = req.user.userId // Assuming authenticateToken middleware adds user info to req.user
+  const { competitionId, studentId, score, place, notes, addedBy, isConfirmed } = req.body
 
   console.log("Оновлення результату ID:", resultId)
 
@@ -1928,7 +1693,7 @@ app.put("/api/results/:resultId", authenticateToken, async (req, res) => {
     await client.query("BEGIN")
 
     // Перевірка існування результату
-    const resultCheck = await pool.query("SELECT * FROM competition_results WHERE id = $1", [resultId])
+    const resultCheck = await client.query("SELECT * FROM competition_results WHERE id = $1", [resultId])
 
     if (resultCheck.rows.length === 0) {
       await client.query("ROLLBACK")
@@ -1939,8 +1704,8 @@ app.put("/api/results/:resultId", authenticateToken, async (req, res) => {
     }
 
     // Перевірка прав доступу
-    if (userId) {
-      const teacherCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
+    if (addedBy) {
+      const teacherCheck = await client.query("SELECT role FROM users WHERE id = $1", [addedBy])
 
       if (teacherCheck.rows.length === 0 || !["вчитель", "методист"].includes(teacherCheck.rows[0].role)) {
         await client.query("ROLLBACK")
@@ -1969,7 +1734,7 @@ app.put("/api/results/:resultId", authenticateToken, async (req, res) => {
         score,
         place,
         notes,
-        score || place || "Участь", // Use score or place as achievement if not provided
+        score || place || "Участь",
         isConfirmed !== undefined ? isConfirmed : resultCheck.rows[0].is_confirmed,
         resultId,
       ],
@@ -1977,21 +1742,6 @@ app.put("/api/results/:resultId", authenticateToken, async (req, res) => {
 
     await client.query("COMMIT")
     console.log("✓ Результат оновлено")
-
-    // CHANGE: Створення сповіщення про оновлення результату
-    const competitionResult = await pool.query("SELECT title FROM competitions WHERE id = $1", [
-      result.rows[0].competition_id,
-    ])
-    const competitionTitle = competitionResult.rows[0]?.title || "конкурс"
-    await createNotification(
-      result.rows[0].user_id,
-      "Результат оновлено",
-      `Ваш результат у конкурсі "${competitionTitle}" було оновлено.`,
-      "result_update",
-      result.rows[0].competition_id,
-      "competition",
-      `results.html?competition=${result.rows[0].competition_id}`,
-    )
 
     res.json({
       message: "Результат успішно оновлено",
@@ -2009,54 +1759,22 @@ app.put("/api/results/:resultId", authenticateToken, async (req, res) => {
 })
 
 // Видалення результату (новий ендпоінт)
-app.delete("/api/results/:resultId", authenticateToken, async (req, res) => {
+app.delete("/api/results/:resultId", async (req, res) => {
   const { resultId } = req.params
-  const userId = req.user.userId // Assuming authenticateToken middleware adds user info to req.user
 
   console.log("Видалення результату ID:", resultId)
 
   try {
-    // Check if the user has permissions to delete
-    const resultCheck = await pool.query("SELECT user_id, competition_id FROM competition_results WHERE id = $1", [
-      resultId,
-    ])
-    if (resultCheck.rows.length === 0) {
-      return res.status(404).json({ error: "Результат не знайдено" })
-    }
+    const result = await pool.query("DELETE FROM competition_results WHERE id = $1 RETURNING id", [resultId])
 
-    const { user_id: studentId, competition_id } = resultCheck.rows[0]
-
-    const userRoleCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
-    const userRole = userRoleCheck.rows[0]?.role
-
-    if (userId !== studentId && userRole !== "вчитель" && userRole !== "методист") {
-      return res.status(403).json({ error: "У вас немає прав для видалення цього результату" })
-    }
-
-    const deleteResult = await pool.query("DELETE FROM competition_results WHERE id = $1 RETURNING id", [resultId])
-
-    if (deleteResult.rows.length === 0) {
-      console.log("Помилка: результат не знайдено (після перевірки прав)")
+    if (result.rows.length === 0) {
+      console.log("Помилка: результат не знайдено")
       return res.status(404).json({
         error: "Результат не знайдено",
       })
     }
 
     console.log("✓ Результат видалено")
-
-    // CHANGE: Створення сповіщення про видалення результату
-    const competitionResult = await pool.query("SELECT title FROM competitions WHERE id = $1", [competition_id])
-    const competitionTitle = competitionResult.rows[0]?.title || "конкурс"
-    await createNotification(
-      studentId, // Сповіщення для учня
-      "Результат видалено",
-      `Ваш результат у конкурсі "${competitionTitle}" було видалено.`,
-      "result_deleted",
-      competition_id,
-      "competition",
-      `competitionsP.html#competition-${competition_id}`, // Link to the competition page
-    )
-
     res.json({
       message: "Результат успішно видалено",
     })
@@ -2820,8 +2538,8 @@ app.post("/api/telegram/notify", async (req, res) => {
   }
 
   try {
-    // This call relies on sendTelegramNotification, which needs the bot instance.
-    // await sendTelegramNotification(message) // Use the local sendTelegramNotification
+    // This will fail if sendTelegramNotification relies on a bot instance not present here.
+    // await sendTelegramNotification(message)
     console.log(
       "'/api/telegram/notify' endpoint called. Notification sending needs to be re-integrated or managed in bot.js.",
     )
@@ -2883,25 +2601,6 @@ setInterval(async () => {
         console.log(
           "Deadline reminder interval triggered. Notification sending needs to be re-integrated or managed in bot.js.",
         )
-
-        // CHANGE: Створення сповіщення про дедлайн
-        // Get all users who are participants of this competition
-        const participantsResult = await pool.query(
-          "SELECT user_id FROM competition_participants WHERE competition_id = $1",
-          [competition.id],
-        )
-
-        for (const participant of participantsResult.rows) {
-          await createNotification(
-            participant.user_id,
-            "Наближається дедлайн!",
-            `Не забудьте подати роботу до конкурсу "${competition.title}" завтра!`,
-            "deadline_reminder",
-            competition.id,
-            "competition",
-            `competitionsP.html#competition-${competition.id}`,
-          )
-        }
       }
     }
   } catch (error) {
@@ -2980,7 +2679,7 @@ app.post("/api/profile/teacher", upload.single("avatar"), async (req, res) => {
     subjectsIds,
     gradesCatering,
     bio,
-    userRole, // This seems unused in the function logic, but kept as per input.
+    userRole,
     consultationAreas,
   } = req.body
 
@@ -3212,7 +2911,7 @@ app.get("/api/students/:studentId/participations", async (req, res) => {
 })
 
 // Зміна пароля
-app.post("/api/change-password", authenticateToken, async (req, res) => {
+app.post("/api/change-password", async (req, res) => {
   const { userId, currentPassword, newPassword } = req.body
 
   console.log("Запит на зміну пароля для користувача ID:", userId)
@@ -3237,7 +2936,7 @@ app.post("/api/change-password", authenticateToken, async (req, res) => {
     await client.query("BEGIN")
 
     // Отримання поточного пароля користувача
-    const userResult = await pool.query("SELECT id, email, password FROM users WHERE id = $1", [userId])
+    const userResult = await client.query("SELECT id, email, password FROM users WHERE id = $1", [userId])
 
     if (userResult.rows.length === 0) {
       await client.query("ROLLBACK")
@@ -3269,17 +2968,6 @@ app.post("/api/change-password", authenticateToken, async (req, res) => {
     await client.query("COMMIT")
     console.log("✓ Пароль успішно змінено для користувача:", user.email)
 
-    // CHANGE: Створення сповіщення про зміну пароля
-    await createNotification(
-      userId,
-      "Зміна пароля",
-      "Ваш пароль було успішно змінено.",
-      "security",
-      null,
-      null,
-      "profile.html", // Link to profile page
-    )
-
     res.json({
       message: "Пароль успішно змінено",
     })
@@ -3295,7 +2983,7 @@ app.post("/api/change-password", authenticateToken, async (req, res) => {
 })
 
 // Створення учня вчителем
-app.post("/api/teacher/students", authenticateToken, async (req, res) => {
+app.post("/api/teacher/students", async (req, res) => {
   const {
     firstName,
     lastName,
@@ -3370,18 +3058,6 @@ app.post("/api/teacher/students", authenticateToken, async (req, res) => {
     await client.query("COMMIT")
 
     console.log(" Student created successfully:", userId)
-
-    // CHANGE: Створення сповіщення для новоствореного учня
-    await createNotification(
-      userId,
-      "Вітаємо!",
-      "Ви успішно зареєстровані як учень.",
-      "system",
-      null,
-      null,
-      "index.html",
-    )
-
     res.json({ message: "Учня успішно створено", userId })
   } catch (error) {
     await client.query("ROLLBACK")
@@ -3393,14 +3069,14 @@ app.post("/api/teacher/students", authenticateToken, async (req, res) => {
 })
 
 // Оновлення учня вчителем
-app.put("/api/teacher/students/:studentId", authenticateToken, async (req, res) => {
+app.put("/api/teacher/students/:studentId", async (req, res) => {
   const { studentId } = req.params
   const {
     firstName,
     lastName,
     middleName,
     email,
-    password, // Password update handled separately or conditionally
+    password,
     phone,
     gradeNumber,
     gradeLetter,
@@ -3432,7 +3108,7 @@ app.put("/api/teacher/students/:studentId", authenticateToken, async (req, res) 
     // Update user email
     await client.query("UPDATE users SET email = $1 WHERE id = $2", [email, studentId])
 
-    // Update password if provided and not empty
+    // Update password if provided
     if (password && password.trim()) {
       const hashedPassword = await bcrypt.hash(password, 10)
       await client.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, studentId])
@@ -3468,7 +3144,7 @@ app.put("/api/teacher/students/:studentId", authenticateToken, async (req, res) 
         birthDate || null,
         city || null,
         telegram || null,
-        isActive !== false, // Ensure boolean is correctly set
+        isActive !== false,
         schoolId,
         studentId,
       ],
@@ -3488,7 +3164,7 @@ app.put("/api/teacher/students/:studentId", authenticateToken, async (req, res) 
 })
 
 // Видалення учня вчителем
-app.delete("/api/teacher/students/:studentId", authenticateToken, async (req, res) => {
+app.delete("/api/teacher/students/:studentId", async (req, res) => {
   const { studentId } = req.params
 
   console.log(" Deleting student:", studentId)
@@ -3684,17 +3360,6 @@ app.post("/api/competitions/:competitionId/documents/upload", uploadDocument.sin
     console.log(`✓ Файл успішно завантажено та організовано: ${req.file.originalname}`)
     console.log(`  → Шлях: ${relativeFilePath}`)
 
-    // CHANGE: Створення сповіщення про завантаження файлу
-    await createNotification(
-      userId,
-      "Файл завантажено",
-      `Ваш файл "${req.file.originalname}" успішно завантажено для конкурсу "${competition.title}".`,
-      "document_upload",
-      competitionId,
-      "competition",
-      `documents.html?competitionId=${competitionId}`, // Link to documents page
-    )
-
     res.json({
       message: "Файл успішно завантажено",
       document: result.rows[0],
@@ -3778,12 +3443,11 @@ app.get("/api/competitions/:competitionId/documents/my/:userId", async (req, res
   }
 })
 
-app.delete("/api/competitions/documents/:documentId", authenticateToken, async (req, res) => {
+app.delete("/api/competitions/documents/:documentId", async (req, res) => {
   const { documentId } = req.params
-  const userId = req.user.userId // From authenticateToken
-  const userRole = req.user.role // From authenticateToken
+  const { userId, userRole } = req.body
 
-  console.log(`🗑️ Видалення файлу ${documentId} користувачем ${userId} (Роль: ${userRole})`)
+  console.log(`🗑️ Видалення файлу ${documentId} користувачем ${userId}`)
 
   const client = await pool.connect()
 
@@ -3791,7 +3455,7 @@ app.delete("/api/competitions/documents/:documentId", authenticateToken, async (
     await client.query("BEGIN")
 
     // Отримання інформації про файл
-    const docResult = await pool.query(`SELECT * FROM competition_documents WHERE id = $1`, [documentId])
+    const docResult = await client.query(`SELECT * FROM competition_documents WHERE id = $1`, [documentId])
 
     if (docResult.rows.length === 0) {
       await client.query("ROLLBACK")
@@ -3821,17 +3485,6 @@ app.delete("/api/competitions/documents/:documentId", authenticateToken, async (
     }
 
     await client.query("COMMIT")
-
-    // CHANGE: Створення сповіщення про видалення файлу
-    await createNotification(
-      document.user_id, // Сповіщення користувачу, який завантажив файл
-      "Файл видалено",
-      `Ваш файл "${document.original_name}" було видалено.`,
-      "document_deleted",
-      document.competition_id,
-      "competition",
-      `documents.html?competitionId=${document.competition_id}`, // Link to documents page
-    )
 
     res.json({
       message: "Файл успішно видалено",
@@ -3876,182 +3529,235 @@ app.listen(PORT, async () => {
   console.log(`🚀 Сервер запущено на порту ${PORT}`)
   await initializeDatabase()
 
-  // API для запуску синхронізації з ІСУО
-  app.post("/api/admin/sync-schools", async (req, res) => {
-    console.log("🔄 Запуск синхронізації з ІСУО...")
+  try {
+    await initBot()
+    console.log("✅ Telegram бот успішно запущено")
+  } catch (error) {
+    console.error("❌ Помилка при запуску Telegram бота:", error)
+  }
+})
 
-    try {
-      const result = await syncSchoolsWithISUO()
+// API ендпоінти для роботи з відповідями на форми конкурсів
 
-      res.json({
-        success: true,
-        message: "Синхронізація успішно завершена",
-        updated: result.updated,
-        created: result.created,
-        total: result.total,
+// Збереження відповіді учня на форму конкурсу
+app.post("/api/competitions/:id/form-response", async (req, res) => {
+  const { id } = req.params
+  const { userId, formData } = req.body
+
+  console.log("Збереження відповіді на форму конкурсу ID:", id, "від користувача:", userId)
+
+  if (!userId || !formData) {
+    return res.status(400).json({
+      error: "userId та formData обов'язкові",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    const participantCheck = await client.query(
+      "SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2",
+      [id, userId],
+    )
+
+    if (participantCheck.rows.length === 0) {
+      // Automatically register student as participant
+      await client.query("INSERT INTO competition_participants (competition_id, user_id) VALUES ($1, $2)", [id, userId])
+      console.log("✓ Учень автоматично доданий як учасник")
+    }
+
+    // Збереження або оновлення відповіді
+    const result = await client.query(
+      `INSERT INTO competition_form_responses (competition_id, user_id, form_data, submitted_at, updated_at)
+       VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       ON CONFLICT (competition_id, user_id) 
+       DO UPDATE SET form_data = $3, updated_at = CURRENT_TIMESTAMP
+       RETURNING *`,
+      [id, userId, JSON.stringify(formData)],
+    )
+
+    await client.query("COMMIT")
+    console.log("✓ Відповідь збережено")
+
+    res.json({
+      message: "Відповідь успішно збережено",
+      response: result.rows[0],
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("❌ Помилка збереження відповіді:", error.message)
+    res.status(500).json({
+      error: "Помилка збереження відповіді: " + error.message,
+    })
+  } finally {
+    client.release()
+  }
+})
+
+// Отримання відповіді конкретного учня на форму конкурсу
+app.get("/api/competitions/:id/form-response/:userId", async (req, res) => {
+  const { id, userId } = req.params
+
+  console.log("Запит відповіді на форму конкурсу ID:", id, "від користувача:", userId)
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM competition_form_responses 
+       WHERE competition_id = $1 AND user_id = $2`,
+      [id, userId],
+    )
+
+    if (result.rows.length === 0) {
+      return res.json({
+        response: null,
       })
-    } catch (error) {
-      console.error("❌ Помилка синхронізації:", error)
-      res.status(500).json({
-        success: false,
-        error: "Помилка синхронізації: " + error.message,
+    }
+
+    console.log("✓ Відповідь знайдено")
+    res.json({
+      response: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання відповіді:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання відповіді",
+    })
+  }
+})
+
+// Отримання всіх відповідей на форму конкурсу (для вчителів/методистів)
+app.get("/api/competitions/:id/form-responses", async (req, res) => {
+  const { id } = req.params
+
+  console.log("Запит всіх відповідей на форму конкурсу ID:", id)
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        cfr.*,
+        u.email,
+        p.first_name,
+        p.last_name,
+        p.grade,
+        p.avatar
+      FROM competition_form_responses cfr
+      INNER JOIN users u ON cfr.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE cfr.competition_id = $1
+      ORDER BY cfr.submitted_at DESC`,
+      [id],
+    )
+
+    console.log("✓ Знайдено відповідей:", result.rows.length)
+    res.json({
+      responses: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання відповідей:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання відповідей",
+    })
+  }
+})
+
+// CHANGE: Added new endpoint for form file uploads
+app.post("/api/competitions/:competitionId/form-file-upload", uploadDocument.single("file"), async (req, res) => {
+  const { competitionId } = req.params
+  const { userId, fieldIndex, description } = req.body
+
+  console.log(`📤 Завантаження файлу форми для конкурсу ${competitionId} від користувача ${userId}`)
+
+  if (!userId || !req.file) {
+    return res.status(400).json({
+      error: "Не вказано користувача або файл не завантажено",
+    })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    // Перевірка, чи учень є учасником конкурсу
+    const participantCheck = await client.query(
+      `SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2`,
+      [competitionId, userId],
+    )
+
+    if (participantCheck.rows.length === 0) {
+      await client.query("ROLLBACK")
+      fs.unlinkSync(req.file.path)
+      return res.status(403).json({
+        error: "Ви не є учасником цього конкурсу",
       })
     }
-  })
 
-  // API для отримання статистики парсера
-  app.get("/api/admin/parser-stats", async (req, res) => {
-    try {
-      // Отримуємо загальну кількість шкіл
-      const totalSchoolsResult = await pool.query("SELECT COUNT(*) as count FROM schools")
-      const totalSchools = Number.parseInt(totalSchoolsResult.rows[0].count)
+    // Отримання інформації про конкурс
+    const competitionInfo = await client.query(`SELECT title FROM competitions WHERE id = $1`, [competitionId])
+    const competition = competitionInfo.rows[0]
 
-      // Отримуємо дані про останню синхронізацію з історії
-      const lastSyncResult = await pool.query(`
-        SELECT * FROM sync_history 
-        ORDER BY sync_date DESC 
-        LIMIT 1
-      `)
+    // Організація папок: documents/(конкурс)/(id учня)/
+    const competitionFolderName = competition.title.replace(/[^a-zA-Z0-9_-]/g, "_")
+    const competitionFolder = path.join(__dirname, "documents", competitionFolderName)
+    const userFolder = path.join(competitionFolder, `${userId}`)
 
-      let lastSyncCount = 0
-      let lastSyncTime = null
-      if (lastSyncResult.rows.length > 0) {
-        const lastSync = lastSyncResult.rows[0]
-        lastSyncCount = (lastSync.updated_count || 0) + (lastSync.created_count || 0)
-        lastSyncTime = lastSync.sync_date
-      }
-
-      // Отримуємо загальну кількість синхронізацій
-      const totalSyncsResult = await pool.query("SELECT COUNT(*) as count FROM sync_history")
-      const totalSyncs = Number.parseInt(totalSyncsResult.rows[0].count)
-
-      res.json({
-        totalSchools,
-        lastSyncCount,
-        lastSyncTime,
-        totalSyncs,
-      })
-    } catch (error) {
-      console.error("Помилка отримання статистики:", error)
-      res.status(500).json({ error: "Помилка отримання статистики" })
+    // Створення папок, якщо їх немає
+    if (!fs.existsSync(competitionFolder)) {
+      fs.mkdirSync(competitionFolder, { recursive: true })
+      console.log(`📁 Створено папку: ${competitionFolder}`)
     }
-  })
 
-  // API для отримання історії синхронізацій
-  app.get("/api/admin/parser-history", async (req, res) => {
-    try {
-      const result = await pool.query(`
-        SELECT * FROM sync_history 
-        ORDER BY sync_date DESC 
-        LIMIT 100
-      `)
-
-      const history = result.rows.map((row) => ({
-        id: row.id,
-        type: row.has_errors ? "error" : row.created_count > 0 ? "created" : "updated",
-        title: `Синхронізація ${new Date(row.sync_date).toLocaleDateString("uk-UA")}`,
-        description: row.has_errors
-          ? `Помилка: ${row.error_message}`
-          : `Оновлено: ${row.updated_count}, Додано: ${row.created_count}, Всього: ${row.total_count}`,
-        timestamp: row.sync_date,
-        duration_ms: row.duration_ms,
-        details: row.details,
-      }))
-
-      res.json({ history })
-    } catch (error) {
-      console.error("Помилка отримання історії:", error)
-      res.status(500).json({ error: "Помилка отримання історії" })
+    if (!fs.existsSync(userFolder)) {
+      fs.mkdirSync(userFolder, { recursive: true })
+      console.log(`📁 Створено папку: ${userFolder}`)
     }
-  })
 
-  // API для отримання списку всіх шкіл
-  app.get("/api/admin/schools", async (req, res) => {
-    try {
-      const result = await pool.query(`
-        SELECT id, name, city, address, phone, created_at, updated_at 
-        FROM schools 
-        ORDER BY id ASC
-      `)
+    // Переміщення файлу до організованої структури
+    const newFilePath = path.join(userFolder, req.file.filename)
+    fs.renameSync(req.file.path, newFilePath)
 
-      res.json(result.rows)
-    } catch (error) {
-      console.error("Помилка отримання списку шкіл:", error)
-      res.status(500).json({ error: "Помилка отримання списку шкіл" })
+    const relativeFilePath = `/documents/${competitionFolderName}/${userId}/${req.file.filename}`
+
+    // Збереження інформації про файл у базу даних
+    const result = await client.query(
+      `INSERT INTO competition_documents (
+        competition_id, user_id, file_name, original_name, 
+        file_path, file_size, file_type, description
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      RETURNING *`,
+      [
+        competitionId,
+        userId,
+        req.file.filename,
+        req.file.originalname,
+        relativeFilePath,
+        req.file.size,
+        req.file.mimetype,
+        description || null,
+      ],
+    )
+
+    await client.query("COMMIT")
+
+    console.log(`✓ Файл успішно завантажено та організовано: ${req.file.originalname}`)
+    console.log(`  → Шлях: ${relativeFilePath}`)
+
+    res.json({
+      message: "Файл успішно завантажено",
+      document: result.rows[0],
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    if (req.file) {
+      fs.unlinkSync(req.file.path)
     }
-  })
-
-  // Отримати всі сповіщення користувача
-  app.get("/api/notifications", authenticateToken, async (req, res) => {
-    try {
-      const userId = req.user.userId
-
-      const result = await pool.query(
-        `SELECT * FROM notifications 
-         WHERE user_id = $1 
-         ORDER BY created_at DESC 
-         LIMIT 50`,
-        [userId],
-      )
-
-      res.json({ notifications: result.rows })
-    } catch (error) {
-      console.error("Error fetching notifications:", error)
-      res.status(500).json({ error: "Помилка при отриманні сповіщень" })
-    }
-  })
-
-  // Позначити сповіщення як прочитане
-  app.put("/api/notifications/:id/read", authenticateToken, async (req, res) => {
-    try {
-      const userId = req.user.userId
-      const notificationId = req.params.id
-
-      await pool.query(
-        `UPDATE notifications 
-         SET is_read = TRUE, read_at = CURRENT_TIMESTAMP 
-         WHERE id = $1 AND user_id = $2`,
-        [notificationId, userId],
-      )
-
-      res.json({ success: true })
-    } catch (error) {
-      console.error("Error marking notification as read:", error)
-      res.status(500).json({ error: "Помилка при позначенні сповіщення як прочитаного" })
-    }
-  })
-
-  // Позначити всі сповіщення як прочитані
-  app.put("/api/notifications/read-all", authenticateToken, async (req, res) => {
-    try {
-      const userId = req.user.userId
-
-      await pool.query(
-        `UPDATE notifications 
-         SET is_read = TRUE, read_at = CURRENT_TIMESTAMP 
-         WHERE user_id = $1 AND is_read = FALSE`,
-        [userId],
-      )
-
-      res.json({ success: true })
-    } catch (error) {
-      console.error("Error marking all notifications as read:", error)
-      res.status(500).json({ error: "Помилка при позначенні всіх сповіщень як прочитаних" })
-    }
-  })
-
-  // Видалити сповіщення
-  app.delete("/api/notifications/:id", authenticateToken, async (req, res) => {
-    try {
-      const userId = req.user.userId
-      const notificationId = req.params.id
-
-      await pool.query(`DELETE FROM notifications WHERE id = $1 AND user_id = $2`, [notificationId, userId])
-
-      res.json({ success: true })
-    } catch (error) {
-      console.error("Error deleting notification:", error)
-      res.status(500).json({ error: "Помилка при видаленні сповіщення" })
-    }
-  })
+    console.error("❌ Помилка завантаження файлу форми:", error.message)
+    res.status(500).json({
+      error: "Помилка завантаження файлу: " + error.message,
+    })
+  } finally {
+    client.release()
+  }
 })
