@@ -11,7 +11,7 @@ console.log("📡 Підключення до:", BASE_URL)
 
 let allPredictions = []
 let currentUserId = null
-let currentUserSchoolId = null
+const currentUserSchoolId = null
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", () => {
@@ -23,11 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return
   }
 
-  if (userRole !== "вчитель" && userRole !== "методист") {
-    alert("У вас немає доступу до цієї сторінки")
-    window.location.href = "index.html"
-    return
-  }
+  // Previously only вчитель and методист had access
 
   loadPredictions()
   setupFilters()
@@ -133,7 +129,7 @@ function calculatePrediction(student, studentResults) {
     avgScore,
     predictedScore,
     recommendation,
-    lastCompetitionDate: studentResults[0]?.added_at || null,
+    lastCompetitionDate: studentResults[0] ? .added_at || null,
   }
 }
 
@@ -325,7 +321,9 @@ function filterPredictions() {
         const nameB = `${b.student.last_name || ""} ${b.student.first_name || ""}`.toLowerCase()
         return nameA.localeCompare(nameB)
       case "grade":
-        return (a.student.grade || "").localeCompare(b.student.grade || "", undefined, { numeric: true })
+        return (a.student.grade || "").localeCompare(b.student.grade || "", undefined, {
+          numeric: true
+        })
       case "avgScore":
         return (b.avgScore || 0) - (a.avgScore || 0)
       case "predictedScore":
@@ -333,7 +331,12 @@ function filterPredictions() {
       case "participation":
         return b.participationCount - a.participationCount
       case "trend":
-        const trendOrder = { improving: 0, stable: 1, new: 2, declining: 3 }
+        const trendOrder = {
+          improving: 0,
+          stable: 1,
+          new: 2,
+          declining: 3
+        }
         return trendOrder[a.trend] - trendOrder[b.trend]
       default:
         return 0
@@ -451,9 +454,4 @@ function showLoading(show) {
 
 function showNoData(show) {
   document.getElementById("noData").style.display = show ? "block" : "none"
-}
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js")
-    .then(() => console.log("Service Worker зареєстровано"))
-    .catch(err => console.log("SW error:", err));
 }

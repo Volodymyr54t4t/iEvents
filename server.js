@@ -7,7 +7,7 @@ const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
 const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCompetition } = require("./bot")
-const { syncSchoolsWithISUO, runParser } = require("./parser")
+
 
 // Placeholder for authenticateToken middleware
 // In a real application, this would be imported from a separate file (e.g., middleware/auth.js)
@@ -816,7 +816,7 @@ app.post("/api/register", async (req, res) => {
       "system",
       null,
       null,
-      "dashboard.html",
+      "index.html",
     )
 
     res.json({
@@ -1221,7 +1221,7 @@ app.post("/api/admin/change-role", async (req, res) => {
       "system",
       null,
       null,
-      "dashboard.html",
+      "index.html",
     )
 
     console.log("✓ Роль успішно змінено на:", role)
@@ -3379,7 +3379,7 @@ app.post("/api/teacher/students", authenticateToken, async (req, res) => {
       "system",
       null,
       null,
-      "dashboard.html",
+      "index.html",
     )
 
     res.json({ message: "Учня успішно створено", userId })
