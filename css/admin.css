@@ -5,7 +5,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   background: #fafaf9;
   min-height: 100vh;
   display: flex;
@@ -72,7 +73,6 @@ main {
   font-weight: 700;
 }
 
-/* Updated color palette to brown tones from index.css */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
@@ -102,7 +102,11 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 60%
+  );
   pointer-events: none;
 }
 
@@ -164,74 +168,6 @@ main {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   opacity: 0.95;
-}
-
-.table-container {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.data-table th {
-  background: linear-gradient(135deg, #9d7560 0%, #8b6951 100%);
-  color: white;
-  font-weight: 700;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 18px 24px;
-  text-align: left;
-  border: none;
-}
-
-.data-table td {
-  color: #2d3748;
-  font-size: 14px;
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0ebe4;
-  vertical-align: middle;
-}
-
-.data-table th:first-child,
-.data-table td:first-child {
-  min-width: 100px;
-}
-
-.data-table th:nth-child(4),
-.data-table td:nth-child(4) {
-  min-width: 140px;
-}
-
-.data-table th:nth-child(6),
-.data-table td:nth-child(6) {
-  min-width: 120px;
-}
-
-.data-table th:last-child,
-.data-table td:last-child {
-  min-width: 180px;
-}
-
-.data-table tr:last-child td {
-  border-bottom: none;
-}
-
-.data-table tbody tr {
-  transition: background-color 0.2s;
-}
-
-.data-table tbody tr:hover {
-  background-color: #fafaf9;
 }
 
 .role-badge {
@@ -974,4 +910,259 @@ main {
   border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
+}
+
+/* Виправлено стилі для таблиць - додано правильні ширини стовпців */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
+  margin-top: 20px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  table-layout: fixed;
+}
+
+.data-table th {
+  background: linear-gradient(135deg, #9d7560 0%, #8b6951 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 18px 12px;
+  text-align: left;
+  border: none;
+  vertical-align: middle;
+}
+
+.data-table td {
+  color: #2d3748;
+  font-size: 14px;
+  padding: 16px 12px;
+  border-bottom: 1px solid #f0ebe4;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.data-table tbody tr:hover {
+  background-color: #fafaf9;
+}
+
+/* Налаштування для таблиці Конкурси - 8 стовпців */
+#competitions-section .data-table {
+  min-width: 1400px;
+}
+
+#competitions-section .data-table th:nth-child(1),
+#competitions-section .data-table td:nth-child(1) {
+  width: 80px;
+  text-align: center;
+}
+
+#competitions-section .data-table th:nth-child(2),
+#competitions-section .data-table td:nth-child(2) {
+  width: 200px;
+}
+
+#competitions-section .data-table th:nth-child(3),
+#competitions-section .data-table td:nth-child(3) {
+  width: 280px;
+}
+
+#competitions-section .data-table th:nth-child(4),
+#competitions-section .data-table td:nth-child(4) {
+  width: 140px;
+  text-align: center;
+}
+
+#competitions-section .data-table th:nth-child(5),
+#competitions-section .data-table td:nth-child(5) {
+  width: 140px;
+  text-align: center;
+}
+
+#competitions-section .data-table th:nth-child(6),
+#competitions-section .data-table td:nth-child(6) {
+  width: 130px;
+  text-align: center;
+}
+
+#competitions-section .data-table th:nth-child(7),
+#competitions-section .data-table td:nth-child(7) {
+  width: 140px;
+  text-align: center;
+}
+
+#competitions-section .data-table th:nth-child(8),
+#competitions-section .data-table td:nth-child(8) {
+  width: 290px;
+  text-align: center;
+}
+
+/* Налаштування для таблиці Результати - 9 стовпців */
+#results-section .data-table {
+  min-width: 1500px;
+}
+
+#results-section .data-table th:nth-child(1),
+#results-section .data-table td:nth-child(1) {
+  width: 220px;
+}
+
+#results-section .data-table th:nth-child(2),
+#results-section .data-table td:nth-child(2) {
+  width: 180px;
+}
+
+#results-section .data-table th:nth-child(3),
+#results-section .data-table td:nth-child(3) {
+  width: 100px;
+  text-align: center;
+}
+
+#results-section .data-table th:nth-child(4),
+#results-section .data-table td:nth-child(4) {
+  width: 120px;
+  text-align: center;
+}
+
+#results-section .data-table th:nth-child(5),
+#results-section .data-table td:nth-child(5) {
+  width: 100px;
+  text-align: center;
+}
+
+#results-section .data-table th:nth-child(6),
+#results-section .data-table td:nth-child(6) {
+  width: 150px;
+  text-align: center;
+}
+
+#results-section .data-table th:nth-child(7),
+#results-section .data-table td:nth-child(7) {
+  width: 200px;
+}
+
+#results-section .data-table th:nth-child(8),
+#results-section .data-table td:nth-child(8) {
+  width: 150px;
+  text-align: center;
+}
+
+#results-section .data-table th:nth-child(9),
+#results-section .data-table td:nth-child(9) {
+  width: 280px;
+  text-align: center;
+}
+
+/* Налаштування для таблиці Користувачі - 8 стовпців */
+#users-section .data-table {
+  min-width: 1300px;
+}
+
+#users-section .data-table th:nth-child(1),
+#users-section .data-table td:nth-child(1) {
+  width: 80px;
+  text-align: center;
+}
+
+#users-section .data-table th:nth-child(2),
+#users-section .data-table td:nth-child(2) {
+  width: 220px;
+}
+
+#users-section .data-table th:nth-child(3),
+#users-section .data-table td:nth-child(3) {
+  width: 200px;
+}
+
+#users-section .data-table th:nth-child(4),
+#users-section .data-table td:nth-child(4) {
+  width: 140px;
+}
+
+#users-section .data-table th:nth-child(5),
+#users-section .data-table td:nth-child(5) {
+  width: 140px;
+}
+
+#users-section .data-table th:nth-child(6),
+#users-section .data-table td:nth-child(6) {
+  width: 120px;
+  text-align: center;
+}
+
+#users-section .data-table th:nth-child(7),
+#users-section .data-table td:nth-child(7) {
+  width: 140px;
+  text-align: center;
+}
+
+#users-section .data-table th:nth-child(8),
+#users-section .data-table td:nth-child(8) {
+  width: 260px;
+  text-align: center;
+}
+
+/* Додаткові стилі для фільтрів */
+.filters-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filters-row .filter-select {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Стилі для статистики */
+.stats-table th,
+.stats-table td {
+  padding: 12px 16px;
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    border-radius: 12px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .search-box input {
+    max-width: 100%;
+  }
 }

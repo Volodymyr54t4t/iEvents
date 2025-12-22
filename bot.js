@@ -4,7 +4,7 @@ const {
 } = require("pg")
 
 // Telegram Bot Token
-const TELEGRAM_TOKEN = "8543297029:AAHVaWK-4eAkSTQ8WSzKG0lyKPdfsnBo3dU"
+const TELEGRAM_TOKEN = "8352460980:AAGXc5J6JDxAC3jvqxDXaGEDx8V_cPVmsoI"
 
 // Connection retry configuration
 const MAX_RETRIES = 3
