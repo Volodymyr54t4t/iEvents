@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -339,16 +339,16 @@ async function loadFormResponses(competitionId) {
   container.innerHTML = '<div class="loading">Завантаження відповідей...</div>'
 
   try {
-    console.log(" Завантаження відповідей для конкурсу:", competitionId)
+    console.log("[v0] Завантаження відповідей для конкурсу:", competitionId)
     const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/form-responses`)
-    console.log(" Відповідь сервера:", response.status)
+    console.log("[v0] Відповідь сервера:", response.status)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     const data = await response.json()
-    console.log(" Отримано відповідей:", data.responses?.length || 0)
+    console.log("[v0] Отримано відповідей:", data.responses?.length || 0)
 
     currentResponses = data.responses || []
     displayFormResponses(currentResponses)
@@ -386,7 +386,7 @@ function displayFormResponses(responses) {
       const fullName =
         response.first_name && response.last_name
           ? `${response.last_name} ${response.first_name}`
-          : formData.fullName || formData["ПІБ"] || "Невідомий учень"
+          : formData.fullName || formData["ПІБ"] || response.email || "Невідомий учень"
 
       const initials = fullName
         .split(" ")
@@ -848,7 +848,7 @@ async function openCompetitionDetailsModal(competitionId) {
         <div class="custom-fields-list">
           ${customFields
             .map((field) => {
-              const requiredMark = field.required ? '<span class="required-badge">Обов\'язкове</span>' : ""
+              const requiredMark = field.required ? '<span class="required-badge">Обовʼязкове</span>' : ""
               return `
               <div class="custom-field-preview">
                 <strong>${field.label}</strong> ${requiredMark}
@@ -915,7 +915,6 @@ async function openCompetitionDetailsModal(competitionId) {
               <div class="responses-container">
                 ${data.responses
                   .map((resp) => {
-                    // Формуємо ПІБ з даних профілю або з form_data
                     const fullName =
                       resp.first_name && resp.last_name
                         ? `${resp.last_name} ${resp.first_name}`
@@ -1023,23 +1022,23 @@ function getFieldTypeLabel(type) {
 // Завантаження списку учнів
 async function loadStudents() {
   try {
-    console.log(" Loading students for teacher ID:", userId)
+    console.log("[v0] Loading students for teacher ID:", userId)
 
     // Get teacher's profile to check school_id
     const teacherResponse = await fetch(`${BASE_URL}/api/profile/teacher/${userId}`)
     const teacherData = await teacherResponse.json()
 
     if (!teacherResponse.ok) {
-      console.log(" Error loading teacher profile:", teacherData.error)
+      console.log("[v0] Error loading teacher profile:", teacherData.error)
       allStudents = []
       return
     }
 
     const teacherSchoolId = teacherData.profile?.school_id ? Number.parseInt(teacherData.profile.school_id, 10) : null
-    console.log(" Teacher school ID:", teacherSchoolId)
+    console.log("[v0] Teacher school ID:", teacherSchoolId)
 
     if (!teacherSchoolId) {
-      console.log(" Teacher has no school assigned")
+      console.log("[v0] Teacher has no school assigned")
       allStudents = []
       return
     }
@@ -1055,13 +1054,13 @@ async function loadStudents() {
         return studentSchoolId === teacherSchoolId
       })
 
-      console.log(" Students loaded and filtered by school:", allStudents.length)
+      console.log("[v0] Students loaded and filtered by school:", allStudents.length)
     } else {
-      console.log(" Error loading students:", data.error)
+      console.log("[v0] Error loading students:", data.error)
       allStudents = []
     }
   } catch (error) {
-    console.error(" Error loading students:", error)
+    console.error("[v0] Error loading students:", error)
     allStudents = []
   }
 }
@@ -1113,20 +1112,11 @@ function displayStudents(students) {
           <h4 style="margin: 16px 0 8px 0; color: #4a5568;">${grade}</h4>
           ${students
             .map((student) => {
-              // Формуємо ПІБ з даних профілю
               const fullName = [student.last_name, student.first_name].filter(Boolean).join(" ") || student.email
-              const initials = fullName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
 
               return `
                 <div class="student-item" onclick="toggleStudent(${student.id})">
                   <input type="checkbox" class="student-checkbox" id="student-${student.id}" value="${student.id}">
-                  <div class="student-avatar">
-                    ${student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : `<span>${initials}</span>`}
-                  </div>
                   <div class="student-info">
                     <div class="student-name">${fullName}</div>
                     <div class="student-grade">${student.grade || "Клас не вказано"}</div>
@@ -1739,9 +1729,4 @@ function viewFormResponse(formData, studentName) {
   formHTML += "</div>"
 
   previewBody.innerHTML = formHTML
-}
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js")
-    .then(() => console.log("Service Worker зареєстровано"))
-    .catch(err => console.log("SW error:", err));
 }
