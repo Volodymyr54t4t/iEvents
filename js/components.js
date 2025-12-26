@@ -11,7 +11,7 @@ function renderHeader() {
     header.innerHTML = `
         <header class="site-header">
             <div class="header-container">
-                <a href="index.html" class="logo">🎯 iEvents</a>
+                <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
                     <a href="auth.html" class="btn btn-primary">Увійти / Зареєструватися</a>
                 </nav>
@@ -23,6 +23,8 @@ function renderHeader() {
 
   checkAdminPageAccess(userRole)
 
+  const notificationButton = '<div id="notificationContainer"></div>'
+
   if (userRole === "адміністратор_громади") {
     header.innerHTML = `
         <header class="site-header">
@@ -32,11 +34,12 @@ function renderHeader() {
                     <span></span>
                     <span></span>
                 </button>
-                <a href="index.html" class="logo">🎯 iEvents</a>
+                <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
                     <a href="profileCommunity.html" class="nav-link">Профіль</a>
                     <a href="adminCommunity.html" class="nav-link">🏛️ Адмін панель</a>
+                    ${notificationButton}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
                         <span class="user-role">${userRole}</span>
@@ -60,13 +63,14 @@ function renderHeader() {
         </header>
     `
     setupMenuToggle()
+    initNotifications()
     return
   }
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист"
-      ? '<a href="competitionsT.html" class="nav-link">Конкурси</a>'
-      : '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
+    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
@@ -74,13 +78,15 @@ function renderHeader() {
   const statisticsLink = '<a href="statistics.html" class="nav-link">Статистика</a>'
   const predictionsLink = '<a href="predictions.html" class="nav-link">Прогнози</a>'
 
+  const calendarLink = '<a href="calendar.html" class="nav-link">Календар</a>'
+
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
 
   const studentAdminLink =
-    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Особистий кабінет</a>' : ""
+    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">📋 Особистий кабінет</a>' : ""
 
   const teacherAdminLink =
-    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка вчителя</a>' : ""
+    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">👨‍🏫 Адмінка вчителя</a>' : ""
 
   let profileLink = '<a href="profile.html" class="nav-link">Профіль</a>'
   if (userRole === "вчитель" || userRole === "методист") {
@@ -95,10 +101,11 @@ function renderHeader() {
                     <span></span>
                     <span></span>
                 </button>
-                <a href="index.html" class="logo">🎯 iEvents</a>
+                <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
                     ${competitionsLink}
+                    ${calendarLink}
                     ${resultsLink}
                     ${statisticsLink}
                     ${predictionsLink}
@@ -106,6 +113,7 @@ function renderHeader() {
                     ${teacherAdminLink}
                     ${profileLink}
                     ${adminLink}
+                    ${notificationButton}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
                         <span class="user-role">${userRole}</span>
@@ -115,6 +123,7 @@ function renderHeader() {
                 <aside class="sidebar" id="sidebar">
                     <a href="index.html" class="sidebar-link">Головна</a>
                     ${competitionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${calendarLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${resultsLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${statisticsLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${predictionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
@@ -135,6 +144,7 @@ function renderHeader() {
         </header>
     `
   setupMenuToggle()
+  initNotifications()
 }
 
 // Footer component
@@ -169,7 +179,7 @@ function checkAdminPageAccess(userRole) {
   const allowedPages = ["index.html", "profileCommunity.html", "adminCommunity.html"]
 
   if (!allowedPages.includes(currentPage) && currentPage !== "") {
-    console.warn(` Admin user tried to access unauthorized page: ${currentPage}. Redirecting to index.html`)
+    console.warn(`[v0] Admin user tried to access unauthorized page: ${currentPage}. Redirecting to index.html`)
     window.location.href = "index.html"
   }
 }
@@ -202,6 +212,24 @@ function setupMenuToggle() {
       sidebar.classList.remove("active")
     })
   })
+}
+
+async function initNotifications() {
+  const container = document.getElementById("notificationContainer")
+  if (!container) return
+
+  // Ініціалізувати систему сповіщень
+  await window.notificationSystem.init()
+
+  // Встановити callback для оновлення UI
+  window.notificationSystem.onUpdate = () => {
+    container.innerHTML = window.notificationSystem.renderUI()
+    window.notificationSystem.setupEventListeners()
+  }
+
+  // Перший рендер
+  container.innerHTML = window.notificationSystem.renderUI()
+  window.notificationSystem.setupEventListeners()
 }
 
 if (document.readyState === "loading") {

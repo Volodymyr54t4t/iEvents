@@ -3524,6 +3524,48 @@ app.use((err, req, res, next) => {
   })
 })
 
+// ADDED CALENDAR API ENDPOINT:
+app.get("/api/calendar/competitions", async (req, res) => {
+  console.log("Запит конкурсів для календаря")
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        c.id,
+        c.title,
+        c.description,
+        c.start_date,
+        c.end_date,
+        c.registration_deadline,
+        c.manual_status,
+        c.subject_id,
+        c.level,
+        c.organizer,
+        c.location,
+        c.max_participants,
+        c.is_online,
+        c.website_url,
+        s.name as subject_name,
+        COUNT(cp.id) as participants_count
+      FROM competitions c
+      LEFT JOIN subjects s ON c.subject_id = s.id
+      LEFT JOIN competition_participants cp ON c.id = cp.competition_id
+      GROUP BY c.id, s.name
+      ORDER BY c.start_date ASC
+    `)
+
+    console.log("✓ Конкурсів для календаря:", result.rows.length)
+    res.json({
+      competitions: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання конкурсів для календаря:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання конкурсів",
+    })
+  }
+})
+
 // Запуск сервера
 app.listen(PORT, async () => {
   console.log(`🚀 Сервер запущено на порту ${PORT}`)

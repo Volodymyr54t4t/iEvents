@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календар конкурсів - iEvents</title>
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+</head>
+
+<body>
+    <header id="header"></header>
+    <script src="js/components.js"></script>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>📅 Календар конкурсів</h1>
+            <p class="subtitle">Переглядай важливі дати конкурсів та плануй свою участь</p>
+        </div>
+
+        <!-- Легенда -->
+        <div class="calendar-legend">
+            <div class="legend-item">
+                <span class="legend-dot legend-start"></span>
+                <span>Початок конкурсу</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot legend-end"></span>
+                <span>Закінчення конкурсу</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot legend-deadline"></span>
+                <span>Дедлайн реєстрації</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot legend-active"></span>
+                <span>Активний період</span>
+            </div>
+        </div>
+
+        <!-- Навігація календаря -->
+        <div class="calendar-navigation">
+            <button class="btn btn-secondary" id="prevMonth">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+                Попередній
+            </button>
+            <h2 class="current-month" id="currentMonth">Січень 2025</h2>
+            <button class="btn btn-secondary" id="nextMonth">
+                Наступний
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Фільтри -->
+        <div class="calendar-filters">
+            <div class="filter-group">
+                <label for="filterSubject">Предмет:</label>
+                <select id="filterSubject" class="filter-select">
+                    <option value="">Всі предмети</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterLevel">Рівень:</label>
+                <select id="filterLevel" class="filter-select">
+                    <option value="">Всі рівні</option>
+                    <option value="школа">Школа</option>
+                    <option value="район">Район</option>
+                    <option value="місто">Місто</option>
+                    <option value="область">Область</option>
+                    <option value="країна">Країна</option>
+                    <option value="міжнародний">Міжнародний</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterStatus">Статус:</label>
+                <select id="filterStatus" class="filter-select">
+                    <option value="">Всі</option>
+                    <option value="active">Активні</option>
+                    <option value="upcoming">Майбутні</option>
+                    <option value="completed">Завершені</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="todayBtn">Сьогодні</button>
+        </div>
+
+        <!-- Календар -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="weekday">Пн</div>
+                <div class="weekday">Вт</div>
+                <div class="weekday">Ср</div>
+                <div class="weekday">Чт</div>
+                <div class="weekday">Пт</div>
+                <div class="weekday weekend">Сб</div>
+                <div class="weekday weekend">Нд</div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Дні календаря генеруються JavaScript -->
+            </div>
+        </div>
+
+        <!-- Список подій на вибраний день -->
+        <div class="events-panel" id="eventsPanel">
+            <div class="events-panel-header">
+                <h3 id="selectedDateTitle">Оберіть дату</h3>
+                <button class="close-panel" id="closePanel">&times;</button>
+            </div>
+            <div class="events-list" id="eventsList">
+                <p class="no-events">Клікніть на дату в календарі, щоб побачити події</p>
+            </div>
+        </div>
+
+        <!-- Найближчі конкурси -->
+        <div class="upcoming-section">
+            <h2>🔥 Найближчі події</h2>
+            <div class="upcoming-grid" id="upcomingGrid">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer"></footer>
+    <script src="js/calendar.js"></script>
+</body>
+
+</html>
