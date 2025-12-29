@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Репетиції - Вчитель - iEvents</title>
+    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <link rel="stylesheet" href="css/rehearsalT.css">
+</head>
+
+<body>
+    <header id="header"></header>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>Управління репетиціями</h1>
+            <p class="subtitle">Створюйте репетиції для учнів та організовуйте їхню підготовку</p>
+        </div>
+
+        <div class="filters-section">
+            <button class="btn-add-rehearsal" onclick="openCreateRehearsalModal()">
+                Створити репетицію
+            </button>
+
+            <div class="filters-row">
+                <input type="text" id="searchRehearsals" class="filter-input" placeholder="Пошук репетицій...">
+
+                <select id="filterCompetition" class="filter-select">
+                    <option value="">Всі конкурси</option>
+                </select>
+
+                <select id="filterType" class="filter-select">
+                    <option value="">Всі типи</option>
+                    <option value="group">Групові</option>
+                    <option value="personal">Особисті</option>
+                </select>
+
+                <select id="filterDate" class="filter-select">
+                    <option value="">Всі дати</option>
+                    <option value="today">Сьогодні</option>
+                    <option value="tomorrow">Завтра</option>
+                    <option value="week">Цього тижня</option>
+                    <option value="month">Цього місяця</option>
+                </select>
+
+                <select id="sortBy" class="filter-select">
+                    <option value="date_asc">За датою (спочатку нові)</option>
+                    <option value="date_desc">За датою (спочатку старі)</option>
+                    <option value="title_asc">За назвою (А-Я)</option>
+                    <option value="title_desc">За назвою (Я-А)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Мої репетиції</h2>
+            <div id="rehearsalsList" class="rehearsals-list">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <div id="createRehearsalModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">Створити репетицію</h2>
+                <button class="modal-close" onclick="closeCreateRehearsalModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="createRehearsalForm">
+                    <input type="hidden" id="editRehearsalId">
+
+                    <div class="form-group">
+                        <label for="competition">Конкурс *</label>
+                        <select id="competition" name="competition" required onchange="loadCompetitionParticipants()">
+                            <option value="">Оберіть конкурс</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">Назва репетиції *</label>
+                        <input type="text" id="title" name="title" required
+                            placeholder="Наприклад: Підготовка до фінального етапу">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Опис репетиції</label>
+                        <textarea id="description" name="description" rows="3"
+                            placeholder="Що будемо робити на репетиції..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rehearsalDate">Дата та час *</label>
+                            <input type="datetime-local" id="rehearsalDate" name="rehearsalDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="duration">Тривалість (хвилин)</label>
+                            <input type="number" id="duration" name="duration" min="15" max="480" placeholder="60">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location">Місце проведення</label>
+                            <input type="text" id="location" name="location" placeholder="Адреса або кабінет">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="isOnline">Формат</label>
+                            <select id="isOnline" name="isOnline">
+                                <option value="false">Офлайн</option>
+                                <option value="true">Онлайн</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="isPersonal" name="isPersonal" onchange="toggleStudentSelect()">
+                            <span class="checkbox-text">Особиста репетиція (для конкретного учня)</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="studentSelectGroup" style="display: none;">
+                        <label for="student">Оберіть учня *</label>
+                        <select id="student" name="student">
+                            <option value="">Спочатку оберіть конкурс</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Додаткові нотатки</label>
+                        <textarea id="notes" name="notes" rows="2"
+                            placeholder="Що потрібно принести, додаткова інформація..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCreateRehearsalModal()">Скасувати</button>
+                <button class="btn btn-primary" onclick="saveRehearsal()">Зберегти репетицію</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load scripts in correct order: config -> components -> main -->
+    <script src="js/config.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/rehearsalT.js"></script>
+</body>
+
+</html>

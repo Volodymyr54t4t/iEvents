@@ -72,21 +72,24 @@ function renderHeader() {
     '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
     '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
+  const rehearsalLink =
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="rehearsalT.html" class="nav-link">Репетиції</a>' :
+    userRole === "учень" ?
+    '<a href="rehearsalP.html" class="nav-link">Репетиції</a>' :
+    ""
+
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
 
   const statisticsLink = '<a href="statistics.html" class="nav-link">Статистика</a>'
   const predictionsLink = '<a href="predictions.html" class="nav-link">Прогнози</a>'
-
   const calendarLink = '<a href="calendar.html" class="nav-link">Календар</a>'
-
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
-
   const studentAdminLink =
-    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">📋 Особистий кабінет</a>' : ""
-
+    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Особистий кабінет</a>' : ""
   const teacherAdminLink =
-    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">👨‍🏫 Адмінка вчителя</a>' : ""
+    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка вчителя</a>' : ""
 
   let profileLink = '<a href="profile.html" class="nav-link">Профіль</a>'
   if (userRole === "вчитель" || userRole === "методист") {
@@ -105,6 +108,7 @@ function renderHeader() {
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
                     ${competitionsLink}
+                    ${rehearsalLink}
                     ${calendarLink}
                     ${resultsLink}
                     ${statisticsLink}
@@ -123,6 +127,7 @@ function renderHeader() {
                 <aside class="sidebar" id="sidebar">
                     <a href="index.html" class="sidebar-link">Головна</a>
                     ${competitionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${rehearsalLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${calendarLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${resultsLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${statisticsLink.replace('class="nav-link"', 'class="sidebar-link"')}
@@ -217,6 +222,11 @@ function setupMenuToggle() {
 async function initNotifications() {
   const container = document.getElementById("notificationContainer")
   if (!container) return
+
+  if (!window.notificationSystem) {
+    console.warn("[v0] Notification system not loaded yet")
+    return
+  }
 
   // Ініціалізувати систему сповіщень
   await window.notificationSystem.init()

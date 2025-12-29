@@ -533,6 +533,70 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця competition_form_responses вже існує")
     }
 
+    // Перевірка та створення таблиці rehearsals
+    console.log("Перевірка таблиці rehearsals...")
+    const rehearsalsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'rehearsals'
+      ) as exists
+    `)
+
+    if (!rehearsalsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці rehearsals...")
+      await client.query(`
+        CREATE TABLE rehearsals (
+          id SERIAL PRIMARY KEY,
+          competition_id INTEGER REFERENCES competitions(id) ON DELETE CASCADE,
+          teacher_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          student_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          rehearsal_date TIMESTAMP NOT NULL,
+          duration INTEGER, -- duration in minutes
+          location VARCHAR(255),
+          is_online BOOLEAN DEFAULT FALSE,
+          notes TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця rehearsals створена")
+    } else {
+      console.log("  ✓ Таблиця rehearsals вже існує")
+      // Перевірка та додавання колонок до rehearsals
+      const rehearsalColumnsToAdd = [
+        { name: "student_id", type: "INTEGER REFERENCES users(id) ON DELETE SET NULL" },
+        { name: "duration", type: "INTEGER" },
+        { name: "location", type: "VARCHAR(255)" },
+        { name: "is_online", type: "BOOLEAN DEFAULT FALSE" },
+        { name: "notes", type: "TEXT" },
+        { name: "updated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" },
+      ]
+
+      console.log("  → Перевірка та додавання колонок до rehearsals...")
+      for (const col of rehearsalColumnsToAdd) {
+        try {
+          const columnCheck = await client.query(`
+            SELECT EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name = 'rehearsals' AND column_name = '${col.name}'
+            ) as exists
+          `)
+
+          if (!columnCheck.rows[0].exists) {
+            console.log(`  → Додавання колонки ${col.name}...`)
+            await client.query(`ALTER TABLE rehearsals ADD COLUMN ${col.name} ${col.type}`)
+            console.log(`  ✓ Колонка ${col.name} додана`)
+          } else {
+            console.log(`  ✓ Колонка ${col.name} вже існує`)
+          }
+        } catch (colError) {
+          console.log(`  ⚠️  Помилка при перевірці/додаванні ${col.name} (можливо, вже існує): ${colError.message}`)
+        }
+      }
+    }
+
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -3801,5 +3865,256 @@ app.post("/api/competitions/:competitionId/form-file-upload", uploadDocument.sin
     })
   } finally {
     client.release()
+  }
+})
+
+// </CHANGE> Додаємо API endpoints для репетицій
+
+// Створення репетиції
+app.post("/api/rehearsals", async (req, res) => {
+  const {
+    competitionId,
+    teacherId,
+    studentId,
+    title,
+    description,
+    rehearsalDate,
+    duration,
+    location,
+    isOnline,
+    notes,
+  } = req.body
+
+  console.log("Створення репетиції:", title)
+
+  if (!competitionId || !teacherId || !title || !rehearsalDate) {
+    console.log("Помилка: відсутні обов'язкові поля")
+    return res.status(400).json({
+      error: "Конкурс, вчитель, назва та дата обов'язкові",
+    })
+  }
+
+  try {
+    // Перевірка чи вчитель має права
+    const teacherCheck = await pool.query("SELECT role FROM users WHERE id = $1", [teacherId])
+
+    if (teacherCheck.rows.length === 0 || !["вчитель", "методист"].includes(teacherCheck.rows[0].role)) {
+      console.log("Помилка: недостатньо прав")
+      return res.status(403).json({
+        error: "У вас немає прав для створення репетицій",
+      })
+    }
+
+    // Перевірка чи конкурс існує
+    const competitionCheck = await pool.query("SELECT id FROM competitions WHERE id = $1", [competitionId])
+
+    if (competitionCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: "Конкурс не знайдено",
+      })
+    }
+
+    // Якщо studentId вказано, перевірити чи учень є учасником конкурсу
+    if (studentId) {
+      const participantCheck = await pool.query(
+        "SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2",
+        [competitionId, studentId],
+      )
+
+      if (participantCheck.rows.length === 0) {
+        return res.status(400).json({
+          error: "Учень не є учасником цього конкурсу",
+        })
+      }
+    }
+
+    const result = await pool.query(
+      `INSERT INTO rehearsals (
+        competition_id, teacher_id, student_id, title, description,
+        rehearsal_date, duration, location, is_online, notes
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [
+        competitionId,
+        teacherId,
+        studentId || null,
+        title,
+        description || null,
+        rehearsalDate,
+        duration || null,
+        location || null,
+        isOnline || false,
+        notes || null,
+      ],
+    )
+
+    console.log("✓ Репетицію створено з ID:", result.rows[0].id)
+
+    res.json({
+      message: "Репетицію успішно створено",
+      rehearsal: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка створення репетиції:", error.message)
+    res.status(500).json({
+      error: "Помилка створення репетиції",
+    })
+  }
+})
+
+// Отримання репетицій вчителя
+app.get("/api/rehearsals/teacher/:teacherId", async (req, res) => {
+  const { teacherId } = req.params
+
+  console.log("Запит репетицій вчителя ID:", teacherId)
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        r.*,
+        c.title as competition_title,
+        p.first_name || ' ' || p.last_name as student_name
+      FROM rehearsals r
+      INNER JOIN competitions c ON r.competition_id = c.id
+      LEFT JOIN profiles p ON r.student_id = p.user_id
+      WHERE r.teacher_id = $1
+      ORDER BY r.rehearsal_date ASC`,
+      [teacherId],
+    )
+
+    console.log("✓ Знайдено репетицій:", result.rows.length)
+    res.json({
+      rehearsals: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання репетицій:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання репетицій",
+    })
+  }
+})
+
+// Отримання репетицій учня
+app.get("/api/rehearsals/student/:studentId", async (req, res) => {
+  const { studentId } = req.params
+
+  console.log("Запит репетицій учня ID:", studentId)
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        r.*,
+        c.title as competition_title,
+        p.first_name || ' ' || p.last_name as teacher_name,
+        (r.student_id = $1) as is_personal
+      FROM rehearsals r
+      INNER JOIN competitions c ON r.competition_id = c.id
+      INNER JOIN profiles p ON r.teacher_id = p.user_id
+      WHERE (
+        r.student_id = $1 
+        OR (r.student_id IS NULL AND EXISTS (
+          SELECT 1 FROM competition_participants cp 
+          WHERE cp.competition_id = r.competition_id AND cp.user_id = $1
+        ))
+      )
+      ORDER BY r.rehearsal_date ASC`,
+      [studentId],
+    )
+
+    console.log("✓ Знайдено репетицій:", result.rows.length)
+    res.json({
+      rehearsals: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання репетицій:", error.message)
+    res.status(500).json({
+      error: "Помилка отримання репетицій",
+    })
+  }
+})
+
+// Оновлення репетиції
+app.put("/api/rehearsals/:id", async (req, res) => {
+  const { id } = req.params
+  const { competitionId, studentId, title, description, rehearsalDate, duration, location, isOnline, notes } = req.body
+
+  console.log("Оновлення репетиції ID:", id)
+
+  if (!title || !rehearsalDate) {
+    return res.status(400).json({
+      error: "Назва та дата обов'язкові",
+    })
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE rehearsals SET
+        competition_id = $1,
+        student_id = $2,
+        title = $3,
+        description = $4,
+        rehearsal_date = $5,
+        duration = $6,
+        location = $7,
+        is_online = $8,
+        notes = $9,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $10 RETURNING *`,
+      [
+        competitionId,
+        studentId || null,
+        title,
+        description || null,
+        rehearsalDate,
+        duration || null,
+        location || null,
+        isOnline || false,
+        notes || null,
+        id,
+      ],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Репетицію не знайдено",
+      })
+    }
+
+    console.log("✓ Репетицію оновлено")
+    res.json({
+      message: "Репетицію успішно оновлено",
+      rehearsal: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка оновлення репетиції:", error.message)
+    res.status(500).json({
+      error: "Помилка оновлення репетиції",
+    })
+  }
+})
+
+// Видалення репетиції
+app.delete("/api/rehearsals/:id", async (req, res) => {
+  const { id } = req.params
+
+  console.log("Видалення репетиції ID:", id)
+
+  try {
+    const result = await pool.query("DELETE FROM rehearsals WHERE id = $1 RETURNING id", [id])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Репетицію не знайдено",
+      })
+    }
+
+    console.log("✓ Репетицію видалено")
+    res.json({
+      message: "Репетицію успішно видалено",
+    })
+  } catch (error) {
+    console.error("❌ Помилка видалення репетиції:", error.message)
+    res.status(500).json({
+      error: "Помилка видалення репетиції",
+    })
   }
 })
