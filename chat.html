@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система чатів - Методист</title>
+    <link rel="stylesheet" href="css/chat.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar з чатами -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Чати</h2>
+                <button class="btn-create" id="createChatBtn">+ Створити чат</button>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar">М</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Методист</div>
+                    <div class="user-role">Організатор</div>
+                </div>
+            </div>
+
+            <div class="chat-list" id="chatList">
+                <!-- Чати будуть додані динамічно -->
+            </div>
+        </aside>
+
+        <!-- Головна область чату -->
+        <main class="chat-main">
+            <div class="chat-header" id="chatHeader">
+                <div class="chat-info">
+                    <h3 class="chat-title" id="chatTitle">Виберіть чат</h3>
+                    <div class="chat-members" id="chatMembers"></div>
+                </div>
+                <div class="chat-actions">
+                    <!-- Replaced settings button with home button -->
+                    <button class="btn-icon" id="homeBtn" title="На головну">🏠</button>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-message">
+                    <h2>Ласкаво просимо до системи чатів</h2>
+                    <p>Виберіть чат зліва або створіть новий</p>
+                </div>
+            </div>
+
+            <div class="message-input-container" id="messageInputContainer" style="display: none;">
+                <form class="message-form" id="messageForm">
+                    <input type="text" class="message-input" id="messageInput" placeholder="Напишіть повідомлення..."
+                        autocomplete="off">
+                    <button type="submit" class="btn-send">➤</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальне вікно для створення чату -->
+    <div class="modal" id="createChatModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Створити новий чат</h3>
+                <button class="modal-close" id="closeModalBtn">×</button>
+            </div>
+            <form class="modal-form" id="createChatForm">
+                <div class="form-group">
+                    <label for="chatName">Назва чату</label>
+                    <input type="text" id="chatName" class="form-input" placeholder="Наприклад: Батьки + методист"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="chatDescription">Опис (необов'язково)</label>
+                    <textarea id="chatDescription" class="form-input" placeholder="Короткий опис чату"
+                        rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelCreateBtn">Скасувати</button>
+                    <button type="submit" class="btn-primary">Створити</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/chat.js"></script>
+</body>
+
+</html>

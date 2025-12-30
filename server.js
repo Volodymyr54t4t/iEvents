@@ -597,6 +597,82 @@ async function initializeDatabase() {
       }
     }
 
+    // Перевірка та створення таблиці chats
+    console.log("Перевірка таблиці chats...")
+    const chatsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'chats'
+      ) as exists
+    `)
+
+    if (!chatsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці chats...")
+      await client.query(`
+        CREATE TABLE chats (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          description TEXT,
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця chats створена")
+    } else {
+      console.log("  ✓ Таблиця chats вже існує")
+    }
+
+    // Перевірка та створення таблиці chat_members
+    console.log("Перевірка таблиці chat_members...")
+    const chatMembersTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'chat_members'
+      ) as exists
+    `)
+
+    if (!chatMembersTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці chat_members...")
+      await client.query(`
+        CREATE TABLE chat_members (
+          id SERIAL PRIMARY KEY,
+          chat_id INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(chat_id, user_id)
+        )
+      `)
+      console.log("  ✓ Таблиця chat_members створена")
+    } else {
+      console.log("  ✓ Таблиця chat_members вже існує")
+    }
+
+    // Перевірка та створення таблиці chat_messages
+    console.log("Перевірка таблиці chat_messages...")
+    const chatMessagesTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'chat_messages'
+      ) as exists
+    `)
+
+    if (!chatMessagesTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці chat_messages...")
+      await client.query(`
+        CREATE TABLE chat_messages (
+          id SERIAL PRIMARY KEY,
+          chat_id INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          user_name VARCHAR(255),
+          content TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця chat_messages створена")
+    } else {
+      console.log("  ✓ Таблиця chat_messages вже існує")
+    }
+
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -3868,7 +3944,7 @@ app.post("/api/competitions/:competitionId/form-file-upload", uploadDocument.sin
   }
 })
 
-// </CHANGE> Додаємо API endpoints для репетицій
+// Додаємо API endpoints для репетицій
 
 // Створення репетиції
 app.post("/api/rehearsals", async (req, res) => {
@@ -4116,5 +4192,163 @@ app.delete("/api/rehearsals/:id", async (req, res) => {
     res.status(500).json({
       error: "Помилка видалення репетиції",
     })
+  }
+})
+
+// API для чатів
+app.get("/api/chats", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        c.id,
+        c.name,
+        c.description,
+        c.created_at,
+        COUNT(DISTINCT cm.user_id) as member_count,
+        (
+          SELECT m.content 
+          FROM chat_messages m 
+          WHERE m.chat_id = c.id 
+          ORDER BY m.created_at DESC 
+          LIMIT 1
+        ) as last_message,
+        (
+          SELECT m.created_at 
+          FROM chat_messages m 
+          WHERE m.chat_id = c.id 
+          ORDER BY m.created_at DESC 
+          LIMIT 1
+        ) as last_message_time
+      FROM chats c
+      LEFT JOIN chat_members cm ON c.id = cm.chat_id
+      GROUP BY c.id, c.name, c.description, c.created_at
+      ORDER BY last_message_time DESC NULLS LAST, c.created_at DESC
+    `)
+    res.json(result.rows)
+  } catch (error) {
+    console.error("Помилка завантаження чатів:", error)
+    res.status(500).json({ error: "Помилка завантаження чатів" })
+  }
+})
+
+// Створення нового чату
+app.post("/api/chats", async (req, res) => {
+  const { name, description, created_by } = req.body
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO chats (name, description, created_by) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`,
+      [name, description, created_by],
+    )
+
+    // Автоматично додати методиста до чату
+    await pool.query(`INSERT INTO chat_members (chat_id, user_id) VALUES ($1, $2)`, [result.rows[0].id, created_by])
+
+    res.status(201).json(result.rows[0])
+  } catch (error) {
+    console.error("Помилка створення чату:", error)
+    res.status(500).json({ error: "Помилка створення чату" })
+  }
+})
+
+// Отримання повідомлень чату
+app.get("/api/messages/:chatId", async (req, res) => {
+  const { chatId } = req.params
+  const { after } = req.query
+
+  try {
+    let query = `
+      SELECT 
+        id,
+        chat_id,
+        user_id,
+        user_name,
+        content,
+        created_at
+      FROM chat_messages
+      WHERE chat_id = $1
+    `
+    const params = [chatId]
+
+    if (after) {
+      query += ` AND id > $2`
+      params.push(after)
+    }
+
+    query += ` ORDER BY created_at ASC`
+
+    const result = await pool.query(query, params)
+    res.json(result.rows)
+  } catch (error) {
+    console.error("Помилка завантаження повідомлень:", error)
+    res.status(500).json({ error: "Помилка завантаження повідомлень" })
+  }
+})
+
+// Відправка повідомлення
+app.post("/api/messages", async (req, res) => {
+  const { chat_id, user_id, user_name, content } = req.body
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO chat_messages (chat_id, user_id, user_name, content) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
+      [chat_id, user_id, user_name, content],
+    )
+
+    res.status(201).json(result.rows[0])
+  } catch (error) {
+    console.error("Помилка відправки повідомлення:", error)
+    res.status(500).json({ error: "Помилка відправки повідомлення" })
+  }
+})
+
+// Додавання учасника до чату
+app.post("/api/chats/:chatId/members", async (req, res) => {
+  const { chatId } = req.params
+  const { user_id } = req.body
+
+  try {
+    await pool.query(
+      `INSERT INTO chat_members (chat_id, user_id) 
+       VALUES ($1, $2) 
+       ON CONFLICT (chat_id, user_id) DO NOTHING`,
+      [chatId, user_id],
+    )
+
+    res.status(201).json({ success: true })
+  } catch (error) {
+    console.error("Помилка додавання учасника:", error)
+    res.status(500).json({ error: "Помилка додавання учасника" })
+  }
+})
+
+// Отримання учасників чату
+app.get("/api/chats/:chatId/members", async (req, res) => {
+  const { chatId } = req.params
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        u.id,
+        u.email,
+        u.role,
+        p.first_name,
+        p.last_name
+      FROM chat_members cm
+      JOIN users u ON cm.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE cm.chat_id = $1
+      ORDER BY u.role DESC, p.last_name ASC`,
+      [chatId],
+    )
+
+    res.json(result.rows)
+  } catch (error) {
+    console.error("Помилка завантаження учасників:", error)
+    res.status(500).json({ error: "Помилка завантаження учасників" })
   }
 })
