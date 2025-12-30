@@ -36,7 +36,7 @@ function renderHeader() {
                 </button>
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
-                    <a href="index.html" class="nav-link">Головна</a>
+                    <a href="chat.html" class="nav-link">Чати</a>
                     <a href="profileCommunity.html" class="nav-link">Профіль</a>
                     <a href="adminCommunity.html" class="nav-link">🏛️ Адмін панель</a>
                     ${notificationButton}
@@ -47,7 +47,7 @@ function renderHeader() {
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
-                    <a href="index.html" class="sidebar-link">Головна</a>
+                    <a href="chat.html" class="sidebar-link">Чати</a>
                     <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
                     <a href="adminCommunity.html" class="sidebar-link">🏛️ Адмін панель</a>
                     <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
@@ -106,7 +106,7 @@ function renderHeader() {
                 </button>
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
-                    <a href="index.html" class="nav-link">Головна</a>
+                    <a href="chat.html" class="sidebar-link">Чати</a>
                     ${competitionsLink}
                     ${rehearsalLink}
                     ${calendarLink}
@@ -125,7 +125,7 @@ function renderHeader() {
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
-                    <a href="index.html" class="sidebar-link">Головна</a>
+                    <a href="chat.html" class="sidebar-link">Чати</a>
                     ${competitionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${rehearsalLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${calendarLink.replace('class="nav-link"', 'class="sidebar-link"')}
