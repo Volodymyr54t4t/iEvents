@@ -2,29 +2,23 @@ let currentUserId = null
 let allRehearsals = []
 let allCompetitions = []
 
-// Ініціалізація сторінки
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadUserData()
-  await loadCompetitions()
-  await loadRehearsals()
-  setupFilters()
-  loadHeaderAndFooter()
-})
-
-// Завантаження header та footer
-function loadHeaderAndFooter() {
-  try {
-    // Припускаємо, що функції в components.js називаються саме так:
-    if (typeof renderHeader === 'function' && typeof renderFooter === 'function') {
-      renderHeader("header"); // Передаємо ID контейнера
-      renderFooter("footer"); // Передаємо ID контейнера
-    } else {
-      console.error("Функції рендерингу не знайдені в components.js");
-    }
-  } catch (error) {
-    console.error("Помилка завантаження компонентів:", error);
+  if (!window.AppConfig || !window.AppConfig.API_URL) {
+    console.error("AppConfig не завантажився")
+    alert("Помилка завантаження конфігурації. Спробуйте оновити сторінку.")
+    return
   }
-}
+
+  try {
+    await Promise.all([loadUserData(), loadCompetitions()])
+
+    await loadRehearsals()
+    setupFilters()
+  } catch (error) {
+    console.error("Помилка ініціалізації:", error)
+    alert("Помилка завантаження сторінки. Спробуйте оновити.")
+  }
+})
 
 async function loadUserData() {
   currentUserId = localStorage.getItem("userId")
@@ -36,43 +30,50 @@ async function loadUserData() {
   }
 
   try {
-    const response = await fetch(`${window.API_URL}/api/user/role/${currentUserId}`)
+    const response = await fetch(`${window.AppConfig.API_URL}/api/user/role/${currentUserId}`)
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
     const data = await response.json()
 
-    if (!response.ok || !["вчитель", "методист"].includes(data.role)) {
+    if (!["вчитель", "методист"].includes(data.role)) {
       alert("Доступ заборонено. Ця сторінка тільки для вчителів та методистів.")
       window.location.href = "index.html"
     }
   } catch (error) {
     console.error("Помилка завантаження даних користувача:", error)
     alert("Помилка завантаження даних користувача")
+    window.location.href = "index.html"
   }
 }
 
 async function loadCompetitions() {
   try {
-    const response = await fetch(`${window.API_URL}/api/competitions`)
-    const data = await response.json()
+    const response = await fetch(`${window.AppConfig.API_URL}/api/competitions`)
 
-    if (response.ok) {
-      allCompetitions = data.competitions || []
-
-      // Завантажити конкурси в фільтр
-      const filterCompetition = document.getElementById("filterCompetition")
-      const competitionSelect = document.getElementById("competition")
-
-      allCompetitions.forEach((comp) => {
-        const option1 = document.createElement("option")
-        option1.value = comp.id
-        option1.textContent = comp.title
-        filterCompetition.appendChild(option1)
-
-        const option2 = document.createElement("option")
-        option2.value = comp.id
-        option2.textContent = comp.title
-        competitionSelect.appendChild(option2)
-      })
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
     }
+
+    const data = await response.json()
+    allCompetitions = data.competitions || []
+
+    const filterCompetition = document.getElementById("filterCompetition")
+    const competitionSelect = document.getElementById("competition")
+
+    allCompetitions.forEach((comp) => {
+      const option1 = document.createElement("option")
+      option1.value = comp.id
+      option1.textContent = comp.title
+      filterCompetition.appendChild(option1)
+
+      const option2 = document.createElement("option")
+      option2.value = comp.id
+      option2.textContent = comp.title
+      competitionSelect.appendChild(option2)
+    })
   } catch (error) {
     console.error("Помилка завантаження конкурсів:", error)
   }
@@ -80,15 +81,15 @@ async function loadCompetitions() {
 
 async function loadRehearsals() {
   try {
-    const response = await fetch(`${window.API_URL}/api/rehearsals/teacher/${currentUserId}`)
-    const data = await response.json()
+    const response = await fetch(`${window.AppConfig.API_URL}/api/rehearsals/teacher/${currentUserId}`)
 
-    if (response.ok) {
-      allRehearsals = data.rehearsals || []
-      displayRehearsals(allRehearsals)
-    } else {
-      throw new Error(data.error || "Помилка завантаження репетицій")
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
     }
+
+    const data = await response.json()
+    allRehearsals = data.rehearsals || []
+    displayRehearsals(allRehearsals)
   } catch (error) {
     console.error("Помилка завантаження репетицій:", error)
     document.getElementById("rehearsalsList").innerHTML = `
@@ -100,7 +101,6 @@ async function loadRehearsals() {
   }
 }
 
-// Відображення репетицій
 function displayRehearsals(rehearsals) {
   const container = document.getElementById("rehearsalsList")
 
@@ -129,6 +129,8 @@ function displayRehearsals(rehearsals) {
       const dateClass = isToday ? "date-today" : "date-upcoming"
       const dateLabel = isToday ? "Сьогодні" : formatDate(date)
 
+      const isOwner = rehearsal.teacher_id === Number.parseInt(currentUserId)
+
       return `
         <div class="rehearsal-item" style="${isPast ? "opacity: 0.6;" : ""}">
           <div class="rehearsal-header">
@@ -140,6 +142,7 @@ function displayRehearsals(rehearsals) {
             <span class="type-badge ${typeClass}">${typeLabel}</span>
             <span class="format-badge ${formatClass}">${formatLabel}</span>
             <span class="date-badge ${dateClass}">${dateLabel}</span>
+            ${!isOwner ? '<span class="owner-badge">Створено іншим вчителем</span>' : ""}
           </div>
 
           <div class="rehearsal-details">
@@ -197,12 +200,23 @@ function displayRehearsals(rehearsals) {
           }
 
           <div class="rehearsal-actions">
-            <button class="btn btn-secondary" onclick="editRehearsal(${rehearsal.id})">
-              Редагувати
-            </button>
-            <button class="btn btn-danger" onclick="deleteRehearsal(${rehearsal.id})">
-              Видалити
-            </button>
+            ${
+              isOwner
+                ? `
+              <button class="btn btn-secondary" onclick="editRehearsal(${rehearsal.id})">
+                Редагувати
+              </button>
+              <button class="btn btn-danger" onclick="deleteRehearsal(${rehearsal.id})">
+                Видалити
+              </button>
+            `
+                : `
+              <button class="btn btn-secondary" onclick="viewAllRehearsals()">
+                Всі репетиції
+              </button>
+              <p class="info-text">Ви можете тільки переглядати цю репетицію</p>
+            `
+            }
           </div>
         </div>
       `
@@ -210,7 +224,6 @@ function displayRehearsals(rehearsals) {
     .join("")
 }
 
-// Фільтрація репетицій
 function setupFilters() {
   const searchInput = document.getElementById("searchRehearsals")
   const filterCompetition = document.getElementById("filterCompetition")
@@ -234,30 +247,25 @@ function applyFilters() {
 
   let filtered = [...allRehearsals]
 
-  // Пошук
   if (searchTerm) {
     filtered = filtered.filter(
       (r) =>
-        r.title.toLowerCase().includes(searchTerm) ||
-        r.competition_title.toLowerCase().includes(searchTerm) ||
-        (r.student_name && r.student_name.toLowerCase().includes(searchTerm)),
+      r.title.toLowerCase().includes(searchTerm) ||
+      r.competition_title.toLowerCase().includes(searchTerm) ||
+      (r.student_name && r.student_name.toLowerCase().includes(searchTerm)),
     )
   }
 
-  // Фільтр по конкурсу
   if (competitionFilter) {
     filtered = filtered.filter((r) => r.competition_id == competitionFilter)
   }
 
-  // Фільтр по типу
   if (typeFilter === "personal") {
     filtered = filtered.filter((r) => r.student_id !== null)
   } else if (typeFilter === "group") {
     filtered = filtered.filter((r) => r.student_id === null)
   }
 
-  // Фільтр по даті
-  const now = new Date()
   if (dateFilter) {
     filtered = filtered.filter((r) => {
       const date = new Date(r.rehearsal_date)
@@ -276,7 +284,6 @@ function applyFilters() {
     })
   }
 
-  // Сортування
   filtered.sort((a, b) => {
     switch (sortBy) {
       case "date_asc":
@@ -295,7 +302,6 @@ function applyFilters() {
   displayRehearsals(filtered)
 }
 
-// Відкрити модальне вікно створення репетиції
 function openCreateRehearsalModal() {
   document.getElementById("createRehearsalModal").classList.add("active")
   document.getElementById("modalTitle").textContent = "Створити репетицію"
@@ -304,7 +310,6 @@ function openCreateRehearsalModal() {
   document.getElementById("studentSelectGroup").style.display = "none"
 }
 
-// Закрити модальне вікно
 function closeCreateRehearsalModal() {
   document.getElementById("createRehearsalModal").classList.remove("active")
 }
@@ -319,7 +324,7 @@ async function loadCompetitionParticipants() {
   }
 
   try {
-    const response = await fetch(`${window.API_URL}/api/competitions/${competitionId}/participants`)
+    const response = await fetch(`${window.AppConfig.API_URL}/api/competitions/${competitionId}/participants`)
     const data = await response.json()
 
     if (response.ok) {
@@ -339,7 +344,6 @@ async function loadCompetitionParticipants() {
   }
 }
 
-// Перемикач особистої репетиції
 function toggleStudentSelect() {
   const isPersonal = document.getElementById("isPersonal").checked
   const studentSelectGroup = document.getElementById("studentSelectGroup")
@@ -393,7 +397,9 @@ async function saveRehearsal() {
   }
 
   try {
-    const url = rehearsalId ? `${window.API_URL}/api/rehearsals/${rehearsalId}` : `${window.API_URL}/api/rehearsals`
+    const url = rehearsalId ?
+      `${window.AppConfig.API_URL}/api/rehearsals/${rehearsalId}` :
+      `${window.AppConfig.API_URL}/api/rehearsals`
     const method = rehearsalId ? "PUT" : "POST"
 
     const response = await fetch(url, {
@@ -420,10 +426,21 @@ async function saveRehearsal() {
 }
 
 async function deleteRehearsal(rehearsalId) {
+  const rehearsal = allRehearsals.find((r) => r.id === rehearsalId)
+  if (!rehearsal) {
+    alert("Репетицію не знайдено")
+    return
+  }
+
+  if (rehearsal.teacher_id !== Number.parseInt(currentUserId)) {
+    alert("Ви не можете видаляти репетиції інших вчителів")
+    return
+  }
+
   if (!confirm("Ви впевнені, що хочете видалити цю репетицію?")) return
 
   try {
-    const response = await fetch(`${window.API_URL}/api/rehearsals/${rehearsalId}`, {
+    const response = await fetch(`${window.AppConfig.API_URL}/api/rehearsals/${rehearsalId}`, {
       method: "DELETE",
     })
 
@@ -445,6 +462,11 @@ async function editRehearsal(rehearsalId) {
   const rehearsal = allRehearsals.find((r) => r.id === rehearsalId)
   if (!rehearsal) return
 
+  if (rehearsal.teacher_id !== Number.parseInt(currentUserId)) {
+    alert("Ви не можете редагувати репетиції інших вчителів")
+    return
+  }
+
   openCreateRehearsalModal()
   document.getElementById("modalTitle").textContent = "Редагувати репетицію"
   document.getElementById("editRehearsalId").value = rehearsal.id
@@ -465,7 +487,6 @@ async function editRehearsal(rehearsalId) {
   }
 }
 
-// Утилітні функції
 function formatDate(date) {
   return date.toLocaleDateString("uk-UA", {
     day: "numeric",
@@ -522,3 +543,62 @@ function isDateThisMonth(date) {
   const today = new Date()
   return date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()
 }
+
+function viewAllRehearsals() {
+  window.location.href = "rehearsals.html"
+} // Centralized API configuration
+// This file must be loaded BEFORE any other JS files in HTML
+
+window.AppConfig = (() => {
+  // Determine the correct API URL based on environment
+  const getApiUrl = () => {
+    const hostname = window.location.hostname
+    const protocol = window.location.protocol
+
+    // Check if we're on localhost
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "http://localhost:3000"
+    }
+
+    // Production environment - use the production URL
+    return "https://ievents-qf5k.onrender.com"
+  }
+
+  const API_URL = getApiUrl()
+
+  console.log("[Config] Ініціалізація AppConfig...")
+  console.log("[Config] API URL:", API_URL)
+
+  // Public API
+  return {
+    API_URL: API_URL,
+    getApiUrl: () => API_URL,
+
+    // Helper method for making authenticated requests
+    async fetch(endpoint, options = {}) {
+      const token = localStorage.getItem("token")
+      const headers = {
+        "Content-Type": "application/json",
+        ...options.headers,
+      }
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`
+      }
+
+      const url = endpoint.startsWith("http") ? endpoint : `${API_URL}${endpoint}`
+
+      return fetch(url, {
+        ...options,
+        headers,
+      })
+    },
+  }
+})()
+
+// Make API_URL available globally for backward compatibility
+window.API_URL = window.AppConfig.API_URL
+
+window.dispatchEvent(new Event("configReady"))
+
+console.log("[Config] AppConfig готовий до використання")
