@@ -163,7 +163,7 @@ function renderFooter() {
                 <p>&copy; 2025 iEvents. Всі права захищені.</p>
                 <div class="footer-links">
                     <a href="about.html">Про нас</a>
-                    <a href="#">Контакти</a>
+                    <a href="contacts.html">Контакти</a>
                     <a href="#">Підтримка</a>
                 </div>
             </div>
