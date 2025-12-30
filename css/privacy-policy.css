@@ -1,0 +1,81 @@
+.privacy-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  line-height: 1.8;
+}
+
+.privacy-content h1 {
+  color: #78643a;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.privacy-content h2 {
+  color: #78643a;
+  font-size: 1.8rem;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #78643a;
+  padding-bottom: 10px;
+}
+
+.privacy-content h3 {
+  color: #78643a;
+  font-size: 1.4rem;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+
+.privacy-content p {
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+.privacy-content ul {
+  margin-left: 30px;
+  margin-bottom: 20px;
+}
+
+.privacy-content li {
+  margin-bottom: 10px;
+}
+
+.privacy-content strong {
+  color: #78643a;
+}
+
+.privacy-content .highlight {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-left: 4px solid #78643a;
+  margin: 20px 0;
+}
+
+.privacy-content .date-updated {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 40px;
+}
+
+.back-button {
+  display: inline-block;
+  margin: 20px auto;
+  padding: 12px 30px;
+  background-color: #78643a;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #5d4d2e;
+}
+
+.button-container {
+  text-align: center;
+  margin-top: 40px;
+}

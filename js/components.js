@@ -164,7 +164,9 @@ function renderFooter() {
                 <div class="footer-links">
                     <a href="about.html">Про нас</a>
                     <a href="contacts.html">Контакти</a>
-                    <a href="#">Підтримка</a>
+                    <a href="support.html">Підтримка</a>
+                    <a href="question.html">Задати питання</a>
+                    <a href="privacy-policy.html">Політика конфіденційності</a>
                 </div>
             </div>
         </footer>
