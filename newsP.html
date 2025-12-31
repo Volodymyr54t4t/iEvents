@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новини - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <link rel="stylesheet" href="css/newsP.css">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>📰 Новини</h1>
+            <p class="subtitle">Останні події та оголошення</p>
+        </div>
+
+        <div class="filters-section">
+            <input type="text" id="searchNews" class="filter-input" placeholder="Пошук новин...">
+
+            <select id="filterCategory" class="filter-select">
+                <option value="">Всі категорії</option>
+                <option value="Конкурси">Конкурси</option>
+                <option value="Репетиції">Репетиції</option>
+                <option value="Результати">Результати</option>
+                <option value="Оголошення">Оголошення</option>
+                <option value="Події">Події</option>
+                <option value="Інше">Інше</option>
+            </select>
+
+            <!-- Додано фільтр для перегляду архіву -->
+            <select id="filterArchive" class="filter-select">
+                <option value="active">Активні</option>
+                <option value="archived">Архів</option>
+                <option value="all">Всі</option>
+            </select>
+
+            <!-- Додано фільтр по місяцях -->
+            <select id="filterMonth" class="filter-select">
+                <option value="">Всі місяці</option>
+            </select>
+
+            <select id="sortBy" class="filter-select">
+                <option value="date_desc">Спочатку нові</option>
+                <option value="date_asc">Спочатку старі</option>
+                <option value="likes_desc">За популярністю</option>
+            </select>
+        </div>
+
+        <div id="newsList" class="news-list">
+            <div class="loading">Завантаження новин...</div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <!-- View News Modal -->
+    <div id="viewNewsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="newsModalTitle">Новина</h2>
+                <button class="modal-close" onclick="closeViewNewsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="newsFullContent"></div>
+
+                <div class="comments-section">
+                    <h3>💬 Коментарі</h3>
+
+                    <div class="comment-form">
+                        <textarea id="newComment" placeholder="Напишіть коментар..." rows="3"></textarea>
+                        <button class="btn btn-primary" onclick="addComment()">Відправити</button>
+                    </div>
+
+                    <div id="commentsList" class="comments-list">
+                        <div class="loading">Завантаження коментарів...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/newsP.js"></script>
+</body>
+
+</html>

@@ -36,9 +36,9 @@ function renderHeader() {
                 </button>
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
-                    <a href="chat.html" class="nav-link">Чати</a>
+                    <a href="index.html" class="nav-link">Головна</a>
                     <a href="profileCommunity.html" class="nav-link">Профіль</a>
-                    <a href="adminCommunity.html" class="nav-link">🏛️ Адмін панель</a>
+                    <a href="adminCommunity.html" class="nav-link">Адмін панель</a>
                     ${notificationButton}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
@@ -47,9 +47,9 @@ function renderHeader() {
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
-                    <a href="chat.html" class="sidebar-link">Чати</a>
+                    <a href="index.html" class="sidebar-link">Головна</a>
                     <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
-                    <a href="adminCommunity.html" class="sidebar-link">🏛️ Адмін панель</a>
+                    <a href="adminCommunity.html" class="sidebar-link">Адмін панель</a>
                     <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
                     <div style="padding: 16px 24px;">
                         <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
@@ -79,6 +79,11 @@ function renderHeader() {
     '<a href="rehearsalP.html" class="nav-link">Репетиції</a>' :
     ""
 
+  const newsLink =
+    userRole === "вчитель" || userRole === "методист" ?
+    '<a href="newsT.html" class="nav-link">Новини</a>' :
+    '<a href="newsP.html" class="nav-link">Новини</a>'
+
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
 
@@ -106,9 +111,10 @@ function renderHeader() {
                 </button>
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
-                    <a href="chat.html" class="sidebar-link">Чати</a>
+                    <a href="index.html" class="nav-link">Головна</a>
                     ${competitionsLink}
                     ${rehearsalLink}
+                    ${newsLink}
                     ${calendarLink}
                     ${resultsLink}
                     ${statisticsLink}
@@ -125,9 +131,10 @@ function renderHeader() {
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
-                    <a href="chat.html" class="sidebar-link">Чати</a>
+                    <a href="index.html" class="sidebar-link">Головна</a>
                     ${competitionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${rehearsalLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    ${newsLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${calendarLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${resultsLink.replace('class="nav-link"', 'class="sidebar-link"')}
                     ${statisticsLink.replace('class="nav-link"', 'class="sidebar-link"')}
@@ -162,11 +169,9 @@ function renderFooter() {
             <div class="footer-container">
                 <p>&copy; 2025 iEvents. Всі права захищені.</p>
                 <div class="footer-links">
-                    <a href="about.html">Про нас</a>
-                    <a href="contacts.html">Контакти</a>
-                    <a href="support.html">Підтримка</a>
-                    <a href="question.html">Задати питання</a>
-                    <a href="privacy-policy.html">Політика конфіденційності</a>
+                    <a href="#">Про нас</a>
+                    <a href="#">Контакти</a>
+                    <a href="#">Підтримка</a>
                 </div>
             </div>
         </footer>

@@ -698,6 +698,126 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця chat_read_status вже існує")
     }
 
+    // Перевірка та створення таблиці news
+    console.log("Перевірка таблиці news...")
+    const newsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'news'
+      ) as exists
+    `)
+
+    if (!newsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці news...")
+      await client.query(`
+        CREATE TABLE news (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          content TEXT NOT NULL,
+          category VARCHAR(100),
+          is_published BOOLEAN DEFAULT FALSE,
+          image_url VARCHAR(255),
+          author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця news створена")
+    } else {
+      console.log("  ✓ Таблиця news вже існує")
+    }
+
+    // Перевірка та створення таблиці news_comments
+    console.log("Перевірка таблиці news_comments...")
+    const newsCommentsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'news_comments'
+      ) as exists
+    `)
+
+    if (!newsCommentsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці news_comments...")
+      await client.query(`
+        CREATE TABLE news_comments (
+          id SERIAL PRIMARY KEY,
+          news_id INTEGER REFERENCES news(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          comment TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця news_comments створена")
+    } else {
+      console.log("  ✓ Таблиця news_comments вже існує")
+    }
+
+    // Перевірка та створення таблиці news_likes
+    console.log("Перевірка таблиці news_likes...")
+    const newsLikesTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'news_likes'
+      ) as exists
+    `)
+
+    if (!newsLikesTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці news_likes...")
+      await client.query(`
+        CREATE TABLE news_likes (
+          id SERIAL PRIMARY KEY,
+          news_id INTEGER REFERENCES news(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(news_id, user_id)
+        )
+      `)
+      console.log("  ✓ Таблиця news_likes створена")
+    } else {
+      console.log("  ✓ Таблиця news_likes вже існує")
+    }
+
+    // Перевірка та додавання колонки views_count до таблиці news
+    console.log("Перевірка колонки views_count в таблиці news...")
+    const viewsCountCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'news' AND column_name = 'views_count'
+      ) as exists
+    `)
+    if (!viewsCountCheck.rows[0].exists) {
+      console.log("  → Додавання колонки views_count...")
+      await client.query(`ALTER TABLE news ADD COLUMN views_count INTEGER DEFAULT 0`)
+      console.log("  ✓ Колонка views_count додана")
+    } else {
+      console.log("  ✓ Колонка views_count вже існує")
+    }
+
+    // --- CHANGES START HERE ---
+    // Перевірка та додавання колонок cover_image_url та gallery_images до таблиці news
+    const newsImageColumns = [
+      { name: "cover_image_url", type: "VARCHAR(255)" },
+      { name: "gallery_images", type: "TEXT[]" }, // Array of text for multiple image URLs
+    ]
+
+    console.log("  → Перевірка та додавання колонок зображень до таблиці news...")
+    for (const col of newsImageColumns) {
+      const columnCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'news' AND column_name = '${col.name}'
+        ) as exists
+      `)
+      if (!columnCheck.rows[0].exists) {
+        console.log(`  → Додавання колонки ${col.name}...`)
+        await client.query(`ALTER TABLE news ADD COLUMN ${col.name} ${col.type}`)
+        console.log(`  ✓ Колонка ${col.name} додана`)
+      } else {
+        console.log(`  ✓ Колонка ${col.name} вже існує`)
+      }
+    }
+    // --- CHANGES END HERE ---
+
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -1600,7 +1720,8 @@ app.get("/api/competitions/:id/participants", async (req, res) => {
   try {
     const result = await pool.query(
       `
-      SELECT u.id, u.email,
+      SELECT 
+        u.id, u.email,
              p.first_name, p.last_name, p.grade, p.avatar
       FROM competition_participants cp
       INNER JOIN users u ON cp.user_id = u.id
@@ -3669,30 +3790,6 @@ app.delete("/api/competitions/documents/:documentId", async (req, res) => {
   }
 })
 
-// Обробка помилок
-app.use((err, req, res, next) => {
-  console.error("❌ Необроблена помилка сервера:")
-  console.error("URL:", req.url)
-  console.error("Метод:", req.method)
-  console.error("Помилка:", err.message)
-  console.error("Stack:", err.stack)
-
-  if (err instanceof multer.MulterError) {
-    if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({
-        error: "Файл занадто великий. Максимум 5MB",
-      })
-    }
-    return res.status(400).json({
-      error: "Помилка завантаження файлу",
-    })
-  }
-
-  res.status(500).json({
-    error: "Внутрішня помилка сервера",
-  })
-})
-
 // ADDED CALENDAR API ENDPOINT:
 app.get("/api/calendar/competitions", async (req, res) => {
   console.log("Запит конкурсів для календаря")
@@ -4440,4 +4537,450 @@ app.post("/api/chats/:chatId/read", async (req, res) => {
     console.error("Помилка позначення чату як прочитаного:", error)
     res.status(500).json({ error: "Помилка позначення чату як прочитаного" })
   }
+})
+
+// Get all news (for teachers/methodist)
+app.get("/api/news", async (req, res) => {
+  console.log("Запит всіх новин")
+
+  try {
+    const result = await pool.query(`
+      SELECT n.*, 
+             u.email as author_email,
+             COALESCE(p.first_name || ' ' || p.last_name, u.email) as author_name,
+             COALESCE(n.views_count, 0) as views_count,
+             (SELECT COUNT(*) FROM news_likes WHERE news_id = n.id) as likes_count,
+             (SELECT COUNT(*) FROM news_comments WHERE news_id = n.id) as comments_count
+      FROM news n
+      LEFT JOIN users u ON n.author_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      ORDER BY n.created_at DESC
+    `)
+
+    console.log("✓ Знайдено новин:", result.rows.length)
+    res.json({
+      success: true,
+      news: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання новин:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка отримання новин",
+    })
+  }
+})
+
+// Get published news (for students)
+app.get("/api/news/published", async (req, res) => {
+  console.log("Запит опублікованих новин")
+
+  try {
+    const result = await pool.query(`
+      SELECT n.*, 
+             u.email as author_email,
+             COALESCE(p.first_name || ' ' || p.last_name, u.email) as author_name,
+             COALESCE(n.views_count, 0) as views_count,
+             (SELECT COUNT(*) FROM news_likes WHERE news_id = n.id) as likes_count,
+             (SELECT COUNT(*) FROM news_comments WHERE news_id = n.id) as comments_count
+      FROM news n
+      LEFT JOIN users u ON n.author_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE n.is_published = true
+      ORDER BY n.created_at DESC
+    `)
+
+    console.log("✓ Знайдено опублікованих новин:", result.rows.length)
+    res.json({
+      success: true,
+      news: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання новин:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка отримання новин",
+    })
+  }
+})
+
+// Get single news by ID
+app.get("/api/news/:id", async (req, res) => {
+  const { id } = req.params
+  console.log("Запит новини з ID:", id)
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT n.*, 
+             u.email as author_email,
+             COALESCE(p.first_name || ' ' || p.last_name, u.email) as author_name,
+             COALESCE(n.views_count, 0) as views_count,
+             (SELECT COUNT(*) FROM news_likes WHERE news_id = n.id) as likes_count,
+             (SELECT COUNT(*) FROM news_comments WHERE news_id = n.id) as comments_count
+      FROM news n
+      LEFT JOIN users u ON n.author_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE n.id = $1
+    `,
+      [id],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Новину не знайдено",
+      })
+    }
+
+    console.log("✓ Новину знайдено")
+    res.json({
+      success: true,
+      news: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання новини:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка отримання новини",
+    })
+  }
+})
+
+// Create news
+app.post("/api/news", async (req, res) => {
+  const { title, content, category, isPublished, coverImageUrl, galleryImageUrls, authorId } = req.body
+  console.log("Створення новини:", title)
+
+  if (!title || !content || !authorId) {
+    return res.status(400).json({
+      success: false,
+      error: "Заголовок, зміст та автор обов'язкові",
+    })
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO news (title, content, category, is_published, image_url, cover_image_url, gallery_images, author_id) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+       RETURNING *`,
+      [title, content, category, isPublished || false, coverImageUrl, coverImageUrl, galleryImageUrls || [], authorId],
+    )
+
+    console.log("✓ Новину створено")
+    res.json({
+      success: true,
+      news: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка створення новини:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка створення новини",
+    })
+  }
+})
+
+// Update news
+app.put("/api/news/:id", async (req, res) => {
+  const { id } = req.params
+  const { title, content, category, isPublished, coverImageUrl, galleryImageUrls } = req.body
+  console.log("Оновлення новини ID:", id)
+
+  if (!title || !content) {
+    return res.status(400).json({
+      success: false,
+      error: "Заголовок та зміст обов'язкові",
+    })
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE news 
+       SET title = $1, content = $2, category = $3, is_published = $4, 
+           image_url = $5, cover_image_url = $6, gallery_images = $7, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $8
+       RETURNING *`,
+      [title, content, category, isPublished, coverImageUrl, coverImageUrl, galleryImageUrls || [], id],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Новину не знайдено",
+      })
+    }
+
+    console.log("✓ Новину оновлено")
+    res.json({
+      success: true,
+      news: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка оновлення новини:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка оновлення новини",
+    })
+  }
+})
+
+// Delete news
+app.delete("/api/news/:id", async (req, res) => {
+  const { id } = req.params
+  console.log("Видалення новини ID:", id)
+
+  try {
+    const result = await pool.query("DELETE FROM news WHERE id = $1 RETURNING *", [id])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Новину не знайдено",
+      })
+    }
+
+    console.log("✓ Новину видалено")
+    res.json({
+      success: true,
+    })
+  } catch (error) {
+    console.error("❌ Помилка видалення новини:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка видалення новини",
+    })
+  }
+})
+
+// Get comments for news
+app.get("/api/news/:id/comments", async (req, res) => {
+  const { id } = req.params
+  console.log("Запит коментарів для новини ID:", id)
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT nc.*, 
+             u.email as user_email,
+             COALESCE(p.first_name || ' ' || p.last_name, u.email) as user_name
+      FROM news_comments nc
+      LEFT JOIN users u ON nc.user_id = u.id
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE nc.news_id = $1
+      ORDER BY nc.created_at DESC
+    `,
+      [id],
+    )
+
+    console.log("✓ Знайдено коментарів:", result.rows.length)
+    res.json({
+      success: true,
+      comments: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання коментарів:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка отримання коментарів",
+    })
+  }
+})
+
+// Add comment to news
+app.post("/api/news/:id/comments", async (req, res) => {
+  const { id } = req.params
+  const { userId, comment } = req.body
+  console.log("Додавання коментаря до новини ID:", id)
+
+  if (!userId || !comment) {
+    return res.status(400).json({
+      success: false,
+      error: "Користувач та текст коментаря обов'язкові",
+    })
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO news_comments (news_id, user_id, comment) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`,
+      [id, userId, comment],
+    )
+
+    console.log("✓ Коментар додано")
+    res.json({
+      success: true,
+      comment: result.rows[0],
+    })
+  } catch (error) {
+    console.error("❌ Помилка додавання коментаря:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка додавання коментаря",
+    })
+  }
+})
+
+// Delete comment
+app.delete("/api/news/comments/:commentId", async (req, res) => {
+  const { commentId } = req.params
+  console.log("Видалення коментаря ID:", commentId)
+
+  try {
+    const result = await pool.query("DELETE FROM news_comments WHERE id = $1 RETURNING *", [commentId])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Коментар не знайдено",
+      })
+    }
+
+    console.log("✓ Коментар видалено")
+    res.json({
+      success: true,
+    })
+  } catch (error) {
+    console.error("❌ Помилка видалення коментаря:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка видалення коментаря",
+    })
+  }
+})
+
+// Like/Unlike news
+app.post("/api/news/:id/like", async (req, res) => {
+  const { id } = req.params
+  const { userId } = req.body
+  console.log("Лайк новини ID:", id, "користувачем:", userId)
+
+  if (!userId) {
+    return res.status(400).json({
+      success: false,
+      error: "ID користувача обов'язковий",
+    })
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO news_likes (news_id, user_id) 
+       VALUES ($1, $2) 
+       ON CONFLICT (news_id, user_id) DO NOTHING`,
+      [id, userId],
+    )
+
+    const countResult = await pool.query("SELECT COUNT(*) as count FROM news_likes WHERE news_id = $1", [id])
+
+    console.log("✓ Лайк додано")
+    res.json({
+      success: true,
+      likesCount: Number.parseInt(countResult.rows[0].count),
+    })
+  } catch (error) {
+    console.error("❌ Помилка додавання лайка:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка додавання лайка",
+    })
+  }
+})
+
+// Remove like
+app.delete("/api/news/:id/like", async (req, res) => {
+  const { id } = req.params
+  const { userId } = req.body
+  console.log("Видалення лайка новини ID:", id, "користувачем:", userId)
+
+  if (!userId) {
+    return res.status(400).json({
+      success: false,
+      error: "ID користувача обов'язковий",
+    })
+  }
+
+  try {
+    await pool.query("DELETE FROM news_likes WHERE news_id = $1 AND user_id = $2", [id, userId])
+
+    const countResult = await pool.query("SELECT COUNT(*) as count FROM news_likes WHERE news_id = $1", [id])
+
+    console.log("✓ Лайк видалено")
+    res.json({
+      success: true,
+      likesCount: Number.parseInt(countResult.rows[0].count),
+    })
+  } catch (error) {
+    console.error("❌ Помилка видалення лайка:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка видалення лайка",
+    })
+  }
+})
+
+// Get user's likes
+app.get("/api/news/likes/user/:userId", async (req, res) => {
+  const { userId } = req.params
+  console.log("Запит лайків користувача ID:", userId)
+
+  try {
+    const result = await pool.query("SELECT news_id FROM news_likes WHERE user_id = $1", [userId])
+
+    console.log("✓ Знайдено лайків:", result.rows.length)
+    res.json({
+      success: true,
+      likes: result.rows,
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання лайків:", error.message)
+    res.status(500).json({
+      success: false,
+      error: "Помилка отримання лайків",
+    })
+  }
+})
+
+// Upload image endpoint
+app.post("/api/upload-image", upload.single("image"), (req, res) => {
+  console.log("Завантаження зображення")
+
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      error: "Файл не завантажено",
+    })
+  }
+
+  const imageUrl = `/uploads/${req.file.filename}`
+  console.log("✓ Зображення завантажено:", imageUrl)
+
+  res.json({
+    success: true,
+    imageUrl: imageUrl,
+  })
+})
+
+// Обробка помилок
+app.use((err, req, res, next) => {
+  console.error("❌ Необроблена помилка сервера:")
+  console.error("URL:", req.url)
+  console.error("Метод:", req.method)
+  console.error("Помилка:", err.message)
+  console.error("Stack:", err.stack)
+
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        error: "Файл занадто великий. Максимум 5MB",
+      })
+    }
+    return res.status(400).json({
+      error: "Помилка завантаження файлу",
+    })
+  }
+
+  res.status(500).json({
+    error: "Внутрішня помилка сервера",
+  })
 })

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управління новинами - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <link rel="stylesheet" href="css/newsT.css">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>📰 Управління новинами</h1>
+            <p class="subtitle">Створюйте та керуйте новинами платформи</p>
+        </div>
+
+        <div class="actions-section">
+            <button class="btn-add-news" onclick="openCreateNewsModal()">
+                ➕ Додати новину
+            </button>
+
+            <div class="filters-row">
+                <input type="text" id="searchNews" class="filter-input" placeholder="Пошук новин...">
+
+                <select id="filterCategory" class="filter-select">
+                    <option value="">Всі категорії</option>
+                    <option value="Конкурси">Конкурси</option>
+                    <option value="Репетиції">Репетиції</option>
+                    <option value="Результати">Результати</option>
+                    <option value="Оголошення">Оголошення</option>
+                    <option value="Події">Події</option>
+                    <option value="Інше">Інше</option>
+                </select>
+
+                <select id="filterPublished" class="filter-select">
+                    <option value="">Всі новини</option>
+                    <option value="true">Опубліковані</option>
+                    <option value="false">Чернетки</option>
+                </select>
+
+                <select id="sortBy" class="filter-select">
+                    <option value="date_desc">Спочатку нові</option>
+                    <option value="date_asc">Спочатку старі</option>
+                    <option value="likes_desc">За кількістю лайків</option>
+                    <option value="comments_desc">За кількістю коментарів</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <div id="newsList" class="news-list">
+                <div class="loading">Завантаження новин...</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <!-- Create/Edit News Modal -->
+    <div id="createNewsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">Створити новину</h2>
+                <button class="modal-close" onclick="closeCreateNewsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createNewsForm" class="news-form">
+                    <input type="hidden" id="editNewsId">
+
+                    <div class="form-group">
+                        <label for="newsTitle">Заголовок *</label>
+                        <input type="text" id="newsTitle" name="title" required placeholder="Введіть заголовок новини">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newsCategory">Категорія *</label>
+                        <select id="newsCategory" name="category" required>
+                            <option value="">Оберіть категорію</option>
+                            <option value="Конкурси">Конкурси</option>
+                            <option value="Репетиції">Репетиції</option>
+                            <option value="Результати">Результати</option>
+                            <option value="Оголошення">Оголошення</option>
+                            <option value="Події">Події</option>
+                            <option value="Інше">Інше</option>
+                        </select>
+                    </div>
+
+                    <!-- Додаємо поле для обкладинки -->
+                    <div class="form-group">
+                        <label for="newsCoverImage">🖼️ Обкладинка новини (одне фото)</label>
+                        <input type="file" id="newsCoverImage" accept="image/*">
+                        <div id="coverImagePreview" class="image-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newsContent">Зміст *</label>
+                        <textarea id="newsContent" name="content" required rows="10"
+                            placeholder="Введіть текст новини..."></textarea>
+                    </div>
+
+                    <!-- Додаємо поле для галереї -->
+                    <div class="form-group">
+                        <label for="newsGalleryImages">🖼️ Галерея фотографій (декілька фото)</label>
+                        <input type="file" id="newsGalleryImages" accept="image/*" multiple>
+                        <div id="galleryImagesPreview" class="gallery-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="newsPublished" name="published" checked>
+                            <span>Опублікувати відразу</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCreateNewsModal()">Скасувати</button>
+                <button class="btn btn-primary" onclick="saveNews()">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Comments Modal -->
+    <div id="viewCommentsModal" class="modal">
+        <div class="modal-content modal-medium">
+            <div class="modal-header">
+                <h2>💬 Коментарі</h2>
+                <button class="modal-close" onclick="closeViewCommentsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="commentsContainer" class="comments-container">
+                    <div class="loading">Завантаження коментарів...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeViewCommentsModal()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/components.js"></script>
+    <script src="js/newsT.js"></script>
+</body>
+
+</html>
