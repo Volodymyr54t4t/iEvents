@@ -673,6 +673,31 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця chat_messages вже існує")
     }
 
+    // Перевірка та створення таблиці chat_read_status
+    console.log("Перевірка таблиці chat_read_status...")
+    const chatReadStatusTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'chat_read_status'
+      ) as exists
+    `)
+
+    if (!chatReadStatusTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці chat_read_status...")
+      await client.query(`
+        CREATE TABLE chat_read_status (
+          id SERIAL PRIMARY KEY,
+          chat_id INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          last_read_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(chat_id, user_id)
+        )
+      `)
+      console.log("  ✓ Таблиця chat_read_status створена")
+    } else {
+      console.log("  ✓ Таблиця chat_read_status вже існує")
+    }
+
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -703,7 +728,7 @@ app.get("/", (req, res) => {
 
 // Реєстрація користувача
 app.post("/api/register", async (req, res) => {
-  const { email, password } = req.body
+  const { email, password, phone, telegram } = req.body
 
   console.log("Спроба реєстрації:", email)
 
@@ -762,10 +787,13 @@ app.post("/api/register", async (req, res) => {
     const user = userResult.rows[0]
     console.log("Користувач створений з ID:", user.id)
 
-    // Створення порожнього профілю
     console.log("Створення профілю для користувача...")
-    await client.query("INSERT INTO profiles (user_id) VALUES ($1)", [user.id])
-    console.log("Профіль створений")
+    await client.query("INSERT INTO profiles (user_id, phone, telegram) VALUES ($1, $2, $3)", [
+      user.id,
+      phone || null,
+      telegram || null,
+    ])
+    console.log("Профіль створений з додатковими даними")
 
     await client.query("COMMIT")
     console.log("Транзакція завершена успішно")
@@ -910,8 +938,7 @@ app.get("/api/profile/:userId", async (req, res) => {
   const client = await pool.connect()
 
   try {
-    // Перевірка існування користувача
-    const userCheck = await client.query("SELECT id, role FROM users WHERE id = $1", [userId])
+    const userCheck = await client.query("SELECT id, email, role FROM users WHERE id = $1", [userId])
 
     if (userCheck.rows.length === 0) {
       console.log("Помилка: користувача не існує")
@@ -932,6 +959,7 @@ app.get("/api/profile/:userId", async (req, res) => {
 
       const profile = {
         ...newProfile.rows[0],
+        email: user.email,
         role: user.role,
       }
       console.log("✓ Новий профіль створено")
@@ -942,6 +970,7 @@ app.get("/api/profile/:userId", async (req, res) => {
 
     const profile = {
       ...profileResult.rows[0],
+      email: user.email,
       role: user.role,
     }
     console.log("✓ Профіль знайдено")
@@ -2981,7 +3010,7 @@ app.get("/api/teacher/:teacherId/students", async (req, res) => {
         u.id, 
         u.email, 
         p.first_name, 
-        p.last_name, 
+        p.last_name,
         p.middle_name,
         p.grade_number,
         p.grade_letter,
@@ -4197,8 +4226,24 @@ app.delete("/api/rehearsals/:id", async (req, res) => {
 
 // API для чатів
 app.get("/api/chats", async (req, res) => {
+  const { userId } = req.query
+
+  if (!userId) {
+    return res.status(400).json({ error: "userId є обов'язковим" })
+  }
+
   try {
-    const result = await pool.query(`
+    // Отримуємо роль користувача
+    const userResult = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "Користувача не знайдено" })
+    }
+
+    const userRole = userResult.rows[0].role
+
+    const result = await pool.query(
+      `
       SELECT 
         c.id,
         c.name,
@@ -4218,12 +4263,32 @@ app.get("/api/chats", async (req, res) => {
           WHERE m.chat_id = c.id 
           ORDER BY m.created_at DESC 
           LIMIT 1
-        ) as last_message_time
+        ) as last_message_time,
+        (
+          SELECT COUNT(*)
+          FROM chat_messages m
+          WHERE m.chat_id = c.id
+          AND m.created_at > COALESCE(
+            (SELECT last_read_at FROM chat_read_status WHERE chat_id = c.id AND user_id = $1),
+            '1970-01-01'::timestamp
+          )
+          AND m.user_id != $1
+        ) as unread_count,
+        EXISTS(SELECT 1 FROM chat_members WHERE chat_id = c.id AND user_id = $1) as is_member
       FROM chats c
       LEFT JOIN chat_members cm ON c.id = cm.chat_id
+      WHERE 
+        c.id IN (SELECT chat_id FROM chat_members WHERE user_id = $1)
+        OR c.created_by = $1
+        OR (c.name = 'Вчителі + методист' AND $2 = 'вчитель')
+        OR (c.name = 'Учні + методист' AND $2 = 'учень')
+        OR $2 = 'методист'
       GROUP BY c.id, c.name, c.description, c.created_at
       ORDER BY last_message_time DESC NULLS LAST, c.created_at DESC
-    `)
+    `,
+      [userId, userRole],
+    )
+
     res.json(result.rows)
   } catch (error) {
     console.error("Помилка завантаження чатів:", error)
@@ -4350,5 +4415,29 @@ app.get("/api/chats/:chatId/members", async (req, res) => {
   } catch (error) {
     console.error("Помилка завантаження учасників:", error)
     res.status(500).json({ error: "Помилка завантаження учасників" })
+  }
+})
+
+app.post("/api/chats/:chatId/read", async (req, res) => {
+  const { chatId } = req.params
+  const { user_id } = req.body
+
+  if (!user_id) {
+    return res.status(400).json({ error: "user_id є обов'язковим" })
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO chat_read_status (chat_id, user_id, last_read_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (chat_id, user_id) 
+       DO UPDATE SET last_read_at = NOW()`,
+      [chatId, user_id],
+    )
+
+    res.json({ success: true })
+  } catch (error) {
+    console.error("Помилка позначення чату як прочитаного:", error)
+    res.status(500).json({ error: "Помилка позначення чату як прочитаного" })
   }
 })
