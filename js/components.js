@@ -38,7 +38,7 @@ function renderHeader() {
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
                     <a href="profileCommunity.html" class="nav-link">Профіль</a>
-                    <a href="adminCommunity.html" class="nav-link">Адмін панель</a>
+                    <a href="adminCommunity.html" class="nav-link">Admin</a>
                     ${notificationButton}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
@@ -49,7 +49,7 @@ function renderHeader() {
                 <aside class="sidebar" id="sidebar">
                     <a href="index.html" class="sidebar-link">Головна</a>
                     <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
-                    <a href="adminCommunity.html" class="sidebar-link">Адмін панель</a>
+                    <a href="adminCommunity.html" class="sidebar-link">Admin</a>
                     <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
                     <div style="padding: 16px 24px;">
                         <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
@@ -92,9 +92,9 @@ function renderHeader() {
   const calendarLink = '<a href="calendar.html" class="nav-link">Календар</a>'
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
   const studentAdminLink =
-    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Особистий кабінет</a>' : ""
+    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Е-кабінет</a>' : ""
   const teacherAdminLink =
-    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка вчителя</a>' : ""
+    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка</a>' : ""
 
   let profileLink = '<a href="profile.html" class="nav-link">Профіль</a>'
   if (userRole === "вчитель" || userRole === "методист") {

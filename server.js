@@ -8,6 +8,8 @@ const path = require("path")
 const fs = require("fs")
 const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCompetition } = require("./bot")
 
+const security = require("./security")
+
 const app = express()
 const PORT = 3000
 
@@ -22,6 +24,11 @@ async function sendTelegramNotification(message) {
 // Middleware
 app.use(cors())
 app.use(express.json())
+app.use(security.securityHeaders)
+app.use(security.validateInput)
+app.use(security.blockSuspiciousIp)
+app.use(security.rateLimiters.general)
+
 app.use(express.static(path.join(__dirname)))
 app.use("/uploads", express.static("uploads"))
 
@@ -818,6 +825,36 @@ async function initializeDatabase() {
     }
     // --- CHANGES END HERE ---
 
+    // Перевірка та створення таблиці testimonials
+    console.log("Перевірка таблиці testimonials...")
+    const testimonialsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'testimonials'
+      ) as exists
+    `)
+
+    if (!testimonialsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці testimonials...")
+      await client.query(`
+        CREATE TABLE testimonials (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          name VARCHAR(255) NOT NULL,
+          role VARCHAR(100) NOT NULL,
+          rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+          text TEXT NOT NULL,
+          is_approved BOOLEAN DEFAULT FALSE,
+          is_featured BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  ✓ Таблиця testimonials створена")
+    } else {
+      console.log("  ✓ Таблиця testimonials вже існує")
+    }
+
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -847,149 +884,104 @@ app.get("/", (req, res) => {
 })
 
 // Реєстрація користувача
-app.post("/api/register", async (req, res) => {
-  const { email, password, phone, telegram } = req.body
+app.post("/api/register", security.rateLimiters.registration, async (req, res) => {
+  const { email, password, role, phone, telegram } = req.body
 
   console.log("Спроба реєстрації:", email)
 
-  // Валідація вхідних даних
-  if (!email || !password) {
-    console.log("Помилка: відсутні email або пароль")
-    return res.status(400).json({
-      error: "Email та пароль обов'язкові",
-    })
-  }
-
-  if (password.length < 6) {
-    console.log("Помилка: пароль занадто короткий")
-    return res.status(400).json({
-      error: "Пароль повинен містити мінімум 6 символів",
-    })
-  }
-
-  // Валідація email формату
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    console.log("Помилка: невірний формат email")
-    return res.status(400).json({
-      error: "Невірний формат email",
-    })
-  }
-
-  const client = await pool.connect()
-
   try {
-    await client.query("BEGIN")
-    console.log("Транзакція розпочата")
+    if (!security.validateEmail(email)) {
+      const ip = req.ip || req.connection.remoteAddress
+      security.logSuspiciousActivity(ip, "invalid_registration_email", { email })
+      return res.status(400).json({ error: "Невірний формат email" })
+    }
 
-    // Перевірка чи користувач вже існує
-    const existingUser = await client.query("SELECT id FROM users WHERE email = $1", [email])
+    if (!security.validatePassword(password)) {
+      return res.status(400).json({ error: "Пароль має містити мінімум 6 символів" })
+    }
+
+    if (phone && !security.validatePhone(phone)) {
+      return res.status(400).json({ error: "Невірний формат номера телефону" })
+    }
+
+    const sanitizedEmail = security.sanitizeString(email).toLowerCase()
+    const sanitizedRole = security.sanitizeString(role) || "учень"
+    const sanitizedPhone = phone ? security.sanitizeString(phone) : null
+    const sanitizedTelegram = telegram ? security.sanitizeString(telegram) : null
+
+    // Перевірка чи існує користувач
+    const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [sanitizedEmail])
 
     if (existingUser.rows.length > 0) {
-      await client.query("ROLLBACK")
-      console.log("Помилка: користувач вже існує")
-      return res.status(400).json({
-        error: "Користувач з таким email вже існує",
-      })
+      const ip = req.ip || req.connection.remoteAddress
+      security.logSuspiciousActivity(ip, "duplicate_registration", { email: sanitizedEmail })
+      return res.status(400).json({ error: "Користувач з таким email вже існує" })
     }
 
     // Хешування пароля
-    console.log("Хешування пароля...")
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Створення користувача
-    console.log("Створення користувача в базі даних...")
-    const userResult = await client.query(
-      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3::user_role) RETURNING id, email, role",
-      [email, hashedPassword, "учень"],
+    const result = await pool.query(
+      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
+      [sanitizedEmail, hashedPassword, sanitizedRole],
     )
 
-    const user = userResult.rows[0]
-    console.log("Користувач створений з ID:", user.id)
+    const user = result.rows[0]
 
-    console.log("Створення профілю для користувача...")
-    await client.query("INSERT INTO profiles (user_id, phone, telegram) VALUES ($1, $2, $3)", [
+    // Створення профілю
+    await pool.query("INSERT INTO profiles (user_id, phone, telegram) VALUES ($1, $2, $3)", [
       user.id,
-      phone || null,
-      telegram || null,
+      sanitizedPhone,
+      sanitizedTelegram,
     ])
-    console.log("Профіль створений з додатковими даними")
 
-    await client.query("COMMIT")
-    console.log("Транзакція завершена успішно")
-    console.log("✓ Реєстрація успішна для:", email)
+    console.log("✓ Користувач зареєстрований:", user.email)
 
-    res.json({
+    res.status(201).json({
       userId: user.id,
       email: user.email,
       role: user.role,
     })
   } catch (error) {
-    await client.query("ROLLBACK")
-    console.error("❌ Помилка реєстрації:")
-    console.error("Тип помилки:", error.name)
-    console.error("Повідомлення:", error.message)
-    console.error("Код помилки:", error.code)
-    console.error("Деталі:", error.detail)
-
-    // Специфічні помилки
-    if (error.code === "23505") {
-      return res.status(400).json({
-        error: "Користувач з таким email вже існує",
-      })
-    }
-    if (error.code === "22P02") {
-      return res.status(500).json({
-        error: "Помилка типу даних. Перевірте структуру бази даних.",
-      })
-    }
-    if (error.message.includes("user_role")) {
-      return res.status(500).json({
-        error: "Помилка ролі користувача. Запустіть SQL скрипт для перестворення бази даних.",
-      })
-    }
-
-    res.status(500).json({
-      error: "Помилка реєстрації. Спробуйте ще раз.",
-    })
-  } finally {
-    client.release()
+    console.error("❌ Помилка реєстрації:", error.message)
+    res.status(500).json({ error: "Помилка реєстрації. Спробуйте ще раз." })
   }
 })
 
-// Вхід користувача
-app.post("/api/login", async (req, res) => {
+app.post("/api/login", security.rateLimiters.auth, async (req, res) => {
   const { email, password } = req.body
 
   console.log("Спроба входу:", email)
 
-  if (!email || !password) {
-    console.log("Помилка: відсутні email або пароль")
-    return res.status(400).json({
-      error: "Email та пароль обов'язкові",
-    })
-  }
-
   try {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email])
+    if (!security.validateEmail(email)) {
+      const ip = req.ip || req.connection.remoteAddress
+      security.logSuspiciousActivity(ip, "invalid_email_login", { email })
+      return res.status(400).json({ error: "Невірний формат email" })
+    }
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email та пароль обов'язкові" })
+    }
+
+    const sanitizedEmail = security.sanitizeString(email).toLowerCase()
+
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [sanitizedEmail])
 
     if (result.rows.length === 0) {
-      console.log("Помилка: користувача не знайдено")
-      return res.status(401).json({
-        error: "Невірний email або пароль",
-      })
+      const ip = req.ip || req.connection.remoteAddress
+      security.logSuspiciousActivity(ip, "failed_login", { email: sanitizedEmail })
+      return res.status(401).json({ error: "Невірний email або пароль" })
     }
 
     const user = result.rows[0]
-    console.log("Користувач знайдений, перевірка пароля...")
-
     const validPassword = await bcrypt.compare(password, user.password)
 
     if (!validPassword) {
-      console.log("Помилка: невірний пароль")
-      return res.status(401).json({
-        error: "Невірний email або пароль",
-      })
+      const ip = req.ip || req.connection.remoteAddress
+      security.logSuspiciousActivity(ip, "failed_login", { email: sanitizedEmail })
+      return res.status(401).json({ error: "Невірний email або пароль" })
     }
 
     console.log("✓ Вхід успішний для користувача ID:", user.id)
@@ -1001,9 +993,7 @@ app.post("/api/login", async (req, res) => {
     })
   } catch (error) {
     console.error("❌ Помилка входу:", error.message)
-    res.status(500).json({
-      error: "Помилка входу. Спробуйте ще раз.",
-    })
+    res.status(500).json({ error: "Помилка входу. Спробуйте ще раз." })
   }
 })
 
@@ -1856,7 +1846,7 @@ app.post("/api/results", async (req, res) => {
     }
 
     // Перевірка чи викладач має права (вчитель або методист)
-    const teacherCheck = await client.query("SELECT role FROM users WHERE id = $1", [addedBy])
+    const teacherCheck = await pool.query("SELECT role FROM users WHERE id = $1", [addedBy])
 
     if (teacherCheck.rows.length === 0 || !["вчитель", "методист"].includes(teacherCheck.rows[0].role)) {
       await client.query("ROLLBACK")
@@ -1995,7 +1985,7 @@ app.put("/api/results/:resultId", async (req, res) => {
 
     // Перевірка прав доступу
     if (addedBy) {
-      const teacherCheck = await client.query("SELECT role FROM users WHERE id = $1", [addedBy])
+      const teacherCheck = await pool.query("SELECT role FROM users WHERE id = $1", [addedBy])
 
       if (teacherCheck.rows.length === 0 || !["вчитель", "методист"].includes(teacherCheck.rows[0].role)) {
         await client.query("ROLLBACK")
@@ -4984,3 +4974,300 @@ app.use((err, req, res, next) => {
     error: "Внутрішня помилка сервера",
   })
 })
+
+// Get approved testimonials
+app.get("/api/testimonials", async (req, res) => {
+  console.log("📝 Запит відгуків")
+
+  try {
+    const result = await pool.query(`
+      SELECT t.*, u.email
+      FROM testimonials t
+      LEFT JOIN users u ON t.user_id = u.id
+      WHERE t.is_approved = TRUE
+      ORDER BY t.is_featured DESC, t.created_at DESC
+      LIMIT 20
+    `)
+
+    console.log("✓ Знайдено відгуків:", result.rows.length)
+    res.json({ testimonials: result.rows })
+  } catch (error) {
+    console.error("❌ Помилка отримання відгуків:", error.message)
+    res.status(500).json({ error: "Помилка отримання відгуків" })
+  }
+})
+
+// Create new testimonial
+app.post("/api/testimonials", async (req, res) => {
+  console.log("Запит створення відгуку")
+
+  try {
+    const { userId, name, role, rating, text } = req.body
+
+    if (!name || !role || !rating || !text) {
+      return res.status(400).json({
+        success: false,
+        error: "Заповніть всі обов'язкові поля",
+      })
+    }
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        error: "Оцінка має бути від 1 до 5",
+      })
+    }
+
+    // Check if testimonials table exists
+    const tableCheck = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'testimonials'
+      )
+    `)
+
+    if (!tableCheck.rows[0].exists) {
+      return res.status(500).json({
+        success: false,
+        error: "Таблиця testimonials не існує. Запустіть SQL скрипт для створення таблиці.",
+      })
+    }
+
+    const result = await pool.query(
+      `INSERT INTO testimonials (user_id, name, role, rating, text, is_approved, is_featured)
+       VALUES ($1, $2, $3, $4, $5, true, false)
+       RETURNING *`,
+      [userId, name, role, rating, text],
+    )
+
+    console.log("✓ Відгук створено:", result.rows[0].id)
+    res.json({
+      success: true,
+      testimonial: result.rows[0],
+      message: "Відгук успішно додано",
+    })
+  } catch (error) {
+    console.error("❌ Помилка створення відгуку:", error.message)
+    res.status(500).json({
+      success: false,
+      error: `Помилка створення відгуку: ${error.message}`,
+    })
+  }
+})
+
+// Approve testimonial (admin only)
+app.patch("/api/testimonials/:id/approve", async (req, res) => {
+  const { id } = req.params
+  const { userId, isApproved, isFeatured } = req.body
+
+  console.log("✅ Затвердження відгуку ID:", id)
+
+  try {
+    // Check if user is admin (methodist or teacher)
+    const userCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
+
+    if (!userCheck.rows[0] || !["методист", "вчитель"].includes(userCheck.rows[0].role)) {
+      return res.status(403).json({ error: "Недостатньо прав" })
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE testimonials 
+      SET is_approved = $1, is_featured = $2, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $3
+      RETURNING *
+    `,
+      [isApproved, isFeatured || false, id],
+    )
+
+    console.log("✓ Відгук оновлено")
+    res.json({ testimonial: result.rows[0] })
+  } catch (error) {
+    console.error("❌ Помилка затвердження відгуку:", error.message)
+    res.status(500).json({ error: "Помилка затвердження відгуку" })
+  }
+})
+
+// Delete testimonial (admin only)
+app.delete("/api/testimonials/:id", async (req, res) => {
+  const { id } = req.params
+  const userId = req.body.userId
+
+  console.log("🗑️ Видалення відгуку ID:", id)
+
+  try {
+    // Check if user is admin
+    const userCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
+
+    if (!userCheck.rows[0] || !["методист", "вчитель"].includes(userCheck.rows[0].role)) {
+      return res.status(403).json({ error: "Недостатньо прав" })
+    }
+
+    await pool.query("DELETE FROM testimonials WHERE id = $1", [id])
+
+    console.log("✓ Відгук видалено")
+    res.json({ message: "Відгук видалено" })
+  } catch (error) {
+    console.error("❌ Помилка видалення відгуку:", error.message)
+    res.status(500).json({ error: "Помилка видалення відгуку" })
+  }
+})
+
+// --- START OF ADDED ENDPOINTS FOR STATISTICS ---
+
+// Get student data (for statistics)
+app.get("/api/students/:userId", async (req, res) => {
+  console.log("Запит даних учня")
+  const { userId } = req.params
+
+  try {
+    const participations = await pool.query(
+      "SELECT COUNT(*) as count FROM competition_participants WHERE user_id = $1", // Corrected student_id to user_id
+      [userId],
+    )
+
+    const prizes = await pool.query(
+      "SELECT COUNT(*) as count FROM competition_results WHERE user_id = $1 AND place <= 3", // Corrected student_id to user_id
+      [userId],
+    )
+
+    const totalScore = await pool.query(
+      "SELECT COALESCE(SUM(CAST(score AS NUMERIC)), 0) as total FROM competition_results WHERE user_id = $1", // Corrected student_id to user_id and ensured score is numeric
+      [userId],
+    )
+
+    res.json({
+      participations_count: Number.parseInt(participations.rows[0]?.count || 0),
+      prizes_count: Number.parseInt(prizes.rows[0]?.count || 0),
+      total_score: Number.parseFloat(totalScore.rows[0]?.total || 0), // Use parseFloat for potential decimal scores
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання даних учня:", error.message)
+    res.status(500).json({ error: "Помилка отримання даних учня" })
+  }
+})
+
+// Get student's competitions
+app.get("/api/student/:userId/competitions", async (req, res) => {
+  // Changed endpoint to match common patterns
+  console.log("Запит конкурсів учня")
+  const { userId } = req.params
+
+  try {
+    const result = await pool.query(
+      `SELECT c.* FROM competitions c
+       INNER JOIN competition_participants cp ON c.id = cp.competition_id
+       WHERE cp.user_id = $1
+       ORDER BY c.start_date DESC
+       LIMIT 10`,
+      [userId],
+    )
+
+    res.json({ competitions: result.rows })
+  } catch (error) {
+    console.error("❌ Помилка отримання конкурсів учня:", error.message)
+    res.status(500).json({ error: "Помилка отримання конкурсів" })
+  }
+})
+
+// Get teacher data
+app.get("/api/teacher/:userId", async (req, res) => {
+  console.log("Запит даних вчителя")
+  const { userId } = req.params
+
+  try {
+    // Count students associated with the teacher (assuming a teacher_id in users or profiles)
+    // This query assumes a teacher_id column exists in the 'users' table or a similar relation.
+    // If not, this part needs adjustment based on how teachers are linked to students.
+    const students = await pool.query(
+      "SELECT COUNT(*) as count FROM users WHERE teacher_id = $1 AND role = 'учень'", // Assuming teacher_id in users table
+      [userId],
+    )
+
+    const competitions = await pool.query("SELECT COUNT(*) as count FROM competitions WHERE created_by = $1", [userId])
+
+    const participations = await pool.query(
+      `SELECT COUNT(*) as count FROM competition_participants cp
+       INNER JOIN competitions c ON cp.competition_id = c.id
+       WHERE c.created_by = $1`,
+      [userId],
+    )
+
+    res.json({
+      students_count: Number.parseInt(students.rows[0]?.count || 0),
+      competitions_count: Number.parseInt(competitions.rows[0]?.count || 0),
+      active_participations: Number.parseInt(participations.rows[0]?.count || 0),
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання даних вчителя:", error.message)
+    res.status(500).json({ error: "Помилка отримання даних вчителя" })
+  }
+})
+
+// Get teacher's top students
+app.get("/api/teacher/:userId/top-students", async (req, res) => {
+  console.log("Запит топ учнів вчителя")
+  const { userId } = req.params
+
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u.email, p.first_name, p.last_name, p.grade,
+       (SELECT COUNT(*) FROM competition_participants WHERE user_id = u.id) as participations_count, -- Corrected column name
+       (SELECT COUNT(*) FROM competition_results WHERE user_id = u.id AND place <= 3) as prizes_count
+       FROM users u
+       LEFT JOIN profiles p ON u.id = p.user_id
+       WHERE u.teacher_id = $1 AND u.role = 'учень' -- Assuming teacher_id in users table
+       ORDER BY prizes_count DESC, participations_count DESC
+       LIMIT 10`,
+      [userId],
+    )
+
+    res.json({ students: result.rows })
+  } catch (error) {
+    console.error("❌ Помилка отримання топ учнів:", error.message)
+    res.status(500).json({ error: "Помилка отримання топ учнів" })
+  }
+})
+
+// Get methodist statistics
+app.get("/api/methodist/statistics", async (req, res) => {
+  console.log("Запит статистики методиста")
+
+  try {
+    // Count schools with associated students
+    const schools = await pool.query(
+      "SELECT COUNT(DISTINCT school_id) as count FROM profiles WHERE school_id IS NOT NULL",
+    )
+
+    const teachers = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'вчитель'")
+
+    const students = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'учень'")
+
+    const activeComps = await pool.query(
+      "SELECT COUNT(*) as count FROM competitions WHERE start_date <= CURRENT_DATE AND end_date >= CURRENT_DATE",
+    )
+
+    const completedComps = await pool.query("SELECT COUNT(*) as count FROM competitions WHERE end_date < CURRENT_DATE")
+
+    const totalParticipations = await pool.query("SELECT COUNT(*) as count FROM competition_participants")
+
+    // Calculate average score, ensuring score is numeric and handling potential NULLs
+    const avgRating = await pool.query(
+      "SELECT AVG(CAST(score AS NUMERIC)) as avg FROM competition_results WHERE score IS NOT NULL AND score ~ '^\\d+(\\.\\d+)?$'",
+    )
+
+    res.json({
+      schools_count: Number.parseInt(schools.rows[0]?.count || 0),
+      teachers_count: Number.parseInt(teachers.rows[0]?.count || 0),
+      students_count: Number.parseInt(students.rows[0]?.count || 0),
+      active_competitions: Number.parseInt(activeComps.rows[0]?.count || 0),
+      completed_competitions: Number.parseInt(completedComps.rows[0]?.count || 0),
+      total_participations: Number.parseInt(totalParticipations.rows[0]?.count || 0),
+      average_rating: Number.parseFloat(avgRating.rows[0]?.avg || 0).toFixed(2), // Format to 2 decimal places
+    })
+  } catch (error) {
+    console.error("❌ Помилка отримання статистики методиста:", error.message)
+    res.status(500).json({ error: "Помилка отримання статистики" })
+  }
+})
+
