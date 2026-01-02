@@ -7,7 +7,6 @@ const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
 const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCompetition } = require("./bot")
-
 const security = require("./security")
 
 const app = express()
@@ -24,11 +23,6 @@ async function sendTelegramNotification(message) {
 // Middleware
 app.use(cors())
 app.use(express.json())
-app.use(security.securityHeaders)
-app.use(security.validateInput)
-app.use(security.blockSuspiciousIp)
-app.use(security.rateLimiters.general)
-
 app.use(express.static(path.join(__dirname)))
 app.use("/uploads", express.static("uploads"))
 
@@ -96,6 +90,13 @@ const pool = new Pool({
     rejectUnauthorized: false,
   },
 })
+
+app.use(security.securityHeaders)
+app.use(security.apiLimiter)
+app.use(security.sqlInjectionProtection)
+app.use(security.xssProtection)
+
+app.locals.pool = pool
 
 // Ініціалізація бази даних
 async function initializeDatabase() {
@@ -825,36 +826,6 @@ async function initializeDatabase() {
     }
     // --- CHANGES END HERE ---
 
-    // Перевірка та створення таблиці testimonials
-    console.log("Перевірка таблиці testimonials...")
-    const testimonialsTableCheck = await client.query(`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.tables 
-        WHERE table_name = 'testimonials'
-      ) as exists
-    `)
-
-    if (!testimonialsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці testimonials...")
-      await client.query(`
-        CREATE TABLE testimonials (
-          id SERIAL PRIMARY KEY,
-          user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-          name VARCHAR(255) NOT NULL,
-          role VARCHAR(100) NOT NULL,
-          rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-          text TEXT NOT NULL,
-          is_approved BOOLEAN DEFAULT FALSE,
-          is_featured BOOLEAN DEFAULT FALSE,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-      `)
-      console.log("  ✓ Таблиця testimonials створена")
-    } else {
-      console.log("  ✓ Таблиця testimonials вже існує")
-    }
-
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:")
@@ -883,119 +854,183 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "auth.html"))
 })
 
-// Реєстрація користувача
-app.post("/api/register", security.rateLimiters.registration, async (req, res) => {
-  const { email, password, role, phone, telegram } = req.body
+app.post(
+  "/api/register",
+  security.authLimiter,
+  security.validateInput({
+    email: { required: true, type: "email" },
+    password: { required: true, type: "password", minLength: 6 },
+    phone: { type: "phone" },
+    telegram: { maxLength: 50, sanitize: true },
+  }),
+  security.passwordStrengthCheck,
+  async (req, res) => {
+    const { email, password, phone, telegram } = req.body
 
-  console.log("Спроба реєстрації:", email)
+    console.log("Спроба реєстрації:", email)
 
-  try {
-    if (!security.validateEmail(email)) {
-      const ip = req.ip || req.connection.remoteAddress
-      security.logSuspiciousActivity(ip, "invalid_registration_email", { email })
-      return res.status(400).json({ error: "Невірний формат email" })
+    // Валідація вхідних даних (частково виконана middleware)
+    // if (!email || !password) {
+    //   console.log("Помилка: відсутні email або пароль")
+    //   return res.status(400).json({
+    //     error: "Email та пароль обов'язкові",
+    //   })
+    // }
+
+    // if (password.length < 6) {
+    //   console.log("Помилка: пароль занадто короткий")
+    //   return res.status(400).json({
+    //     error: "Пароль повинен містити мінімум 6 символів",
+    //   })
+    // }
+
+    // Валідація email формату
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      console.log("Помилка: невірний формат email")
+      return res.status(400).json({
+        error: "Невірний формат email",
+      })
     }
 
-    if (!security.validatePassword(password)) {
-      return res.status(400).json({ error: "Пароль має містити мінімум 6 символів" })
+    const client = await pool.connect()
+
+    try {
+      await client.query("BEGIN")
+      console.log("Транзакція розпочата")
+
+      // Перевірка чи користувач вже існує
+      const existingUser = await client.query("SELECT id FROM users WHERE email = $1", [email])
+
+      if (existingUser.rows.length > 0) {
+        await client.query("ROLLBACK")
+        console.log("Помилка: користувач вже існує")
+        return res.status(400).json({
+          error: "Користувач з таким email вже існує",
+        })
+      }
+
+      // Хешування пароля
+      console.log("Хешування пароля...")
+      const hashedPassword = await bcrypt.hash(password, 10)
+
+      // Створення користувача
+      console.log("Створення користувача в базі даних...")
+      const userResult = await client.query(
+        "INSERT INTO users (email, password, role) VALUES ($1, $2, $3::user_role) RETURNING id, email, role",
+        [email, hashedPassword, "учень"],
+      )
+
+      const user = userResult.rows[0]
+      console.log("Користувач створений з ID:", user.id)
+
+      console.log("Створення профілю для користувача...")
+      await client.query("INSERT INTO profiles (user_id, phone, telegram) VALUES ($1, $2, $3)", [
+        user.id,
+        phone || null,
+        telegram || null,
+      ])
+      console.log("Профіль створений з додатковими даними")
+
+      await client.query("COMMIT")
+      console.log("Транзакція завершена успішно")
+      console.log("✓ Реєстрація успішна для:", email)
+
+      res.json({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      })
+    } catch (error) {
+      await client.query("ROLLBACK")
+      console.error("❌ Помилка реєстрації:")
+      console.error("Тип помилки:", error.name)
+      console.error("Повідомлення:", error.message)
+      console.error("Код помилки:", error.code)
+      console.error("Деталі:", error.detail)
+
+      // Специфічні помилки
+      if (error.code === "23505") {
+        return res.status(400).json({
+          error: "Користувач з таким email вже існує",
+        })
+      }
+      if (error.code === "22P02") {
+        return res.status(500).json({
+          error: "Помилка типу даних. Перевірте структуру бази даних.",
+        })
+      }
+      if (error.message.includes("user_role")) {
+        return res.status(500).json({
+          error: "Помилка ролі користувача. Запустіть SQL скрипт для перестворення бази даних.",
+        })
+      }
+
+      res.status(500).json({
+        error: "Помилка реєстрації. Спробуйте ще раз.",
+      })
+    } finally {
+      client.release()
     }
+  },
+)
 
-    if (phone && !security.validatePhone(phone)) {
-      return res.status(400).json({ error: "Невірний формат номера телефону" })
+app.post(
+  "/api/login",
+  security.authLimiter,
+  security.validateInput({
+    email: { required: true, type: "email" },
+    password: { required: true, minLength: 6 },
+  }),
+  async (req, res) => {
+    const { email, password } = req.body
+
+    console.log("Спроба входу:", email)
+
+    // if (!email || !password) {
+    //   console.log("Помилка: відсутні email або пароль")
+    //   return res.status(400).json({
+    //     error: "Email та пароль обов'язкові",
+    //   })
+    // }
+
+    try {
+      const result = await pool.query("SELECT * FROM users WHERE email = $1", [email])
+
+      if (result.rows.length === 0) {
+        console.log("Помилка: користувача не знайдено")
+        return res.status(401).json({
+          error: "Невірний email або пароль",
+        })
+      }
+
+      const user = result.rows[0]
+      console.log("Користувач знайдений, перевірка пароля...")
+
+      const validPassword = await bcrypt.compare(password, user.password)
+
+      if (!validPassword) {
+        console.log("Помилка: невірний пароль")
+        return res.status(401).json({
+          error: "Невірний email або пароль",
+        })
+      }
+
+      console.log("✓ Вхід успішний для користувача ID:", user.id)
+
+      res.json({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      })
+    } catch (error) {
+      console.error("❌ Помилка входу:", error.message)
+      res.status(500).json({
+        error: "Помилка входу. Спробуйте ще раз.",
+      })
     }
-
-    const sanitizedEmail = security.sanitizeString(email).toLowerCase()
-    const sanitizedRole = security.sanitizeString(role) || "учень"
-    const sanitizedPhone = phone ? security.sanitizeString(phone) : null
-    const sanitizedTelegram = telegram ? security.sanitizeString(telegram) : null
-
-    // Перевірка чи існує користувач
-    const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [sanitizedEmail])
-
-    if (existingUser.rows.length > 0) {
-      const ip = req.ip || req.connection.remoteAddress
-      security.logSuspiciousActivity(ip, "duplicate_registration", { email: sanitizedEmail })
-      return res.status(400).json({ error: "Користувач з таким email вже існує" })
-    }
-
-    // Хешування пароля
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // Створення користувача
-    const result = await pool.query(
-      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
-      [sanitizedEmail, hashedPassword, sanitizedRole],
-    )
-
-    const user = result.rows[0]
-
-    // Створення профілю
-    await pool.query("INSERT INTO profiles (user_id, phone, telegram) VALUES ($1, $2, $3)", [
-      user.id,
-      sanitizedPhone,
-      sanitizedTelegram,
-    ])
-
-    console.log("✓ Користувач зареєстрований:", user.email)
-
-    res.status(201).json({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    })
-  } catch (error) {
-    console.error("❌ Помилка реєстрації:", error.message)
-    res.status(500).json({ error: "Помилка реєстрації. Спробуйте ще раз." })
-  }
-})
-
-app.post("/api/login", security.rateLimiters.auth, async (req, res) => {
-  const { email, password } = req.body
-
-  console.log("Спроба входу:", email)
-
-  try {
-    if (!security.validateEmail(email)) {
-      const ip = req.ip || req.connection.remoteAddress
-      security.logSuspiciousActivity(ip, "invalid_email_login", { email })
-      return res.status(400).json({ error: "Невірний формат email" })
-    }
-
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email та пароль обов'язкові" })
-    }
-
-    const sanitizedEmail = security.sanitizeString(email).toLowerCase()
-
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [sanitizedEmail])
-
-    if (result.rows.length === 0) {
-      const ip = req.ip || req.connection.remoteAddress
-      security.logSuspiciousActivity(ip, "failed_login", { email: sanitizedEmail })
-      return res.status(401).json({ error: "Невірний email або пароль" })
-    }
-
-    const user = result.rows[0]
-    const validPassword = await bcrypt.compare(password, user.password)
-
-    if (!validPassword) {
-      const ip = req.ip || req.connection.remoteAddress
-      security.logSuspiciousActivity(ip, "failed_login", { email: sanitizedEmail })
-      return res.status(401).json({ error: "Невірний email або пароль" })
-    }
-
-    console.log("✓ Вхід успішний для користувача ID:", user.id)
-
-    res.json({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    })
-  } catch (error) {
-    console.error("❌ Помилка входу:", error.message)
-    res.status(500).json({ error: "Помилка входу. Спробуйте ще раз." })
-  }
-})
+  },
+)
 
 // Отримання ролі користувача
 app.get("/api/user/role/:userId", async (req, res) => {
@@ -1097,152 +1132,164 @@ app.get("/api/profile/:userId", async (req, res) => {
   }
 })
 
-// Оновлення профілю
-app.post("/api/profile", upload.single("avatar"), async (req, res) => {
-  const {
-    userId,
-    firstName,
-    lastName,
-    middleName,
-    telegram,
-    phone,
-    birthDate,
-    city,
-    school,
-    grade,
-    schoolId,
-    gradeNumber,
-    gradeLetter,
-    clubInstitution,
-    clubName,
-    interests,
-    bio,
-  } = req.body
+app.post(
+  "/api/profile",
+  security.apiLimiter,
+  security.requireAuth,
+  upload.single("avatar"),
+  security.fileUploadSecurity({
+    allowedTypes: {
+      extensions: ["jpg", "jpeg", "png", "gif"],
+      mimeTypes: ["image/jpeg", "image/png", "image/gif"],
+    },
+    maxSize: 5 * 1024 * 1024,
+  }),
+  async (req, res) => {
+    const {
+      userId,
+      firstName,
+      lastName,
+      middleName,
+      telegram,
+      phone,
+      birthDate,
+      city,
+      school,
+      grade,
+      schoolId,
+      gradeNumber,
+      gradeLetter,
+      clubInstitution,
+      clubName,
+      interests,
+      bio,
+    } = req.body
 
-  console.log("Оновлення профілю для користувача:", userId)
+    console.log("Оновлення профілю для користувача:", userId)
 
-  if (!userId || userId === "undefined" || userId === "null") {
-    console.log("Помилка: невірний userId")
-    return res.status(400).json({
-      error: "Невірний ID користувача",
-    })
-  }
-
-  const client = await pool.connect()
-
-  try {
-    await client.query("BEGIN")
-
-    // Перевірка існування користувача
-    const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [userId])
-    if (userCheck.rows.length === 0) {
-      await client.query("ROLLBACK")
-      console.log("Помилка: користувача не існує")
-      return res.status(404).json({
-        error: "Користувача не знайдено",
+    if (!userId || userId === "undefined" || userId === "null") {
+      console.log("Помилка: невірний userId")
+      return res.status(400).json({
+        error: "Невірний ID користувача",
       })
     }
 
-    let avatarPath = null
-    if (req.file) {
-      avatarPath = `/uploads/${req.file.filename}`
-      console.log("Завантажено аватар:", avatarPath)
+    const client = await pool.connect()
+
+    try {
+      await client.query("BEGIN")
+
+      // Перевірка існування користувача
+      const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [userId])
+      if (userCheck.rows.length === 0) {
+        await client.query("ROLLBACK")
+        console.log("Помилка: користувача не існує")
+        return res.status(404).json({
+          error: "Користувача не знайдено",
+        })
+      }
+
+      let avatarPath = null
+      if (req.file) {
+        avatarPath = `/uploads/${req.file.filename}`
+        console.log("Завантажено аватар:", avatarPath)
+      }
+
+      // Перевірка існування профілю
+      const existingProfile = await client.query("SELECT id FROM profiles WHERE user_id = $1", [userId])
+
+      if (existingProfile.rows.length === 0) {
+        console.log("Створення нового профілю...")
+        await client.query(
+          `INSERT INTO profiles (
+            user_id, first_name, last_name, middle_name, 
+            telegram, phone, birth_date, city, 
+            school, grade, school_id, grade_number, grade_letter,
+            club_institution, club_name, interests, bio, avatar
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+          [
+            userId,
+            firstName || null,
+            lastName || null,
+            middleName || null,
+            telegram || null,
+            phone || null,
+            birthDate || null,
+            city || null,
+            school || null,
+            grade || null,
+            schoolId || null,
+            gradeNumber || null,
+            gradeLetter || null,
+            clubInstitution || null,
+            clubName || null,
+            interests || null,
+            bio || null,
+            avatarPath,
+          ],
+        )
+        console.log("✓ Новий профіль створено")
+      } else {
+        console.log("Оновлення існуючого профілю...")
+
+        const updateFields = []
+        const updateValues = [userId]
+        let paramCounter = 2
+
+        const fields = {
+          first_name: firstName,
+          last_name: lastName,
+          middle_name: middleName,
+          telegram: telegram,
+          phone: phone,
+          birth_date: birthDate,
+          city: city,
+          school: school,
+          grade: grade,
+          school_id: schoolId,
+          grade_number: gradeNumber,
+          grade_letter: gradeLetter,
+          club_institution: clubInstitution,
+          club_name: clubName,
+          interests: interests,
+          bio: bio,
+        }
+
+        for (const [key, value] of Object.entries(fields)) {
+          updateFields.push(`${key} = $${paramCounter}`)
+          updateValues.push(value || null)
+          paramCounter++
+        }
+
+        if (avatarPath) {
+          updateFields.push(`avatar = $${paramCounter}`)
+          updateValues.push(avatarPath)
+          paramCounter++
+        }
+
+        updateFields.push("updated_at = CURRENT_TIMESTAMP")
+
+        const updateQuery = `UPDATE profiles SET ${updateFields.join(", ")} WHERE user_id = $1`
+        await client.query(updateQuery, updateValues)
+        console.log("✓ Профіль оновлено")
+      }
+
+      await client.query("COMMIT")
+      console.log("✓ Транзакція завершена успішно")
+      res.json({
+        message: "Профіль успішно оновлено",
+      })
+    } catch (error) {
+      await client.query("ROLLBACK")
+      console.error("Помилка оновлення профілю:", error)
+      res.status(500).json({
+        error: "Помилка оновлення профілю",
+      })
+    } finally {
+      client.release()
     }
-
-    // Перевірка існування профілю
-    const existingProfile = await client.query("SELECT id FROM profiles WHERE user_id = $1", [userId])
-
-    if (existingProfile.rows.length === 0) {
-      console.log("Створення нового профілю...")
-      await client.query(
-        `INSERT INTO profiles (
-          user_id, first_name, last_name, middle_name, 
-          telegram, phone, birth_date, city, 
-          school, grade, school_id, grade_number, grade_letter,
-          club_institution, club_name, interests, bio, avatar
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
-        [
-          userId,
-          firstName || null,
-          lastName || null,
-          middleName || null,
-          telegram || null,
-          phone || null,
-          birthDate || null,
-          city || null,
-          school || null,
-          grade || null,
-          schoolId || null,
-          gradeNumber || null,
-          gradeLetter || null,
-          clubInstitution || null,
-          clubName || null,
-          interests || null,
-          bio || null,
-          avatarPath,
-        ],
-      )
-      console.log("✓ Новий профіль створено")
-    } else {
-      console.log("Оновлення існуючого профілю...")
-
-      const updateFields = []
-      const updateValues = [userId]
-      let paramCounter = 2
-
-      const fields = {
-        first_name: firstName,
-        last_name: lastName,
-        middle_name: middleName,
-        telegram: telegram,
-        phone: phone,
-        birth_date: birthDate,
-        city: city,
-        school: school,
-        grade: grade,
-        school_id: schoolId,
-        grade_number: gradeNumber,
-        grade_letter: gradeLetter,
-        club_institution: clubInstitution,
-        club_name: clubName,
-        interests: interests,
-        bio: bio,
-      }
-
-      for (const [key, value] of Object.entries(fields)) {
-        updateFields.push(`${key} = $${paramCounter}`)
-        updateValues.push(value || null)
-        paramCounter++
-      }
-
-      if (avatarPath) {
-        updateFields.push(`avatar = $${paramCounter}`)
-        updateValues.push(avatarPath)
-        paramCounter++
-      }
-
-      updateFields.push("updated_at = CURRENT_TIMESTAMP")
-
-      const updateQuery = `UPDATE profiles SET ${updateFields.join(", ")} WHERE user_id = $1`
-      await client.query(updateQuery, updateValues)
-      console.log("✓ Профіль оновлено")
-    }
-
-    await client.query("COMMIT")
-    console.log("✓ Транзакція завершена успішно")
-    res.json({
-      message: "Профіль успішно оновлено",
-    })
-  } catch (error) {
-    await client.query("ROLLBACK")
-    console.error("Помилка оновлення профілю:", error)
-    res.status(500).json({
-      error: "Помилка оновлення профілю",
-    })
-  } finally {
-    client.release()
-  }
-})
+  },
+)
 
 // Отримання всіх користувачів
 app.get("/api/admin/users", async (req, res) => {
@@ -1846,7 +1893,7 @@ app.post("/api/results", async (req, res) => {
     }
 
     // Перевірка чи викладач має права (вчитель або методист)
-    const teacherCheck = await pool.query("SELECT role FROM users WHERE id = $1", [addedBy])
+    const teacherCheck = await client.query("SELECT role FROM users WHERE id = $1", [addedBy])
 
     if (teacherCheck.rows.length === 0 || !["вчитель", "методист"].includes(teacherCheck.rows[0].role)) {
       await client.query("ROLLBACK")
@@ -1985,7 +2032,7 @@ app.put("/api/results/:resultId", async (req, res) => {
 
     // Перевірка прав доступу
     if (addedBy) {
-      const teacherCheck = await pool.query("SELECT role FROM users WHERE id = $1", [addedBy])
+      const teacherCheck = await client.query("SELECT role FROM users WHERE id = $1", [addedBy])
 
       if (teacherCheck.rows.length === 0 || !["вчитель", "методист"].includes(teacherCheck.rows[0].role)) {
         await client.query("ROLLBACK")
@@ -3191,76 +3238,87 @@ app.get("/api/students/:studentId/participations", async (req, res) => {
 })
 
 // Зміна пароля
-app.post("/api/change-password", async (req, res) => {
-  const { userId, currentPassword, newPassword } = req.body
+app.post(
+  "/api/change-password",
+  security.authLimiter,
+  security.requireAuth,
+  security.validateInput({
+    userId: { required: true, type: "id" },
+    currentPassword: { required: true, minLength: 6 },
+    newPassword: { required: true, type: "password", minLength: 6 },
+  }),
+  security.passwordStrengthCheck,
+  async (req, res) => {
+    const { userId, currentPassword, newPassword } = req.body
 
-  console.log("Запит на зміну пароля для користувача ID:", userId)
+    console.log("Запит на зміну пароля для користувача ID:", userId)
 
-  if (!userId || !currentPassword || !newPassword) {
-    console.log("Помилка: відсутні обов'язкові поля")
-    return res.status(400).json({
-      error: "Всі поля обов'язкові",
-    })
-  }
+    // if (!userId || !currentPassword || !newPassword) {
+    //   console.log("Помилка: відсутні обов'язкові поля")
+    //   return res.status(400).json({
+    //     error: "Всі поля обов'язкові",
+    //   })
+    // }
 
-  if (newPassword.length < 6) {
-    console.log("Помилка: пароль занадто короткий")
-    return res.status(400).json({
-      error: "Новий пароль повинен містити мінімум 6 символів",
-    })
-  }
+    // if (newPassword.length < 6) {
+    //   console.log("Помилка: пароль занадто короткий")
+    //   return res.status(400).json({
+    //     error: "Новий пароль повинен містити мінімум 6 символів",
+    //   })
+    // }
 
-  const client = await pool.connect()
+    const client = await pool.connect()
 
-  try {
-    await client.query("BEGIN")
+    try {
+      await client.query("BEGIN")
 
-    // Отримання поточного пароля користувача
-    const userResult = await client.query("SELECT id, email, password FROM users WHERE id = $1", [userId])
+      // Отримання поточного пароля користувача
+      const userResult = await client.query("SELECT id, email, password FROM users WHERE id = $1", [userId])
 
-    if (userResult.rows.length === 0) {
-      await client.query("ROLLBACK")
-      console.log("Помилка: користувача не знайдено")
-      return res.status(404).json({
-        error: "Користувача не знайдено",
+      if (userResult.rows.length === 0) {
+        await client.query("ROLLBACK")
+        console.log("Помилка: користувача не знайдено")
+        return res.status(404).json({
+          error: "Користувача не знайдено",
+        })
+      }
+
+      const user = userResult.rows[0]
+
+      // Перевірка поточного пароля
+      const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
+
+      if (!isPasswordValid) {
+        await client.query("ROLLBACK")
+        console.log("Помилка: невірний поточний пароль")
+        return res.status(400).json({
+          error: "Невірний поточний пароль",
+        })
+      }
+
+      // Хешування нового пароля
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+      // Оновлення пароля в базі даних
+      await client.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, userId])
+
+      await client.query("COMMIT")
+      console.log("✓ Пароль успішно змінено для користувача:", user.email)
+
+      res.json({
+        message: "Пароль успішно змінено",
       })
-    }
-
-    const user = userResult.rows[0]
-
-    // Перевірка поточного пароля
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
-
-    if (!isPasswordValid) {
+    } catch (error) {
       await client.query("ROLLBACK")
-      console.log("Помилка: невірний поточний пароль")
-      return res.status(400).json({
-        error: "Невірний поточний пароль",
+      console.error("❌ Помилка зміни пароля:", error.message)
+      res.status(500).json({
+        error: "Помилка зміни пароля",
       })
+    } finally {
+      client.release()
     }
-
-    // Хешування нового пароля
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
-
-    // Оновлення пароля в базі даних
-    await client.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, userId])
-
-    await client.query("COMMIT")
-    console.log("✓ Пароль успішно змінено для користувача:", user.email)
-
-    res.json({
-      message: "Пароль успішно змінено",
-    })
-  } catch (error) {
-    await client.query("ROLLBACK")
-    console.error("❌ Помилка зміни пароля:", error.message)
-    res.status(500).json({
-      error: "Помилка зміни пароля",
-    })
-  } finally {
-    client.release()
-  }
-})
+  },
+)
 
 // Створення учня вчителем
 app.post("/api/teacher/students", async (req, res) => {
@@ -3961,104 +4019,124 @@ app.get("/api/competitions/:id/form-responses", async (req, res) => {
 })
 
 // CHANGE: Added new endpoint for form file uploads
-app.post("/api/competitions/:competitionId/form-file-upload", uploadDocument.single("file"), async (req, res) => {
-  const { competitionId } = req.params
-  const { userId, fieldIndex, description } = req.body
+app.post(
+  "/api/competitions/:competitionId/form-file-upload",
+  security.uploadLimiter,
+  security.requireAuth,
+  uploadDocument.single("file"),
+  security.fileUploadSecurity({
+    allowedTypes: {
+      extensions: ["pdf", "doc", "docx", "txt", "jpg", "jpeg", "png"],
+      mimeTypes: [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+        "image/jpeg",
+        "image/png",
+      ],
+    },
+    maxSize: 50 * 1024 * 1024,
+  }),
+  async (req, res) => {
+    const { competitionId } = req.params
+    const { userId, fieldIndex, description } = req.body
 
-  console.log(`📤 Завантаження файлу форми для конкурсу ${competitionId} від користувача ${userId}`)
+    console.log(`📤 Завантаження файлу форми для конкурсу ${competitionId} від користувача ${userId}`)
 
-  if (!userId || !req.file) {
-    return res.status(400).json({
-      error: "Не вказано користувача або файл не завантажено",
-    })
-  }
-
-  const client = await pool.connect()
-
-  try {
-    await client.query("BEGIN")
-
-    // Перевірка, чи учень є учасником конкурсу
-    const participantCheck = await client.query(
-      `SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2`,
-      [competitionId, userId],
-    )
-
-    if (participantCheck.rows.length === 0) {
-      await client.query("ROLLBACK")
-      fs.unlinkSync(req.file.path)
-      return res.status(403).json({
-        error: "Ви не є учасником цього конкурсу",
+    if (!userId || !req.file) {
+      return res.status(400).json({
+        error: "Не вказано користувача або файл не завантажено",
       })
     }
 
-    // Отримання інформації про конкурс
-    const competitionInfo = await client.query(`SELECT title FROM competitions WHERE id = $1`, [competitionId])
-    const competition = competitionInfo.rows[0]
+    const client = await pool.connect()
 
-    // Організація папок: documents/(конкурс)/(id учня)/
-    const competitionFolderName = competition.title.replace(/[^a-zA-Z0-9_-]/g, "_")
-    const competitionFolder = path.join(__dirname, "documents", competitionFolderName)
-    const userFolder = path.join(competitionFolder, `${userId}`)
+    try {
+      await client.query("BEGIN")
 
-    // Створення папок, якщо їх немає
-    if (!fs.existsSync(competitionFolder)) {
-      fs.mkdirSync(competitionFolder, { recursive: true })
-      console.log(`📁 Створено папку: ${competitionFolder}`)
+      // Перевірка, чи учень є учасником конкурсу
+      const participantCheck = await client.query(
+        `SELECT id FROM competition_participants WHERE competition_id = $1 AND user_id = $2`,
+        [competitionId, userId],
+      )
+
+      if (participantCheck.rows.length === 0) {
+        await client.query("ROLLBACK")
+        fs.unlinkSync(req.file.path)
+        return res.status(403).json({
+          error: "Ви не є учасником цього конкурсу",
+        })
+      }
+
+      // Отримання інформації про конкурс
+      const competitionInfo = await client.query(`SELECT title FROM competitions WHERE id = $1`, [competitionId])
+      const competition = competitionInfo.rows[0]
+
+      // Організація папок: documents/(конкурс)/(id учня)/
+      const competitionFolderName = competition.title.replace(/[^a-zA-Z0-9_-]/g, "_")
+      const competitionFolder = path.join(__dirname, "documents", competitionFolderName)
+      const userFolder = path.join(competitionFolder, `${userId}`)
+
+      // Створення папок, якщо їх немає
+      if (!fs.existsSync(competitionFolder)) {
+        fs.mkdirSync(competitionFolder, { recursive: true })
+        console.log(`📁 Створено папку: ${competitionFolder}`)
+      }
+
+      if (!fs.existsSync(userFolder)) {
+        fs.mkdirSync(userFolder, { recursive: true })
+        console.log(`📁 Створено папку: ${userFolder}`)
+      }
+
+      // Переміщення файлу до організованої структури
+      const newFilePath = path.join(userFolder, req.file.filename)
+      fs.renameSync(req.file.path, newFilePath)
+
+      const relativeFilePath = `/documents/${competitionFolderName}/${userId}/${req.file.filename}`
+
+      // Збереження інформації про файл у базу даних
+      const result = await client.query(
+        `INSERT INTO competition_documents (
+          competition_id, user_id, file_name, original_name, 
+          file_path, file_size, file_type, description
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+        RETURNING *`,
+        [
+          competitionId,
+          userId,
+          req.file.filename,
+          req.file.originalname,
+          relativeFilePath,
+          req.file.size,
+          req.file.mimetype,
+          description || null,
+        ],
+      )
+
+      await client.query("COMMIT")
+
+      console.log(`✓ Файл успішно завантажено та організовано: ${req.file.originalname}`)
+      console.log(`  → Шлях: ${relativeFilePath}`)
+
+      res.json({
+        message: "Файл успішно завантажено",
+        document: result.rows[0],
+      })
+    } catch (error) {
+      await client.query("ROLLBACK")
+      if (req.file) {
+        fs.unlinkSync(req.file.path)
+      }
+      console.error("❌ Помилка завантаження файлу форми:", error.message)
+      res.status(500).json({
+        error: "Помилка завантаження файлу: " + error.message,
+      })
+    } finally {
+      client.release()
     }
-
-    if (!fs.existsSync(userFolder)) {
-      fs.mkdirSync(userFolder, { recursive: true })
-      console.log(`📁 Створено папку: ${userFolder}`)
-    }
-
-    // Переміщення файлу до організованої структури
-    const newFilePath = path.join(userFolder, req.file.filename)
-    fs.renameSync(req.file.path, newFilePath)
-
-    const relativeFilePath = `/documents/${competitionFolderName}/${userId}/${req.file.filename}`
-
-    // Збереження інформації про файл у базу даних
-    const result = await client.query(
-      `INSERT INTO competition_documents (
-        competition_id, user_id, file_name, original_name, 
-        file_path, file_size, file_type, description
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-      RETURNING *`,
-      [
-        competitionId,
-        userId,
-        req.file.filename,
-        req.file.originalname,
-        relativeFilePath,
-        req.file.size,
-        req.file.mimetype,
-        description || null,
-      ],
-    )
-
-    await client.query("COMMIT")
-
-    console.log(`✓ Файл успішно завантажено та організовано: ${req.file.originalname}`)
-    console.log(`  → Шлях: ${relativeFilePath}`)
-
-    res.json({
-      message: "Файл успішно завантажено",
-      document: result.rows[0],
-    })
-  } catch (error) {
-    await client.query("ROLLBACK")
-    if (req.file) {
-      fs.unlinkSync(req.file.path)
-    }
-    console.error("❌ Помилка завантаження файлу форми:", error.message)
-    res.status(500).json({
-      error: "Помилка завантаження файлу: " + error.message,
-    })
-  } finally {
-    client.release()
-  }
-})
+  },
+)
 
 // Додаємо API endpoints для репетицій
 
@@ -4932,24 +5010,173 @@ app.get("/api/news/likes/user/:userId", async (req, res) => {
 })
 
 // Upload image endpoint
-app.post("/api/upload-image", upload.single("image"), (req, res) => {
-  console.log("Завантаження зображення")
+app.post(
+  "/api/upload-image",
+  security.uploadLimiter,
+  security.requireAuth,
+  upload.single("image"),
+  security.fileUploadSecurity({
+    allowedTypes: {
+      extensions: ["jpg", "jpeg", "png", "gif", "webp"],
+      mimeTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+    },
+    maxSize: 5 * 1024 * 1024,
+  }),
+  (req, res) => {
+    console.log("Завантаження зображення")
 
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      error: "Файл не завантажено",
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: "Файл не завантажено",
+      })
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`
+    console.log("✓ Зображення завантажено:", imageUrl)
+
+    res.json({
+      success: true,
+      imageUrl: imageUrl,
     })
-  }
+  },
+)
 
-  const imageUrl = `/uploads/${req.file.filename}`
-  console.log("✓ Зображення завантажено:", imageUrl)
+app.post(
+  "/api/news",
+  security.apiLimiter,
+  security.requireAuth,
+  security.requireRole("методист", "вчитель"),
+  async (req, res) => {
+    const { title, content, category, isPublished, coverImageUrl, galleryImageUrls, authorId } = req.body
+    console.log("Створення новини:", title)
 
-  res.json({
-    success: true,
-    imageUrl: imageUrl,
-  })
-})
+    if (!title || !content || !authorId) {
+      return res.status(400).json({
+        success: false,
+        error: "Заголовок, зміст та автор обов'язкові",
+      })
+    }
+
+    try {
+      const result = await pool.query(
+        `INSERT INTO news (title, content, category, is_published, image_url, cover_image_url, gallery_images, author_id) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+         RETURNING *`,
+        [
+          title,
+          content,
+          category,
+          isPublished || false,
+          coverImageUrl,
+          coverImageUrl,
+          galleryImageUrls || [],
+          authorId,
+        ],
+      )
+
+      console.log("✓ Новину створено")
+      res.json({
+        success: true,
+        news: result.rows[0],
+      })
+    } catch (error) {
+      console.error("❌ Помилка створення новини:", error.message)
+      res.status(500).json({
+        success: false,
+        error: "Помилка створення новини",
+      })
+    }
+  },
+)
+
+app.put(
+  "/api/news/:id",
+  security.apiLimiter,
+  security.requireAuth,
+  security.requireRole("методист", "вчитель"),
+  security.validateInput({
+    id: { required: true, type: "id" },
+  }),
+  async (req, res) => {
+    const { id } = req.params
+    const { title, content, category, isPublished, coverImageUrl, galleryImageUrls } = req.body
+    console.log("Оновлення новини ID:", id)
+
+    if (!title || !content) {
+      return res.status(400).json({
+        success: false,
+        error: "Заголовок та зміст обов'язкові",
+      })
+    }
+
+    try {
+      const result = await pool.query(
+        `UPDATE news 
+         SET title = $1, content = $2, category = $3, is_published = $4, 
+             image_url = $5, cover_image_url = $6, gallery_images = $7, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $8
+         RETURNING *`,
+        [title, content, category, isPublished, coverImageUrl, coverImageUrl, galleryImageUrls || [], id],
+      )
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: "Новину не знайдено",
+        })
+      }
+
+      console.log("✓ Новину оновлено")
+      res.json({
+        success: true,
+        news: result.rows[0],
+      })
+    } catch (error) {
+      console.error("❌ Помилка оновлення новини:", error.message)
+      res.status(500).json({
+        success: false,
+        error: "Помилка оновлення новини",
+      })
+    }
+  },
+)
+
+app.delete(
+  "/api/news/:id",
+  security.apiLimiter,
+  security.requireAuth,
+  security.requireRole("методист", "вчитель"),
+  security.validateInput({
+    id: { required: true, type: "id" },
+  }),
+  async (req, res) => {
+    const { id } = req.params
+    console.log("Видалення новини ID:", id)
+
+    try {
+      const result = await pool.query("DELETE FROM news WHERE id = $1 RETURNING *", [id])
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: "Новину не знайдено",
+        })
+      }
+
+      console.log("✓ Новину видалено")
+      res.json({
+        success: true,
+      })
+    } catch (error) {
+      console.error("❌ Помилка видалення новини:", error.message)
+      res.status(500).json({
+        success: false,
+        error: "Помилка видалення новини",
+      })
+    }
+  },
+)
 
 // Обробка помилок
 app.use((err, req, res, next) => {
@@ -4974,300 +5201,3 @@ app.use((err, req, res, next) => {
     error: "Внутрішня помилка сервера",
   })
 })
-
-// Get approved testimonials
-app.get("/api/testimonials", async (req, res) => {
-  console.log("📝 Запит відгуків")
-
-  try {
-    const result = await pool.query(`
-      SELECT t.*, u.email
-      FROM testimonials t
-      LEFT JOIN users u ON t.user_id = u.id
-      WHERE t.is_approved = TRUE
-      ORDER BY t.is_featured DESC, t.created_at DESC
-      LIMIT 20
-    `)
-
-    console.log("✓ Знайдено відгуків:", result.rows.length)
-    res.json({ testimonials: result.rows })
-  } catch (error) {
-    console.error("❌ Помилка отримання відгуків:", error.message)
-    res.status(500).json({ error: "Помилка отримання відгуків" })
-  }
-})
-
-// Create new testimonial
-app.post("/api/testimonials", async (req, res) => {
-  console.log("Запит створення відгуку")
-
-  try {
-    const { userId, name, role, rating, text } = req.body
-
-    if (!name || !role || !rating || !text) {
-      return res.status(400).json({
-        success: false,
-        error: "Заповніть всі обов'язкові поля",
-      })
-    }
-
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({
-        success: false,
-        error: "Оцінка має бути від 1 до 5",
-      })
-    }
-
-    // Check if testimonials table exists
-    const tableCheck = await pool.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_name = 'testimonials'
-      )
-    `)
-
-    if (!tableCheck.rows[0].exists) {
-      return res.status(500).json({
-        success: false,
-        error: "Таблиця testimonials не існує. Запустіть SQL скрипт для створення таблиці.",
-      })
-    }
-
-    const result = await pool.query(
-      `INSERT INTO testimonials (user_id, name, role, rating, text, is_approved, is_featured)
-       VALUES ($1, $2, $3, $4, $5, true, false)
-       RETURNING *`,
-      [userId, name, role, rating, text],
-    )
-
-    console.log("✓ Відгук створено:", result.rows[0].id)
-    res.json({
-      success: true,
-      testimonial: result.rows[0],
-      message: "Відгук успішно додано",
-    })
-  } catch (error) {
-    console.error("❌ Помилка створення відгуку:", error.message)
-    res.status(500).json({
-      success: false,
-      error: `Помилка створення відгуку: ${error.message}`,
-    })
-  }
-})
-
-// Approve testimonial (admin only)
-app.patch("/api/testimonials/:id/approve", async (req, res) => {
-  const { id } = req.params
-  const { userId, isApproved, isFeatured } = req.body
-
-  console.log("✅ Затвердження відгуку ID:", id)
-
-  try {
-    // Check if user is admin (methodist or teacher)
-    const userCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
-
-    if (!userCheck.rows[0] || !["методист", "вчитель"].includes(userCheck.rows[0].role)) {
-      return res.status(403).json({ error: "Недостатньо прав" })
-    }
-
-    const result = await pool.query(
-      `
-      UPDATE testimonials 
-      SET is_approved = $1, is_featured = $2, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $3
-      RETURNING *
-    `,
-      [isApproved, isFeatured || false, id],
-    )
-
-    console.log("✓ Відгук оновлено")
-    res.json({ testimonial: result.rows[0] })
-  } catch (error) {
-    console.error("❌ Помилка затвердження відгуку:", error.message)
-    res.status(500).json({ error: "Помилка затвердження відгуку" })
-  }
-})
-
-// Delete testimonial (admin only)
-app.delete("/api/testimonials/:id", async (req, res) => {
-  const { id } = req.params
-  const userId = req.body.userId
-
-  console.log("🗑️ Видалення відгуку ID:", id)
-
-  try {
-    // Check if user is admin
-    const userCheck = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
-
-    if (!userCheck.rows[0] || !["методист", "вчитель"].includes(userCheck.rows[0].role)) {
-      return res.status(403).json({ error: "Недостатньо прав" })
-    }
-
-    await pool.query("DELETE FROM testimonials WHERE id = $1", [id])
-
-    console.log("✓ Відгук видалено")
-    res.json({ message: "Відгук видалено" })
-  } catch (error) {
-    console.error("❌ Помилка видалення відгуку:", error.message)
-    res.status(500).json({ error: "Помилка видалення відгуку" })
-  }
-})
-
-// --- START OF ADDED ENDPOINTS FOR STATISTICS ---
-
-// Get student data (for statistics)
-app.get("/api/students/:userId", async (req, res) => {
-  console.log("Запит даних учня")
-  const { userId } = req.params
-
-  try {
-    const participations = await pool.query(
-      "SELECT COUNT(*) as count FROM competition_participants WHERE user_id = $1", // Corrected student_id to user_id
-      [userId],
-    )
-
-    const prizes = await pool.query(
-      "SELECT COUNT(*) as count FROM competition_results WHERE user_id = $1 AND place <= 3", // Corrected student_id to user_id
-      [userId],
-    )
-
-    const totalScore = await pool.query(
-      "SELECT COALESCE(SUM(CAST(score AS NUMERIC)), 0) as total FROM competition_results WHERE user_id = $1", // Corrected student_id to user_id and ensured score is numeric
-      [userId],
-    )
-
-    res.json({
-      participations_count: Number.parseInt(participations.rows[0]?.count || 0),
-      prizes_count: Number.parseInt(prizes.rows[0]?.count || 0),
-      total_score: Number.parseFloat(totalScore.rows[0]?.total || 0), // Use parseFloat for potential decimal scores
-    })
-  } catch (error) {
-    console.error("❌ Помилка отримання даних учня:", error.message)
-    res.status(500).json({ error: "Помилка отримання даних учня" })
-  }
-})
-
-// Get student's competitions
-app.get("/api/student/:userId/competitions", async (req, res) => {
-  // Changed endpoint to match common patterns
-  console.log("Запит конкурсів учня")
-  const { userId } = req.params
-
-  try {
-    const result = await pool.query(
-      `SELECT c.* FROM competitions c
-       INNER JOIN competition_participants cp ON c.id = cp.competition_id
-       WHERE cp.user_id = $1
-       ORDER BY c.start_date DESC
-       LIMIT 10`,
-      [userId],
-    )
-
-    res.json({ competitions: result.rows })
-  } catch (error) {
-    console.error("❌ Помилка отримання конкурсів учня:", error.message)
-    res.status(500).json({ error: "Помилка отримання конкурсів" })
-  }
-})
-
-// Get teacher data
-app.get("/api/teacher/:userId", async (req, res) => {
-  console.log("Запит даних вчителя")
-  const { userId } = req.params
-
-  try {
-    // Count students associated with the teacher (assuming a teacher_id in users or profiles)
-    // This query assumes a teacher_id column exists in the 'users' table or a similar relation.
-    // If not, this part needs adjustment based on how teachers are linked to students.
-    const students = await pool.query(
-      "SELECT COUNT(*) as count FROM users WHERE teacher_id = $1 AND role = 'учень'", // Assuming teacher_id in users table
-      [userId],
-    )
-
-    const competitions = await pool.query("SELECT COUNT(*) as count FROM competitions WHERE created_by = $1", [userId])
-
-    const participations = await pool.query(
-      `SELECT COUNT(*) as count FROM competition_participants cp
-       INNER JOIN competitions c ON cp.competition_id = c.id
-       WHERE c.created_by = $1`,
-      [userId],
-    )
-
-    res.json({
-      students_count: Number.parseInt(students.rows[0]?.count || 0),
-      competitions_count: Number.parseInt(competitions.rows[0]?.count || 0),
-      active_participations: Number.parseInt(participations.rows[0]?.count || 0),
-    })
-  } catch (error) {
-    console.error("❌ Помилка отримання даних вчителя:", error.message)
-    res.status(500).json({ error: "Помилка отримання даних вчителя" })
-  }
-})
-
-// Get teacher's top students
-app.get("/api/teacher/:userId/top-students", async (req, res) => {
-  console.log("Запит топ учнів вчителя")
-  const { userId } = req.params
-
-  try {
-    const result = await pool.query(
-      `SELECT u.id, u.email, p.first_name, p.last_name, p.grade,
-       (SELECT COUNT(*) FROM competition_participants WHERE user_id = u.id) as participations_count, -- Corrected column name
-       (SELECT COUNT(*) FROM competition_results WHERE user_id = u.id AND place <= 3) as prizes_count
-       FROM users u
-       LEFT JOIN profiles p ON u.id = p.user_id
-       WHERE u.teacher_id = $1 AND u.role = 'учень' -- Assuming teacher_id in users table
-       ORDER BY prizes_count DESC, participations_count DESC
-       LIMIT 10`,
-      [userId],
-    )
-
-    res.json({ students: result.rows })
-  } catch (error) {
-    console.error("❌ Помилка отримання топ учнів:", error.message)
-    res.status(500).json({ error: "Помилка отримання топ учнів" })
-  }
-})
-
-// Get methodist statistics
-app.get("/api/methodist/statistics", async (req, res) => {
-  console.log("Запит статистики методиста")
-
-  try {
-    // Count schools with associated students
-    const schools = await pool.query(
-      "SELECT COUNT(DISTINCT school_id) as count FROM profiles WHERE school_id IS NOT NULL",
-    )
-
-    const teachers = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'вчитель'")
-
-    const students = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'учень'")
-
-    const activeComps = await pool.query(
-      "SELECT COUNT(*) as count FROM competitions WHERE start_date <= CURRENT_DATE AND end_date >= CURRENT_DATE",
-    )
-
-    const completedComps = await pool.query("SELECT COUNT(*) as count FROM competitions WHERE end_date < CURRENT_DATE")
-
-    const totalParticipations = await pool.query("SELECT COUNT(*) as count FROM competition_participants")
-
-    // Calculate average score, ensuring score is numeric and handling potential NULLs
-    const avgRating = await pool.query(
-      "SELECT AVG(CAST(score AS NUMERIC)) as avg FROM competition_results WHERE score IS NOT NULL AND score ~ '^\\d+(\\.\\d+)?$'",
-    )
-
-    res.json({
-      schools_count: Number.parseInt(schools.rows[0]?.count || 0),
-      teachers_count: Number.parseInt(teachers.rows[0]?.count || 0),
-      students_count: Number.parseInt(students.rows[0]?.count || 0),
-      active_competitions: Number.parseInt(activeComps.rows[0]?.count || 0),
-      completed_competitions: Number.parseInt(completedComps.rows[0]?.count || 0),
-      total_participations: Number.parseInt(totalParticipations.rows[0]?.count || 0),
-      average_rating: Number.parseFloat(avgRating.rows[0]?.avg || 0).toFixed(2), // Format to 2 decimal places
-    })
-  } catch (error) {
-    console.error("❌ Помилка отримання статистики методиста:", error.message)
-    res.status(500).json({ error: "Помилка отримання статистики" })
-  }
-})
-

@@ -1,374 +1,561 @@
 const crypto = require("crypto")
-const rateLimit = require("express-rate-limit")
-const helmet = require("helmet")
 
+// ============= RATE LIMITING =============
+// Зберігає інформацію про запити користувачів для обмеження кількості запитів
+const requestLog = new Map()
 
-// Rate Limiting - захист від DDoS атак
-const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100, message = "Забагато запитів з цієї IP-адреси") => {
-    return rateLimit({
-        windowMs,
-        max,
-        message: {
-            error: message
-        },
-        standardHeaders: true,
-        legacyHeaders: false,
-    })
+// Middleware для обмеження кількості запитів (DDoS захист)
+function rateLimiter(options = {}) {
+    const {
+        windowMs = 15 * 60 * 1000, max = 100, message = "Занадто багато запитів. Спробуйте пізніше."
+    } = options
+
+    return (req, res, next) => {
+        const key = req.ip || req.connection.remoteAddress
+        const now = Date.now()
+
+        if (!requestLog.has(key)) {
+            requestLog.set(key, {
+                count: 1,
+                resetTime: now + windowMs
+            })
+            return next()
+        }
+
+        const record = requestLog.get(key)
+
+        if (now > record.resetTime) {
+            record.count = 1
+            record.resetTime = now + windowMs
+            return next()
+        }
+
+        if (record.count >= max) {
+            console.warn(`[SECURITY] Rate limit exceeded for IP: ${key}`)
+            return res.status(429).json({
+                error: message
+            })
+        }
+
+        record.count++
+        next()
+    }
 }
 
-// Rate limiters для різних типів запитів
-const rateLimiters = {
-    general: createRateLimiter(15 * 60 * 1000, 100, "Забагато запитів. Спробуйте через 15 хвилин"),
-    auth: createRateLimiter(15 * 60 * 1000, 5, "Забагато спроб входу. Спробуйте через 15 хвилин"),
-    registration: createRateLimiter(60 * 60 * 1000, 3, "Забагато спроб реєстрації. Спробуйте через годину"),
-    api: createRateLimiter(1 * 60 * 1000, 30, "Забагато API запитів. Спробуйте через хвилину"),
-    upload: createRateLimiter(15 * 60 * 1000, 10, "Забагато завантажень файлів"),
-}
+// Спеціальні лімітери для різних типів запитів
+const authLimiter = rateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 хвилин
+    max: 5, // максимум 5 спроб входу
+    message: "Занадто багато спроб входу. Спробуйте через 15 хвилин.",
+})
 
-// ==================== ВАЛІДАЦІЯ ТА САНІТИЗАЦІЯ ====================
+const apiLimiter = rateLimiter({
+    windowMs: 1 * 60 * 1000, // 1 хвилина
+    max: 100, // максимум 100 запитів
+})
+
+const uploadLimiter = rateLimiter({
+    windowMs: 60 * 60 * 1000, // 1 година
+    max: 50, // максимум 50 завантажень
+    message: "Занадто багато завантажень файлів. Спробуйте через годину.",
+})
+
+// ============= INPUT VALIDATION & SANITIZATION =============
+
+// Санітизація HTML для захисту від XSS
+function sanitizeHtml(text) {
+    if (typeof text !== "string") return text
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#x27;")
+        .replace(/\//g, "&#x2F;")
+}
 
 // Валідація email
-const validateEmail = (email) => {
-    if (!email || typeof email !== "string") return false
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    return emailRegex.test(email) && email.length <= 255
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
 }
 
-// Валідація пароля (мінімум 6 символів)
-const validatePassword = (password) => {
-    if (!password || typeof password !== "string") return false
-    return password.length >= 6 && password.length <= 100
+// Валідація пароля (мінімум 6 символів, буква та цифра)
+function isValidPassword(password) {
+    if (typeof password !== "string" || password.length < 6) {
+        return false
+    }
+    // Перевірка на наявність хоча б однієї букви та однієї цифри
+    const hasLetter = /[a-zA-Zа-яА-ЯіІїЇєЄґҐ]/.test(password)
+    const hasNumber = /[0-9]/.test(password)
+    return hasLetter && hasNumber
 }
 
-// Санітизація рядків (видалення HTML тегів та небезпечних символів)
-const sanitizeString = (str) => {
-    if (!str || typeof str !== "string") return ""
-    return str
-        .replace(/<script[^>]*>.*?<\/script>/gi, "")
-        .replace(/<[^>]+>/g, "")
-        .replace(/javascript:/gi, "")
-        .replace(/on\w+\s*=/gi, "")
-        .trim()
-        .slice(0, 10000) // Максимум 10000 символів
-}
-
-// Валідація та санітизація ID
-const validateId = (id) => {
-    const numId = Number.parseInt(id, 10)
-    return !isNaN(numId) && numId > 0 && numId < Number.MAX_SAFE_INTEGER
-}
-
-// Валідація номера телефону
-const validatePhone = (phone) => {
-    if (!phone) return true // Необов'язкове поле
+// Валідація телефону
+function isValidPhone(phone) {
+    if (!phone) return true // телефон опціональний
     const phoneRegex = /^\+?[0-9]{10,15}$/
-    return phoneRegex.test(phone)
+    return phoneRegex.test(phone.replace(/[\s\-$$$$]/g, ""))
 }
 
-// Валідація дати
-const validateDate = (date) => {
-    if (!date) return true
-    const timestamp = Date.parse(date)
-    return !isNaN(timestamp) && timestamp > 0
+// Валідація ID (тільки цілі числа)
+function isValidId(id) {
+    return Number.isInteger(Number(id)) && Number(id) > 0
 }
 
-// ==================== ЗАХИСТ ВІД SQL INJECTION ====================
+// Middleware для валідації вхідних даних
+function validateInput(schema) {
+    return (req, res, next) => {
+        const data = {
+            ...req.body,
+            ...req.params,
+            ...req.query
+        }
+        const errors = []
 
-// Перевірка на SQL injection паттерни
-const containsSqlInjection = (value) => {
+        for (const [field, rules] of Object.entries(schema)) {
+            const value = data[field]
+
+            // Перевірка на обов'язковість
+            if (rules.required && !value) {
+                errors.push(`Поле ${field} є обов'язковим`)
+                continue
+            }
+
+            if (!value && !rules.required) continue
+
+            // Перевірка типу
+            if (rules.type === "email" && !isValidEmail(value)) {
+                errors.push(`Невірний формат email`)
+            }
+            if (rules.type === "password" && !isValidPassword(value)) {
+                errors.push(`Пароль повинен містити мінімум 6 символів, включаючи букву та цифру`)
+            }
+            if (rules.type === "phone" && !isValidPhone(value)) {
+                errors.push(`Невірний формат телефону`)
+            }
+            if (rules.type === "id" && !isValidId(value)) {
+                errors.push(`Невірний ID`)
+            }
+
+            // Перевірка мінімальної та максимальної довжини
+            if (rules.minLength && value.length < rules.minLength) {
+                errors.push(`Поле ${field} повинно містити мінімум ${rules.minLength} символів`)
+            }
+            if (rules.maxLength && value.length > rules.maxLength) {
+                errors.push(`Поле ${field} не повинно перевищувати ${rules.maxLength} символів`)
+            }
+
+            // Санітизація HTML
+            if (rules.sanitize && typeof value === "string") {
+                req.body[field] = sanitizeHtml(value)
+            }
+        }
+
+        if (errors.length > 0) {
+            console.warn(`[SECURITY] Validation failed:`, errors)
+            return res.status(400).json({
+                error: errors.join(", ")
+            })
+        }
+
+        next()
+    }
+}
+
+// ============= SQL INJECTION PROTECTION =============
+
+// Перевірка на небезпечні SQL паттерни
+function detectSqlInjection(value) {
     if (typeof value !== "string") return false
 
     const sqlPatterns = [
-        /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|DECLARE)\b)/gi,
-        /(;|--|\/\*|\*\/|xp_|sp_)/gi,
-        /('|"|\||&|<|>)/g,
+        /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|SCRIPT)\b)/gi,
+        /(--|;|\/\*|\*\/|xp_|sp_)/gi,
+        /(\bOR\b.*=.*|1\s*=\s*1)/gi,
     ]
 
     return sqlPatterns.some((pattern) => pattern.test(value))
 }
 
-// Валідатор для SQL параметрів
-const sanitizeSqlParams = (params) => {
-    if (Array.isArray(params)) {
-        return params.map((param) => {
-            if (typeof param === "string" && containsSqlInjection(param)) {
-                throw new Error("Виявлено підозрілі символи в запиті")
+// Middleware для захисту від SQL ін'єкцій
+function sqlInjectionProtection(req, res, next) {
+    const checkObject = (obj) => {
+        for (const key in obj) {
+            if (typeof obj[key] === "string" && detectSqlInjection(obj[key])) {
+                console.error(`[SECURITY] SQL Injection attempt detected in ${key}:`, obj[key])
+                return true
             }
-            return param
-        })
-    }
-    return params
-}
-
-// ==================== ЗАХИСТ ВІД XSS ====================
-
-// Екранування HTML символів
-const escapeHtml = (text) => {
-    if (!text || typeof text !== "string") return ""
-    const map = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#x27;",
-        "/": "&#x2F;",
-    }
-    return text.replace(/[&<>"'/]/g, (char) => map[char])
-}
-
-// ==================== ЗАХИСТ ВІД CSRF ====================
-
-// Генерація CSRF токена
-const generateCsrfToken = () => {
-    return crypto.randomBytes(32).toString("hex")
-}
-
-// Валідація CSRF токена
-const validateCsrfToken = (token, sessionToken) => {
-    if (!token || !sessionToken) return false
-    return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(sessionToken))
-}
-
-// ==================== ЗАХИСТ ПАРОЛІВ ====================
-
-// Перевірка складності пароля
-const checkPasswordStrength = (password) => {
-    const checks = {
-        length: password.length >= 8,
-        uppercase: /[A-Z]/.test(password),
-        lowercase: /[a-z]/.test(password),
-        number: /[0-9]/.test(password),
-        special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    }
-
-    const score = Object.values(checks).filter(Boolean).length
-
-    return {
-        isStrong: score >= 3,
-        score,
-        checks,
-        suggestions: [
-            !checks.length && "Пароль має містити мінімум 8 символів",
-            !checks.uppercase && "Додайте великі літери",
-            !checks.lowercase && "Додайте малі літери",
-            !checks.number && "Додайте цифри",
-            !checks.special && "Додайте спеціальні символи",
-        ].filter(Boolean),
-    }
-}
-
-// ==================== ЗАХИСТ ФАЙЛІВ ====================
-
-// Дозволені типи файлів
-const allowedImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
-const allowedDocumentTypes = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-]
-
-// Валідація файлу
-const validateFile = (file, allowedTypes = allowedImageTypes, maxSize = 10 * 1024 * 1024) => {
-    const errors = []
-
-    if (!file) {
-        errors.push("Файл не вибрано")
-        return {
-            isValid: false,
-            errors
-        }
-    }
-
-    // Перевірка типу
-    if (!allowedTypes.includes(file.mimetype)) {
-        errors.push("Недозволений тип файлу")
-    }
-
-    // Перевірка розміру
-    if (file.size > maxSize) {
-        errors.push(`Файл занадто великий. Максимум: ${maxSize / 1024 / 1024}MB`)
-    }
-
-    // Перевірка розширення
-    const ext = file.originalname.split(".").pop().toLowerCase()
-    const allowedExts = allowedTypes
-        .map((type) => {
-            const extMap = {
-                "image/jpeg": "jpg",
-                "image/jpg": "jpg",
-                "image/png": "png",
-                "image/gif": "gif",
-                "image/webp": "webp",
-                "application/pdf": "pdf",
-                "application/msword": "doc",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+            if (typeof obj[key] === "object") {
+                if (checkObject(obj[key])) return true
             }
-            return extMap[type]
+        }
+        return false
+    }
+
+    if (checkObject(req.body) || checkObject(req.query) || checkObject(req.params)) {
+        return res.status(400).json({
+            error: "Виявлено підозрілу активність"
         })
-        .filter(Boolean)
-
-    if (!allowedExts.includes(ext)) {
-        errors.push("Недозволене розширення файлу")
-    }
-
-    return {
-        isValid: errors.length === 0,
-        errors
-    }
-}
-
-// ==================== МОНІТОРИНГ БЕЗПЕКИ ====================
-
-// Логування підозрілої активності
-const suspiciousActivityLog = new Map()
-
-const logSuspiciousActivity = (ip, type, details) => {
-    const key = `${ip}_${type}`
-    const now = Date.now()
-
-    if (!suspiciousActivityLog.has(key)) {
-        suspiciousActivityLog.set(key, [])
-    }
-
-    const logs = suspiciousActivityLog.get(key)
-    logs.push({
-        timestamp: now,
-        details
-    })
-
-    // Видаляємо старі записи (старші 1 години)
-    const filtered = logs.filter((log) => now - log.timestamp < 60 * 60 * 1000)
-    suspiciousActivityLog.set(key, filtered)
-
-    console.warn(`[SECURITY WARNING] ${type} from ${ip}:`, details)
-
-    // Якщо більше 10 підозрілих активностей за годину - блокуємо IP
-    if (filtered.length >= 10) {
-        console.error(`[SECURITY ALERT] IP ${ip} blocked due to suspicious activity`)
-        return true // Треба блокувати
-    }
-
-    return false
-}
-
-// ==================== MIDDLEWARE ====================
-
-// Security headers middleware
-const securityHeaders = helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            imgSrc: ["'self'", "data:", "https:", "blob:"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            connectSrc: ["'self'", "https:", "wss:"],
-            frameSrc: ["'none'"],
-            objectSrc: ["'none'"],
-        },
-    },
-    hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true,
-    },
-    noSniff: true,
-    xssFilter: true,
-    referrerPolicy: {
-        policy: "strict-origin-when-cross-origin"
-    },
-})
-
-// Input validation middleware
-const validateInput = (req, res, next) => {
-    try {
-        // Перевірка body на SQL injection
-        if (req.body) {
-            Object.values(req.body).forEach((value) => {
-                if (typeof value === "string" && containsSqlInjection(value)) {
-                    throw new Error("Виявлено небезпечні символи в запиті")
-                }
-            })
-        }
-
-        // Перевірка query parameters
-        if (req.query) {
-            Object.values(req.query).forEach((value) => {
-                if (typeof value === "string" && containsSqlInjection(value)) {
-                    throw new Error("Виявлено небезпечні символи в параметрах")
-                }
-            })
-        }
-
-        next()
-    } catch (error) {
-        res.status(400).json({
-            error: error.message
-        })
-    }
-}
-
-// IP blocking middleware
-const blockSuspiciousIp = (req, res, next) => {
-    const ip = req.ip || req.connection.remoteAddress
-
-    // Перевірка, чи IP не в чорному списку
-    const blocked = suspiciousActivityLog.get(`${ip}_blocked`)
-    if (blocked && blocked.length > 0) {
-        const lastBlock = blocked[blocked.length - 1]
-        const now = Date.now()
-
-        // Блокування на 1 годину
-        if (now - lastBlock.timestamp < 60 * 60 * 1000) {
-            return res.status(403).json({
-                error: "Доступ заборонено через підозрілу активність"
-            })
-        }
     }
 
     next()
 }
 
-// ==================== ЕКСПОРТ ====================
+// ============= XSS PROTECTION =============
+
+// Middleware для захисту від XSS атак
+function xssProtection(req, res, next) {
+    const sanitizeObject = (obj) => {
+        for (const key in obj) {
+            if (typeof obj[key] === "string") {
+                // Перевірка на наявність небезпечних тегів
+                if (/<script|<iframe|javascript:|onerror|onload/gi.test(obj[key])) {
+                    console.warn(`[SECURITY] XSS attempt detected in ${key}`)
+                    obj[key] = sanitizeHtml(obj[key])
+                }
+            } else if (typeof obj[key] === "object") {
+                sanitizeObject(obj[key])
+            }
+        }
+    }
+
+    sanitizeObject(req.body)
+    sanitizeObject(req.query)
+
+    next()
+}
+
+// ============= CSRF PROTECTION =============
+
+// Генерація CSRF токенів
+function generateCsrfToken() {
+    return crypto.randomBytes(32).toString("hex")
+}
+
+// Зберігання токенів (в production краще використовувати Redis або session store)
+const csrfTokens = new Map()
+
+// Middleware для створення CSRF токену
+function csrfTokenGenerator(req, res, next) {
+    const token = generateCsrfToken()
+    const sessionId = req.headers["x-session-id"] || req.ip
+
+    csrfTokens.set(sessionId, token)
+
+    // Видалення старих токенів (кожні 30 хвилин)
+    setTimeout(
+        () => {
+            csrfTokens.delete(sessionId)
+        },
+        30 * 60 * 1000,
+    )
+
+    req.csrfToken = token
+    res.setHeader("X-CSRF-Token", token)
+    next()
+}
+
+// Middleware для перевірки CSRF токену
+function csrfProtection(req, res, next) {
+    // GET запити не потребують CSRF перевірки
+    if (req.method === "GET") {
+        return next()
+    }
+
+    const token = req.headers["x-csrf-token"]
+    const sessionId = req.headers["x-session-id"] || req.ip
+
+    if (!token || csrfTokens.get(sessionId) !== token) {
+        console.warn(`[SECURITY] CSRF token validation failed for session: ${sessionId}`)
+        return res.status(403).json({
+            error: "Невірний CSRF токен"
+        })
+    }
+
+    next()
+}
+
+// ============= FILE UPLOAD SECURITY =============
+
+// Перевірка типу файлу
+function validateFileType(file, allowedTypes) {
+    const fileExtension = file.originalname.split(".").pop().toLowerCase()
+    const mimeType = file.mimetype.toLowerCase()
+
+    const allowedExtensions = allowedTypes.extensions || []
+    const allowedMimeTypes = allowedTypes.mimeTypes || []
+
+    return allowedExtensions.includes(fileExtension) && allowedMimeTypes.includes(mimeType)
+}
+
+// Перевірка розміру файлу
+function validateFileSize(file, maxSize) {
+    return file.size <= maxSize
+}
+
+// Безпечне перейменування файлу
+function sanitizeFileName(filename) {
+    return filename
+        .replace(/[^a-zA-Z0-9._-]/g, "_")
+        .replace(/\.+/g, ".")
+        .substring(0, 255)
+}
+
+// Middleware для перевірки файлів
+function fileUploadSecurity(options = {}) {
+    const {
+        allowedTypes = {
+                extensions: ["jpg", "jpeg", "png", "gif"],
+                mimeTypes: ["image/jpeg", "image/png", "image/gif"],
+            },
+            maxSize = 5 * 1024 * 1024, // 5MB
+    } = options
+
+    return (req, res, next) => {
+        if (!req.file && !req.files) {
+            return next()
+        }
+
+        const files = req.files || [req.file]
+
+        for (const file of files) {
+            if (!file) continue
+
+            // Перевірка типу файлу
+            if (!validateFileType(file, allowedTypes)) {
+                console.warn(`[SECURITY] Invalid file type: ${file.mimetype}`)
+                return res.status(400).json({
+                    error: "Недозволений тип файлу"
+                })
+            }
+
+            // Перевірка розміру
+            if (!validateFileSize(file, maxSize)) {
+                console.warn(`[SECURITY] File too large: ${file.size} bytes`)
+                return res.status(400).json({
+                    error: "Файл занадто великий"
+                })
+            }
+
+            // Санітизація імені файлу
+            file.originalname = sanitizeFileName(file.originalname)
+        }
+
+        next()
+    }
+}
+
+// ============= AUTHENTICATION & AUTHORIZATION =============
+
+// Middleware для перевірки автентифікації
+function requireAuth(req, res, next) {
+    const userId = req.headers["x-user-id"] || req.body.userId
+
+    if (!userId || !isValidId(userId)) {
+        console.warn(`[SECURITY] Unauthorized access attempt`)
+        return res.status(401).json({
+            error: "Необхідна автентифікація"
+        })
+    }
+
+    req.userId = userId
+    next()
+}
+
+// Middleware для перевірки ролі користувача
+function requireRole(...allowedRoles) {
+    return async (req, res, next) => {
+        const userId = req.userId || req.headers["x-user-id"] || req.body.userId
+
+        if (!userId) {
+            return res.status(401).json({
+                error: "Необхідна автентифікація"
+            })
+        }
+
+        try {
+            // Отримання ролі з БД (потрібно передати pool через req або використовувати глобальний)
+            const {
+                pool
+            } = req.app.locals
+
+            if (!pool) {
+                console.error("[SECURITY] Database pool not available")
+                return res.status(500).json({
+                    error: "Помилка сервера"
+                })
+            }
+
+            const result = await pool.query("SELECT role FROM users WHERE id = $1", [userId])
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    error: "Користувача не знайдено"
+                })
+            }
+
+            const userRole = result.rows[0].role
+
+            if (!allowedRoles.includes(userRole)) {
+                console.warn(`[SECURITY] Access denied for role: ${userRole}`)
+                return res.status(403).json({
+                    error: "Недостатньо прав доступу"
+                })
+            }
+
+            req.userRole = userRole
+            next()
+        } catch (error) {
+            console.error("[SECURITY] Role verification error:", error)
+            return res.status(500).json({
+                error: "Помилка перевірки прав доступу"
+            })
+        }
+    }
+}
+
+// ============= SECURITY HEADERS =============
+
+// Middleware для встановлення безпечних HTTP заголовків
+function securityHeaders(req, res, next) {
+    // Захист від clickjacking
+    res.setHeader("X-Frame-Options", "DENY")
+
+    // Захист від MIME type sniffing
+    res.setHeader("X-Content-Type-Options", "nosniff")
+
+    // XSS фільтр браузера
+    res.setHeader("X-XSS-Protection", "1; mode=block")
+
+    // Content Security Policy
+    res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;",
+    )
+
+    // Strict Transport Security (HTTPS only)
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+
+    // Referrer Policy
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin")
+
+    // Permissions Policy
+    res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+
+    next()
+}
+
+// ============= LOGGING & MONITORING =============
+
+// Логування підозрілої активності
+function logSuspiciousActivity(req, type, details) {
+    const log = {
+        timestamp: new Date().toISOString(),
+        type: type,
+        ip: req.ip || req.connection.remoteAddress,
+        userAgent: req.headers["user-agent"],
+        url: req.url,
+        method: req.method,
+        details: details,
+    }
+
+    console.warn("[SECURITY ALERT]", JSON.stringify(log))
+
+    // В production тут можна додати запис в БД або відправку в систему моніторингу
+}
+
+// ============= PASSWORD SECURITY =============
+
+// Перевірка на слабкі паролі
+const weakPasswords = ["123456", "password", "qwerty", "admin", "letmein", "welcome", "monkey", "1234567890"]
+
+function isWeakPassword(password) {
+    const lowerPassword = password.toLowerCase()
+
+    // Перевірка на загальні слабкі паролі
+    if (weakPasswords.includes(lowerPassword)) {
+        return true
+    }
+
+    // Перевірка на послідовності
+    if (/^(.)\1+$/.test(password)) {
+        // всі символи однакові
+        return true
+    }
+
+    if (/^(012|123|234|345|456|567|678|789|890)+/.test(password)) {
+        // числові послідовності
+        return true
+    }
+
+    return false
+}
+
+// Middleware для перевірки надійності пароля
+function passwordStrengthCheck(req, res, next) {
+    const password = req.body.password || req.body.newPassword
+
+    if (!password) {
+        return next()
+    }
+
+    if (isWeakPassword(password)) {
+        return res.status(400).json({
+            error: "Пароль занадто слабкий. Використайте складніший пароль.",
+        })
+    }
+
+    next()
+}
+
+// ============= EXPORT =============
 
 module.exports = {
-    // Rate limiters
-    rateLimiters,
+    // Rate Limiting
+    rateLimiter,
+    authLimiter,
+    apiLimiter,
+    uploadLimiter,
 
-    // Validation functions
-    validateEmail,
-    validatePassword,
-    validateId,
-    validatePhone,
-    validateDate,
+    // Input Validation
+    validateInput,
+    sanitizeHtml,
+    isValidEmail,
+    isValidPassword,
+    isValidPhone,
+    isValidId,
 
-    // Sanitization
-    sanitizeString,
-    escapeHtml,
-    sanitizeSqlParams,
+    // SQL Injection Protection
+    sqlInjectionProtection,
+    detectSqlInjection,
 
-    // SQL Injection protection
-    containsSqlInjection,
+    // XSS Protection
+    xssProtection,
 
-    // CSRF protection
+    // CSRF Protection
+    csrfTokenGenerator,
+    csrfProtection,
     generateCsrfToken,
-    validateCsrfToken,
 
-    // Password security
-    checkPasswordStrength,
+    // File Upload Security
+    fileUploadSecurity,
+    validateFileType,
+    validateFileSize,
+    sanitizeFileName,
 
-    // File validation
-    validateFile,
-    allowedImageTypes,
-    allowedDocumentTypes,
+    // Authentication & Authorization
+    requireAuth,
+    requireRole,
 
-    // Security monitoring
+    // Security Headers
+    securityHeaders,
+
+    // Logging
     logSuspiciousActivity,
 
-    // Middleware
-    securityHeaders,
-    validateInput,
-    blockSuspiciousIp,
+    // Password Security
+    passwordStrengthCheck,
+    isWeakPassword,
 }
