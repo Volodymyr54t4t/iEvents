@@ -169,10 +169,12 @@ function renderFooter() {
             <div class="footer-container">
                 <p>&copy; 2025 iEvents. Всі права захищені.</p>
                 <div class="footer-links">
+                    <a href="../chat.html">Чат система</a>
                     <a href="../about.html">Про нас</a>
                     <a href="../contacts.html">Контакти</a>
                     <a href="../support.html">Підтримка</a>
                     <a href="../question.html">Задати питання</a>
+                    
                     <a href="../privacy-policy.html">Політика конфіденційності</a>
                 </div>
             </div>
