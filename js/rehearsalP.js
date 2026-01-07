@@ -1,3 +1,16 @@
+let BASE_URL
+if (window.location.hostname === "localhost") {
+  // 🖥️ Локальний режим
+  BASE_URL = "http://localhost:3000"
+} else {
+  // ☁️ Онлайн-сервер Render
+  BASE_URL = "https://ievents-qf5k.onrender.com"
+}
+console.log("📡 Підключення до:", BASE_URL)
+
+// Оновити window.API_URL для сумісності з іншими частинами коду
+window.API_URL = BASE_URL
+
 let currentUserId = null
 let allRehearsals = []
 let allCompetitions = []
@@ -13,17 +26,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // Завантаження header та footer
 function loadHeaderAndFooter() {
-  try {
-    // Припускаємо, що функції в components.js називаються саме так:
-    if (typeof renderHeader === 'function' && typeof renderFooter === 'function') {
-      renderHeader("header"); // Передаємо ID контейнера
-      renderFooter("footer"); // Передаємо ID контейнера
-    } else {
-      console.error("Функції рендерингу не знайдені в components.js");
-    }
-  } catch (error) {
-    console.error("Помилка завантаження компонентів:", error);
-  }
+  fetch("header.html")
+    .then((response) => response.text())
+    .then((data) => {
+      document.getElementById("header").innerHTML = data
+    })
+
+  fetch("footer.html")
+    .then((response) => response.text())
+    .then((data) => {
+      document.getElementById("footer").innerHTML = data
+    })
 }
 
 async function loadUserData() {
@@ -39,8 +52,8 @@ async function loadUserData() {
     const response = await fetch(`${window.API_URL}/api/user/role/${currentUserId}`)
     const data = await response.json()
 
-    if (!response.ok || data.role !== "учень") {
-      alert("Доступ заборонено. Ця сторінка тільки для учнів.")
+    if (!response.ok || !["вчитель", "методист"].includes(data.role)) {
+      alert("Доступ заборонено. Ця сторінка тільки для вчителів та методистів.")
       window.location.href = "index.html"
     }
   } catch (error) {
@@ -59,12 +72,18 @@ async function loadCompetitions() {
 
       // Завантажити конкурси в фільтр
       const filterCompetition = document.getElementById("filterCompetition")
+      const competitionSelect = document.getElementById("competition")
 
       allCompetitions.forEach((comp) => {
-        const option = document.createElement("option")
-        option.value = comp.id
-        option.textContent = comp.title
-        filterCompetition.appendChild(option)
+        const option1 = document.createElement("option")
+        option1.value = comp.id
+        option1.textContent = comp.title
+        filterCompetition.appendChild(option1)
+
+        const option2 = document.createElement("option")
+        option2.value = comp.id
+        option2.textContent = comp.title
+        competitionSelect.appendChild(option2)
       })
     }
   } catch (error) {
@@ -74,7 +93,7 @@ async function loadCompetitions() {
 
 async function loadRehearsals() {
   try {
-    const response = await fetch(`${window.API_URL}/api/rehearsals/student/${currentUserId}`)
+    const response = await fetch(`${window.API_URL}/api/rehearsals/teacher/${currentUserId}`)
     const data = await response.json()
 
     if (response.ok) {
@@ -102,7 +121,7 @@ function displayRehearsals(rehearsals) {
     container.innerHTML = `
       <div class="empty-state">
         <h3>Репетицій поки немає</h3>
-        <p>Репетиції з'являться тут, коли вчитель їх створить</p>
+        <p>Створіть першу репетицію для своїх учнів</p>
       </div>
     `
     return
@@ -114,40 +133,20 @@ function displayRehearsals(rehearsals) {
       const isToday = isDateToday(date)
       const isPast = date < new Date()
 
-      const typeLabel = rehearsal.is_personal ? "Особиста" : "Групова"
-      const typeClass = rehearsal.is_personal ? "type-personal" : "type-group"
+      const typeLabel = rehearsal.student_name ? "Особиста" : "Групова"
+      const typeClass = rehearsal.student_name ? "type-personal" : "type-group"
 
       const formatLabel = rehearsal.is_online ? "Онлайн" : "Офлайн"
       const formatClass = rehearsal.is_online ? "format-online" : "format-offline"
 
-      let dateClass, dateLabel
-      if (isPast) {
-        dateClass = "date-past"
-        dateLabel = "Завершено"
-      } else if (isToday) {
-        dateClass = "date-today"
-        dateLabel = "Сьогодні"
-      } else {
-        dateClass = "date-upcoming"
-        dateLabel = formatDate(date)
-      }
+      const dateClass = isToday ? "date-today" : "date-upcoming"
+      const dateLabel = isToday ? "Сьогодні" : formatDate(date)
 
       return `
-        <div class="rehearsal-item" style="${isPast ? "opacity: 0.7;" : ""}">
-          ${
-            isToday && !isPast
-              ? `
-            <div class="rehearsal-alert">
-              <strong>⚠️ Сьогодні репетиція!</strong>
-            </div>
-          `
-              : ""
-          }
-
+        <div class="rehearsal-item" style="${isPast ? "opacity: 0.6;" : ""}">
           <div class="rehearsal-header">
             <div class="rehearsal-title">${rehearsal.title}</div>
             <div class="rehearsal-competition">Конкурс: ${rehearsal.competition_title}</div>
-            <div class="rehearsal-teacher">Вчитель: ${rehearsal.teacher_name}</div>
           </div>
 
           <div class="rehearsal-badges">
@@ -189,6 +188,16 @@ function displayRehearsals(rehearsals) {
           }
 
           ${
+            rehearsal.student_name
+              ? `
+            <div class="rehearsal-student">
+              <strong>👤 Учень:</strong> ${rehearsal.student_name}
+            </div>
+          `
+              : ""
+          }
+
+          ${
             rehearsal.notes
               ? `
             <div class="rehearsal-details">
@@ -199,6 +208,15 @@ function displayRehearsals(rehearsals) {
           `
               : ""
           }
+
+          <div class="rehearsal-actions">
+            <button class="btn btn-secondary" onclick="editRehearsal(${rehearsal.id})">
+              Редагувати
+            </button>
+            <button class="btn btn-danger" onclick="deleteRehearsal(${rehearsal.id})">
+              Видалити
+            </button>
+          </div>
         </div>
       `
     })
@@ -211,11 +229,13 @@ function setupFilters() {
   const filterCompetition = document.getElementById("filterCompetition")
   const filterType = document.getElementById("filterType")
   const filterDate = document.getElementById("filterDate")
+  const sortBy = document.getElementById("sortBy")
 
   searchInput.addEventListener("input", applyFilters)
   filterCompetition.addEventListener("change", applyFilters)
   filterType.addEventListener("change", applyFilters)
   filterDate.addEventListener("change", applyFilters)
+  sortBy.addEventListener("change", applyFilters)
 }
 
 function applyFilters() {
@@ -223,6 +243,7 @@ function applyFilters() {
   const competitionFilter = document.getElementById("filterCompetition").value
   const typeFilter = document.getElementById("filterType").value
   const dateFilter = document.getElementById("filterDate").value
+  const sortBy = document.getElementById("sortBy").value
 
   let filtered = [...allRehearsals]
 
@@ -232,7 +253,7 @@ function applyFilters() {
       (r) =>
         r.title.toLowerCase().includes(searchTerm) ||
         r.competition_title.toLowerCase().includes(searchTerm) ||
-        r.teacher_name.toLowerCase().includes(searchTerm),
+        (r.student_name && r.student_name.toLowerCase().includes(searchTerm)),
     )
   }
 
@@ -243,12 +264,13 @@ function applyFilters() {
 
   // Фільтр по типу
   if (typeFilter === "personal") {
-    filtered = filtered.filter((r) => r.is_personal)
+    filtered = filtered.filter((r) => r.student_id !== null)
   } else if (typeFilter === "group") {
-    filtered = filtered.filter((r) => !r.is_personal)
+    filtered = filtered.filter((r) => r.student_id === null)
   }
 
   // Фільтр по даті
+  const now = new Date()
   if (dateFilter) {
     filtered = filtered.filter((r) => {
       const date = new Date(r.rehearsal_date)
@@ -267,10 +289,193 @@ function applyFilters() {
     })
   }
 
-  // Сортування за датою (найближчі спочатку)
-  filtered.sort((a, b) => new Date(a.rehearsal_date) - new Date(b.rehearsal_date))
+  // Сортування
+  filtered.sort((a, b) => {
+    switch (sortBy) {
+      case "date_asc":
+        return new Date(a.rehearsal_date) - new Date(b.rehearsal_date)
+      case "date_desc":
+        return new Date(b.rehearsal_date) - new Date(a.rehearsal_date)
+      case "title_asc":
+        return a.title.localeCompare(b.title)
+      case "title_desc":
+        return b.title.localeCompare(a.title)
+      default:
+        return 0
+    }
+  })
 
   displayRehearsals(filtered)
+}
+
+// Відкрити модальне вікно створення репетиції
+function openCreateRehearsalModal() {
+  document.getElementById("createRehearsalModal").classList.add("active")
+  document.getElementById("modalTitle").textContent = "Створити репетицію"
+  document.getElementById("createRehearsalForm").reset()
+  document.getElementById("editRehearsalId").value = ""
+  document.getElementById("studentSelectGroup").style.display = "none"
+}
+
+// Закрити модальне вікно
+function closeCreateRehearsalModal() {
+  document.getElementById("createRehearsalModal").classList.remove("active")
+}
+
+async function loadCompetitionParticipants() {
+  const competitionId = document.getElementById("competition").value
+  const studentSelect = document.getElementById("student")
+
+  if (!competitionId) {
+    studentSelect.innerHTML = '<option value="">Спочатку оберіть конкурс</option>'
+    return
+  }
+
+  try {
+    const response = await fetch(`${window.API_URL}/api/competitions/${competitionId}/participants`)
+    const data = await response.json()
+
+    if (response.ok) {
+      const participants = data.participants || []
+      studentSelect.innerHTML = '<option value="">Оберіть учня</option>'
+
+      participants.forEach((participant) => {
+        const option = document.createElement("option")
+        option.value = participant.id
+        option.textContent = `${participant.first_name || ""} ${participant.last_name || ""} ${participant.email ? "(" + participant.email + ")" : ""}`
+        studentSelect.appendChild(option)
+      })
+    }
+  } catch (error) {
+    console.error("Помилка завантаження учасників:", error)
+    studentSelect.innerHTML = '<option value="">Помилка завантаження учасників</option>'
+  }
+}
+
+// Перемикач особистої репетиції
+function toggleStudentSelect() {
+  const isPersonal = document.getElementById("isPersonal").checked
+  const studentSelectGroup = document.getElementById("studentSelectGroup")
+
+  if (isPersonal) {
+    studentSelectGroup.style.display = "block"
+    document.getElementById("student").required = true
+  } else {
+    studentSelectGroup.style.display = "none"
+    document.getElementById("student").required = false
+    document.getElementById("student").value = ""
+  }
+}
+
+async function saveRehearsal() {
+  const form = document.getElementById("createRehearsalForm")
+
+  if (!form.checkValidity()) {
+    form.reportValidity()
+    return
+  }
+
+  const rehearsalId = document.getElementById("editRehearsalId").value
+  const competitionId = document.getElementById("competition").value
+  const title = document.getElementById("title").value
+  const description = document.getElementById("description").value
+  const rehearsalDate = document.getElementById("rehearsalDate").value
+  const duration = document.getElementById("duration").value
+  const location = document.getElementById("location").value
+  const isOnline = document.getElementById("isOnline").value === "true"
+  const isPersonal = document.getElementById("isPersonal").checked
+  const studentId = isPersonal ? document.getElementById("student").value : null
+  const notes = document.getElementById("notes").value
+
+  if (isPersonal && !studentId) {
+    alert("Оберіть учня для особистої репетиції")
+    return
+  }
+
+  const rehearsalData = {
+    competitionId,
+    teacherId: currentUserId,
+    studentId,
+    title,
+    description,
+    rehearsalDate,
+    duration: duration ? Number.parseInt(duration) : null,
+    location,
+    isOnline,
+    notes,
+  }
+
+  try {
+    const url = rehearsalId ? `${window.API_URL}/api/rehearsals/${rehearsalId}` : `${window.API_URL}/api/rehearsals`
+    const method = rehearsalId ? "PUT" : "POST"
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(rehearsalData),
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      alert(rehearsalId ? "Репетицію оновлено!" : "Репетицію створено!")
+      closeCreateRehearsalModal()
+      await loadRehearsals()
+    } else {
+      throw new Error(data.error || "Помилка збереження репетиції")
+    }
+  } catch (error) {
+    console.error("Помилка:", error)
+    alert("Помилка: " + error.message)
+  }
+}
+
+async function deleteRehearsal(rehearsalId) {
+  if (!confirm("Ви впевнені, що хочете видалити цю репетицію?")) return
+
+  try {
+    const response = await fetch(`${window.API_URL}/api/rehearsals/${rehearsalId}`, {
+      method: "DELETE",
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      alert("Репетицію видалено!")
+      await loadRehearsals()
+    } else {
+      throw new Error(data.error || "Помилка видалення")
+    }
+  } catch (error) {
+    console.error("Помилка:", error)
+    alert("Помилка видалення: " + error.message)
+  }
+}
+
+async function editRehearsal(rehearsalId) {
+  const rehearsal = allRehearsals.find((r) => r.id === rehearsalId)
+  if (!rehearsal) return
+
+  openCreateRehearsalModal()
+  document.getElementById("modalTitle").textContent = "Редагувати репетицію"
+  document.getElementById("editRehearsalId").value = rehearsal.id
+  document.getElementById("competition").value = rehearsal.competition_id
+  document.getElementById("title").value = rehearsal.title
+  document.getElementById("description").value = rehearsal.description || ""
+  document.getElementById("rehearsalDate").value = formatDateTimeForInput(new Date(rehearsal.rehearsal_date))
+  document.getElementById("duration").value = rehearsal.duration || ""
+  document.getElementById("location").value = rehearsal.location || ""
+  document.getElementById("isOnline").value = rehearsal.is_online ? "true" : "false"
+  document.getElementById("notes").value = rehearsal.notes || ""
+
+  if (rehearsal.student_id) {
+    document.getElementById("isPersonal").checked = true
+    await loadCompetitionParticipants()
+    document.getElementById("student").value = rehearsal.student_id
+    toggleStudentSelect()
+  }
 }
 
 // Утилітні функції
@@ -290,6 +495,15 @@ function formatDateTime(date) {
     hour: "2-digit",
     minute: "2-digit",
   })
+}
+
+function formatDateTimeForInput(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  const hours = String(date.getHours()).padStart(2, "0")
+  const minutes = String(date.getMinutes()).padStart(2, "0")
+  return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
 function isDateToday(date) {

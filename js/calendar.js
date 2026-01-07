@@ -1,4 +1,14 @@
 // Calendar state
+let BASE_URL
+if (window.location.hostname === "localhost") {
+  // 🖥️ Локальний режим
+  BASE_URL = "http://localhost:3000"
+} else {
+  // ☁️ Онлайн-сервер Render
+  BASE_URL = "https://ievents-qf5k.onrender.com"
+}
+console.log("📡 Підключення до:", BASE_URL)
+
 const currentDate = new Date()
 let currentMonth = currentDate.getMonth()
 let currentYear = currentDate.getFullYear()
@@ -49,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // Load competitions from API
 async function loadCompetitions() {
   try {
-    const response = await fetch("/api/calendar/competitions")
+    const response = await fetch(`${BASE_URL}/api/calendar/competitions`)
     const data = await response.json()
 
     if (data.competitions) {

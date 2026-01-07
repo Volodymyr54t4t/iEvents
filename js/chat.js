@@ -1,12 +1,20 @@
+let BASE_URL
+if (window.location.hostname === "localhost") {
+  // 🖥️ Локальний режим
+  BASE_URL = "http://localhost:3000"
+} else {
+  // ☁️ Онлайн-сервер Render
+  BASE_URL = "https://ievents-qf5k.onrender.com"
+}
+console.log("📡 Підключення до:", BASE_URL)
+
+const API_URL = `${BASE_URL}/api`
+
 // Конфігурація сервера
-const API_URL = "http://localhost:3000/api"
+// const API_URL = "http://localhost:3000/api"
 
 // Глобальний стан
-let currentUser = {
-  id: null,
-  name: "",
-  role: ""
-}
+let currentUser = { id: null, name: "", role: "" }
 let currentChatId = null
 let chats = []
 let messages = []
@@ -339,9 +347,7 @@ async function markChatAsRead(chatId) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: currentUser.id
-      }),
+      body: JSON.stringify({ user_id: currentUser.id }),
     })
 
     // Оновити локальний стан
@@ -486,6 +492,3 @@ window.addEventListener("beforeunload", () => {
     clearInterval(messagePollingInterval)
   }
 })
-document.getElementById('homeBtn').addEventListener('click', function () {
-  window.location.href = 'index.html';
-});
