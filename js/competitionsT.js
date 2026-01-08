@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -1114,9 +1114,19 @@ function displayStudents(students) {
             .map((student) => {
               const fullName = [student.last_name, student.first_name].filter(Boolean).join(" ") || student.email
 
+              const initials = fullName
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2)
+
+              const avatarHTML = student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : initials
+
               return `
                 <div class="student-item" onclick="toggleStudent(${student.id})">
                   <input type="checkbox" class="student-checkbox" id="student-${student.id}" value="${student.id}">
+                  <div class="student-avatar">${avatarHTML}</div>
                   <div class="student-info">
                     <div class="student-name">${fullName}</div>
                     <div class="student-grade">${student.grade || "Клас не вказано"}</div>
@@ -1400,6 +1410,7 @@ function displayDocuments(documents) {
         .map((n) => n[0])
         .join("")
         .toUpperCase()
+        .slice(0, 2)
 
       return `
       <div class="student-documents-group">

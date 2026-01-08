@@ -9,7 +9,8 @@ html {
 }
 
 body {
-  font-family: -apple-system, BlinkMacMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacMacSystemFont, "Segoe UI",
+    "Helvetica Neue", sans-serif;
   background: #faf8f3;
   color: #2d2d2d;
   min-height: 100vh;
@@ -748,7 +749,7 @@ body {
   text-align: center;
   padding: 60px 20px;
   color: #666;
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 6s ease-out;
 }
 
 .empty-state h3 {
@@ -968,788 +969,102 @@ body {
   animation-delay: 0.15s;
 }
 
-.document-group {
-  background: white;
-  border: 2px solid #e8e3da;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 20px;
-  animation: slideInUp 0.6s ease-out both;
-  transition: box-shadow 0.3s ease;
-}
-
-.document-group:hover {
-  border-color: #1a3a52;
-  box-shadow: 0 4px 12px rgba(26, 58, 82, 0.15);
-}
-
-.document-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e8e3da;
-}
-
-.document-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a3a52;
-  animation: slideInLeft 0.4s ease-out both;
-}
-
-.document-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  margin: 16px 0;
-  padding: 12px;
-  background: #faf8f3;
-  border-radius: 8px;
-}
-
-.document-detail {
-  font-size: 13px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.document-detail label {
-  font-weight: 600;
-  color: #1a3a52;
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-}
-
-.document-detail value {
-  color: #2d2d2d;
-  font-size: 14px;
-}
-
-.document-files {
-  margin-top: 16px;
-}
-
-.file-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: #faf8f3;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  transition: all 0.3s ease;
-  border-left: 3px solid #d4cfc4;
-}
-
-.file-item:hover {
-  border-left-color: #1a3a52;
-  background: #f5f2ed;
-  box-shadow: 0 2px 6px rgba(26, 58, 82, 0.1);
-}
-
-.file-icon {
-  width: 32px;
-  height: 32px;
-  background: #e8f0f6;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1a3a52;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.file-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.file-name {
-  font-weight: 600;
-  color: #1a3a52;
-  font-size: 13px;
-}
-
-.file-meta {
-  font-size: 12px;
-  color: #999;
-  display: flex;
-  gap: 12px;
-}
-
-.file-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.file-btn {
-  padding: 6px 12px;
-  background: #1a3a52;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.file-btn:hover {
-  background: #0f2839;
-  transform: translateY(-2px);
-}
-
-.document-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  justify-content: flex-end;
-}
-
-.document-actions .btn {
-  font-size: 12px;
-  padding: 8px 16px;
-}
-
-.upload-box {
-  background: #faf8f3;
-  border: 2px dashed #d4cfc4;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  transition: all 0.3s ease;
-}
-
-.upload-box:hover {
-  border-color: #1a3a52;
-  background: #f5f2ed;
-}
-
-.upload-box h3 {
-  font-size: 16px;
-  color: #1a3a52;
-  margin-bottom: 16px;
-  font-weight: 600;
-}
-
-.upload-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: end;
-}
-
-.upload-progress {
-  margin-top: 16px;
-  padding: 12px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e8e3da;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: #e8e3da;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #1a3a52, #0f2839);
-  transition: width 0.3s ease;
-}
-
-.progress-text {
-  font-size: 12px;
-  color: #666;
-  text-align: center;
-}
-
-.responses-container {
-  display: grid;
-  gap: 16px;
-}
-
-.response-item {
-  background: white;
-  border: 2px solid #e8e3da;
-  border-radius: 12px;
-  padding: 16px;
-  animation: slideInUp 0.5s ease-out both;
-  transition: all 0.3s ease;
-}
-
-.response-item:hover {
-  border-color: #1a3a52;
-  box-shadow: 0 4px 12px rgba(26, 58, 82, 0.15);
-}
-
-.response-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e8e3da;
-}
-
-.response-student {
-  font-weight: 600;
-  color: #1a3a52;
-  font-size: 14px;
-}
-
-.response-date {
-  font-size: 12px;
-  color: #999;
-}
-
-.response-body {
-  display: grid;
-  gap: 12px;
-}
-
-.response-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px;
-  background: #faf8f3;
-  border-radius: 6px;
-}
-
-.response-field-label {
-  font-weight: 600;
-  font-size: 12px;
-  color: #1a3a52;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.response-field-value {
-  font-size: 13px;
-  color: #2d2d2d;
-  word-break: break-word;
-}
-
-.students-list {
-  display: grid;
-  gap: 12px;
-}
-
+/* Додано стилі для student-item, student-avatar та student-info у модальному вікні */
 .student-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: white;
+  gap: 16px;
+  padding: 16px;
   border: 2px solid #e8e3da;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: white;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 12px;
 }
 
 .student-item:hover {
   border-color: #1a3a52;
   background: #faf8f3;
-  transform: translateX(4px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(26, 58, 82, 0.15);
 }
 
-.student-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+.student-item.selected {
+  border-color: #1a3a52;
+  background: #f0f4f8;
+  box-shadow: 0 4px 12px rgba(26, 58, 82, 0.2);
+}
+
+.student-checkbox {
+  width: 20px;
+  height: 20px;
   cursor: pointer;
+  accent-color: #1a3a52;
+}
+
+.student-avatar {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a3a52 0%, #0f2839 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(26, 58, 82, 0.3);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.student-item:hover .student-avatar {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(26, 58, 82, 0.4);
+}
+
+.student-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .student-info {
   flex: 1;
+  min-width: 0;
 }
 
 .student-name {
-  font-weight: 600;
-  color: #1a3a52;
-  font-size: 14px;
-}
-
-.student-class {
-  font-size: 12px;
-  color: #999;
-}
-
-.search-box {
-  margin-bottom: 20px;
-}
-
-.search-box input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #d4cfc4;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: #1a3a52;
-  box-shadow: 0 0 0 3px rgba(26, 58, 82, 0.15);
-}
-
-.documents-filters {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.standard-fields-section {
-  background: #e8f0f6;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.standard-fields-section h4 {
-  font-size: 14px;
-  color: #1a3a52;
-  margin-bottom: 12px;
-  font-weight: 600;
-}
-
-.standard-fields-list {
-  display: grid;
-  gap: 12px;
-}
-
-.standard-field-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px;
-  background: white;
-  border-radius: 6px;
-}
-
-.field-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.field-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.field-info strong {
-  font-size: 13px;
-  color: #1a3a52;
-  font-weight: 600;
-}
-
-.field-info small {
-  font-size: 12px;
-  color: #999;
-}
-
-.dynamic-fields-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.dynamic-fields-container {
-  display: grid;
-  gap: 16px;
-}
-
-.dynamic-field {
-  background: white;
-  border: 2px solid #e8e3da;
-  border-radius: 8px;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
-  gap: 12px;
-  align-items: end;
-}
-
-.dynamic-field .form-group {
-  animation: none;
-}
-
-.competition-form {
-  display: grid;
-  gap: 24px;
-}
-
-.tab-section-title {
   font-size: 16px;
-  color: #1a3a52;
   font-weight: 700;
-  margin-bottom: 16px;
+  color: #1a3a52;
+  margin-bottom: 4px;
+  transition: all 0.3s ease;
+  word-wrap: break-word;
 }
 
-.tab-description {
+.student-item:hover .student-name {
+  color: #0f2839;
+}
+
+.student-grade {
   font-size: 13px;
   color: #666;
-  margin-bottom: 16px;
-  line-height: 1.6;
 }
 
-.responses-filters {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+.grade-group {
+  margin-bottom: 24px;
 }
 
-/* RESPONSIVE DESIGN - MOBILE ADAPTATION */
-
-/* Large Tablets and Desktops */
-@media (max-width: 1024px) {
-  .main-container {
-    padding: 40px 16px;
-  }
-
-  .competitions-list {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  }
-
-  .dynamic-field {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Tablets */
-@media (max-width: 768px) {
-  .main-container {
-    padding: 32px 12px;
-    margin-top: 20px;
-  }
-
-  .page-header h1 {
-    font-size: 32px;
-    margin-bottom: 8px;
-  }
-
-  .subtitle {
-    font-size: 16px;
-  }
-
-  .competitions-list {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-  }
-
-  .card {
-    padding: 24px;
-  }
-
-  .card h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-
-  .filters-row {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .filter-input,
-  .filter-select {
-    width: 100%;
-  }
-
-  .btn-add-competition {
-    width: 100%;
-    padding: 12px 24px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .upload-form {
-    grid-template-columns: 1fr;
-  }
-
-  .document-info {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .dynamic-field {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-content,
-  .modal-large {
-    max-width: 90vw;
-    max-height: 80vh;
-  }
-
-  .modal-tabs {
-    flex-wrap: wrap;
-  }
-
-  .tab-button {
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-}
-
-/* Mobile Phones */
-@media (max-width: 480px) {
-  .main-container {
-    padding: 20px 12px;
-    margin-top: 0;
-  }
-
-  .page-header {
-    margin-bottom: 24px;
-  }
-
-  .page-header h1 {
-    font-size: 24px;
-    margin-bottom: 6px;
-  }
-
-  .subtitle {
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
-
-  .btn-add-competition {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
-
-  .competitions-list {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .competition-item {
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .competition-header {
-    flex-direction: column;
-  }
-
-  .competition-badges {
-    width: 100%;
-  }
-
-  .competition-details-quick {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 12px;
-    margin: 8px 0;
-  }
-
-  .competition-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .competition-actions .btn {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .card {
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-
-  .card h2 {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .filters-row {
-    flex-direction: column;
-  }
-
-  .filter-input,
-  .filter-select {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-
-  .modal-content,
-  .modal-large,
-  .modal-extra-large {
-    max-width: 95vw;
-    max-height: 85vh;
-    width: 95vw;
-  }
-
-  .modal-header {
-    padding: 16px;
-  }
-
-  .modal-body {
-    padding: 16px;
-  }
-
-  .modal-footer {
-    padding: 12px;
-    flex-direction: column-reverse;
-  }
-
-  .modal-footer .btn {
-    width: 100%;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-
-  .form-group label {
-    font-size: 13px;
-  }
-
-  .document-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .document-info {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .file-item {
-    flex-wrap: wrap;
-    padding: 10px;
-  }
-
-  .file-actions {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .file-btn {
-    padding: 6px 10px;
-    font-size: 10px;
-  }
-
-  .upload-form {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    align-items: stretch;
-  }
-
-  .upload-box {
-    padding: 16px;
-  }
-
-  .dynamic-field {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .response-item {
-    padding: 12px;
-  }
-
-  .response-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .student-item {
-    padding: 10px;
-  }
-
-  .search-box input {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-
-  .modal-tabs {
-    gap: 4px;
-    padding: 0 12px 12px;
-  }
-
-  .tab-button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-}
-
-/* Small Mobile Phones (320px and below) */
-@media (max-width: 360px) {
-  .main-container {
-    padding: 16px 8px;
-  }
-
-  .page-header h1 {
-    font-size: 20px;
-  }
-
-  .subtitle {
-    font-size: 13px;
-  }
-
-  .card h2 {
-    font-size: 18px;
-  }
-
-  .competition-item {
-    padding: 12px;
-  }
-
-  .competition-title {
-    font-size: 16px;
-  }
-
-  .filter-input,
-  .filter-select {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
-
-  .btn {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
+.grade-group h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a3a52;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e8e3da;
 }
