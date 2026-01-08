@@ -5,15 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управління конкурсами - iEvents</title>
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/page-spacing.css">
     <link rel="stylesheet" href="css/competitionsT.css">
     <script src="js/config.js"></script>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#317EFB">
-
 </head>
 
 <body>
@@ -207,6 +203,23 @@
                                 <input type="url" id="websiteUrl" name="websiteUrl" placeholder="https://example.com">
                             </div>
                         </div>
+
+                        <!-- Added team checkbox toggle -->
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="isTeamCompetition" name="isTeamCompetition">
+                                <span class="checkbox-text">👥 Командна робота</span>
+                            </label>
+                            <small class="checkbox-hint">Якщо увімкнено, вчителі зможуть створювати команди для цього
+                                конкурсу</small>
+                        </div>
+
+                        <!-- Team name field shown only for team competitions -->
+                        <div class="form-group" id="teamNameField" style="display: none;">
+                            <label for="defaultTeamName">Назва команди за замовчуванням (необов'язково)</label>
+                            <input type="text" id="defaultTeamName" name="defaultTeamName"
+                                placeholder="Наприклад: Команда 1, Група А">
+                        </div>
                     </div>
 
                     <div id="tab-content-form" class="tab-content">
@@ -257,6 +270,15 @@
                         <h3 class="tab-section-title">Відповіді учнів на форму</h3>
                         <p class="tab-description">Тут відображаються всі відповіді учнів на форму реєстрації.</p>
 
+                        <!-- Added contest selector dropdown -->
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="responseCompetitionSelector">Оберіть конкурс для перегляду відповідей</label>
+                            <select id="responseCompetitionSelector" class="filter-select"
+                                onchange="loadResponsesForSelectedCompetition()" style="width: 100%; max-width: 500px;">
+                                <option value="">-- Оберіть конкурс --</option>
+                            </select>
+                        </div>
+
                         <div class="responses-filters">
                             <input type="text" id="searchResponses" class="filter-input"
                                 placeholder="Пошук за ім'ям учня...">
@@ -282,17 +304,40 @@
     </div>
 
     <div id="addStudentsModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <div class="modal-header">
                 <h2>Додати учнів на конкурс</h2>
                 <button class="modal-close" onclick="closeAddStudentsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="search-box">
-                    <input type="text" id="studentSearch" placeholder="Пошук учнів за ім'ям або класом...">
-                </div>
-                <div id="studentsList" class="students-list">
-                    <div class="loading">Завантаження учнів...</div>
+                <div id="studentsListContainer">
+                    <!-- Team creation section for team competitions -->
+                    <div id="teamCreationSection"
+                        style="display: none; margin-bottom: 24px; padding: 20px; background: #f0f4f8; border-radius: 12px; border-left: 4px solid #1a3a52;">
+                        <h3 style="margin: 0 0 12px 0; color: #1a3a52;">👥 Створити команду</h3>
+                        <div class="form-group">
+                            <label for="teamNameInput">Назва команди *</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="teamNameInput" placeholder="Наприклад: Команда А, Група 1"
+                                    style="flex: 1;">
+                                <button class="btn btn-primary" onclick="createTeam()"
+                                    style="white-space: nowrap;">Створити</button>
+                            </div>
+                        </div>
+                        <div id="teamCreationStatus"></div>
+                        <div id="currentTeamDisplay"
+                            style="display: none; margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border-left: 3px solid #2d5f3f;">
+                            <span style="color: #2d5f3f; font-weight: 600;">✅ Команда:</span>
+                            <span id="currentTeamName" style="margin-left: 8px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="search-box" style="margin-bottom: 16px;">
+                        <input type="text" id="studentSearch" placeholder="Пошук учнів за ім'ям або класом...">
+                    </div>
+                    <div id="studentsList" class="students-list">
+                        <div class="loading">Завантаження учнів...</div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

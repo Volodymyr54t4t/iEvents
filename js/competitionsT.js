@@ -59,6 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
       displayFormResponses(filtered)
     })
   }
+
+  // Додаємо обробник для зміни обраного конкурсу у вкладці "Відповіді"
+  document.getElementById("responseCompetitionSelector").addEventListener("change", loadResponsesForSelectedCompetition)
 })
 
 async function loadSubjects() {
@@ -109,10 +112,12 @@ function switchTab(tabName) {
   document.getElementById(`tab-content-${tabName}`).classList.add("active")
   document.getElementById(`tab-${tabName}`).classList.add("active")
 
-  // Якщо відкрили вкладку "Відповіді", завантажуємо їх
   if (tabName === "responses") {
+    populateResponseCompetitionSelector()
     const competitionId = document.getElementById("editCompetitionId").value
     if (competitionId) {
+      // Set the selector to the current competition
+      document.getElementById("responseCompetitionSelector").value = competitionId
       loadFormResponses(competitionId)
     }
   }
@@ -126,6 +131,11 @@ function openCreateCompetitionModal() {
   document.getElementById("dynamicFieldsContainer").innerHTML = ""
 
   switchTab("info")
+
+  const responseSelector = document.getElementById("responseCompetitionSelector")
+  if (responseSelector) {
+    responseSelector.value = ""
+  }
 
   document.getElementById("responsesContainer").innerHTML = `
     <div class="empty-state">
@@ -504,6 +514,11 @@ async function loadCompetitions() {
 
     if (response.ok) {
       allCompetitions = data.competitions
+      // Populate subject names for display
+      allCompetitions.forEach((comp) => {
+        const subject = allSubjects.find((s) => s.id == comp.subject_id)
+        comp.subject_name = subject ? subject.name : "Не вказано"
+      })
       filterAndSortCompetitions()
     } else {
       container.innerHTML = '<div class="empty-state"><p>Помилка завантаження конкурсів</p></div>'
@@ -611,7 +626,7 @@ function displayCompetitions(competitions) {
         statusText = "Активний"
       }
 
-      const subjectName = allSubjects.find((s) => s.id == competition.subject_id)?.name || "Не вказано"
+      const subjectName = competition.subject_name || "Не вказано"
       const isOwner = competition.created_by == userId
 
       return `
@@ -715,7 +730,7 @@ async function openCompetitionDetailsModal(competitionId) {
       }
     }
 
-    const subjectName = allSubjects.find((s) => s.id == competition.subject_id)?.name || "Не вказано"
+    const subjectName = competition.subject_name || "Не вказано"
 
     let detailsHTML = `
       <div class="competition-detail-section">
@@ -1740,4 +1755,36 @@ function viewFormResponse(formData, studentName) {
   formHTML += "</div>"
 
   previewBody.innerHTML = formHTML
+}
+
+function populateResponseCompetitionSelector() {
+  const selector = document.getElementById("responseCompetitionSelector")
+  if (!selector) return
+
+  // Clear existing options except the first one
+  selector.innerHTML = '<option value="">-- Оберіть конкурс --</option>'
+
+  // Add all competitions to the dropdown
+  allCompetitions.forEach((competition) => {
+    const option = document.createElement("option")
+    option.value = competition.id
+    option.textContent = `${competition.title} (${competition.subject_name || competition.subject_id})`
+    selector.appendChild(option)
+  })
+}
+
+function loadResponsesForSelectedCompetition() {
+  const selector = document.getElementById("responseCompetitionSelector")
+  const competitionId = selector.value
+
+  if (competitionId) {
+    loadFormResponses(competitionId)
+  } else {
+    document.getElementById("responsesContainer").innerHTML = `
+      <div class="empty-state">
+        <p>Виберіть конкурс для перегляду відповідей</p>
+      </div>
+    `
+    currentResponses = []
+  }
 }
