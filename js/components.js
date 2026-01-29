@@ -38,18 +38,17 @@ function renderHeader() {
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
                     <a href="profileCommunity.html" class="nav-link">Профіль</a>
-                    <a href="adminCommunity.html" class="nav-link">Admin</a>
+                    <a href="adminCommunity.html" class="nav-link">Адмін панель</a>
                     ${notificationButton}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
                         <span class="user-role">${userRole}</span>
                     </div>
-                    <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
                     <a href="index.html" class="sidebar-link">Головна</a>
                     <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
-                    <a href="adminCommunity.html" class="sidebar-link">Admin</a>
+                    <a href="adminCommunity.html" class="sidebar-link">Адмін панель</a>
                     <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
                     <div style="padding: 16px 24px;">
                         <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
@@ -68,21 +67,21 @@ function renderHeader() {
   }
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
-    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" || userRole === "методист"
+      ? '<a href="competitionsT.html" class="nav-link">Конкурси</a>'
+      : '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const rehearsalLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="rehearsalT.html" class="nav-link">Репетиції</a>' :
-    userRole === "учень" ?
-    '<a href="rehearsalP.html" class="nav-link">Репетиції</a>' :
-    ""
+    userRole === "вчитель" || userRole === "методист"
+      ? '<a href="rehearsalT.html" class="nav-link">Репетиції</a>'
+      : userRole === "учень"
+        ? '<a href="rehearsalP.html" class="nav-link">Репетиції</a>'
+        : ""
 
   const newsLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="newsT.html" class="nav-link">Новини</a>' :
-    '<a href="newsP.html" class="nav-link">Новини</a>'
+    userRole === "вчитель" || userRole === "методист"
+      ? '<a href="newsT.html" class="nav-link">Новини</a>'
+      : '<a href="newsP.html" class="nav-link">Новини</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
@@ -92,9 +91,9 @@ function renderHeader() {
   const calendarLink = '<a href="calendar.html" class="nav-link">Календар</a>'
   const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
   const studentAdminLink =
-    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Е-кабінет</a>' : ""
+    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Особистий кабінет</a>' : ""
   const teacherAdminLink =
-    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка</a>' : ""
+    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка вчителя</a>' : ""
 
   let profileLink = '<a href="profile.html" class="nav-link">Профіль</a>'
   if (userRole === "вчитель" || userRole === "методист") {
@@ -128,7 +127,6 @@ function renderHeader() {
                         <span class="user-email">${userEmail}</span>
                         <span class="user-role">${userRole}</span>
                     </div>
-                    <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
                     <a href="index.html" class="sidebar-link">Головна</a>
@@ -169,13 +167,9 @@ function renderFooter() {
             <div class="footer-container">
                 <p>&copy; 2025 iEvents. Всі права захищені.</p>
                 <div class="footer-links">
-                    <a href="../chat.html">Чат система</a>
-                    <a href="../about.html">Про нас</a>
-                    <a href="../contacts.html">Контакти</a>
-                    <a href="../support.html">Підтримка</a>
-                    <a href="../question.html">Задати питання</a>
-                    
-                    <a href="../privacy-policy.html">Політика конфіденційності</a>
+                    <a href="#">Про нас</a>
+                    <a href="#">Контакти</a>
+                    <a href="#">Підтримка</a>
                 </div>
             </div>
         </footer>

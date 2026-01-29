@@ -2,7 +2,7 @@ let BASE_URL
 if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 
 const userIdFromStorage = localStorage.getItem("userId")
@@ -10,11 +10,11 @@ const userId = userIdFromStorage ? Number.parseInt(userIdFromStorage, 10) : null
 const userRole = localStorage.getItem("userRole") || "вчитель"
 
 if (!userId || Number.isNaN(userId)) {
-  console.error(" Invalid userId:", userIdFromStorage)
+  console.error("[v0] Invalid userId:", userIdFromStorage)
   window.location.href = "auth.html"
 }
 
-console.log(" Loaded userId:", userId, "Role:", userRole)
+console.log("[v0] Loaded userId:", userId, "Role:", userRole)
 
 let avatarFile = null
 let originalImage = null
@@ -173,7 +173,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   }
 
   try {
-    console.log(" Sending profile update for userId:", userId)
+    console.log("[v0] Sending profile update for userId:", userId)
     const response = await fetch(`${BASE_URL}/api/profile/teacher`, {
       method: "POST",
       body: formData,
@@ -200,10 +200,10 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
       messageDiv.textContent = "❌ " + (data.error || "Помилка збереження")
       messageDiv.className = "message error"
       messageDiv.style.display = "block"
-      console.error(" Server error:", data)
+      console.error("[v0] Server error:", data)
     }
   } catch (error) {
-    console.error(" Error saving profile:", error)
+    console.error("[v0] Error saving profile:", error)
     messageDiv.textContent = "❌ Помилка з'єднання з сервером"
     messageDiv.className = "message error"
     messageDiv.style.display = "block"
@@ -440,8 +440,3 @@ toggleFieldsByRole()
 loadSchools()
 loadSubjects()
 loadProfile()
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js")
-    .then(() => console.log("Service Worker зареєстровано"))
-    .catch(err => console.log("SW error:", err));
-}
