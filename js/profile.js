@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-o8nm.onrender.com"
+  BASE_URL = "https://ievents-qf5k.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -105,7 +105,7 @@ async function loadProfile() {
       if (userRole === "учень") {
         if (profile.school_id) {
           document.getElementById("schoolSelect").value = String(profile.school_id)
-          console.log("[v0] Student school_id loaded:", profile.school_id)
+          console.log(" Student school_id loaded:", profile.school_id)
         }
         document.getElementById("gradeNumber").value = profile.grade_number || ""
         document.getElementById("gradeLetter").value = profile.grade_letter || ""
@@ -296,14 +296,14 @@ function confirmAvatar() {
   canvas.toBlob((blob) => {
     const file = new File([blob], "avatar.png", { type: "image/png" })
     avatarFile = file
-
+    
     const reader = new FileReader()
     reader.onload = (e) => {
       document.getElementById("avatarPreview").innerHTML = `<img src="${e.target.result}" alt="Avatar">`
       document.getElementById("clearAvatarBtn").style.display = "block"
     }
     reader.readAsDataURL(blob)
-
+    
     closeAvatarEditor()
   }, "image/png")
 }
@@ -394,7 +394,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   if (userRole === "учень") {
     const schoolId = document.getElementById("schoolSelect").value
     formData.append("schoolId", schoolId ? Number.parseInt(schoolId, 10) : "")
-    console.log("[v0] Submitting school_id:", schoolId)
+    console.log(" Submitting school_id:", schoolId)
     formData.append("gradeNumber", document.getElementById("gradeNumber").value.trim())
     formData.append("gradeLetter", document.getElementById("gradeLetter").value.trim())
     formData.append("clubInstitution", document.getElementById("clubInstitution").value.trim())
@@ -454,3 +454,8 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
 toggleFieldsByRole()
 loadSchools()
 loadProfile()
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker зареєстровано"))
+    .catch(err => console.log("SW error:", err));
+}

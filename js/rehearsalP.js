@@ -1,43 +1,23 @@
 let BASE_URL
 if (window.location.hostname === "localhost") {
-  // 🖥️ Локальний режим
   BASE_URL = "http://localhost:3000"
 } else {
-  // ☁️ Онлайн-сервер Render
   BASE_URL = "https://ievents-qf5k.onrender.com"
 }
-console.log("📡 Підключення до:", BASE_URL)
+console.log("Pidklyuchennia do:", BASE_URL)
 
-// Оновити window.API_URL для сумісності з іншими частинами коду
 window.API_URL = BASE_URL
 
 let currentUserId = null
 let allRehearsals = []
 let allCompetitions = []
 
-// Ініціалізація сторінки
 document.addEventListener("DOMContentLoaded", async () => {
   await loadUserData()
   await loadCompetitions()
   await loadRehearsals()
   setupFilters()
-  loadHeaderAndFooter()
 })
-
-// Завантаження header та footer
-function loadHeaderAndFooter() {
-  fetch("header.html")
-    .then((response) => response.text())
-    .then((data) => {
-      document.getElementById("header").innerHTML = data
-    })
-
-  fetch("footer.html")
-    .then((response) => response.text())
-    .then((data) => {
-      document.getElementById("footer").innerHTML = data
-    })
-}
 
 async function loadUserData() {
   currentUserId = localStorage.getItem("userId")
@@ -52,8 +32,9 @@ async function loadUserData() {
     const response = await fetch(`${window.API_URL}/api/user/role/${currentUserId}`)
     const data = await response.json()
 
-    if (!response.ok || !["вчитель", "методист"].includes(data.role)) {
-      alert("Доступ заборонено. Ця сторінка тільки для вчителів та методистів.")
+    // Перевіряємо що роль саме "учень"
+    if (!response.ok || data.role !== "учень") {
+      alert("Доступ заборонено. Ця сторінка тільки для учнів.")
       window.location.href = "index.html"
     }
   } catch (error) {
@@ -70,21 +51,15 @@ async function loadCompetitions() {
     if (response.ok) {
       allCompetitions = data.competitions || []
 
-      // Завантажити конкурси в фільтр
       const filterCompetition = document.getElementById("filterCompetition")
-      const competitionSelect = document.getElementById("competition")
-
-      allCompetitions.forEach((comp) => {
-        const option1 = document.createElement("option")
-        option1.value = comp.id
-        option1.textContent = comp.title
-        filterCompetition.appendChild(option1)
-
-        const option2 = document.createElement("option")
-        option2.value = comp.id
-        option2.textContent = comp.title
-        competitionSelect.appendChild(option2)
-      })
+      if (filterCompetition) {
+        allCompetitions.forEach((comp) => {
+          const option = document.createElement("option")
+          option.value = comp.id
+          option.textContent = comp.title
+          filterCompetition.appendChild(option)
+        })
+      }
     }
   } catch (error) {
     console.error("Помилка завантаження конкурсів:", error)
@@ -93,7 +68,8 @@ async function loadCompetitions() {
 
 async function loadRehearsals() {
   try {
-    const response = await fetch(`${window.API_URL}/api/rehearsals/teacher/${currentUserId}`)
+    // Використовуємо endpoint для учня
+    const response = await fetch(`${window.API_URL}/api/rehearsals/student/${currentUserId}`)
     const data = await response.json()
 
     if (response.ok) {
@@ -113,7 +89,6 @@ async function loadRehearsals() {
   }
 }
 
-// Відображення репетицій
 function displayRehearsals(rehearsals) {
   const container = document.getElementById("rehearsalsList")
 
@@ -121,7 +96,7 @@ function displayRehearsals(rehearsals) {
     container.innerHTML = `
       <div class="empty-state">
         <h3>Репетицій поки немає</h3>
-        <p>Створіть першу репетицію для своїх учнів</p>
+        <p>Вас ще не додано до жодної репетиції</p>
       </div>
     `
     return
@@ -157,13 +132,13 @@ function displayRehearsals(rehearsals) {
 
           <div class="rehearsal-details">
             <div class="detail-item">
-              <strong>📅 Дата:</strong> ${formatDateTime(date)}
+              <strong>Дата:</strong> ${formatDateTime(date)}
             </div>
             ${
               rehearsal.duration
                 ? `
               <div class="detail-item">
-                <strong>⏱️ Тривалість:</strong> ${rehearsal.duration} хв
+                <strong>Тривалість:</strong> ${rehearsal.duration} хв
               </div>
             `
                 : ""
@@ -172,7 +147,7 @@ function displayRehearsals(rehearsals) {
               rehearsal.location
                 ? `
               <div class="detail-item">
-                <strong>📍 Місце:</strong> ${rehearsal.location}
+                <strong>Місце:</strong> ${rehearsal.location}
               </div>
             `
                 : ""
@@ -188,10 +163,10 @@ function displayRehearsals(rehearsals) {
           }
 
           ${
-            rehearsal.student_name
+            rehearsal.teacher_name
               ? `
-            <div class="rehearsal-student">
-              <strong>👤 Учень:</strong> ${rehearsal.student_name}
+            <div class="rehearsal-teacher">
+              <strong>Вчитель:</strong> ${rehearsal.teacher_name}
             </div>
           `
               : ""
@@ -202,28 +177,18 @@ function displayRehearsals(rehearsals) {
               ? `
             <div class="rehearsal-details">
               <div class="detail-item">
-                <strong>📝 Нотатки:</strong> ${rehearsal.notes}
+                <strong>Нотатки:</strong> ${rehearsal.notes}
               </div>
             </div>
           `
               : ""
           }
-
-          <div class="rehearsal-actions">
-            <button class="btn btn-secondary" onclick="editRehearsal(${rehearsal.id})">
-              Редагувати
-            </button>
-            <button class="btn btn-danger" onclick="deleteRehearsal(${rehearsal.id})">
-              Видалити
-            </button>
-          </div>
         </div>
       `
     })
     .join("")
 }
 
-// Фільтрація репетицій
 function setupFilters() {
   const searchInput = document.getElementById("searchRehearsals")
   const filterCompetition = document.getElementById("filterCompetition")
@@ -231,46 +196,47 @@ function setupFilters() {
   const filterDate = document.getElementById("filterDate")
   const sortBy = document.getElementById("sortBy")
 
-  searchInput.addEventListener("input", applyFilters)
-  filterCompetition.addEventListener("change", applyFilters)
-  filterType.addEventListener("change", applyFilters)
-  filterDate.addEventListener("change", applyFilters)
-  sortBy.addEventListener("change", applyFilters)
+  if (searchInput) searchInput.addEventListener("input", applyFilters)
+  if (filterCompetition) filterCompetition.addEventListener("change", applyFilters)
+  if (filterType) filterType.addEventListener("change", applyFilters)
+  if (filterDate) filterDate.addEventListener("change", applyFilters)
+  if (sortBy) sortBy.addEventListener("change", applyFilters)
 }
 
 function applyFilters() {
-  const searchTerm = document.getElementById("searchRehearsals").value.toLowerCase()
-  const competitionFilter = document.getElementById("filterCompetition").value
-  const typeFilter = document.getElementById("filterType").value
-  const dateFilter = document.getElementById("filterDate").value
-  const sortBy = document.getElementById("sortBy").value
+  const searchInput = document.getElementById("searchRehearsals")
+  const filterCompetition = document.getElementById("filterCompetition")
+  const filterType = document.getElementById("filterType")
+  const filterDate = document.getElementById("filterDate")
+  const sortByEl = document.getElementById("sortBy")
+
+  const searchTerm = searchInput ? searchInput.value.toLowerCase() : ""
+  const competitionFilter = filterCompetition ? filterCompetition.value : ""
+  const typeFilter = filterType ? filterType.value : ""
+  const dateFilter = filterDate ? filterDate.value : ""
+  const sortBy = sortByEl ? sortByEl.value : "date_asc"
 
   let filtered = [...allRehearsals]
 
-  // Пошук
   if (searchTerm) {
     filtered = filtered.filter(
       (r) =>
         r.title.toLowerCase().includes(searchTerm) ||
         r.competition_title.toLowerCase().includes(searchTerm) ||
-        (r.student_name && r.student_name.toLowerCase().includes(searchTerm)),
+        (r.teacher_name && r.teacher_name.toLowerCase().includes(searchTerm)),
     )
   }
 
-  // Фільтр по конкурсу
   if (competitionFilter) {
     filtered = filtered.filter((r) => r.competition_id == competitionFilter)
   }
 
-  // Фільтр по типу
   if (typeFilter === "personal") {
     filtered = filtered.filter((r) => r.student_id !== null)
   } else if (typeFilter === "group") {
     filtered = filtered.filter((r) => r.student_id === null)
   }
 
-  // Фільтр по даті
-  const now = new Date()
   if (dateFilter) {
     filtered = filtered.filter((r) => {
       const date = new Date(r.rehearsal_date)
@@ -289,7 +255,6 @@ function applyFilters() {
     })
   }
 
-  // Сортування
   filtered.sort((a, b) => {
     switch (sortBy) {
       case "date_asc":
@@ -308,177 +273,6 @@ function applyFilters() {
   displayRehearsals(filtered)
 }
 
-// Відкрити модальне вікно створення репетиції
-function openCreateRehearsalModal() {
-  document.getElementById("createRehearsalModal").classList.add("active")
-  document.getElementById("modalTitle").textContent = "Створити репетицію"
-  document.getElementById("createRehearsalForm").reset()
-  document.getElementById("editRehearsalId").value = ""
-  document.getElementById("studentSelectGroup").style.display = "none"
-}
-
-// Закрити модальне вікно
-function closeCreateRehearsalModal() {
-  document.getElementById("createRehearsalModal").classList.remove("active")
-}
-
-async function loadCompetitionParticipants() {
-  const competitionId = document.getElementById("competition").value
-  const studentSelect = document.getElementById("student")
-
-  if (!competitionId) {
-    studentSelect.innerHTML = '<option value="">Спочатку оберіть конкурс</option>'
-    return
-  }
-
-  try {
-    const response = await fetch(`${window.API_URL}/api/competitions/${competitionId}/participants`)
-    const data = await response.json()
-
-    if (response.ok) {
-      const participants = data.participants || []
-      studentSelect.innerHTML = '<option value="">Оберіть учня</option>'
-
-      participants.forEach((participant) => {
-        const option = document.createElement("option")
-        option.value = participant.id
-        option.textContent = `${participant.first_name || ""} ${participant.last_name || ""} ${participant.email ? "(" + participant.email + ")" : ""}`
-        studentSelect.appendChild(option)
-      })
-    }
-  } catch (error) {
-    console.error("Помилка завантаження учасників:", error)
-    studentSelect.innerHTML = '<option value="">Помилка завантаження учасників</option>'
-  }
-}
-
-// Перемикач особистої репетиції
-function toggleStudentSelect() {
-  const isPersonal = document.getElementById("isPersonal").checked
-  const studentSelectGroup = document.getElementById("studentSelectGroup")
-
-  if (isPersonal) {
-    studentSelectGroup.style.display = "block"
-    document.getElementById("student").required = true
-  } else {
-    studentSelectGroup.style.display = "none"
-    document.getElementById("student").required = false
-    document.getElementById("student").value = ""
-  }
-}
-
-async function saveRehearsal() {
-  const form = document.getElementById("createRehearsalForm")
-
-  if (!form.checkValidity()) {
-    form.reportValidity()
-    return
-  }
-
-  const rehearsalId = document.getElementById("editRehearsalId").value
-  const competitionId = document.getElementById("competition").value
-  const title = document.getElementById("title").value
-  const description = document.getElementById("description").value
-  const rehearsalDate = document.getElementById("rehearsalDate").value
-  const duration = document.getElementById("duration").value
-  const location = document.getElementById("location").value
-  const isOnline = document.getElementById("isOnline").value === "true"
-  const isPersonal = document.getElementById("isPersonal").checked
-  const studentId = isPersonal ? document.getElementById("student").value : null
-  const notes = document.getElementById("notes").value
-
-  if (isPersonal && !studentId) {
-    alert("Оберіть учня для особистої репетиції")
-    return
-  }
-
-  const rehearsalData = {
-    competitionId,
-    teacherId: currentUserId,
-    studentId,
-    title,
-    description,
-    rehearsalDate,
-    duration: duration ? Number.parseInt(duration) : null,
-    location,
-    isOnline,
-    notes,
-  }
-
-  try {
-    const url = rehearsalId ? `${window.API_URL}/api/rehearsals/${rehearsalId}` : `${window.API_URL}/api/rehearsals`
-    const method = rehearsalId ? "PUT" : "POST"
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(rehearsalData),
-    })
-
-    const data = await response.json()
-
-    if (response.ok) {
-      alert(rehearsalId ? "Репетицію оновлено!" : "Репетицію створено!")
-      closeCreateRehearsalModal()
-      await loadRehearsals()
-    } else {
-      throw new Error(data.error || "Помилка збереження репетиції")
-    }
-  } catch (error) {
-    console.error("Помилка:", error)
-    alert("Помилка: " + error.message)
-  }
-}
-
-async function deleteRehearsal(rehearsalId) {
-  if (!confirm("Ви впевнені, що хочете видалити цю репетицію?")) return
-
-  try {
-    const response = await fetch(`${window.API_URL}/api/rehearsals/${rehearsalId}`, {
-      method: "DELETE",
-    })
-
-    const data = await response.json()
-
-    if (response.ok) {
-      alert("Репетицію видалено!")
-      await loadRehearsals()
-    } else {
-      throw new Error(data.error || "Помилка видалення")
-    }
-  } catch (error) {
-    console.error("Помилка:", error)
-    alert("Помилка видалення: " + error.message)
-  }
-}
-
-async function editRehearsal(rehearsalId) {
-  const rehearsal = allRehearsals.find((r) => r.id === rehearsalId)
-  if (!rehearsal) return
-
-  openCreateRehearsalModal()
-  document.getElementById("modalTitle").textContent = "Редагувати репетицію"
-  document.getElementById("editRehearsalId").value = rehearsal.id
-  document.getElementById("competition").value = rehearsal.competition_id
-  document.getElementById("title").value = rehearsal.title
-  document.getElementById("description").value = rehearsal.description || ""
-  document.getElementById("rehearsalDate").value = formatDateTimeForInput(new Date(rehearsal.rehearsal_date))
-  document.getElementById("duration").value = rehearsal.duration || ""
-  document.getElementById("location").value = rehearsal.location || ""
-  document.getElementById("isOnline").value = rehearsal.is_online ? "true" : "false"
-  document.getElementById("notes").value = rehearsal.notes || ""
-
-  if (rehearsal.student_id) {
-    document.getElementById("isPersonal").checked = true
-    await loadCompetitionParticipants()
-    document.getElementById("student").value = rehearsal.student_id
-    toggleStudentSelect()
-  }
-}
-
-// Утилітні функції
 function formatDate(date) {
   return date.toLocaleDateString("uk-UA", {
     day: "numeric",
@@ -495,15 +289,6 @@ function formatDateTime(date) {
     hour: "2-digit",
     minute: "2-digit",
   })
-}
-
-function formatDateTimeForInput(date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const day = String(date.getDate()).padStart(2, "0")
-  const hours = String(date.getHours()).padStart(2, "0")
-  const minutes = String(date.getMinutes()).padStart(2, "0")
-  return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
 function isDateToday(date) {

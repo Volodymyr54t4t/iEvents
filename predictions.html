@@ -5,10 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Прогнозування результатів - iEvents</title>
+    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/predictions.css">
     <link rel="stylesheet" href="css/page-spacing.css">
+    <link rel="stylesheet" href="css/footer.css">
     <script src="js/config.js"></script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#317EFB">
+
 </head>
 
 <body>
@@ -19,7 +24,6 @@
         <div class="page-header">
             <div class="header-content">
                 <h1>Прогнозування результатів учнів</h1>
-                <p class="subtitle">Система аналізує минулі конкурси та прогнозує майбутні результати</p>
             </div>
             <button class="btn-back" onclick="window.location.href='statistics.html'">
                 ← Назад до статистики
@@ -27,49 +31,32 @@
         </div>
 
         <div class="overview-section">
-            <div class="stat-card" data-filter="all">
+            <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
                     <div class="stat-value" id="totalStudents">-</div>
                     <div class="stat-label">Всього учнів</div>
                 </div>
-                <button class="btn-view-list" onclick="showStudentsList('all')">Подивитися список</button>
             </div>
-            <div class="stat-card" data-filter="active">
+            <div class="stat-card">
                 <div class="stat-icon">🎯</div>
                 <div class="stat-content">
                     <div class="stat-value" id="activeStudents">-</div>
                     <div class="stat-label">Активні учні</div>
                 </div>
-                <button class="btn-view-list" onclick="showStudentsList('active')">Подивитися список</button>
             </div>
-            <div class="stat-card" data-filter="improving">
+            <div class="stat-card">
                 <div class="stat-icon">📈</div>
                 <div class="stat-content">
                     <div class="stat-value" id="improvingStudents">-</div>
                     <div class="stat-label">Покращують результати</div>
                 </div>
-                <button class="btn-view-list" onclick="showStudentsList('improving')">Подивитися список</button>
             </div>
-            <div class="stat-card" data-filter="attention">
+            <div class="stat-card">
                 <div class="stat-icon">⚠️</div>
                 <div class="stat-content">
                     <div class="stat-value" id="needAttention">-</div>
                     <div class="stat-label">Потребують уваги</div>
-                </div>
-                <button class="btn-view-list" onclick="showStudentsList('attention')">Подивитися список</button>
-            </div>
-        </div>
-
-        <!-- Modal for students list -->
-        <div class="modal-overlay" id="studentsModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalTitle">Список учнів</h3>
-                    <button class="modal-close" onclick="closeStudentsModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="students-list" id="studentsList"></div>
                 </div>
             </div>
         </div>
