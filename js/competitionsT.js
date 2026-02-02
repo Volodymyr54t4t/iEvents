@@ -174,7 +174,7 @@ function addDynamicField() {
         <option value="number">Число</option>
         <option value="date">Дата</option>
         <option value="textarea">Багато тексту</option>
-        <option value="file">📎 Файл</option>
+        <option value="file">Файл</option>
       </select>
       <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}">
       <label for="required-${dynamicFieldCount}">Обов'язкове</label>
@@ -249,7 +249,7 @@ function openEditCompetitionModal(competition) {
                 <option value="number" ${field.type === "number" ? "selected" : ""}>Число</option>
                 <option value="date" ${field.type === "date" ? "selected" : ""}>Дата</option>
                 <option value="textarea" ${field.type === "textarea" ? "selected" : ""}>Багато тексту</option>
-                <option value="file" ${field.type === "file" ? "selected" : ""}>📎 Файл</option>
+                <option value="file" ${field.type === "file" ? "selected" : ""}>Файл</option>
               </select>
               <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}" ${field.required ? "checked" : ""}>
               <label for="required-${dynamicFieldCount}">Обов'язкове</label>
