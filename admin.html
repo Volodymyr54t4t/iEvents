@@ -4,111 +4,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Адмін панель - iEvents</title>
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
+    <title>Адмін Панель - iEvents</title>
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/page-spacing.css">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#317EFB">
-    <script src="js/config.js"></script>
+    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
 </head>
 
 <body>
     <header id="header"></header>
-    <!-- Moved script right after header for immediate execution -->
+    <script src="js/config.js"></script>
     <script src="js/components.js"></script>
 
-    <div id="adminAuth" class="auth-overlay">
-        <div class="auth-modal">
-            <h2>🔐 Вхід до адмін панелі</h2>
-            <form id="adminAuthForm">
-                <div class="form-group">
-                    <label for="adminPassword">Пароль адміністратора</label>
-                    <input type="password" id="adminPassword" required placeholder="Введіть пароль">
+    <main class="admin-main">
+        <!-- Header with Dropdown Navigation -->
+        <div class="admin-header-bar">
+            <div class="admin-header-content">
+                <h1 class="admin-title">Адмін Панель</h1>
+                <div class="admin-nav-dropdown">
+                    <button class="nav-dropdown-btn" id="navDropdownBtn">
+                        <span class="current-section-icon">📊</span>
+                        <span class="current-section-text">Дашборд</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="nav-dropdown-menu" id="navDropdownMenu">
+                        <button class="dropdown-nav-item active" data-section="dashboard">
+                            <span class="nav-icon">📊</span>
+                            <span>Дашборд</span>
+                        </button>
+                        <button class="dropdown-nav-item" data-section="users">
+                            <span class="nav-icon">👥</span>
+                            <span>Користувачі</span>
+                        </button>
+                        <button class="dropdown-nav-item" data-section="competitions">
+                            <span class="nav-icon">🏆</span>
+                            <span>Конкурси</span>
+                        </button>
+                        <button class="dropdown-nav-item" data-section="results">
+                            <span class="nav-icon">📋</span>
+                            <span>Результати</span>
+                        </button>
+                        <button class="dropdown-nav-item" data-section="schools">
+                            <span class="nav-icon">🏫</span>
+                            <span>Школи</span>
+                        </button>
+                        <button class="dropdown-nav-item" data-section="subjects">
+                            <span class="nav-icon">📚</span>
+                            <span>Предмети</span>
+                        </button>
+                        <button class="dropdown-nav-item" data-section="news">
+                            <span class="nav-icon">📰</span>
+                            <span>Новини</span>
+                        </button>
+                        <button class="dropdown-nav-item" data-section="logs">
+                            <span class="nav-icon">📝</span>
+                            <span>Логи</span>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Увійти</button>
-                <div id="authError" class="error-message"></div>
-            </form>
+            </div>
         </div>
-    </div>
 
-    <main class="main-content" id="adminContent" style="display: none;">
-        <div class="admin-container">
-            <div id="superMethodistBadge" class="super-methodist-badge" style="display: none;">
-                ⭐ Ви увійшли як головний методист
-            </div>
+        <!-- Main Content -->
+        <div class="admin-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <div class="section-header">
+                    <h1>Дашборд</h1>
+                    <p>Загальна статистика системи</p>
+                </div>
 
-            <h1 class="page-title">Адміністративна панель</h1>
-
-            <div class="admin-tabs">
-                <button class="tab-btn active" data-tab="dashboard">📊 Дашборд</button>
-                <button class="tab-btn" data-tab="users">👥 Користувачі</button>
-                <button class="tab-btn" data-tab="competitions">🏆 Конкурси</button>
-                <button class="tab-btn" data-tab="results">🎯 Результати</button>
-                <button class="tab-btn" data-tab="statistics">📈 Статистика</button>
-            </div>
-
-            <!-- Dashboard section with statistics -->
-            <div id="dashboard-section" class="tab-content active">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">👥</div>
+                        <div class="stat-icon users-icon">👥</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="totalUsers">0</div>
-                            <div class="stat-label">Всього користувачів</div>
+                            <h3 id="totalUsersCount">0</h3>
+                            <p>Користувачів</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">🎓</div>
+                        <div class="stat-icon competitions-icon">🏆</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="totalStudents">0</div>
-                            <div class="stat-label">Учнів</div>
+                            <h3 id="totalCompetitionsCount">0</h3>
+                            <p>Конкурсів</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">👨‍🏫</div>
+                        <div class="stat-icon results-icon">📋</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="totalTeachers">0</div>
-                            <div class="stat-label">Вчителів</div>
+                            <h3 id="totalResultsCount">0</h3>
+                            <p>Результатів</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">📋</div>
+                        <div class="stat-icon schools-icon">🏫</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="totalMethodists">0</div>
-                            <div class="stat-label">Методистів</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🏆</div>
-                        <div class="stat-info">
-                            <div class="stat-value" id="totalCompetitions">0</div>
-                            <div class="stat-label">Конкурсів</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📊</div>
-                        <div class="stat-info">
-                            <div class="stat-value" id="totalParticipations">0</div>
-                            <div class="stat-label">Участей</div>
+                            <h3 id="totalSchoolsCount">0</h3>
+                            <p>Шкіл</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Users management section -->
-            <div id="users-section" class="tab-content">
-                <div class="section-header">
-                    <h2>Управління користувачами</h2>
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="openAddUserModal()">➕ Додати користувача</button>
-                        <div class="search-box">
-                            <input type="text" id="userSearch" placeholder="🔍 Пошук користувачів...">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>Розподіл користувачів</h3>
+                        <div id="usersChart" class="chart-container">
+                            <div class="chart-bars" id="userRolesChart"></div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Статус конкурсів</h3>
+                        <div id="competitionsChart" class="chart-container">
+                            <div class="chart-bars" id="competitionStatusChart"></div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card full-width">
+                        <h3>Останні дії</h3>
+                        <div id="recentActivity" class="activity-list">
+                            <p class="loading">Завантаження...</p>
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="admin-section">
+                <div class="section-header">
+                    <h1>Управління користувачами</h1>
+                    <button class="btn btn-primary" onclick="openModal('addUserModal')">
+                        <span>+</span> Додати користувача
+                    </button>
+                </div>
+
+                <div class="filters-bar">
+                    <input type="text" id="userSearch" placeholder="Пошук за email або ПІБ..." class="search-input">
+                    <select id="userRoleFilter" class="filter-select">
+                        <option value="">Всі ролі</option>
+                        <option value="учень">Учні</option>
+                        <option value="вчитель">Вчителі</option>
+                        <option value="методист">Методисти</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="loadUsers()">Оновити</button>
+                </div>
+
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
@@ -116,427 +155,545 @@
                                 <th>ID</th>
                                 <th>Email</th>
                                 <th>ПІБ</th>
-                                <th>Телефон</th>
-                                <th>Telegram</th>
                                 <th>Роль</th>
+                                <th>Школа</th>
                                 <th>Дата реєстрації</th>
                                 <th>Дії</th>
                             </tr>
                         </thead>
-                        <tbody id="usersTableBody"></tbody>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">Завантаження...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
-            </div>
+                <div class="pagination" id="usersPagination"></div>
+            </section>
 
-            <!-- Competitions management section -->
-            <div id="competitions-section" class="tab-content">
+            <!-- Competitions Section -->
+            <section id="competitions" class="admin-section">
                 <div class="section-header">
-                    <h2>Управління конкурсами</h2>
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="openAddCompetitionModal()">Додати конкурс</button>
-                        <div class="search-box">
-                            <input type="text" id="competitionSearch" placeholder="Пошук конкурсів...">
-                        </div>
-                        <select class="filter-select" onchange="filterCompetitionsByStatus(this.value)">
-                            <option value="all">Всі статуси</option>
-                            <option value="активний">Активні</option>
-                            <option value="майбутній">Майбутні</option>
-                            <option value="завершений">Завершені</option>
-                        </select>
-                    </div>
+                    <h1>Управління конкурсами</h1>
+                    <button class="btn btn-primary" onclick="openModal('addCompetitionModal')">
+                        <span>+</span> Додати конкурс
+                    </button>
                 </div>
+
+                <div class="filters-bar">
+                    <input type="text" id="competitionSearch" placeholder="Пошук за назвою..." class="search-input">
+                    <select id="competitionStatusFilter" class="filter-select">
+                        <option value="">Всі статуси</option>
+                        <option value="active">Активні</option>
+                        <option value="upcoming">Майбутні</option>
+                        <option value="completed">Завершені</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="loadCompetitions()">Оновити</button>
+                </div>
+
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Назва</th>
-                                <th>Опис</th>
                                 <th>Дата початку</th>
-                                <th>Дата закінчення</th>
-                                <th>Учасників</th>
+                                <th>Дата завершення</th>
                                 <th>Статус</th>
+                                <th>Учасників</th>
                                 <th>Дії</th>
                             </tr>
                         </thead>
-                        <tbody id="competitionsTableBody"></tbody>
+                        <tbody id="competitionsTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">Завантаження...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
-            </div>
+                <div class="pagination" id="competitionsPagination"></div>
+            </section>
 
-            <!-- Results management section -->
-            <div id="results-section" class="tab-content">
+            <!-- Results Section -->
+            <section id="results" class="admin-section">
                 <div class="section-header">
-                    <h2>Управління результатами</h2>
-                    <div class="header-actions">
-                        <button class="btn btn-primary" onclick="openAddResultModal()">Додати результат</button>
-                        <div class="search-box">
-                            <input type="text" id="resultSearch" placeholder="Пошук результатів...">
-                        </div>
-                        <select class="filter-select" id="resultCompetitionFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі конкурси</option>
-                        </select>
-                        <select class="filter-select" id="resultPlaceFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі місця</option>
-                            <option value="1">1 місце</option>
-                            <option value="2">2 місце</option>
-                            <option value="3">3 місце</option>
-                            <option value="other">Інші місця</option>
-                        </select>
-                        <select class="filter-select" id="resultGradeFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі класи</option>
-                            <option value="5">5 клас</option>
-                            <option value="6">6 клас</option>
-                            <option value="7">7 клас</option>
-                            <option value="8">8 клас</option>
-                            <option value="9">9 клас</option>
-                            <option value="10">10 клас</option>
-                            <option value="11">11 клас</option>
-                        </select>
-                        <select class="filter-select" id="resultAchievementFilter" onchange="applyResultFilters()">
-                            <option value="all">Всі досягнення</option>
-                            <option value="Переможець">Переможець</option>
-                            <option value="Призер">Призер</option>
-                            <option value="Учасник">Учасник</option>
-                        </select>
-                    </div>
+                    <h1>Управління результатами</h1>
+                    <button class="btn btn-primary" onclick="openModal('addResultModal')">
+                        <span>+</span> Додати результат
+                    </button>
                 </div>
+
+                <div class="filters-bar">
+                    <select id="resultCompetitionFilter" class="filter-select">
+                        <option value="">Всі конкурси</option>
+                    </select>
+                    <input type="text" id="resultSearch" placeholder="Пошук за учнем..." class="search-input">
+                    <button class="btn btn-secondary" onclick="loadResults()">Оновити</button>
+                </div>
+
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Конкурс</th>
-                                <th>Учень</th>
-                                <th>Клас</th>
+                                <th>Учасник</th>
                                 <th>Місце</th>
-                                <th>Бали</th>
+                                <th>Бал</th>
                                 <th>Досягнення</th>
-                                <th>Примітки</th>
-                                <th>Дата додавання</th>
+                                <th>Дата</th>
                                 <th>Дії</th>
                             </tr>
                         </thead>
-                        <tbody id="resultsTableBody"></tbody>
+                        <tbody id="resultsTableBody">
+                            <tr>
+                                <td colspan="8" class="loading">Завантаження...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
-            </div>
+                <div class="pagination" id="resultsPagination"></div>
+            </section>
 
-            <!-- Added new statistics section with comprehensive data visualization -->
-            <div id="statistics-section" class="tab-content">
+            <!-- Schools Section -->
+            <section id="schools" class="admin-section">
                 <div class="section-header">
-                    <h2>Детальна статистика системи</h2>
+                    <h1>Управління школами</h1>
+                    <button class="btn btn-primary" onclick="openModal('addSchoolModal')">
+                        <span>+</span> Додати школу
+                    </button>
                 </div>
 
-                <!-- Overview Statistics -->
-                <div class="stats-section">
-                    <h3 class="stats-section-title">Загальна статистика</h3>
-                    <div class="stats-grid stats-grid-large">
-                        <div class="stat-card stat-card-highlight">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="statsStudents">0</div>
-                                <div class="stat-label">Всього учнів</div>
-                            </div>
-                        </div>
-                        <div class="stat-card stat-card-highlight">
-                            <div class="stat-icon">🏆</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="statsCompetitions">0</div>
-                                <div class="stat-label">Всього конкурсів</div>
-                            </div>
-                        </div>
-                        <div class="stat-card stat-card-highlight">
-                            <div class="stat-icon">📊</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="statsParticipations">0</div>
-                                <div class="stat-label">Всього участей</div>
-                            </div>
-                        </div>
-                        <div class="stat-card stat-card-success">
-                            <div class="stat-icon">✅</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="statsActiveCompetitions">0</div>
-                                <div class="stat-label">Активні конкурси</div>
-                            </div>
-                        </div>
-                        <div class="stat-card stat-card-info">
-                            <div class="stat-icon">🔜</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="statsUpcomingCompetitions">0</div>
-                                <div class="stat-label">Майбутні конкурси</div>
-                            </div>
-                        </div>
-                        <div class="stat-card stat-card-secondary">
-                            <div class="stat-icon">✔️</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="statsCompletedCompetitions">0</div>
-                                <div class="stat-label">Завершені конкурси</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="filters-bar">
+                    <input type="text" id="schoolSearch" placeholder="Пошук за назвою..." class="search-input">
+                    <button class="btn btn-secondary" onclick="loadSchools()">Оновити</button>
                 </div>
 
-                <!-- Participation Rate -->
-                <div class="stats-section">
-                    <h3 class="stats-section-title">Рівень участі учнів</h3>
-                    <div class="participation-card">
-                        <div class="participation-rate">
-                            <div class="rate-circle">
-                                <div class="rate-value" id="participationRate">0%</div>
-                            </div>
-                            <div class="rate-details">
-                                <p><strong id="participatingStudents">0</strong> з <strong
-                                        id="totalStudentsForRate">0</strong> учнів беруть участь у конкурсах</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Назва</th>
+                                <th>Кількість учнів</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schoolsTableBody">
+                            <tr>
+                                <td colspan="4" class="loading">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Subjects Section -->
+            <section id="subjects" class="admin-section">
+                <div class="section-header">
+                    <h1>Управління предметами</h1>
+                    <button class="btn btn-primary" onclick="openModal('addSubjectModal')">
+                        <span>+</span> Додати предмет
+                    </button>
                 </div>
 
-                <!-- Statistics by Grade -->
-                <div class="stats-section">
-                    <h3 class="stats-section-title">Статистика по класах</h3>
-                    <div class="table-container">
-                        <table class="data-table stats-table">
-                            <thead>
-                                <tr>
-                                    <th>Клас</th>
-                                    <th>Кількість учнів</th>
-                                    <th>Участей</th>
-                                    <th>Середній бал</th>
-                                    <th>Рівень участі</th>
-                                </tr>
-                            </thead>
-                            <tbody id="statsByGradeTable"></tbody>
-                        </table>
-                    </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Назва</th>
+                                <th>Категорія</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTableBody">
+                            <tr>
+                                <td colspan="4" class="loading">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- News Section -->
+            <section id="news" class="admin-section">
+                <div class="section-header">
+                    <h1>Управління новинами</h1>
+                    <button class="btn btn-primary" onclick="openModal('addNewsModal')">
+                        <span>+</span> Додати новину
+                    </button>
                 </div>
 
-                <!-- Top Students -->
-                <div class="stats-section">
-                    <h3 class="stats-section-title">Топ-10 найактивніших учнів</h3>
-                    <div class="table-container">
-                        <table class="data-table stats-table">
-                            <thead>
-                                <tr>
-                                    <th>Місце</th>
-                                    <th>ПІБ</th>
-                                    <th>Клас</th>
-                                    <th>Email</th>
-                                    <th>Кількість участей</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topStudentsTable"></tbody>
-                        </table>
-                    </div>
+                <div class="filters-bar">
+                    <input type="text" id="newsSearch" placeholder="Пошук за заголовком..." class="search-input">
+                    <button class="btn btn-secondary" onclick="loadNews()">Оновити</button>
                 </div>
 
-                <!-- Competition Statistics -->
-                <div class="stats-section">
-                    <h3 class="stats-section-title">Детальна статистика конкурсів</h3>
-                    <div class="table-container">
-                        <table class="data-table stats-table">
-                            <thead>
-                                <tr>
-                                    <th>Назва конкурсу</th>
-                                    <th>Дата початку</th>
-                                    <th>Дата закінчення</th>
-                                    <th>Учасників</th>
-                                    <th>Середній бал</th>
-                                    <th>Статус</th>
-                                </tr>
-                            </thead>
-                            <tbody id="competitionStatsTable"></tbody>
-                        </table>
-                    </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Заголовок</th>
+                                <th>Категорія</th>
+                                <th>Опубліковано</th>
+                                <th>Перегляди</th>
+                                <th>Дата</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newsTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Logs Section -->
+            <section id="logs" class="admin-section">
+                <div class="section-header">
+                    <h1>Системні логи</h1>
+                    <button class="btn btn-secondary" onclick="loadLogs()">Оновити</button>
                 </div>
 
-                <!-- Participation Timeline -->
-                <div class="stats-section">
-                    <h3 class="stats-section-title">Динаміка участі по місяцях</h3>
-                    <div class="timeline-container">
-                        <div id="participationTimeline" class="timeline-chart"></div>
-                    </div>
+                <div class="filters-bar">
+                    <select id="logTypeFilter" class="filter-select">
+                        <option value="">Всі типи</option>
+                        <option value="user">Користувачі</option>
+                        <option value="competition">Конкурси</option>
+                        <option value="result">Результати</option>
+                        <option value="auth">Авторизація</option>
+                    </select>
+                    <input type="date" id="logDateFilter" class="date-input">
                 </div>
 
-                <!-- Statistics by School -->
-                <div class="stats-section">
-                    <h3 class="stats-section-title">Топ-10 шкіл за участю</h3>
-                    <div class="table-container">
-                        <table class="data-table stats-table">
-                            <thead>
-                                <tr>
-                                    <th>Місце</th>
-                                    <th>Школа</th>
-                                    <th>Кількість учнів</th>
-                                    <th>Участей</th>
-                                </tr>
-                            </thead>
-                            <tbody id="schoolStatsTable"></tbody>
-                        </table>
-                    </div>
+                <div class="logs-container" id="logsContainer">
+                    <p class="loading">Завантаження...</p>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
 
-    <!-- Modal for changing user role -->
-    <div id="roleModal" class="modal">
-        <div class="modal-content">
-            <h3>Зміна ролі користувача</h3>
-            <p id="modalUserInfo"></p>
-            <div class="role-buttons">
-                <button class="role-btn" data-role="учень">👨‍🎓 Учень</button>
-                <button class="role-btn" data-role="вчитель">👨‍🏫 Вчитель</button>
-                <button class="role-btn" data-role="методист">📋 Методист</button>
-            </div>
-            <button class="btn btn-secondary" onclick="closeRoleModal()">Скасувати</button>
-        </div>
-    </div>
-
-    <!-- Modal for adding new user -->
+    <!-- Modals -->
+    <!-- Add/Edit User Modal -->
     <div id="addUserModal" class="modal">
-        <div class="modal-content modal-large">
-            <h3>Додати нового користувача</h3>
-            <form id="addUserForm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="userModalTitle">Додати користувача</h2>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <form id="userForm" onsubmit="saveUser(event)">
+                <input type="hidden" id="userId">
                 <div class="form-group">
-                    <label for="newUserEmail">Email *</label>
-                    <input type="email" id="newUserEmail" required>
+                    <label for="userEmail">Email *</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group" id="passwordGroup">
+                    <label for="userPassword">Пароль *</label>
+                    <input type="password" id="userPassword">
                 </div>
                 <div class="form-group">
-                    <label for="newUserPassword">Пароль *</label>
-                    <input type="password" id="newUserPassword" required minlength="6">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="newUserFirstName">Ім'я</label>
-                        <input type="text" id="newUserFirstName">
-                    </div>
-                    <div class="form-group">
-                        <label for="newUserLastName">Прізвище</label>
-                        <input type="text" id="newUserLastName">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="newUserRole">Роль *</label>
-                    <select id="newUserRole" required class="form-select">
+                    <label for="userRole">Роль *</label>
+                    <select id="userRole" required>
                         <option value="учень">Учень</option>
                         <option value="вчитель">Вчитель</option>
-                        <option value="методист" id="methodistOption">Методист</option>
+                        <option value="методист">Методист</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label for="newUserPhone">Телефон</label>
-                    <input type="tel" id="newUserPhone">
-                </div>
-                <div class="form-group">
-                    <label for="newUserTelegram">Telegram</label>
-                    <input type="text" id="newUserTelegram" placeholder="@username">
-                </div>
-                <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary">Створити користувача</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeAddUserModal()">Скасувати</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for adding/editing competition -->
-    <div id="competitionModal" class="modal">
-        <div class="modal-content modal-large">
-            <h3 id="competitionModalTitle">Додати конкурс</h3>
-            <form id="competitionForm">
-                <div class="form-group">
-                    <label for="compTitle">Назва конкурсу *</label>
-                    <input type="text" id="compTitle" required placeholder="Введіть назву конкурсу">
-                </div>
-                <div class="form-group">
-                    <label for="compDescription">Опис</label>
-                    <textarea id="compDescription" rows="4" placeholder="Опишіть конкурс (необов'язково)"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="compStartDate">Дата початку *</label>
-                        <input type="date" id="compStartDate" required>
+                        <label for="userFirstName">Ім'я</label>
+                        <input type="text" id="userFirstName">
                     </div>
                     <div class="form-group">
-                        <label for="compEndDate">Дата закінчення *</label>
-                        <input type="date" id="compEndDate" required>
+                        <label for="userLastName">Прізвище</label>
+                        <input type="text" id="userLastName">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="compStatus">Статус конкурсу *</label>
-                    <select id="compStatus" required class="form-select">
-                        <option value="auto">Автоматично (за датами)</option>
-                        <option value="активний">Активний</option>
-                        <option value="майбутній">Майбутній</option>
-                        <option value="завершений">Завершений</option>
+                    <label for="userSchool">Школа</label>
+                    <select id="userSchool">
+                        <option value="">Оберіть школу</option>
                     </select>
-                    <small class="form-hint">Виберіть "Автоматично" для визначення статусу за датами, або встановіть
-                        вручну</small>
                 </div>
-                <div class="modal-actions">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addUserModal')">Скасувати</button>
                     <button type="submit" class="btn btn-primary">Зберегти</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeCompetitionModal()">Скасувати</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal for adding/editing result -->
-    <div id="resultModal" class="modal">
-        <div class="modal-content modal-large">
-            <h3 id="resultModalTitle">Додати результат</h3>
-            <form id="resultForm">
+    <!-- Add/Edit Competition Modal -->
+    <div id="addCompetitionModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="competitionModalTitle">Додати конкурс</h2>
+                <button class="modal-close" onclick="closeModal('addCompetitionModal')">&times;</button>
+            </div>
+            <form id="competitionForm" onsubmit="saveCompetition(event)">
+                <input type="hidden" id="competitionId">
+                <div class="form-group">
+                    <label for="competitionTitle">Назва *</label>
+                    <input type="text" id="competitionTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="competitionDescription">Опис</label>
+                    <textarea id="competitionDescription" rows="4"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="competitionStartDate">Дата початку *</label>
+                        <input type="date" id="competitionStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="competitionEndDate">Дата завершення *</label>
+                        <input type="date" id="competitionEndDate" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="competitionLevel">Рівень</label>
+                        <select id="competitionLevel">
+                            <option value="">Оберіть рівень</option>
+                            <option value="шкільний">Шкільний</option>
+                            <option value="міський">Міський</option>
+                            <option value="обласний">Обласний</option>
+                            <option value="всеукраїнський">Всеукраїнський</option>
+                            <option value="міжнародний">Міжнародний</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="competitionSubject">Предмет</label>
+                        <select id="competitionSubject">
+                            <option value="">Оберіть предмет</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="competitionOrganizer">Організатор</label>
+                        <input type="text" id="competitionOrganizer">
+                    </div>
+                    <div class="form-group">
+                        <label for="competitionLocation">Місце проведення</label>
+                        <input type="text" id="competitionLocation">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="competitionMaxParticipants">Макс. учасників</label>
+                        <input type="number" id="competitionMaxParticipants" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="competitionStatus">Статус</label>
+                        <select id="competitionStatus">
+                            <option value="">Автоматичний</option>
+                            <option value="active">Активний</option>
+                            <option value="completed">Завершений</option>
+                            <option value="cancelled">Скасований</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="competitionIsOnline">
+                        Онлайн конкурс
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addCompetitionModal')">Скасувати</button>
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Result Modal -->
+    <div id="addResultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="resultModalTitle">Додати результат</h2>
+                <button class="modal-close" onclick="closeModal('addResultModal')">&times;</button>
+            </div>
+            <form id="resultForm" onsubmit="saveResult(event)">
+                <input type="hidden" id="resultId">
                 <div class="form-group">
                     <label for="resultCompetition">Конкурс *</label>
-                    <select id="resultCompetition" required class="form-select">
+                    <select id="resultCompetition" required>
                         <option value="">Оберіть конкурс</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="resultStudent">Учень *</label>
-                    <select id="resultStudent" required class="form-select">
-                        <option value="">Оберіть учня</option>
+                    <label for="resultUser">Учасник *</label>
+                    <select id="resultUser" required>
+                        <option value="">Оберіть учасника</option>
                     </select>
-                    <small class="form-hint">Показуються тільки учні, які беруть участь у обраному конкурсі</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="resultPlace">Місце</label>
-                        <input type="number" id="resultPlace" min="1" placeholder="Наприклад: 1, 2, 3">
+                        <input type="text" id="resultPlace" placeholder="1, 2, 3...">
                     </div>
                     <div class="form-group">
-                        <label for="resultScore">Бали</label>
-                        <input type="text" id="resultScore" placeholder="Наприклад: 95, A+, Золото">
+                        <label for="resultScore">Бал</label>
+                        <input type="text" id="resultScore" placeholder="85">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="resultAchievement">Досягнення *</label>
-                    <select id="resultAchievement" required class="form-select">
+                    <select id="resultAchievement" required>
                         <option value="">Оберіть досягнення</option>
                         <option value="Переможець">Переможець</option>
                         <option value="Призер">Призер</option>
+                        <option value="Лауреат">Лауреат</option>
+                        <option value="Дипломант">Дипломант</option>
                         <option value="Учасник">Учасник</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="resultNotes">Примітки</label>
-                    <textarea id="resultNotes" rows="3"
-                        placeholder="Додаткова інформація про результат (необов'язково)"></textarea>
+                    <textarea id="resultNotes" rows="3"></textarea>
                 </div>
-                <small class="form-hint">* Вкажіть хоча б місце або бали</small>
-                <div class="modal-actions">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addResultModal')">Скасувати</button>
                     <button type="submit" class="btn btn-primary">Зберегти</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeResultModal()">Скасувати</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="footer"></div>
+    <!-- Add/Edit School Modal -->
+    <div id="addSchoolModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="schoolModalTitle">Додати школу</h2>
+                <button class="modal-close" onclick="closeModal('addSchoolModal')">&times;</button>
+            </div>
+            <form id="schoolForm" onsubmit="saveSchool(event)">
+                <input type="hidden" id="schoolId">
+                <div class="form-group">
+                    <label for="schoolName">Назва *</label>
+                    <input type="text" id="schoolName" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addSchoolModal')">Скасувати</button>
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <script src="js/role.js"></script>
+    <!-- Add/Edit Subject Modal -->
+    <div id="addSubjectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="subjectModalTitle">Додати предмет</h2>
+                <button class="modal-close" onclick="closeModal('addSubjectModal')">&times;</button>
+            </div>
+            <form id="subjectForm" onsubmit="saveSubject(event)">
+                <input type="hidden" id="subjectId">
+                <div class="form-group">
+                    <label for="subjectName">Назва *</label>
+                    <input type="text" id="subjectName" required>
+                </div>
+                <div class="form-group">
+                    <label for="subjectCategory">Категорія</label>
+                    <select id="subjectCategory">
+                        <option value="">Оберіть категорію</option>
+                        <option value="Точні науки">Точні науки</option>
+                        <option value="Природничі науки">Природничі науки</option>
+                        <option value="Гуманітарні науки">Гуманітарні науки</option>
+                        <option value="Мистецтво">Мистецтво</option>
+                        <option value="Спорт">Спорт</option>
+                        <option value="Інше">Інше</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addSubjectModal')">Скасувати</button>
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit News Modal -->
+    <div id="addNewsModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="newsModalTitle">Додати новину</h2>
+                <button class="modal-close" onclick="closeModal('addNewsModal')">&times;</button>
+            </div>
+            <form id="newsForm" onsubmit="saveNews(event)">
+                <input type="hidden" id="newsId">
+                <div class="form-group">
+                    <label for="newsTitle">Заголовок *</label>
+                    <input type="text" id="newsTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="newsContent">Контент *</label>
+                    <textarea id="newsContent" rows="6" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newsCategory">Категорія</label>
+                        <select id="newsCategory">
+                            <option value="general">Загальне</option>
+                            <option value="competitions">Конкурси</option>
+                            <option value="events">Події</option>
+                            <option value="achievements">Досягнення</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newsImageUrl">URL зображення</label>
+                        <input type="url" id="newsImageUrl">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="newsIsPublished" checked>
+                        Опублікувати
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addNewsModal')">Скасувати</button>
+                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2>Підтвердження</h2>
+                <button class="modal-close" onclick="closeModal('confirmModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Ви впевнені?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('confirmModal')">Скасувати</button>
+                <button type="button" class="btn btn-danger" id="confirmBtn">Підтвердити</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <footer id="footer"></footer>
+
     <script src="js/admin.js"></script>
 </body>
 
