@@ -87,9 +87,6 @@
                 <button class="tab-button" onclick="switchTab('form')" id="tab-form">
                     📝 Форма для учня
                 </button>
-                <button class="tab-button" onclick="switchTab('responses')" id="tab-responses">
-                    📊 Відповіді учнів
-                </button>
             </div>
 
             <div class="modal-body">
@@ -263,33 +260,7 @@
                         </div>
                     </div>
 
-                    <div id="tab-content-responses" class="tab-content">
-                        <h3 class="tab-section-title">Відповіді учнів на форму</h3>
-                        <p class="tab-description">Тут відображаються всі відповіді учнів на форму реєстрації.</p>
 
-                        <!-- Added contest selector dropdown -->
-                        <div class="form-group" style="margin-bottom: 20px;">
-                            <label for="responseCompetitionSelector">Оберіть конкурс для перегляду відповідей</label>
-                            <select id="responseCompetitionSelector" class="filter-select"
-                                onchange="loadResponsesForSelectedCompetition()" style="width: 100%; max-width: 500px;">
-                                <option value="">-- Оберіть конкурс --</option>
-                            </select>
-                        </div>
-
-                        <div class="responses-filters">
-                            <input type="text" id="searchResponses" class="filter-input"
-                                placeholder="Пошук за ім'ям учня...">
-                            <button class="btn btn-sm btn-secondary" onclick="exportResponsesToExcel()">
-                                📥 Експортувати в Excel
-                            </button>
-                        </div>
-
-                        <div id="responsesContainer" class="responses-container">
-                            <div class="empty-state">
-                                <p>Виберіть конкурс для перегляду відповідей або створіть новий конкурс</p>
-                            </div>
-                        </div>
-                    </div>
                 </form>
             </div>
 
@@ -396,6 +367,32 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeViewDocumentsModal()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing student responses -->
+    <div id="viewResponsesModal" class="modal">
+        <div class="modal-content modal-extra-large">
+            <div class="modal-header">
+                <h2 id="responsesModalTitle">📊 Відповіді учнів</h2>
+                <button class="modal-close" onclick="closeViewResponsesModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="responses-filters">
+                    <input type="text" id="searchResponsesModal" class="filter-input"
+                        placeholder="Пошук за ім'ям учня...">
+                    <button class="btn btn-sm btn-secondary" onclick="exportResponsesToExcel()">
+                        📥 Експортувати в Excel
+                    </button>
+                </div>
+
+                <div id="responsesModalContainer" class="responses-container">
+                    <div class="loading">Завантаження відповідей...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeViewResponsesModal()">Закрити</button>
             </div>
         </div>
     </div>

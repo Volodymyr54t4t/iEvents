@@ -24,6 +24,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -34,6 +35,7 @@ body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -44,6 +46,7 @@ body {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -55,6 +58,7 @@ body {
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -66,6 +70,7 @@ body {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -77,6 +82,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -88,6 +94,7 @@ body {
     opacity: 0;
     transform: scale(0.9) translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -99,6 +106,7 @@ body {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -110,9 +118,11 @@ body {
     opacity: 0;
     transform: scale(0.85);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   100% {
     opacity: 1;
     transform: scale(1);
@@ -120,10 +130,12 @@ body {
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -133,6 +145,7 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -142,16 +155,19 @@ body {
   0% {
     transform: translateY(0);
   }
+
   100% {
     transform: translateY(-4px);
   }
 }
 
 @keyframes glowPulse {
+
   0%,
   100% {
     box-shadow: 0 0 8px rgba(26, 58, 82, 0.3);
   }
+
   50% {
     box-shadow: 0 0 16px rgba(26, 58, 82, 0.6);
   }
@@ -162,6 +178,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -173,6 +190,7 @@ body {
     backdrop-filter: blur(0px);
     background: rgba(0, 0, 0, 0);
   }
+
   to {
     backdrop-filter: blur(4px);
     background: rgba(0, 0, 0, 0.5);
@@ -352,27 +370,35 @@ body {
 .competition-item:nth-child(1) {
   animation-delay: 0.1s;
 }
+
 .competition-item:nth-child(2) {
   animation-delay: 0.15s;
 }
+
 .competition-item:nth-child(3) {
   animation-delay: 0.2s;
 }
+
 .competition-item:nth-child(4) {
   animation-delay: 0.25s;
 }
+
 .competition-item:nth-child(5) {
   animation-delay: 0.3s;
 }
+
 .competition-item:nth-child(6) {
   animation-delay: 0.35s;
 }
+
 .competition-item:nth-child(7) {
   animation-delay: 0.4s;
 }
+
 .competition-item:nth-child(8) {
   animation-delay: 0.45s;
 }
+
 .competition-item:nth-child(9) {
   animation-delay: 0.5s;
 }
@@ -495,12 +521,15 @@ body {
 .detail-item:nth-child(1) {
   /* Animation delay removed */
 }
+
 .detail-item:nth-child(2) {
   /* Animation delay removed */
 }
+
 .detail-item:nth-child(3) {
   /* Animation delay removed */
 }
+
 .detail-item:nth-child(4) {
   /* Animation delay removed */
 }
@@ -568,16 +597,28 @@ body {
 .competition-actions .btn:nth-child(1) {
   grid-column: 1;
 }
+
 .competition-actions .btn:nth-child(2) {
   grid-column: 2;
 }
+
 .competition-actions .btn:nth-child(3) {
   grid-column: 1;
 }
+
 .competition-actions .btn:nth-child(4) {
   grid-column: 2;
 }
+
 .competition-actions .btn:nth-child(5) {
+  grid-column: 1;
+}
+
+.competition-actions .btn:nth-child(6) {
+  grid-column: 2;
+}
+
+.competition-actions .btn:nth-child(7) {
   grid-column: 1 / -1;
 }
 
@@ -594,16 +635,28 @@ body {
   .competition-actions .btn:nth-child(1) {
     grid-column: 1;
   }
+
   .competition-actions .btn:nth-child(2) {
     grid-column: 1;
   }
+
   .competition-actions .btn:nth-child(3) {
     grid-column: 1;
   }
+
   .competition-actions .btn:nth-child(4) {
     grid-column: 1;
   }
+
   .competition-actions .btn:nth-child(5) {
+    grid-column: 1;
+  }
+
+  .competition-actions .btn:nth-child(6) {
+    grid-column: 1;
+  }
+
+  .competition-actions .btn:nth-child(7) {
     grid-column: 1;
   }
 }
@@ -883,9 +936,11 @@ body {
 .tab-button:nth-child(1) {
   animation-delay: 0.1s;
 }
+
 .tab-button:nth-child(2) {
   animation-delay: 0.15s;
 }
+
 .tab-button:nth-child(3) {
   animation-delay: 0.2s;
 }
@@ -961,9 +1016,11 @@ body {
 .form-row .form-group:nth-child(1) {
   animation-delay: 0.05s;
 }
+
 .form-row .form-group:nth-child(2) {
   animation-delay: 0.1s;
 }
+
 .form-row .form-group:nth-child(3) {
   animation-delay: 0.15s;
 }
@@ -1084,30 +1141,39 @@ body {
 .response-item:nth-child(1) {
   animation-delay: 0.1s;
 }
+
 .response-item:nth-child(2) {
   animation-delay: 0.15s;
 }
+
 .response-item:nth-child(3) {
   animation-delay: 0.2s;
 }
+
 .response-item:nth-child(4) {
   animation-delay: 0.25s;
 }
+
 .response-item:nth-child(5) {
   animation-delay: 0.3s;
 }
+
 .response-item:nth-child(6) {
   animation-delay: 0.35s;
 }
+
 .response-item:nth-child(7) {
   animation-delay: 0.4s;
 }
+
 .response-item:nth-child(8) {
   animation-delay: 0.45s;
 }
+
 .response-item:nth-child(9) {
   animation-delay: 0.5s;
 }
+
 .response-item:nth-child(10) {
   animation-delay: 0.55s;
 }
@@ -1216,24 +1282,31 @@ body {
 .response-field:nth-child(1) {
   animation-delay: 0.6s;
 }
+
 .response-field:nth-child(2) {
   animation-delay: 0.65s;
 }
+
 .response-field:nth-child(3) {
   animation-delay: 0.7s;
 }
+
 .response-field:nth-child(4) {
   animation-delay: 0.75s;
 }
+
 .response-field:nth-child(5) {
   animation-delay: 0.8s;
 }
+
 .response-field:nth-child(6) {
   animation-delay: 0.85s;
 }
+
 .response-field:nth-child(7) {
   animation-delay: 0.9s;
 }
+
 .response-field:nth-child(8) {
   animation-delay: 0.95s;
 }

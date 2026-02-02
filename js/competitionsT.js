@@ -109,18 +109,10 @@ function switchTab(tabName) {
   })
 
   // Показуємо потрібну вкладку
-  document.getElementById(`tab-content-${tabName}`).classList.add("active")
-  document.getElementById(`tab-${tabName}`).classList.add("active")
-
-  if (tabName === "responses") {
-    populateResponseCompetitionSelector()
-    const competitionId = document.getElementById("editCompetitionId").value
-    if (competitionId) {
-      // Set the selector to the current competition
-      document.getElementById("responseCompetitionSelector").value = competitionId
-      loadFormResponses(competitionId)
-    }
-  }
+  const tabContent = document.getElementById(`tab-content-${tabName}`)
+  const tabButton = document.getElementById(`tab-${tabName}`)
+  if (tabContent) tabContent.classList.add("active")
+  if (tabButton) tabButton.classList.add("active")
 }
 
 function openCreateCompetitionModal() {
@@ -131,17 +123,6 @@ function openCreateCompetitionModal() {
   document.getElementById("dynamicFieldsContainer").innerHTML = ""
 
   switchTab("info")
-
-  const responseSelector = document.getElementById("responseCompetitionSelector")
-  if (responseSelector) {
-    responseSelector.value = ""
-  }
-
-  document.getElementById("responsesContainer").innerHTML = `
-    <div class="empty-state">
-      <p>Виберіть конкурс для перегляду відповідей або створіть новий конкурс</p>
-    </div>
-  `
 
   document.getElementById("createCompetitionModal").classList.add("active")
 }
@@ -408,11 +389,10 @@ function displayFormResponses(responses) {
       <div class="response-item">
         <div class="response-header">
           <div class="response-student-info">
-            ${
-              response.avatar
-                ? `<img src="${response.avatar}" alt="Avatar" class="response-avatar-img">`
-                : `<div class="response-avatar">${initials}</div>`
-            }
+            ${response.avatar
+          ? `<img src="${response.avatar}" alt="Avatar" class="response-avatar-img">`
+          : `<div class="response-avatar">${initials}</div>`
+        }
             <div class="response-student-details">
               <h4>${fullName}</h4>
               <p>${response.email || "Немає email"}</p>
@@ -426,15 +406,15 @@ function displayFormResponses(responses) {
         <div class="response-body">
           <h4>Відповіді на форму:</h4>
           ${Object.entries(formData)
-            .map(
-              ([key, value]) => `
+          .map(
+            ([key, value]) => `
             <div class="response-field">
               <div class="response-field-label">${key}:</div>
               <div class="response-field-value">${Array.isArray(value) ? value.join(", ") : value || "-"}</div>
             </div>
           `,
-            )
-            .join("")}
+          )
+          .join("")}
         </div>
       </div>
     `
@@ -651,18 +631,20 @@ function displayCompetitions(competitions) {
               <button class="btn btn-info" onclick="window.location.href='results.html'">
                 📊 Результати
               </button>
+              <button class="btn btn-secondary" onclick="openViewResponsesModal(${competition.id})">
+                📝 Відповіді учнів
+              </button>
               <button class="btn btn-success" onclick="openAddStudentsModal(${competition.id})">
                 Додати учнів
               </button>
-              ${
-                isOwner || userRole === "методист"
-                  ? `
+              ${isOwner || userRole === "методист"
+          ? `
                 <button class="btn btn-primary btn-sm" onclick='openEditCompetitionModal(${JSON.stringify(competition).replace(/'/g, "&#39;")})'>
                   ✏️ Редагувати
                 </button>
               `
-                  : ""
-              }
+          : ""
+        }
             </div>
           </div>
           ${competition.description ? `<p class="competition-description">${competition.description}</p>` : ""}
@@ -766,9 +748,8 @@ async function openCompetitionDetailsModal(competitionId) {
               <span>${new Date(competition.end_date).toLocaleDateString("uk-UA")}</span>
             </div>
           </div>
-          ${
-            competition.registration_deadline
-              ? `
+          ${competition.registration_deadline
+        ? `
           <div class="detail-item">
             <span class="detail-icon">⏰</span>
             <div>
@@ -777,8 +758,8 @@ async function openCompetitionDetailsModal(competitionId) {
             </div>
           </div>
           `
-              : ""
-          }
+        : ""
+      }
           <div class="detail-item">
             <span class="detail-icon">${competition.is_online ? "💻" : "📍"}</span>
             <div>
@@ -786,9 +767,8 @@ async function openCompetitionDetailsModal(competitionId) {
               <span>${competition.is_online ? "Онлайн" : "Офлайн"}</span>
             </div>
           </div>
-          ${
-            competition.location
-              ? `
+          ${competition.location
+        ? `
           <div class="detail-item">
             <span class="detail-icon">📍</span>
             <div>
@@ -797,11 +777,10 @@ async function openCompetitionDetailsModal(competitionId) {
             </div>
           </div>
           `
-              : ""
-          }
-          ${
-            competition.max_participants
-              ? `
+        : ""
+      }
+          ${competition.max_participants
+        ? `
           <div class="detail-item">
             <span class="detail-icon">👥</span>
             <div>
@@ -810,8 +789,8 @@ async function openCompetitionDetailsModal(competitionId) {
             </div>
           </div>
           `
-              : ""
-          }
+        : ""
+      }
           <div class="detail-item">
             <span class="detail-icon">👥</span>
             <div>
@@ -822,72 +801,66 @@ async function openCompetitionDetailsModal(competitionId) {
         </div>
       </div>
 
-      ${
-        competition.organizer
-          ? `
+      ${competition.organizer
+        ? `
       <div class="competition-detail-section">
         <h4>Організатор</h4>
         <p>🏛️ ${competition.organizer}</p>
       </div>
       `
-          : ""
+        : ""
       }
 
-      ${
-        competition.requirements
-          ? `
+      ${competition.requirements
+        ? `
       <div class="competition-detail-section">
         <h4>Вимоги до учасників</h4>
         <p>${competition.requirements}</p>
       </div>
       `
-          : ""
+        : ""
       }
 
-      ${
-        competition.prizes
-          ? `
+      ${competition.prizes
+        ? `
       <div class="competition-detail-section">
         <h4>Призи та нагороди</h4>
         <p>${competition.prizes}</p>
       </div>
       `
-          : ""
+        : ""
       }
 
-      ${
-        customFields.length > 0
-          ? `
+      ${customFields.length > 0
+        ? `
       <div class="competition-detail-section">
         <h4>Додаткові поля для учнів</h4>
         <div class="custom-fields-list">
           ${customFields
-            .map((field) => {
-              const requiredMark = field.required ? '<span class="required-badge">Обовʼязкове</span>' : ""
-              return `
+          .map((field) => {
+            const requiredMark = field.required ? '<span class="required-badge">Обовʼязкове</span>' : ""
+            return `
               <div class="custom-field-preview">
                 <strong>${field.label}</strong> ${requiredMark}
                 <span class="field-type-badge">${getFieldTypeLabel(field.type)}</span>
                 ${field.placeholder ? `<div class="field-placeholder">Підказка: ${field.placeholder}</div>` : ""}
               </div>
             `
-            })
-            .join("")}
+          })
+          .join("")}
         </div>
       </div>
       `
-          : ""
+        : ""
       }
 
-      ${
-        competition.contact_info || competition.website_url
-          ? `
+      ${competition.contact_info || competition.website_url
+        ? `
       <div class="competition-detail-section">
         <h4>Контактна інформація</h4>
         <div class="detail-grid">
-          ${
-            competition.contact_info
-              ? `
+          ${competition.contact_info
+          ? `
           <div class="detail-item">
             <span class="detail-icon">📧</span>
             <div>
@@ -896,11 +869,10 @@ async function openCompetitionDetailsModal(competitionId) {
             </div>
           </div>
           `
-              : ""
-          }
-          ${
-            competition.website_url
-              ? `
+          : ""
+        }
+          ${competition.website_url
+          ? `
           <div class="detail-item">
             <span class="detail-icon">🌐</span>
             <div>
@@ -909,12 +881,12 @@ async function openCompetitionDetailsModal(competitionId) {
             </div>
           </div>
           `
-              : ""
-          }
+          : ""
+        }
         </div>
       </div>
       `
-          : ""
+        : ""
       }
     `
 
@@ -929,30 +901,29 @@ async function openCompetitionDetailsModal(competitionId) {
               <h4>Відповіді учнів (${data.responses.length})</h4>
               <div class="responses-container">
                 ${data.responses
-                  .map((resp) => {
-                    const fullName =
-                      resp.first_name && resp.last_name
-                        ? `${resp.last_name} ${resp.first_name}`
-                        : resp.form_data?.fullName || resp.form_data?.["ПІБ"] || resp.email || "Невідомий учень"
+              .map((resp) => {
+                const fullName =
+                  resp.first_name && resp.last_name
+                    ? `${resp.last_name} ${resp.first_name}`
+                    : resp.form_data?.fullName || resp.form_data?.["ПІБ"] || resp.email || "Невідомий учень"
 
-                    let formData = {}
-                    try {
-                      formData = typeof resp.form_data === "string" ? JSON.parse(resp.form_data) : resp.form_data || {}
-                    } catch (e) {
-                      console.error("Помилка парсування form_data:", e)
-                      formData = resp.form_data || {}
-                    }
-                    const submittedDate = new Date(resp.submitted_at).toLocaleString("uk-UA")
+                let formData = {}
+                try {
+                  formData = typeof resp.form_data === "string" ? JSON.parse(resp.form_data) : resp.form_data || {}
+                } catch (e) {
+                  console.error("Помилка парсування form_data:", e)
+                  formData = resp.form_data || {}
+                }
+                const submittedDate = new Date(resp.submitted_at).toLocaleString("uk-UA")
 
-                    return `
+                return `
                     <div class="response-card">
                       <div class="response-header">
                         <div class="student-info">
-                          ${
-                            resp.avatar
-                              ? `<img src="${resp.avatar}" alt="${fullName}" class="student-avatar-small">`
-                              : ""
-                          }
+                          ${resp.avatar
+                    ? `<img src="${resp.avatar}" alt="${fullName}" class="student-avatar-small">`
+                    : ""
+                  }
                           <div>
                             <strong>${fullName}</strong>
                             ${resp.grade ? `<span class="grade-badge-small">${resp.grade} клас</span>` : ""}
@@ -964,20 +935,20 @@ async function openCompetitionDetailsModal(competitionId) {
                       </div>
                       <div class="response-body">
                         ${Object.entries(formData)
-                          .map(([key, value]) => {
-                            return `
+                    .map(([key, value]) => {
+                      return `
                             <div class="response-field">
                               <strong>${key}:</strong>
                               <span>${Array.isArray(value) ? value.join(", ") : value || "-"}</span>
                             </div>
                           `
-                          })
-                          .join("")}
+                    })
+                    .join("")}
                       </div>
                     </div>
                   `
-                  })
-                  .join("")}
+              })
+              .join("")}
               </div>
             </div>
           `
@@ -1126,19 +1097,19 @@ function displayStudents(students) {
         <div class="grade-group">
           <h4 style="margin: 16px 0 8px 0; color: #4a5568;">${grade}</h4>
           ${students
-            .map((student) => {
-              const fullName = [student.last_name, student.first_name].filter(Boolean).join(" ") || student.email
+          .map((student) => {
+            const fullName = [student.last_name, student.first_name].filter(Boolean).join(" ") || student.email
 
-              const initials = fullName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-                .slice(0, 2)
+            const initials = fullName
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
 
-              const avatarHTML = student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : initials
+            const avatarHTML = student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : initials
 
-              return `
+            return `
                 <div class="student-item" onclick="toggleStudent(${student.id})">
                   <input type="checkbox" class="student-checkbox" id="student-${student.id}" value="${student.id}">
                   <div class="student-avatar">${avatarHTML}</div>
@@ -1148,8 +1119,8 @@ function displayStudents(students) {
                   </div>
                 </div>
               `
-            })
-            .join("")}
+          })
+          .join("")}
         </div>
       `
     })
@@ -1444,13 +1415,13 @@ function displayDocuments(documents) {
         </div>
         <div class="student-documents-list">
           ${docs
-            .map((doc) => {
-              const uploadDate = new Date(doc.uploaded_at).toLocaleString("uk-UA")
-              const fileSize = formatFileSize(doc.file_size)
-              const fileIcon = getFileIcon(doc.file_type)
+          .map((doc) => {
+            const uploadDate = new Date(doc.uploaded_at).toLocaleString("uk-UA")
+            const fileSize = formatFileSize(doc.file_size)
+            const fileIcon = getFileIcon(doc.file_type)
 
-              if (doc.file_type === "form-response") {
-                return `
+            if (doc.file_type === "form-response") {
+              return `
                 <div class="teacher-document-item form-response-item">
                   <div class="document-icon">📋</div>
                   <div class="teacher-document-info">
@@ -1468,9 +1439,9 @@ function displayDocuments(documents) {
                   </div>
                 </div>
               `
-              }
+            }
 
-              return `
+            return `
               <div class="teacher-document-item">
                 <div class="document-icon">${fileIcon}</div>
                 <div class="teacher-document-info">
@@ -1495,8 +1466,8 @@ function displayDocuments(documents) {
                 </div>
               </div>
             `
-            })
-            .join("")}
+          })
+          .join("")}
         </div>
       </div>
     `
@@ -1787,4 +1758,124 @@ function loadResponsesForSelectedCompetition() {
     `
     currentResponses = []
   }
+}
+
+// New modal for viewing student responses
+let currentResponsesCompetitionId = null
+
+async function openViewResponsesModal(competitionId) {
+  currentResponsesCompetitionId = competitionId
+  const competition = allCompetitions.find((c) => c.id === competitionId)
+
+  const modal = document.getElementById("viewResponsesModal")
+  const titleElement = document.getElementById("responsesModalTitle")
+  const container = document.getElementById("responsesModalContainer")
+
+  titleElement.textContent = competition ? `📊 Відповіді учнів: ${competition.title}` : "📊 Відповіді учнів"
+
+  modal.classList.add("active")
+  container.innerHTML = '<div class="loading">Завантаження відповідей...</div>'
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/form-responses`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    currentResponses = data.responses || []
+    displayFormResponsesModal(currentResponses)
+
+    // Add search handler
+    const searchInput = document.getElementById("searchResponsesModal")
+    searchInput.value = ""
+    searchInput.oninput = (e) => {
+      const searchTerm = e.target.value.toLowerCase()
+      const filtered = currentResponses.filter((response) =>
+        (response.student_name || response.first_name || response.last_name || "").toLowerCase().includes(searchTerm)
+      )
+      displayFormResponsesModal(filtered)
+    }
+  } catch (error) {
+    console.error("Помилка завантаження відповідей:", error)
+    container.innerHTML = '<div class="empty-state"><p>Помилка завантаження відповідей</p></div>'
+  }
+}
+
+function closeViewResponsesModal() {
+  const modal = document.getElementById("viewResponsesModal")
+  modal.classList.remove("active")
+  currentResponsesCompetitionId = null
+}
+
+function displayFormResponsesModal(responses) {
+  const container = document.getElementById("responsesModalContainer")
+
+  if (!responses || responses.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>Поки немає відповідей</h3>
+        <p>Відповіді учнів з'являться тут після заповнення форми реєстрації на конкурс</p>
+      </div>
+    `
+    return
+  }
+
+  container.innerHTML = responses
+    .map((response) => {
+      const submittedDate = new Date(response.submitted_at).toLocaleString("uk-UA")
+      let formData = {}
+      try {
+        formData = typeof response.form_data === "string" ? JSON.parse(response.form_data) : response.form_data || {}
+      } catch (e) {
+        console.error("Помилка парсингу form_data:", e)
+        formData = {}
+      }
+
+      const fullName =
+        response.first_name && response.last_name
+          ? `${response.last_name} ${response.first_name}`
+          : formData.fullName || formData["ПІБ"] || response.email || "Невідомий учень"
+
+      const initials = fullName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+
+      return `
+      <div class="response-item">
+        <div class="response-header">
+          <div class="response-student-info">
+            ${response.avatar
+          ? `<img src="${response.avatar}" alt="Avatar" class="response-avatar-img">`
+          : `<div class="response-avatar">${initials}</div>`
+        }
+            <div class="response-student-details">
+              <h4>${fullName}</h4>
+              <p>${response.email || "Немає email"}</p>
+              ${response.grade ? `<p>Клас: ${response.grade}</p>` : ""}
+            </div>
+          </div>
+          <div class="response-date">
+            📅 ${submittedDate}
+          </div>
+        </div>
+        <div class="response-body">
+          <h4>Відповіді на форму:</h4>
+          ${Object.entries(formData)
+          .map(
+            ([key, value]) => `
+            <div class="response-field">
+              <div class="response-field-label">${key}:</div>
+              <div class="response-field-value">${Array.isArray(value) ? value.join(", ") : value || "-"}</div>
+            </div>
+          `
+          )
+          .join("")}
+        </div>
+      </div>
+    `
+    })
+    .join("")
 }
