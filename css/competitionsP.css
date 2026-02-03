@@ -1016,3 +1016,657 @@ body {
 .competition-details-section:nth-child(1) {
   animation-delay: 0.05s;
 }
+
+/* ==================== RESPONSIVE STYLES ==================== */
+
+/* Tablet - 1024px and below */
+@media (max-width: 1024px) {
+  .main-container {
+    padding: 30px 16px 60px;
+  }
+
+  .page-hero {
+    padding: 48px 32px;
+    margin-bottom: 40px;
+  }
+
+  .page-title {
+    font-size: 40px;
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+  }
+
+  .section-card {
+    padding: 32px;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  .competitions-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .modal-content {
+    max-width: 90%;
+  }
+
+  .modal-large {
+    max-width: 95%;
+  }
+}
+
+/* Tablet Portrait - 768px and below */
+@media (max-width: 768px) {
+  body {
+    padding-top: 70px;
+  }
+
+  .main-container {
+    padding: 24px 16px 50px;
+  }
+
+  .page-hero {
+    padding: 40px 24px;
+    margin-bottom: 32px;
+    border-radius: 12px;
+  }
+
+  .page-hero::before {
+    width: 250px;
+    height: 250px;
+    top: -30%;
+    right: -15%;
+  }
+
+  .page-title {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .page-subtitle {
+    font-size: 15px;
+  }
+
+  .section-card {
+    padding: 24px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+  }
+
+  .section-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+  }
+
+  .competitions-list {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .competition-card {
+    padding: 20px;
+  }
+
+  .competition-info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px;
+    margin: 12px 0;
+  }
+
+  .competition-title {
+    font-size: 18px;
+  }
+
+  .competition-description {
+    font-size: 13px;
+  }
+
+  .competition-dates {
+    font-size: 13px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .status-badge {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .result-card {
+    padding: 20px;
+  }
+
+  .result-header h3 {
+    font-size: 16px;
+  }
+
+  .result-place {
+    font-size: 20px;
+  }
+
+  .result-score {
+    font-size: 15px;
+  }
+
+  .result-achievement {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  /* Modal styles for tablet */
+  .modal {
+    padding: 16px;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+
+  .modal-large {
+    max-width: 100%;
+  }
+
+  .modal-header {
+    padding: 20px;
+  }
+
+  .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .modal-close {
+    font-size: 28px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    padding: 16px 20px;
+    flex-direction: column;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+
+  /* Form styles for tablet */
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-group input[type="file"],
+  .form-group textarea {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  /* Document styles */
+  .document-item {
+    padding: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .document-info {
+    min-width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .document-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .document-meta {
+    gap: 12px;
+  }
+
+  /* Button styles */
+  .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  /* File preview modal */
+  .file-preview-content {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .file-preview-header {
+    padding: 16px 20px;
+  }
+
+  .file-preview-header h2 {
+    font-size: 16px;
+    max-width: 65%;
+  }
+
+  .file-preview-body {
+    padding: 16px;
+  }
+
+  .file-preview-iframe {
+    height: 50vh;
+  }
+
+  .file-preview-footer {
+    padding: 16px 20px;
+    flex-direction: column;
+  }
+
+  .file-preview-footer .btn {
+    width: 100%;
+  }
+}
+
+/* Mobile - 480px and below */
+@media (max-width: 480px) {
+  body {
+    padding-top: 60px;
+  }
+
+  .main-container {
+    padding: 16px 12px 40px;
+  }
+
+  .page-hero {
+    padding: 32px 16px;
+    margin-bottom: 24px;
+    border-radius: 10px;
+  }
+
+  .page-hero::before {
+    display: none;
+  }
+
+  .page-title {
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+
+  .page-subtitle {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .section-card {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+  }
+
+  .section-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .section-subtitle {
+    font-size: 13px;
+  }
+
+  .competition-card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .competition-info-grid {
+    padding: 8px;
+    border-radius: 6px;
+  }
+
+  .info-item {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .info-icon {
+    font-size: 14px;
+  }
+
+  .competition-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .competition-description {
+    font-size: 13px;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  .competition-dates {
+    font-size: 12px;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .competition-dates span {
+    gap: 6px;
+  }
+
+  .competition-organizer-info {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin-top: 10px;
+  }
+
+  .status-badge {
+    padding: 5px 10px;
+    font-size: 10px;
+    margin-top: 10px;
+  }
+
+  .result-card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .result-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .result-header h3 {
+    font-size: 15px;
+  }
+
+  .result-date {
+    font-size: 12px;
+  }
+
+  .result-body {
+    gap: 10px;
+  }
+
+  .result-place {
+    font-size: 18px;
+  }
+
+  .result-score {
+    font-size: 14px;
+  }
+
+  .result-achievement {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .result-notes {
+    font-size: 12px;
+  }
+
+  /* Modal styles for mobile */
+  .modal {
+    padding: 8px;
+  }
+
+  .modal-content {
+    border-radius: 10px;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .modal-close {
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+  }
+
+  /* Form styles for mobile */
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input[type="file"] {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .form-group textarea {
+    padding: 8px;
+    font-size: 12px;
+    min-height: 80px;
+  }
+
+  .file-hint {
+    font-size: 11px;
+  }
+
+  .upload-progress {
+    margin-top: 12px;
+    padding: 12px;
+  }
+
+  .progress-bar {
+    height: 8px;
+  }
+
+  #progressText {
+    font-size: 12px;
+  }
+
+  /* Document styles for mobile */
+  .my-documents {
+    margin-top: 24px;
+    padding-top: 16px;
+  }
+
+  .my-documents h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .documents-list {
+    gap: 10px;
+  }
+
+  .document-item {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .document-name {
+    font-size: 14px;
+  }
+
+  .document-meta {
+    font-size: 11px;
+    gap: 10px;
+  }
+
+  .document-description {
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  .document-actions {
+    gap: 6px;
+  }
+
+  /* Button styles for mobile */
+  .btn {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  /* File preview for mobile */
+  .file-preview-header {
+    padding: 12px 16px;
+  }
+
+  .file-preview-header h2 {
+    font-size: 14px;
+  }
+
+  .file-preview-body {
+    padding: 12px;
+  }
+
+  .file-preview-iframe {
+    height: 45vh;
+  }
+
+  .file-preview-image {
+    max-height: 60vh;
+  }
+
+  .file-preview-unsupported {
+    padding: 40px 16px;
+  }
+
+  .file-preview-footer {
+    padding: 12px 16px;
+  }
+
+  /* Loading and empty states */
+  .loading {
+    padding: 40px 16px;
+    font-size: 14px;
+  }
+
+  .loading::after {
+    width: 32px;
+    height: 32px;
+    margin-left: 10px;
+    border-width: 2px;
+  }
+
+  .empty-state {
+    padding: 40px 16px;
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  /* Competition details modal */
+  .competition-details-section {
+    padding: 12px;
+    gap: 10px;
+    border-radius: 6px;
+  }
+}
+
+/* Small Mobile - 360px and below */
+@media (max-width: 360px) {
+  .main-container {
+    padding: 12px 8px 32px;
+  }
+
+  .page-hero {
+    padding: 24px 12px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+  }
+
+  .section-card {
+    padding: 12px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .competition-card {
+    padding: 12px;
+  }
+
+  .competition-title {
+    font-size: 15px;
+  }
+
+  .modal-header {
+    padding: 12px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 12px;
+  }
+
+  .modal-footer {
+    padding: 10px 12px;
+  }
+}
