@@ -9,6 +9,9 @@ if (window.location.hostname === "localhost") {
 }
 console.log("📡 Підключення до:", BASE_URL)
 
+const userId = localStorage.getItem("userId")
+const userRole = localStorage.getItem("userRole")
+
 const currentDate = new Date()
 let currentMonth = currentDate.getMonth()
 let currentYear = currentDate.getFullYear()
@@ -56,14 +59,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupEventListeners()
 })
 
-// Load competitions from API
+// Load competitions from API filtered by user role
 async function loadCompetitions() {
   try {
     const response = await fetch(`${BASE_URL}/api/calendar/competitions`)
     const data = await response.json()
 
     if (data.competitions) {
-      competitions = data.competitions
+      let allCompetitions = data.competitions
+
+      if (userRole === "учень" && userId) {
+        // Student: only competitions they are a participant in
+        const studentCompIds = await loadStudentCompetitionIds()
+        allCompetitions = allCompetitions.filter(c => studentCompIds.has(c.id))
+      } else if (userRole === "вчитель" && userId) {
+        // Teacher: only competitions they are subscribed to
+        const teacherSubIds = await loadTeacherSubscriptionIds()
+        allCompetitions = allCompetitions.filter(c => teacherSubIds.has(c.id))
+      }
+      // Methodist: sees all competitions, no filter needed
+
+      competitions = allCompetitions
       filteredCompetitions = [...competitions]
     }
   } catch (error) {
@@ -71,6 +87,34 @@ async function loadCompetitions() {
     competitions = []
     filteredCompetitions = []
   }
+}
+
+// Load competition IDs the student is a participant in
+async function loadStudentCompetitionIds() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/competitions/user/${userId}`)
+    const data = await response.json()
+    if (response.ok && data.competitions) {
+      return new Set(data.competitions.map(c => c.id))
+    }
+  } catch (error) {
+    console.error("Error loading student competitions:", error)
+  }
+  return new Set()
+}
+
+// Load competition IDs the teacher is subscribed to
+async function loadTeacherSubscriptionIds() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/teacher/${userId}/competition-subscriptions`)
+    const data = await response.json()
+    if (response.ok && data.subscriptions) {
+      return new Set(data.subscriptions.map(s => s.competition_id))
+    }
+  } catch (error) {
+    console.error("Error loading teacher subscriptions:", error)
+  }
+  return new Set()
 }
 
 // Load subjects for filter
@@ -494,9 +538,8 @@ function renderUpcomingEvents() {
                         </svg>
                         <span>Закінчення: <strong>${formatDateUkrainian(endDate)}</strong></span>
                     </div>
-                    ${
-                      comp.registration_deadline
-                        ? `
+                    ${comp.registration_deadline
+          ? `
                     <div class="date-row">
                         <svg class="date-icon" viewBox="0 0 24 24" fill="none" stroke="#d4a574" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -506,8 +549,8 @@ function renderUpcomingEvents() {
                         <span>Дедлайн: <strong>${formatDateUkrainian(new Date(comp.registration_deadline))}</strong></span>
                     </div>
                     `
-                        : ""
-                    }
+          : ""
+        }
                 </div>
                 <div class="upcoming-card-badges">
                     <span class="status-badge status-${status}">${status === "active" ? "Активний" : "Очікується"}</span>
