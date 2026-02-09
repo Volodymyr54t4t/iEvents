@@ -47,7 +47,7 @@
 
                 <select id="filterOwnership" class="filter-select">
                     <option value="all">Всі конкурси</option>
-                    <option value="my">Мої конкурси</option>
+                    
                 </select>
 
                 <select id="sortBy" class="filter-select">
@@ -60,11 +60,31 @@
             </div>
         </div>
 
-        <!-- Updated card title -->
-        <div class="card">
-            <h2>Конкурси</h2>
-            <!-- Competitions list now displays 3 per row with expanded details inline -->
+        <!-- Competition tabs -->
+        <div class="competitions-tabs">
+            <button class="competitions-tab active" id="tab-all" onclick="switchCompetitionsTab('all')">
+                Всi конкурси
+            </button>
+            <button class="competitions-tab" id="tab-my" onclick="switchCompetitionsTab('my')">
+                Мої конкурси
+                <span class="tab-count" id="myCompetitionsCount">0</span>
+            </button>
+        </div>
+
+        <!-- All competitions card -->
+        <div class="card" id="allCompetitionsCard">
+            <h2>Всi конкурси</h2>
+            <p class="card-subtitle">Оберiть конкурси, на якi хочете пiдписатися, щоб додавати учнiв</p>
             <div id="competitionsList" class="competitions-list">
+                <div class="loading">Завантаження...</div>
+            </div>
+        </div>
+
+        <!-- My competitions card -->
+        <div class="card" id="myCompetitionsCard" style="display: none;">
+            <h2>Мої конкурси</h2>
+            <p class="card-subtitle">Конкурси, на якi ви пiдписанi. Тут можна додавати учнiв.</p>
+            <div id="myCompetitionsList" class="competitions-list">
                 <div class="loading">Завантаження...</div>
             </div>
         </div>

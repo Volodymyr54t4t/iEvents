@@ -484,7 +484,7 @@ body {
 .online-badge {
   background: #e8f5f1;
   color: #1a4d3e;
-  border-left: 33px solid #3a8b73;
+  border-left: 3px solid #3a8b73;
 }
 
 .competition-details-quick {
@@ -2016,5 +2016,438 @@ body {
     width: 40px;
     height: 40px;
     font-size: 14px;
+  }
+}
+
+/* ==================== COMPETITIONS TABS ==================== */
+
+@keyframes tabSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes subscribePulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes subscribeCheck {
+  0% {
+    transform: scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.3) rotate(10deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes unsubscribeShake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-3px);
+  }
+
+  40% {
+    transform: translateX(3px);
+  }
+
+  60% {
+    transform: translateX(-2px);
+  }
+
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes badgeAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) rotate(45deg) scale(0.5);
+  }
+
+  60% {
+    transform: translateX(-2px) rotate(45deg) scale(1.05);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotate(45deg) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.competitions-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: white;
+  padding: 6px;
+  border-radius: 12px;
+  border: 2px solid #e8e3da;
+  box-shadow: 0 2px 8px rgba(26, 58, 82, 0.06);
+  animation: tabSlideIn 0.5s ease-out 0.1s both;
+}
+
+.competitions-tab {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.competitions-tab::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  opacity: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(26, 58, 82, 0.08) 0%, transparent 70%);
+  transition: opacity 0.3s ease;
+}
+
+.competitions-tab:hover::after {
+  opacity: 1;
+}
+
+.competitions-tab:hover {
+  color: #1a3a52;
+  background: #faf8f3;
+  transform: translateY(-1px);
+}
+
+.competitions-tab.active {
+  background: linear-gradient(135deg, #1a3a52 0%, #0f2839 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(26, 58, 82, 0.35);
+  transform: translateY(-1px);
+}
+
+.competitions-tab.active:hover {
+  box-shadow: 0 6px 20px rgba(26, 58, 82, 0.45);
+  transform: translateY(-2px);
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.25);
+  color: inherit;
+  transition: all 0.3s ease;
+  animation: scaleInBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.competitions-tab:not(.active) .tab-count {
+  background: #e8e3da;
+  color: #1a3a52;
+}
+
+.card-subtitle {
+  color: #888;
+  font-size: 14px;
+  margin-top: -20px;
+  margin-bottom: 24px;
+  animation: fadeIn 0.6s ease-out 0.4s both;
+}
+
+/* ==================== SUBSCRIBE / UNSUBSCRIBE BUTTONS ==================== */
+
+.btn-subscribe {
+  background: linear-gradient(135deg, #2d5f3f 0%, #1a4d2e 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(45, 95, 63, 0.35);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-subscribe::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease, height 0.5s ease;
+}
+
+.btn-subscribe:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-subscribe:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 24px rgba(45, 95, 63, 0.5);
+  background: linear-gradient(135deg, #1a4d2e 0%, #2d5f3f 100%);
+  animation: subscribePulse 0.6s ease-in-out;
+}
+
+.btn-subscribe:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(45, 95, 63, 0.3);
+}
+
+.btn-subscribe .btn-icon-animate {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-weight: 700;
+}
+
+.btn-subscribe:hover .btn-icon-animate {
+  animation: subscribeCheck 0.5s ease-out;
+}
+
+.btn-unsubscribe {
+  background: linear-gradient(135deg, #c41e3a 0%, #8b1528 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(196, 30, 58, 0.25);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-unsubscribe::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease, height 0.5s ease;
+}
+
+.btn-unsubscribe:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-unsubscribe:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(196, 30, 58, 0.4);
+  background: linear-gradient(135deg, #8b1528 0%, #c41e3a 100%);
+}
+
+.btn-unsubscribe:hover .btn-icon-animate {
+  animation: unsubscribeShake 0.4s ease-out;
+}
+
+.btn-unsubscribe:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.btn-icon-animate {
+  display: inline-block;
+  margin-right: 4px;
+  font-weight: 700;
+  transition: transform 0.3s ease;
+}
+
+/* ==================== SUBSCRIBED ITEM STYLES ==================== */
+
+.subscribed-item {
+  border-color: #2d5f3f;
+  background: linear-gradient(135deg, #f8fdf9 0%, #ffffff 100%);
+  box-shadow: 0 4px 16px rgba(45, 95, 63, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.subscribed-item::before {
+  background: linear-gradient(90deg, #2d5f3f, #1a4d2e) !important;
+  opacity: 1 !important;
+}
+
+.subscribed-item:hover {
+  border-color: #1a4d2e;
+  box-shadow: 0 12px 28px rgba(45, 95, 63, 0.22);
+}
+
+.subscribed-badge-corner {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: linear-gradient(135deg, #2d5f3f 0%, #1a4d2e 100%);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 6px 24px 6px 12px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 20% 100%);
+  z-index: 2;
+  animation: badgeAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+  box-shadow: -2px 2px 6px rgba(45, 95, 63, 0.3);
+}
+
+/* ==================== RESPONSIVE FOR NEW STYLES ==================== */
+
+@media (max-width: 768px) {
+  .competitions-tabs {
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .competitions-tab {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .tab-count {
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+
+  .btn-subscribe {
+    padding: 10px 16px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-unsubscribe {
+    padding: 8px 14px;
+    font-size: 11px;
+  }
+
+  .subscribed-badge-corner {
+    font-size: 9px;
+    padding: 5px 20px 5px 10px;
+  }
+
+  .card-subtitle {
+    margin-top: -16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .competitions-tabs {
+    flex-direction: row;
+    padding: 3px;
+  }
+
+  .competitions-tab {
+    padding: 10px 12px;
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .tab-count {
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+    padding: 0 5px;
+  }
+
+  .btn-subscribe {
+    padding: 10px 14px;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-unsubscribe {
+    padding: 8px 12px;
+    font-size: 10px;
+  }
+
+  .subscribed-badge-corner {
+    font-size: 8px;
+    padding: 4px 16px 4px 8px;
+  }
+
+  .card-subtitle {
+    margin-top: -12px;
+    margin-bottom: 16px;
+    font-size: 12px;
   }
 }

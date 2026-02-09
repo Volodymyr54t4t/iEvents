@@ -9,7 +9,7 @@ const fs = require("fs")
 const { initBot, notifyUserAddedToCompetition, notifyUserNewResult, notifyNewCompetition } = require("./bot")
 
 const app = express()
-const PORT = 3000
+const PORT = process.env.PORT || 3000
 
 // Зберігаємо ID чатів для сповіщень
 const subscribedChats = new Set()
@@ -872,6 +872,33 @@ async function initializeDatabase() {
       }
     }
     // --- CHANGES END HERE ---
+
+    // Перевірка та створення таблиці teacher_competition_subscriptions
+    console.log("Перевірка таблиці teacher_competition_subscriptions...")
+    const teacherSubsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'teacher_competition_subscriptions'
+      ) as exists
+    `)
+
+    if (!teacherSubsTableCheck.rows[0].exists) {
+      console.log("  → Створення таблиці teacher_competition_subscriptions...")
+      // Видаляємо залишкову послідовність, якщо вона існує без таблиці
+      await client.query(`DROP SEQUENCE IF EXISTS teacher_competition_subscriptions_id_seq CASCADE`)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS teacher_competition_subscriptions (
+          id SERIAL PRIMARY KEY,
+          teacher_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          competition_id INTEGER REFERENCES competitions(id) ON DELETE CASCADE,
+          subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(teacher_id, competition_id)
+        )
+      `)
+      console.log("  ✓ Таблиця teacher_competition_subscriptions створена")
+    } else {
+      console.log("  ✓ Таблиця teacher_competition_subscriptions вже існує")
+    }
 
     console.log("=== База даних готова до роботи! ===\n")
   } catch (error) {
@@ -2008,6 +2035,61 @@ app.delete("/api/competitions/:id", async (req, res) => {
     res.status(500).json({
       error: "Помилка видалення конкурсу",
     })
+  }
+})
+
+// === Підписки вчителів на конкурси ===
+
+// Отримання підписок вчителя
+app.get("/api/teacher/:teacherId/competition-subscriptions", async (req, res) => {
+  const { teacherId } = req.params
+
+  try {
+    const result = await pool.query(
+      "SELECT competition_id, subscribed_at FROM teacher_competition_subscriptions WHERE teacher_id = $1",
+      [teacherId]
+    )
+
+    res.json({
+      subscriptions: result.rows
+    })
+  } catch (error) {
+    console.error("Помилка отримання підписок:", error.message)
+    res.status(500).json({ error: "Помилка отримання підписок" })
+  }
+})
+
+// Підписка на конкурс
+app.post("/api/teacher/:teacherId/competition-subscriptions/:competitionId", async (req, res) => {
+  const { teacherId, competitionId } = req.params
+
+  try {
+    await pool.query(
+      "INSERT INTO teacher_competition_subscriptions (teacher_id, competition_id) VALUES ($1, $2) ON CONFLICT (teacher_id, competition_id) DO NOTHING",
+      [teacherId, competitionId]
+    )
+
+    res.json({ message: "Успішно підписано на конкурс" })
+  } catch (error) {
+    console.error("Помилка підписки на конкурс:", error.message)
+    res.status(500).json({ error: "Помилка підписки на конкурс" })
+  }
+})
+
+// Відписка від конкурсу
+app.delete("/api/teacher/:teacherId/competition-subscriptions/:competitionId", async (req, res) => {
+  const { teacherId, competitionId } = req.params
+
+  try {
+    await pool.query(
+      "DELETE FROM teacher_competition_subscriptions WHERE teacher_id = $1 AND competition_id = $2",
+      [teacherId, competitionId]
+    )
+
+    res.json({ message: "Успішно відписано від конкурсу" })
+  } catch (error) {
+    console.error("Помилка відписки від конкурсу:", error.message)
+    res.status(500).json({ error: "Помилка відписки від конкурсу" })
   }
 })
 
@@ -4028,15 +4110,33 @@ app.get("/api/calendar/competitions", async (req, res) => {
 })
 
 // Запуск сервера
-app.listen(PORT, async () => {
-  console.log(`🚀 Сервер запущено на порту ${PORT}`)
+const server = app.listen(PORT, async () => {
+  console.log(`Сервер запущено на порту ${PORT}`)
   await initializeDatabase()
 
   try {
     await initBot()
-    console.log("✅ Telegram бот успішно запущено")
+    console.log("Telegram бот успiшно запущено")
   } catch (error) {
-    console.error("❌ Помилка при запуску Telegram бота:", error)
+    console.error("Помилка при запуску Telegram бота:", error)
+  }
+})
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.log(`Порт ${PORT} зайнятий, пробуємо порт ${PORT + 1}...`)
+    server.close()
+    app.listen(PORT + 1, async () => {
+      console.log(`Сервер запущено на порту ${PORT + 1}`)
+      await initializeDatabase()
+      try {
+        await initBot()
+      } catch (e) {
+        console.error("Помилка бота:", e)
+      }
+    })
+  } else {
+    console.error("Помилка сервера:", err)
   }
 })
 

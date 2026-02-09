@@ -22,6 +22,10 @@ let currentDocumentsStudents = []
 let dynamicFieldCount = 0
 let currentResponses = []
 
+// Subscription system
+let teacherSubscriptions = new Set()
+let currentTab = "all"
+
 // Перевірка авторизації
 const userId = localStorage.getItem("userId")
 const userRole = localStorage.getItem("userRole")
@@ -35,8 +39,9 @@ if (userRole !== "вчитель") {
   window.location.href = "index.html"
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   loadSubjects()
+  await loadTeacherSubscriptions()
   loadCompetitions()
   loadStudents()
 
@@ -83,6 +88,188 @@ async function loadSubjects() {
   } catch (error) {
     console.error("Помилка завантаження предметів:", error)
   }
+}
+
+// === Subscription system ===
+
+async function loadTeacherSubscriptions() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/teacher/${userId}/competition-subscriptions`)
+    const data = await response.json()
+
+    if (response.ok) {
+      teacherSubscriptions = new Set(data.subscriptions.map(s => s.competition_id))
+      updateMyCompetitionsCount()
+    }
+  } catch (error) {
+    console.error("Помилка завантаження підписок:", error)
+  }
+}
+
+async function subscribeToCompetition(competitionId) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/teacher/${userId}/competition-subscriptions/${competitionId}`, {
+      method: "POST"
+    })
+
+    if (response.ok) {
+      teacherSubscriptions.add(competitionId)
+      updateMyCompetitionsCount()
+      filterAndSortCompetitions()
+      renderMyCompetitions()
+    } else {
+      alert("Помилка пiдписки на конкурс")
+    }
+  } catch (error) {
+    console.error("Помилка:", error)
+    alert("Помилка пiдписки на конкурс")
+  }
+}
+
+async function unsubscribeFromCompetition(competitionId) {
+  if (!confirm("Ви впевненi, що хочете вiдписатися вiд цього конкурсу?")) return
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/teacher/${userId}/competition-subscriptions/${competitionId}`, {
+      method: "DELETE"
+    })
+
+    if (response.ok) {
+      teacherSubscriptions.delete(competitionId)
+      updateMyCompetitionsCount()
+      filterAndSortCompetitions()
+      renderMyCompetitions()
+    } else {
+      alert("Помилка вiдписки вiд конкурсу")
+    }
+  } catch (error) {
+    console.error("Помилка:", error)
+    alert("Помилка вiдписки вiд конкурсу")
+  }
+}
+
+function updateMyCompetitionsCount() {
+  const countEl = document.getElementById("myCompetitionsCount")
+  if (countEl) {
+    countEl.textContent = teacherSubscriptions.size
+    countEl.style.display = teacherSubscriptions.size > 0 ? "inline-flex" : "none"
+  }
+}
+
+function switchCompetitionsTab(tab) {
+  currentTab = tab
+
+  document.querySelectorAll(".competitions-tab").forEach(t => t.classList.remove("active"))
+  document.getElementById(`tab-${tab}`).classList.add("active")
+
+  const allCard = document.getElementById("allCompetitionsCard")
+  const myCard = document.getElementById("myCompetitionsCard")
+  const filtersSection = document.querySelector(".filters-section")
+
+  if (tab === "all") {
+    allCard.style.display = "block"
+    myCard.style.display = "none"
+    filtersSection.style.display = "block"
+  } else {
+    allCard.style.display = "none"
+    myCard.style.display = "block"
+    filtersSection.style.display = "none"
+    renderMyCompetitions()
+  }
+}
+
+function renderMyCompetitions() {
+  const container = document.getElementById("myCompetitionsList")
+
+  const myCompetitions = allCompetitions.filter(c => teacherSubscriptions.has(c.id))
+
+  if (myCompetitions.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>У вас немає пiдписаних конкурсiв</h3>
+        <p>Перейдiть на вкладку "Всi конкурси" та натиснiть "Взяти собi" на потрiбних конкурсах</p>
+      </div>
+    `
+    return
+  }
+
+  container.innerHTML = myCompetitions
+    .map(competition => {
+      const startDate = new Date(competition.start_date)
+      const endDate = new Date(competition.end_date)
+      const today = new Date()
+
+      let status = "inactive"
+      let statusText = "Неактивний"
+
+      if (endDate < today) {
+        status = "inactive"
+        statusText = "Завершено"
+      } else if (startDate > today) {
+        status = "upcoming"
+        statusText = "Майбутнiй"
+      } else {
+        status = "active"
+        statusText = "Активний"
+      }
+
+      const subjectName = competition.subject_name || "Не вказано"
+      const isOwner = competition.created_by == userId
+
+      return `
+        <div class="competition-item subscribed-item">
+          <div class="subscribed-badge-corner">Мiй конкурс</div>
+          <div class="competition-header">
+            <div>
+              <h3 class="competition-title">${competition.title}</h3>
+              <div class="competition-badges">
+                <span class="status-badge status-${status}">${statusText}</span>
+                ${competition.level ? `<span class="level-badge">${competition.level}</span>` : ""}
+                <span class="subject-badge">${subjectName}</span>
+                ${competition.is_online ? '<span class="online-badge">Онлайн</span>' : ""}
+              </div>
+            </div>
+            <div class="competition-actions">
+              <button class="btn btn-success" onclick="openAddStudentsModal(${competition.id})">
+                Додати учнiв
+              </button>
+              <button class="btn btn-info" onclick="openCompetitionDetailsModal(${competition.id})">
+                Детальнiше
+              </button>
+              <button class="btn btn-view-docs" onclick="openViewDocumentsModal(${competition.id})">
+                Файли учнiв
+              </button>
+              <button class="btn btn-info" onclick="window.location.href='results.html'">
+                Результати
+              </button>
+              <button class="btn btn-secondary" onclick="openViewResponsesModal(${competition.id})">
+                Вiдповiдi учнiв
+              </button>
+              ${isOwner
+          ? `
+                <button class="btn btn-primary btn-sm" onclick='openEditCompetitionModal(${JSON.stringify(competition).replace(/'/g, "&#39;")})'>
+                  Редагувати
+                </button>
+              `
+          : ""
+        }
+              <button class="btn btn-unsubscribe" onclick="unsubscribeFromCompetition(${competition.id})">
+                Вiдписатися
+              </button>
+            </div>
+          </div>
+          ${competition.description ? `<p class="competition-description">${competition.description}</p>` : ""}
+          <div class="competition-meta">
+            <span>Початок: ${startDate.toLocaleDateString("uk-UA")}</span>
+            <span>Закiнчення: ${endDate.toLocaleDateString("uk-UA")}</span>
+            <span>Учасникiв: ${competition.participants_count || 0}</span>
+            ${competition.max_participants ? `<span>Лiмiт: ${competition.max_participants}</span>` : ""}
+          </div>
+          ${competition.organizer ? `<div class="competition-organizer">Органiзатор: ${competition.organizer}</div>` : ""}
+        </div>
+      `
+    })
+    .join("")
 }
 
 // Обробка форми створення конкурсу
@@ -602,9 +789,11 @@ function displayCompetitions(competitions) {
 
       const subjectName = competition.subject_name || "Не вказано"
       const isOwner = competition.created_by == userId
+      const isSubscribed = teacherSubscriptions.has(competition.id)
 
       return `
-        <div class="competition-item">
+        <div class="competition-item ${isSubscribed ? 'subscribed-item' : ''}" style="animation-delay: ${0.05}s">
+          ${isSubscribed ? '<div class="subscribed-badge-corner">Мiй конкурс</div>' : ''}
           <div class="competition-header">
             <div>
               <h3 class="competition-title">${competition.title}</h3>
@@ -616,25 +805,33 @@ function displayCompetitions(competitions) {
               </div>
             </div>
             <div class="competition-actions">
+              ${isSubscribed
+          ? `<button class="btn btn-unsubscribe" onclick="event.stopPropagation(); unsubscribeFromCompetition(${competition.id})">
+                    <span class="btn-icon-animate">&#10005;</span> Вiдписатися
+                  </button>`
+          : `<button class="btn btn-subscribe" onclick="event.stopPropagation(); subscribeToCompetition(${competition.id})">
+                    <span class="btn-icon-animate">&#10003;</span> ПIДПИСАТИСЯ
+                  </button>`
+        }
               <button class="btn btn-info" onclick="openCompetitionDetailsModal(${competition.id})">
-                📋 Детальніше
+                Детальнiше
               </button>
               <button class="btn btn-view-docs" onclick="openViewDocumentsModal(${competition.id})">
-                📎 Файли учнів
+                Файли учнiв
               </button>
               <button class="btn btn-info" onclick="window.location.href='results.html'">
-                📊 Результати
+                Результати
               </button>
               <button class="btn btn-secondary" onclick="openViewResponsesModal(${competition.id})">
-                📝 Відповіді учнів
+                Вiдповiдi учнiв
               </button>
-              <button class="btn btn-success" onclick="openAddStudentsModal(${competition.id})">
-                Додати учнів
-              </button>
+              ${isSubscribed ? `<button class="btn btn-success" onclick="openAddStudentsModal(${competition.id})">
+                Додати учнiв
+              </button>` : ''}
               ${isOwner
           ? `
                 <button class="btn btn-primary btn-sm" onclick='openEditCompetitionModal(${JSON.stringify(competition).replace(/'/g, "&#39;")})'>
-                  ✏️ Редагувати
+                  Редагувати
                 </button>
               `
           : ""
@@ -643,12 +840,12 @@ function displayCompetitions(competitions) {
           </div>
           ${competition.description ? `<p class="competition-description">${competition.description}</p>` : ""}
           <div class="competition-meta">
-            <span>📅 Початок: ${startDate.toLocaleDateString("uk-UA")}</span>
-            <span>📅 Закінчення: ${endDate.toLocaleDateString("uk-UA")}</span>
-            <span>👥 Учасників: ${competition.participants_count || 0}</span>
-            ${competition.max_participants ? `<span>📊 Ліміт: ${competition.max_participants}</span>` : ""}
+            <span>Початок: ${startDate.toLocaleDateString("uk-UA")}</span>
+            <span>Закiнчення: ${endDate.toLocaleDateString("uk-UA")}</span>
+            <span>Учасникiв: ${competition.participants_count || 0}</span>
+            ${competition.max_participants ? `<span>Лiмiт: ${competition.max_participants}</span>` : ""}
           </div>
-          ${competition.organizer ? `<div class="competition-organizer">🏛️ Організатор: ${competition.organizer}</div>` : ""}
+          ${competition.organizer ? `<div class="competition-organizer">Органiзатор: ${competition.organizer}</div>` : ""}
         </div>
       `
     })
