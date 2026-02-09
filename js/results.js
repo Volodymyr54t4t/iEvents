@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
     BASE_URL = "http://localhost:3000"
 } else {
     // ☁️ Онлайн-сервер Render
-    BASE_URL = "https://ievents-qf5k.onrender.com"
+    BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -26,31 +26,62 @@ let currentCompetitionId = null
 let currentParticipants = []
 let allParticipants = []
 let allClasses = new Set()
+let teacherSubscribedIds = new Set()
 
 document.addEventListener("DOMContentLoaded", () => {
     loadCompetitions()
 })
 
+async function loadTeacherSubscriptions() {
+    if (userRole !== "вчитель") return
+    try {
+        const response = await fetch(`${BASE_URL}/api/teacher/${userId}/competition-subscriptions`)
+        const data = await response.json()
+        if (response.ok && data.subscriptions) {
+            teacherSubscribedIds = new Set(data.subscriptions.map(s => s.competition_id))
+        }
+    } catch (error) {
+        console.error("Помилка завантаження пiдписок:", error)
+    }
+}
+
 async function loadCompetitions() {
     const select = document.getElementById("competitionFilter")
 
     try {
+        // Спочатку завантажуємо пiдписки вчителя
+        if (userRole === "вчитель") {
+            await loadTeacherSubscriptions()
+        }
+
         const response = await fetch(`${BASE_URL}/api/competitions`)
         const data = await response.json()
 
         if (response.ok && data.competitions.length > 0) {
-            select.innerHTML =
-                '<option value="">Всі конкурси</option>' +
-                data.competitions
-                .map((comp) => `<option value="${comp.id}">${comp.title} (${comp.participants_count} учасників)</option>`)
-                .join("")
+            // Для вчителiв показуємо лише тi конкурси, на якi вони пiдписанi
+            let filteredCompetitions = data.competitions
+            if (userRole === "вчитель") {
+                filteredCompetitions = data.competitions.filter(comp => teacherSubscribedIds.has(comp.id))
+            }
 
-            document.getElementById("filtersSection").style.display = "block"
+            if (filteredCompetitions.length > 0) {
+                select.innerHTML =
+                    '<option value="">Оберiть конкурс</option>' +
+                    filteredCompetitions
+                        .map((comp) => `<option value="${comp.id}">${comp.title} (${comp.participants_count} учасникiв)</option>`)
+                        .join("")
+
+                document.getElementById("filtersSection").style.display = "block"
+            } else {
+                select.innerHTML = '<option value="">У вас немає пiдписок на конкурси</option>'
+                document.getElementById("filtersSection").style.display = "block"
+                document.getElementById("participantsCard").style.display = "none"
+            }
         } else {
-            select.innerHTML = '<option value="">Конкурсів не знайдено</option>'
+            select.innerHTML = '<option value="">Конкурсiв не знайдено</option>'
         }
     } catch (error) {
-        console.error("Помилка завантаження конкурсів:", error)
+        console.error("Помилка завантаження конкурсiв:", error)
         select.innerHTML = '<option value="">Помилка завантаження</option>'
     }
 }
@@ -83,9 +114,9 @@ async function loadCompetitionParticipants() {
             classFilter.innerHTML =
                 '<option value="">Всі класи</option>' +
                 Array.from(allClasses)
-                .sort()
-                .map((grade) => `<option value="${grade}">${grade}</option>`)
-                .join("")
+                    .sort()
+                    .map((grade) => `<option value="${grade}">${grade}</option>`)
+                    .join("")
 
             displayParticipants(data.participants)
         } else {
@@ -202,73 +233,66 @@ function displayParticipants(participants) {
             </div>
           </div>
           
-          ${
-            hasResult
-              ? `
+          ${hasResult
+                    ? `
             <div class="result-info">
-              ${
-                participant.score !== null
-                  ? `
+              ${participant.score !== null
+                        ? `
                 <div class="result-badge">
                   <span class="result-label">Бали</span>
                   <span class="result-value score">${participant.score}</span>
                 </div>
               `
-                  : ""
-              }
-              ${
-                placeDisplay
-                  ? `
+                        : ""
+                    }
+              ${placeDisplay
+                        ? `
                 <div class="result-badge">
                   <span class="result-label">Місце</span>
                   <span class="result-value place">${placeDisplay}</span>
                 </div>
               `
-                  : ""
-              }
+                        : ""
+                    }
             </div>
           `
-              : `
+                    : `
             <span class="no-result-badge">Без результату</span>
           `
-          }
+                }
           
           <div class="participant-actions">
-            ${
-              hasResult
-                ? `
-              ${
-                userRole === "методист"
-                  ? `
+            ${hasResult
+                    ? `
+              ${userRole === "методист"
+                        ? `
                 <button class="btn btn-warning" onclick="editResult(${participant.student_id})">
                   Редагувати
                 </button>
               `
-                  : ""
-              }
-              ${
-                userRole === "методист"
-                  ? `
+                        : ""
+                    }
+              ${userRole === "методист"
+                        ? `
                 <button class="btn btn-danger" onclick="deleteResult(${participant.result_id})">
                   Видалити
                 </button>
               `
-                  : ""
-              }
-              ${
-                isConfirmed
-                  ? `
+                        : ""
+                    }
+              ${isConfirmed
+                        ? `
                 <span class="confirmed-badge">Підтверджено</span>
               `
-                  : ""
-              }
+                        : ""
+                    }
             `
-                : `
+                    : `
               <button class="btn btn-primary" onclick="addResultForStudent(${participant.student_id})">
                 Додати результат
               </button>
             `
-            }
+                }
           </div>
         </div>
       `
@@ -292,11 +316,11 @@ function openAddResultModal() {
     studentSelect.innerHTML =
         '<option value="">Виберіть учня</option>' +
         studentsWithoutResults
-        .map((p) => {
-            const fullName = [p.last_name, p.first_name].filter(Boolean).join(" ") || p.email
-            return `<option value="${p.student_id}">${fullName} (${p.grade || "Без класу"})</option>`
-        })
-        .join("")
+            .map((p) => {
+                const fullName = [p.last_name, p.first_name].filter(Boolean).join(" ") || p.email
+                return `<option value="${p.student_id}">${fullName} (${p.grade || "Без класу"})</option>`
+            })
+            .join("")
 
     document.getElementById("modalTitle").textContent = "Додати результат"
     document.getElementById("editMode").value = "false"
@@ -519,9 +543,4 @@ function handlePlaceTypeChange() {
     } else {
         customPlaceGroup.style.display = "none"
     }
-}
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js")
-    .then(() => console.log("Service Worker зареєстровано"))
-    .catch(err => console.log("SW error:", err));
 }

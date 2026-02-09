@@ -5,13 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управління результатами - iEvents</title>
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/results.css">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#317EFB">
+    <!-- Added global page spacing styles -->
     <link rel="stylesheet" href="css/page-spacing.css">
+    <!-- Load config.js first -->
     <script src="js/config.js"></script>
 </head>
 
@@ -21,7 +20,7 @@
     <main class="main-container">
         <div class="page-header">
             <h1>Управління результатами</h1>
-            <p class="subtitle">Додавайте та редагуйте результати учнів</p>
+            <p class="subtitle">Результати учнiв у ваших конкурсах</p>
         </div>
 
         <!-- Фільтри та сортування -->
@@ -35,7 +34,7 @@
                     oninput="applyFilters()">
 
                 <select id="competitionFilter" class="filter-select" onchange="loadCompetitionParticipants()">
-                    <option value="">Всі конкурси</option>
+                    <option value="">Оберiть конкурс</option>
                 </select>
 
                 <select id="placeFilter" class="filter-select" onchange="applyFilters()">
