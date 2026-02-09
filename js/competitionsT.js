@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -30,8 +30,8 @@ if (!userId) {
   window.location.href = "auth.html"
 }
 
-if (userRole !== "вчитель" && userRole !== "методист") {
-  alert("У вас немає доступу до цієї сторінки")
+if (userRole !== "вчитель") {
+  alert("Ця сторінка доступна тільки для вчителів")
   window.location.href = "index.html"
 }
 
@@ -88,12 +88,6 @@ async function loadSubjects() {
 // Обробка форми створення конкурсу
 document.getElementById("createCompetitionForm").addEventListener("submit", async (e) => {
   e.preventDefault()
-
-  if (userRole !== "методист") {
-    alert("Тільки методисти можуть створювати конкурси")
-    return
-  }
-
   saveCompetition()
 })
 
@@ -637,7 +631,7 @@ function displayCompetitions(competitions) {
               <button class="btn btn-success" onclick="openAddStudentsModal(${competition.id})">
                 Додати учнів
               </button>
-              ${isOwner || userRole === "методист"
+              ${isOwner
           ? `
                 <button class="btn btn-primary btn-sm" onclick='openEditCompetitionModal(${JSON.stringify(competition).replace(/'/g, "&#39;")})'>
                   ✏️ Редагувати

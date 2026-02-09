@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управління конкурсами - iEvents</title>
+    <title>Управління конкурсами (Методист) - iEvents</title>
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/page-spacing.css">
-    <link rel="stylesheet" href="css/competitionsT.css">
+    <link rel="stylesheet" href="css/competitionsM.css">
     <script src="js/config.js"></script>
 </head>
 
@@ -18,7 +18,7 @@
     <main class="main-container">
         <div class="page-header">
             <h1>Управління конкурсами</h1>
-            <p class="subtitle">Створюйте конкурси та додавайте учнів (Вчитель)</p>
+            <p class="subtitle">Адміністрування конкурсів (Методист)</p>
         </div>
 
         <!-- Filters section with add button -->
@@ -82,10 +82,10 @@
 
             <div class="modal-tabs">
                 <button class="tab-button active" onclick="switchTab('info')" id="tab-info">
-                    📋 Інформація про конкурс
+                    Інформація про конкурс
                 </button>
                 <button class="tab-button" onclick="switchTab('form')" id="tab-form">
-                    📝 Форма для учня
+                    Форма для учня
                 </button>
             </div>
 
@@ -205,7 +205,7 @@
                         <div class="form-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="isTeamCompetition" name="isTeamCompetition">
-                                <span class="checkbox-text">👥 Командна робота</span>
+                                <span class="checkbox-text">Командна робота</span>
                             </label>
                             <small class="checkbox-hint">Якщо увімкнено, вчителі зможуть створювати команди для цього
                                 конкурсу</small>
@@ -252,7 +252,7 @@
                             <div class="dynamic-fields-header">
                                 <label>Додаткові поля форми</label>
                                 <button type="button" class="btn btn-sm btn-primary" onclick="addDynamicField()">
-                                    ➕ Додати поле
+                                    Додати поле
                                 </button>
                             </div>
                             <div id="dynamicFieldsContainer" class="dynamic-fields-container">
@@ -271,60 +271,18 @@
         </div>
     </div>
 
-    <div id="addStudentsModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h2>Додати учнів на конкурс</h2>
-                <button class="modal-close" onclick="closeAddStudentsModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="studentsListContainer">
-                    <!-- Team creation section for team competitions -->
-                    <div id="teamCreationSection"
-                        style="display: none; margin-bottom: 24px; padding: 20px; background: #f0f4f8; border-radius: 12px; border-left: 4px solid #1a3a52;">
-                        <h3 style="margin: 0 0 12px 0; color: #1a3a52;">👥 Створити команду</h3>
-                        <div class="form-group">
-                            <label for="teamNameInput">Назва команди *</label>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="teamNameInput" placeholder="Наприклад: Команда А, Група 1"
-                                    style="flex: 1;">
-                                <button class="btn btn-primary" onclick="createTeam()"
-                                    style="white-space: nowrap;">Створити</button>
-                            </div>
-                        </div>
-                        <div id="teamCreationStatus"></div>
-                        <div id="currentTeamDisplay"
-                            style="display: none; margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border-left: 3px solid #2d5f3f;">
-                            <span style="color: #2d5f3f; font-weight: 600;">✅ Команда:</span>
-                            <span id="currentTeamName" style="margin-left: 8px;"></span>
-                        </div>
-                    </div>
-
-                    <div class="search-box" style="margin-bottom: 16px;">
-                        <input type="text" id="studentSearch" placeholder="Пошук учнів за ім'ям або класом...">
-                    </div>
-                    <div id="studentsList" class="students-list">
-                        <div class="loading">Завантаження учнів...</div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeAddStudentsModal()">Скасувати</button>
-                <button class="btn btn-primary" onclick="addSelectedStudents()">Додати вибраних</button>
-            </div>
-        </div>
-    </div>
+    <!-- NO addStudentsModal for methodist - methodist cannot add students -->
 
     <div id="viewDocumentsModal" class="modal">
         <div class="modal-content modal-large">
             <div class="modal-header">
-                <h2>📎 Завантажені файли учнів</h2>
+                <h2>Завантажені файли учнів</h2>
                 <button class="modal-close" onclick="closeViewDocumentsModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="documents-upload-section">
                     <div class="upload-box">
-                        <h3>➕ Додати файл для учня</h3>
+                        <h3>Додати файл для учня</h3>
                         <div class="upload-form">
                             <div class="form-group">
                                 <label for="teacherFileInput">Оберіть файл</label>
@@ -341,7 +299,7 @@
                                     <option value="">-- Оберіть учня --</option>
                                 </select>
                             </div>
-                            <button type="button" class="btn btn-primary" onclick="uploadFileByTeacher()">📤 Завантажити
+                            <button type="button" class="btn btn-primary" onclick="uploadFileByTeacher()">Завантажити
                                 файл</button>
                         </div>
                         <div id="teacherUploadProgress" class="upload-progress" style="display: none;">
@@ -375,7 +333,7 @@
     <div id="viewResponsesModal" class="modal">
         <div class="modal-content modal-extra-large">
             <div class="modal-header">
-                <h2 id="responsesModalTitle">📊 Відповіді учнів</h2>
+                <h2 id="responsesModalTitle">Відповіді учнів</h2>
                 <button class="modal-close" onclick="closeViewResponsesModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -383,7 +341,7 @@
                     <input type="text" id="searchResponsesModal" class="filter-input"
                         placeholder="Пошук за ім'ям учня...">
                     <button class="btn btn-sm btn-secondary" onclick="exportResponsesToExcel()">
-                        📥 Експортувати в Excel
+                        Експортувати в Excel
                     </button>
                 </div>
 
@@ -398,7 +356,7 @@
     </div>
 
     <script src="js/components.js"></script>
-    <script src="js/competitionsT.js"></script>
+    <script src="js/competitionsM.js"></script>
 </body>
 
 </html>

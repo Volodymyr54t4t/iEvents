@@ -68,21 +68,23 @@ function renderHeader() {
   }
 
   const competitionsLink =
-    userRole === "вчитель" || userRole === "методист" ?
-    '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
-    '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+    userRole === "вчитель" ?
+      '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
+      userRole === "методист" ?
+        '<a href="competitionsM.html" class="nav-link">Конкурси</a>' :
+        '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
 
   const rehearsalLink =
     userRole === "вчитель" || userRole === "методист" ?
-    '<a href="rehearsalT.html" class="nav-link">Репетиції</a>' :
-    userRole === "учень" ?
-    '<a href="rehearsalP.html" class="nav-link">Репетиції</a>' :
-    ""
+      '<a href="rehearsalT.html" class="nav-link">Репетиції</a>' :
+      userRole === "учень" ?
+        '<a href="rehearsalP.html" class="nav-link">Репетиції</a>' :
+        ""
 
   const newsLink =
     userRole === "вчитель" || userRole === "методист" ?
-    '<a href="newsT.html" class="nav-link">Новини</a>' :
-    '<a href="newsP.html" class="nav-link">Новини</a>'
+      '<a href="newsT.html" class="nav-link">Новини</a>' :
+      '<a href="newsP.html" class="nav-link">Новини</a>'
 
   const resultsLink =
     userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""

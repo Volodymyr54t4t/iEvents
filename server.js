@@ -289,6 +289,51 @@ async function initializeDatabase() {
       }
     }
 
+    // Перевірка та створення таблиці subjects (потрібна для competitions.subject_id)
+    console.log("Перевірка таблиці subjects...")
+    const subjectsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'subjects'
+      ) as exists
+    `)
+
+    if (!subjectsTableCheck.rows[0].exists) {
+      console.log("  -> Створення таблиці subjects...")
+      await client.query(`
+        CREATE TABLE subjects (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          category VARCHAR(50),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `)
+      console.log("  + Таблиця subjects створена")
+
+      // Додаємо базові предмети
+      console.log("  -> Додавання базових предметів...")
+      await client.query(`
+        INSERT INTO subjects (name, category) VALUES
+        ('Математика', 'Точні науки'),
+        ('Інформатика', 'Точні науки'),
+        ('Фізика', 'Природничі науки'),
+        ('Хімія', 'Природничі науки'),
+        ('Біологія', 'Природничі науки'),
+        ('Українська мова', 'Гуманітарні науки'),
+        ('Українська література', 'Гуманітарні науки'),
+        ('Англійська мова', 'Іноземні мови'),
+        ('Німецька мова', 'Іноземні мови'),
+        ('Історія України', 'Суспільні науки'),
+        ('Географія', 'Природничі науки'),
+        ('Економіка', 'Суспільні науки'),
+        ('Правознавство', 'Суспільні науки')
+        ON CONFLICT DO NOTHING
+      `)
+      console.log("  + Базові предмети додані")
+    } else {
+      console.log("  + Таблиця subjects вже існує")
+    }
+
     // Перевірка та створення таблиці competitions
     console.log("Перевірка таблиці competitions...")
     const competitionsTableCheck = await client.query(`
@@ -317,19 +362,15 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця competitions вже існує")
       // Перевірка колонки manual_status
       console.log("  → Перевірка колонки manual_status...")
-      const manualStatusColumnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competitions' AND column_name = 'manual_status'
-        ) as exists
-      `)
-
-      if (!manualStatusColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки manual_status...")
-        await client.query(`ALTER TABLE competitions ADD COLUMN manual_status VARCHAR(20)`)
-        console.log("  ✓ Колонка manual_status додана")
-      } else {
-        console.log("  ✓ Колонка manual_status вже існує")
+      try {
+        await client.query(`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS manual_status VARCHAR(20)`)
+        console.log("  ✓ Колонка manual_status перевірена/додана")
+      } catch (e) {
+        if (e.code === '42701') {
+          console.log("  ✓ Колонка manual_status вже існує")
+        } else {
+          throw e
+        }
       }
     }
 
@@ -352,18 +393,32 @@ async function initializeDatabase() {
 
     console.log("  → Перевірка та додавання нових колонок до competitions...")
     for (const col of newCompetitionColumns) {
-      const columnCheck = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name = 'competitions' AND column_name = '${col.name}'
-        ) as exists
-      `)
-      if (!columnCheck.rows[0].exists) {
-        console.log(`  → Додавання колонки ${col.name}...`)
-        await client.query(`ALTER TABLE competitions ADD COLUMN ${col.name} ${col.type}`)
-        console.log(`  ✓ Колонка ${col.name} додана`)
-      } else {
-        console.log(`  ✓ Колонка ${col.name} вже існує`)
+      try {
+        // Use IF NOT EXISTS for simple types, or check first for complex types with REFERENCES
+        if (col.type.includes('REFERENCES')) {
+          const columnCheck = await client.query(`
+            SELECT EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_name = 'competitions' AND column_name = '${col.name}'
+            ) as exists
+          `)
+          if (!columnCheck.rows[0].exists) {
+            console.log(`  → Додавання колонки ${col.name}...`)
+            await client.query(`ALTER TABLE competitions ADD COLUMN ${col.name} ${col.type}`)
+            console.log(`  ✓ Колонка ${col.name} додана`)
+          } else {
+            console.log(`  ✓ Колонка ${col.name} вже існує`)
+          }
+        } else {
+          await client.query(`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS ${col.name} ${col.type}`)
+          console.log(`  ✓ Колонка ${col.name} перевірена/додана`)
+        }
+      } catch (e) {
+        if (e.code === '42701') {
+          console.log(`  ✓ Колонка ${col.name} вже існує`)
+        } else {
+          console.log(`  ⚠️ Помилка при додаванні ${col.name}: ${e.message}`)
+        }
       }
     }
 
