@@ -3,26 +3,57 @@
 
 <head>
     <meta charset="UTF-8" />
+    <!-- Додано правильний viewport для мобільних пристроїв -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>Статистика - iEvents</title>
     <link rel="stylesheet" href="css/header.css" />
     <link rel="stylesheet" href="css/footer.css" />
     <link rel="stylesheet" href="css/statistics.css" />
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/page-spacing.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#317EFB">
-
     <script src="js/config.js"></script>
 </head>
 
 <body>
     <div id="header"></div>
 
-    <main class="statistics-page">
+    <!-- Statistics Mode Selection Modal -->
+    <div class="stats-mode-overlay" id="statsModeOverlay">
+        <div class="stats-mode-modal">
+            <div class="stats-mode-header">
+                <h2>Оберіть тип статистики</h2>
+                <p>Яку статистику ви хочете переглянути?</p>
+            </div>
+            <div class="stats-mode-options">
+                <button class="stats-mode-btn" id="btnPlatformStats" onclick="selectStatsMode('platform')">
+                    <div class="stats-mode-icon">&#127760;</div>
+                    <div class="stats-mode-info">
+                        <div class="stats-mode-title">Загальна статистика платформи</div>
+                        <div class="stats-mode-desc">Всі учні, конкурси та результати по всій платформі iEvents</div>
+                    </div>
+                </button>
+                <button class="stats-mode-btn" id="btnInstitutionStats" onclick="selectStatsMode('institution')">
+                    <div class="stats-mode-icon">&#127979;</div>
+                    <div class="stats-mode-info">
+                        <div class="stats-mode-title">Статистика мого закладу</div>
+                        <div class="stats-mode-desc" id="institutionDesc">Статистика учнів, вчителів та конкурсів вашого
+                            закладу</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="statistics-page" id="statisticsPage" style="display: none;">
         <div class="page-header">
-            <h1>Аналітика та Статистика</h1>
+            <h1 id="pageTitle">Аналітика та Статистика</h1>
+            <p class="subtitle" id="pageSubtitle">Відстежуйте активність учнів і плануйте нові заходи</p>
+            <div class="stats-mode-switcher" id="modeSwitcher">
+                <button class="mode-switch-btn active" id="switchPlatform"
+                    onclick="switchMode('platform')">Платформа</button>
+                <button class="mode-switch-btn" id="switchInstitution" onclick="switchMode('institution')">Мій
+                    заклад</button>
+            </div>
         </div>
 
         <!-- Загальна статистика -->
@@ -190,11 +221,122 @@
                 <div class="loading">Завантаження...</div>
             </div>
         </section>
+
+        <!-- ====== INSTITUTION-SPECIFIC SECTIONS ====== -->
+        <div id="institutionSections" style="display: none;">
+            <!-- Institution info banner -->
+            <section class="institution-banner" id="institutionBanner">
+                <div class="institution-banner-content">
+                    <div class="institution-banner-icon">&#127979;</div>
+                    <div class="institution-banner-info">
+                        <h2 id="institutionName">Мій заклад</h2>
+                        <p id="institutionSummary">Завантаження...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Institution overview -->
+            <section class="overview-section" id="instOverviewSection">
+                <div class="stat-card">
+                    <div class="stat-icon students">&#128218;</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="instTotalStudents">0</div>
+                        <div class="stat-label">Учнів закладу</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon competitions">&#127942;</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="instTotalCompetitions">0</div>
+                        <div class="stat-label">Конкурсів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon participations">&#128101;</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="instTotalParticipations">0</div>
+                        <div class="stat-label">Участей</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon active">&#9889;</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="instActiveCompetitions">0</div>
+                        <div class="stat-label">Активні конкурси</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon average">&#128100;</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="instTeachersCount">0</div>
+                        <div class="stat-label">Вчителів</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rate">&#128200;</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="instParticipationRate">0%</div>
+                        <div class="stat-label">Рівень участі</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Institution charts -->
+            <section class="charts-section">
+                <div class="chart-card">
+                    <h2>Успішність по конкурсах (заклад)</h2>
+                    <canvas id="instTimelineChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Institution top students -->
+            <section class="top-students-section">
+                <h2>Топ учнів закладу</h2>
+                <div class="students-grid" id="instTopStudents">
+                    <div class="loading">Завантаження...</div>
+                </div>
+            </section>
+
+            <!-- Institution competitions -->
+            <section class="competitions-stats-section">
+                <h2>Конкурси закладу</h2>
+                <div class="competitions-table-wrapper">
+                    <table class="competitions-table" id="instCompetitionsTable">
+                        <thead>
+                            <tr>
+                                <th>Назва конкурсу</th>
+                                <th>Дата початку</th>
+                                <th>Дата закінчення</th>
+                                <th>Учасників</th>
+                                <th>Середній бал</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" class="loading">Завантаження...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Institution teachers -->
+            <section class="top-students-section" id="instTeachersSection">
+                <h2>Вчителі та методисти закладу</h2>
+                <div class="students-grid" id="instTeachersList">
+                    <div class="loading">Завантаження...</div>
+                </div>
+            </section>
+
+            <!-- Institution class details -->
+            
+        </div>
     </main>
 
     <div id="footer"></div>
-
     <script src="js/components.js"></script>
+
     <script src="js/statistics.js"></script>
 </body>
 

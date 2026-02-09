@@ -3094,6 +3094,356 @@ app.get("/api/statistics/competitions-detailed", async (req, res) => {
   }
 })
 
+// ======= INSTITUTION-FILTERED STATISTICS ENDPOINTS =======
+// All endpoints filter by school_id (integer) from profiles.school_id for reliable matching
+
+// Get user's school info
+app.get("/api/statistics/my-school", async (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ error: "userId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT p.school, p.school_id, s.name as school_name
+       FROM profiles p
+       LEFT JOIN schools s ON p.school_id = s.id
+       WHERE p.user_id = $1`,
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ school: null, schoolId: null, schoolName: null });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      school: row.school,
+      schoolId: row.school_id,
+      schoolName: row.school_name || row.school,
+    });
+  } catch (error) {
+    console.error("Error fetching user school:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution overview statistics
+app.get("/api/statistics/institution/overview", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const studentsCount = await pool.query(
+      `SELECT COUNT(*) as count FROM users u
+       INNER JOIN profiles p ON u.id = p.user_id
+       WHERE u.role = 'учень' AND p.school_id = $1`,
+      [schoolId]
+    );
+
+    const participationsCount = await pool.query(
+      `SELECT COUNT(*) as count FROM competition_participants cp
+       INNER JOIN users u ON cp.user_id = u.id
+       INNER JOIN profiles p ON u.id = p.user_id
+       WHERE p.school_id = $1`,
+      [schoolId]
+    );
+
+    const competitionsCount = await pool.query(
+      `SELECT COUNT(DISTINCT cp.competition_id) as count FROM competition_participants cp
+       INNER JOIN users u ON cp.user_id = u.id
+       INNER JOIN profiles p ON u.id = p.user_id
+       WHERE p.school_id = $1`,
+      [schoolId]
+    );
+
+    const activeCompetitions = await pool.query(
+      `SELECT COUNT(DISTINCT c.id) as count FROM competitions c
+       INNER JOIN competition_participants cp ON c.id = cp.competition_id
+       INNER JOIN users u ON cp.user_id = u.id
+       INNER JOIN profiles p ON u.id = p.user_id
+       WHERE p.school_id = $1 AND c.start_date <= CURRENT_DATE AND c.end_date >= CURRENT_DATE`,
+      [schoolId]
+    );
+
+    const teachersCount = await pool.query(
+      `SELECT COUNT(*) as count FROM users u
+       INNER JOIN profiles p ON u.id = p.user_id
+       WHERE u.role = 'вчитель' AND p.school_id = $1`,
+      [schoolId]
+    );
+
+    const methodistsCount = await pool.query(
+      `SELECT COUNT(*) as count FROM users u
+       INNER JOIN profiles p ON u.id = p.user_id
+       WHERE u.role = 'методист' AND p.school_id = $1`,
+      [schoolId]
+    );
+
+    res.json({
+      students: parseInt(studentsCount.rows[0].count),
+      participations: parseInt(participationsCount.rows[0].count),
+      competitions: parseInt(competitionsCount.rows[0].count),
+      activeCompetitions: parseInt(activeCompetitions.rows[0].count),
+      teachers: parseInt(teachersCount.rows[0].count),
+      methodists: parseInt(methodistsCount.rows[0].count),
+    });
+  } catch (error) {
+    console.error("Error fetching institution overview:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution grade statistics
+app.get("/api/statistics/institution/by-grade", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        p.grade,
+        COUNT(DISTINCT u.id) as students_count,
+        COUNT(cp.id) as participations_count
+      FROM profiles p
+      INNER JOIN users u ON p.user_id = u.id
+      LEFT JOIN competition_participants cp ON u.id = cp.user_id
+      WHERE u.role = 'учень' AND p.grade IS NOT NULL AND p.school_id = $1
+      GROUP BY p.grade
+      ORDER BY p.grade ASC`,
+      [schoolId]
+    );
+
+    res.json({ grades: result.rows });
+  } catch (error) {
+    console.error("Error fetching institution grade stats:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution top students
+app.get("/api/statistics/institution/top-students", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  const limit = parseInt(req.query.limit) || 8;
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        u.id, u.email, p.first_name, p.last_name, p.grade, p.avatar, p.school,
+        COUNT(cp.id) as participations_count
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      LEFT JOIN competition_participants cp ON u.id = cp.user_id
+      WHERE u.role = 'учень' AND p.school_id = $1
+      GROUP BY u.id, u.email, p.first_name, p.last_name, p.grade, p.avatar, p.school
+      ORDER BY participations_count DESC
+      LIMIT $2`,
+      [schoolId, limit]
+    );
+
+    res.json({ students: result.rows });
+  } catch (error) {
+    console.error("Error fetching institution top students:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution competitions detailed
+app.get("/api/statistics/institution/competitions-detailed", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        c.id, c.title, c.start_date, c.end_date,
+        COUNT(DISTINCT cp.id) as participants_count,
+        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
+        CASE
+          WHEN c.end_date < CURRENT_DATE THEN 'завершений'
+          WHEN c.start_date > CURRENT_DATE THEN 'майбутній'
+          ELSE 'активний'
+        END as status
+      FROM competitions c
+      INNER JOIN competition_participants cp ON c.id = cp.competition_id
+      INNER JOIN users u ON cp.user_id = u.id
+      INNER JOIN profiles p ON u.id = p.user_id
+      LEFT JOIN competition_results cr ON c.id = cr.competition_id AND cr.user_id = u.id
+      WHERE p.school_id = $1
+      GROUP BY c.id, c.title, c.start_date, c.end_date
+      ORDER BY c.start_date DESC`,
+      [schoolId]
+    );
+
+    res.json({ competitions: result.rows });
+  } catch (error) {
+    console.error("Error fetching institution competitions:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution competition success (last 6 months)
+app.get("/api/statistics/institution/competition-success", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        c.title, c.id,
+        COUNT(DISTINCT cp.id) as participants_count,
+        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score
+      FROM competitions c
+      INNER JOIN competition_participants cp ON c.id = cp.competition_id
+      INNER JOIN users u ON cp.user_id = u.id
+      INNER JOIN profiles p ON u.id = p.user_id
+      LEFT JOIN competition_results cr ON c.id = cr.competition_id AND cr.user_id = u.id
+      WHERE p.school_id = $1 AND c.end_date >= CURRENT_DATE - INTERVAL '6 months'
+      GROUP BY c.id, c.title, c.start_date, c.end_date
+      HAVING COUNT(DISTINCT cp.id) > 0
+      ORDER BY c.start_date DESC
+      LIMIT 10`,
+      [schoolId]
+    );
+
+    res.json({ competitions: result.rows });
+  } catch (error) {
+    console.error("Error fetching institution competition success:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution average scores
+app.get("/api/statistics/institution/average-scores", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const overallResult = await pool.query(
+      `SELECT ROUND(AVG(CAST(cr.score AS NUMERIC)), 1) as average
+      FROM competition_results cr
+      INNER JOIN users u ON cr.user_id = u.id
+      INNER JOIN profiles p ON u.id = p.user_id
+      WHERE cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' AND p.school_id = $1`,
+      [schoolId]
+    );
+
+    const byGradeResult = await pool.query(
+      `SELECT
+        p.grade,
+        ROUND(AVG(CAST(cr.score AS NUMERIC)), 1) as average_score,
+        COUNT(cr.id) as results_count
+      FROM competition_results cr
+      INNER JOIN users u ON cr.user_id = u.id
+      INNER JOIN profiles p ON u.id = p.user_id
+      WHERE cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' AND p.grade IS NOT NULL AND p.school_id = $1
+      GROUP BY p.grade
+      ORDER BY p.grade ASC`,
+      [schoolId]
+    );
+
+    res.json({
+      overallAverage: overallResult.rows[0]?.average || "N/A",
+      byGrade: byGradeResult.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching institution average scores:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution participation rate
+app.get("/api/statistics/institution/participation-rate", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        COUNT(DISTINCT u.id) as total_students,
+        COUNT(DISTINCT cp.user_id) as participating_students,
+        ROUND(
+          (COUNT(DISTINCT cp.user_id)::NUMERIC / NULLIF(COUNT(DISTINCT u.id), 0)) * 100,
+          1
+        ) as participation_rate
+      FROM users u
+      INNER JOIN profiles p ON u.id = p.user_id
+      LEFT JOIN competition_participants cp ON u.id = cp.user_id
+      WHERE u.role = 'учень' AND p.school_id = $1`,
+      [schoolId]
+    );
+
+    res.json({
+      rate: result.rows[0]?.participation_rate || 0,
+      totalStudents: parseInt(result.rows[0]?.total_students) || 0,
+      participatingStudents: parseInt(result.rows[0]?.participating_students) || 0,
+    });
+  } catch (error) {
+    console.error("Error fetching institution participation rate:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution class details
+app.get("/api/statistics/institution/class-details", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        p.grade,
+        COUNT(DISTINCT u.id) as students_count,
+        COUNT(cp.id) as participations_count,
+        ROUND(AVG(CAST(CASE WHEN cr.score::TEXT ~ '^[0-9]+(\\.[0-9]+)?$' THEN cr.score ELSE NULL END AS NUMERIC)), 1) as average_score,
+        ROUND(
+          (COUNT(DISTINCT cp.user_id)::NUMERIC / NULLIF(COUNT(DISTINCT u.id), 0)) * 100,
+          1
+        ) as participation_rate
+      FROM profiles p
+      INNER JOIN users u ON p.user_id = u.id
+      LEFT JOIN competition_participants cp ON u.id = cp.user_id
+      LEFT JOIN competition_results cr ON u.id = cr.user_id
+      WHERE u.role = 'учень' AND p.grade IS NOT NULL AND p.school_id = $1
+      GROUP BY p.grade
+      ORDER BY p.grade ASC`,
+      [schoolId]
+    );
+
+    res.json({ classes: result.rows });
+  } catch (error) {
+    console.error("Error fetching institution class details:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Institution teachers list
+app.get("/api/statistics/institution/teachers", async (req, res) => {
+  const schoolId = parseInt(req.query.schoolId);
+  if (!schoolId) return res.status(400).json({ error: "schoolId is required" });
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        u.id, u.email, u.role,
+        p.first_name, p.last_name, p.avatar, p.specialization, p.experience_years,
+        (SELECT COUNT(*) FROM competitions c WHERE c.created_by = u.id) as competitions_created
+      FROM users u
+      INNER JOIN profiles p ON u.id = p.user_id
+      WHERE (u.role = 'вчитель' OR u.role = 'методист') AND p.school_id = $1
+      ORDER BY p.last_name ASC`,
+      [schoolId]
+    );
+
+    res.json({ teachers: result.rows });
+  } catch (error) {
+    console.error("Error fetching institution teachers:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ======= END INSTITUTION-FILTERED STATISTICS =======
+
 // Telegram сповіщення
 app.post("/api/telegram/notify", async (req, res) => {
   const { message } = req.body

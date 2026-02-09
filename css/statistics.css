@@ -5,8 +5,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /* replaced blue gradient with brown gradient */
   background: linear-gradient(135deg, #f5f1eb 0%, #f9f7f4 100%);
   min-height: 100vh;
@@ -30,6 +29,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -56,6 +56,7 @@ body {
     opacity: 0;
     transform: translateY(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -69,20 +70,18 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 60%
-  );
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
   pointer-events: none;
   animation: pulse 3s ease-in-out infinite;
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 1;
   }
@@ -136,6 +135,7 @@ body {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -145,18 +145,23 @@ body {
 .stat-card:nth-child(1) {
   animation-delay: 0.1s;
 }
+
 .stat-card:nth-child(2) {
   animation-delay: 0.2s;
 }
+
 .stat-card:nth-child(3) {
   animation-delay: 0.3s;
 }
+
 .stat-card:nth-child(4) {
   animation-delay: 0.4s;
 }
+
 .stat-card:nth-child(5) {
   animation-delay: 0.5s;
 }
+
 .stat-card:nth-child(6) {
   animation-delay: 0.6s;
 }
@@ -168,11 +173,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 60%
-  );
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -195,7 +196,8 @@ body {
   transform: rotate(5deg) scale(1.1);
 }
 
-.stat-info {
+.stat-info,
+.stat-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -257,6 +259,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -266,9 +269,11 @@ body {
 .chart-card:nth-child(1) {
   animation-delay: 0.2s;
 }
+
 .chart-card:nth-child(2) {
   animation-delay: 0.3s;
 }
+
 .chart-card:nth-child(3) {
   animation-delay: 0.4s;
 }
@@ -341,24 +346,31 @@ body {
 .student-card:nth-child(1) {
   animation-delay: 0.1s;
 }
+
 .student-card:nth-child(2) {
   animation-delay: 0.15s;
 }
+
 .student-card:nth-child(3) {
   animation-delay: 0.2s;
 }
+
 .student-card:nth-child(4) {
   animation-delay: 0.25s;
 }
+
 .student-card:nth-child(5) {
   animation-delay: 0.3s;
 }
+
 .student-card:nth-child(6) {
   animation-delay: 0.35s;
 }
+
 .student-card:nth-child(7) {
   animation-delay: 0.4s;
 }
+
 .student-card:nth-child(8) {
   animation-delay: 0.45s;
 }
@@ -370,11 +382,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 60%
-  );
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -541,6 +549,7 @@ body {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -550,15 +559,19 @@ body {
 .school-item:nth-child(1) {
   animation-delay: 0.1s;
 }
+
 .school-item:nth-child(2) {
   animation-delay: 0.15s;
 }
+
 .school-item:nth-child(3) {
   animation-delay: 0.2s;
 }
+
 .school-item:nth-child(4) {
   animation-delay: 0.25s;
 }
+
 .school-item:nth-child(5) {
   animation-delay: 0.3s;
 }
@@ -804,18 +817,23 @@ body {
 .class-detail-card:nth-child(1) {
   animation-delay: 0.1s;
 }
+
 .class-detail-card:nth-child(2) {
   animation-delay: 0.15s;
 }
+
 .class-detail-card:nth-child(3) {
   animation-delay: 0.2s;
 }
+
 .class-detail-card:nth-child(4) {
   animation-delay: 0.25s;
 }
+
 .class-detail-card:nth-child(5) {
   animation-delay: 0.3s;
 }
+
 .class-detail-card:nth-child(6) {
   animation-delay: 0.35s;
 }
@@ -868,9 +886,345 @@ body {
 .loading {
   text-align: center;
   padding: 40px;
-  color: #5a7a8a;
+  color: #8b7355;
   font-size: 15px;
   animation: pulse 2s ease-in-out infinite;
+}
+
+/* ======= LOADING / EMPTY / ERROR STATES ======= */
+
+.state-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  color: #8b7355;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e8dcc8;
+  border-top: 4px solid #8b7355;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.state-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: #8b7355;
+  font-size: 15px;
+  text-align: center;
+}
+
+.state-empty-icon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.state-empty p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.state-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: #a0522d;
+  font-size: 15px;
+  text-align: center;
+}
+
+.state-error-icon {
+  font-size: 40px;
+}
+
+.state-error p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.btn-retry {
+  margin-top: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #8b7355 0%, #78643a 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.3);
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(120, 100, 58, 0.4);
+}
+
+/* Teacher card variant */
+.teacher-card .student-grade {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+  line-height: 1.4;
+}
+
+/* ======= STATUS BADGES ======= */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.upcoming {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.completed {
+  background: #e8dcc8;
+  color: #78643a;
+}
+
+/* ======= PARTICIPATION LABEL ======= */
+
+.student-participations-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ======= STATISTICS MODE SELECTION MODAL ======= */
+
+.stats-mode-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.stats-mode-modal {
+  background: white;
+  border-radius: 24px;
+  padding: 48px 40px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stats-mode-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.stats-mode-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #78643a;
+  margin-bottom: 8px;
+}
+
+.stats-mode-header p {
+  font-size: 15px;
+  color: #8b7355;
+}
+
+.stats-mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stats-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: #f5f1eb;
+  border: 2px solid #e8dcc8;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  width: 100%;
+}
+
+.stats-mode-btn:hover:not(:disabled) {
+  background: white;
+  border-color: #8b7355;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(120, 100, 58, 0.2);
+}
+
+.stats-mode-btn:active:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.stats-mode-btn:disabled {
+  cursor: not-allowed;
+}
+
+.stats-mode-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #a88264 0%, #8b7355 100%);
+  border-radius: 16px;
+  filter: none;
+}
+
+.stats-mode-info {
+  flex: 1;
+}
+
+.stats-mode-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #78643a;
+  margin-bottom: 4px;
+}
+
+.stats-mode-desc {
+  font-size: 13px;
+  color: #8b7355;
+  line-height: 1.5;
+}
+
+/* Mode switcher in page header */
+.stats-mode-switcher {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.mode-switch-btn {
+  padding: 10px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mode-switch-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+.mode-switch-btn.active {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: white;
+  color: #78643a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ======= INSTITUTION BANNER ======= */
+
+.institution-banner {
+  background: linear-gradient(135deg, #8b7355 0%, #78643a 100%);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 24px rgba(120, 100, 58, 0.25);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.institution-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.institution-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.institution-banner-icon {
+  font-size: 56px;
+  flex-shrink: 0;
+}
+
+.institution-banner-info h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.institution-banner-info p {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* ПОВНА АДАПТАЦІЯ ПІД ВСІ ПРИСТРОЇ */
@@ -939,15 +1293,18 @@ body {
   }
 
   .page-header h1 {
-    font-size: 32px; /* Corrected: Completed the font-size property */
+    font-size: 32px;
+    /* Corrected: Completed the font-size property */
   }
 
   .subtitle {
-    font-size: 14px; /* Added for consistency, scaling down from 16px */
+    font-size: 14px;
+    /* Added for consistency, scaling down from 16px */
   }
 
   .overview-section {
-    grid-template-columns: 1fr; /* Stack cards on smaller screens */
+    grid-template-columns: 1fr;
+    /* Stack cards on smaller screens */
     gap: 12px;
     margin-bottom: 32px;
   }
@@ -955,7 +1312,8 @@ body {
   .stat-card {
     padding: 20px;
     min-height: 100px;
-    flex-direction: column; /* Stack icon and info vertically */
+    flex-direction: column;
+    /* Stack icon and info vertically */
     text-align: center;
     gap: 16px;
   }
@@ -966,5 +1324,57 @@ body {
 
   .stat-info {
     padding: 16px 24px;
+  }
+
+  .stats-mode-modal {
+    padding: 32px 20px;
+  }
+
+  .stats-mode-header h2 {
+    font-size: 22px;
+  }
+
+  .stats-mode-btn {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .stats-mode-icon {
+    font-size: 36px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  .stats-mode-title {
+    font-size: 15px;
+  }
+
+  .stats-mode-desc {
+    font-size: 12px;
+  }
+
+  .stats-mode-switcher {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .mode-switch-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .institution-banner {
+    padding: 20px;
+  }
+
+  .institution-banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .institution-banner-info h2 {
+    font-size: 22px;
   }
 }
