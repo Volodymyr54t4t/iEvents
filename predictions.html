@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Прогнозування результатів - iEvents</title>
     <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/predictions.css">
     <link rel="stylesheet" href="css/page-spacing.css">
     <script src="js/config.js"></script>
@@ -15,61 +16,78 @@
     <!-- Changed div to header tag for semantic HTML -->
     <header id="header"></header>
 
-    <div class="container">
+    <!-- Predictions Mode Selection Modal -->
+    <div class="pred-mode-overlay" id="predModeOverlay">
+        <div class="pred-mode-modal">
+            <div class="pred-mode-header">
+                <h2>Оберіть тип прогнозування</h2>
+                <p>Для яких учнів ви хочете переглянути прогнози?</p>
+            </div>
+            <div class="pred-mode-options">
+                <button class="pred-mode-btn" id="btnPlatformPred" onclick="selectPredMode('platform')">
+                    <div class="pred-mode-icon">&#127760;</div>
+                    <div class="pred-mode-info">
+                        <div class="pred-mode-title">Загальне прогнозування платформи</div>
+                        <div class="pred-mode-desc">Прогнози для всіх учнів на платформі iEvents</div>
+                    </div>
+                </button>
+                <button class="pred-mode-btn" id="btnInstitutionPred" onclick="selectPredMode('institution')">
+                    <div class="pred-mode-icon">&#127979;</div>
+                    <div class="pred-mode-info">
+                        <div class="pred-mode-title">Прогнози мого закладу</div>
+                        <div class="pred-mode-desc" id="institutionDesc">Прогнози для учнів вашого навчального закладу
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="predictionsPage" style="display: none;">
         <div class="page-header">
             <div class="header-content">
-                <h1>Прогнозування результатів учнів</h1>
-                <p class="subtitle">Система аналізує минулі конкурси та прогнозує майбутні результати</p>
+                <h1 id="pageTitle">Прогнозування результатів учнів</h1>
+                <p class="subtitle" id="pageSubtitle">Система аналізує минулі конкурси та прогнозує майбутні результати
+                </p>
+                <div class="pred-mode-switcher" id="modeSwitcher">
+                    <button class="mode-switch-btn active" id="switchPlatform"
+                        onclick="switchPredMode('platform')">Платформа</button>
+                    <button class="mode-switch-btn" id="switchInstitution" onclick="switchPredMode('institution')">Мій
+                        заклад</button>
+                </div>
             </div>
             <button class="btn-back" onclick="window.location.href='statistics.html'">
-                ← Назад до статистики
+                &#8592; Назад до статистики
             </button>
         </div>
 
         <div class="overview-section">
-            <div class="stat-card" data-filter="all">
+            <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
                     <div class="stat-value" id="totalStudents">-</div>
                     <div class="stat-label">Всього учнів</div>
                 </div>
-                <button class="btn-view-list" onclick="showStudentsList('all')">Подивитися список</button>
             </div>
-            <div class="stat-card" data-filter="active">
+            <div class="stat-card">
                 <div class="stat-icon">🎯</div>
                 <div class="stat-content">
                     <div class="stat-value" id="activeStudents">-</div>
                     <div class="stat-label">Активні учні</div>
                 </div>
-                <button class="btn-view-list" onclick="showStudentsList('active')">Подивитися список</button>
             </div>
-            <div class="stat-card" data-filter="improving">
+            <div class="stat-card">
                 <div class="stat-icon">📈</div>
                 <div class="stat-content">
                     <div class="stat-value" id="improvingStudents">-</div>
                     <div class="stat-label">Покращують результати</div>
                 </div>
-                <button class="btn-view-list" onclick="showStudentsList('improving')">Подивитися список</button>
             </div>
-            <div class="stat-card" data-filter="attention">
+            <div class="stat-card">
                 <div class="stat-icon">⚠️</div>
                 <div class="stat-content">
                     <div class="stat-value" id="needAttention">-</div>
                     <div class="stat-label">Потребують уваги</div>
-                </div>
-                <button class="btn-view-list" onclick="showStudentsList('attention')">Подивитися список</button>
-            </div>
-        </div>
-
-        <!-- Modal for students list -->
-        <div class="modal-overlay" id="studentsModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalTitle">Список учнів</h3>
-                    <button class="modal-close" onclick="closeStudentsModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="students-list" id="studentsList"></div>
                 </div>
             </div>
         </div>
@@ -101,7 +119,7 @@
                     <option value="none">Без участі</option>
                 </select>
             </div>
-            <button class="btn-refresh" onclick="loadPredictions()">🔄 Оновити</button>
+            <button class="btn-refresh" onclick="refreshPredictions()">&#128260; Оновити</button>
         </div>
 
         <div class="predictions-section">
@@ -116,11 +134,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Added footer container -->
     <div id="footer"></div>
 
-    <!-- Added components.js for header/footer -->
     <script src="js/components.js"></script>
     <script src="js/predictions.js"></script>
 </body>
