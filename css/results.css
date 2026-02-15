@@ -9,11 +9,13 @@ body {
   background: linear-gradient(135deg, #f5f1eb 0%, #f9f7f4 100%);
   min-height: 100vh;
   color: #2d3748;
-  /* Added padding-top: 80px to prevent header overlap */
   padding-top: 80px;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-container {
+  flex: 1;
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
@@ -43,29 +45,16 @@ body {
   font-weight: 500;
 }
 
-/* New filters section styling matching the image */
+/* Filters section */
 .filters-section {
-  margin-bottom: 16px;
-  /* reduced margin-bottom from 24px to 16px */
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
 }
 
-/* Changed button gradient from blue to brown theme */
-.add-result-btn {
-  width: 100%;
-  padding: 12px;
-  /* reduced padding from 16px to 12px */
-  background: linear-gradient(135deg, #8b7355 0%, #78643a 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 14px;
-  /* reduced font-size from 16px to 14px */
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 12px;
-  /* reduced margin-bottom from 16px to 12px */
-  transition: all 0.2s;
-}
+
 
 .add-result-btn:hover {
   background: linear-gradient(135deg, #78643a 0%, #6a5530 100%);
@@ -73,27 +62,34 @@ body {
   box-shadow: 0 4px 12px rgba(120, 100, 58, 0.4);
 }
 
-.filters-row {
+/* Row 1: search + competition (most used) */
+.filters-row-top {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  gap: 10px;
-  /* reduced gap from 12px to 10px */
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Row 2: smaller filters in equal columns */
+.filters-row-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
 .filter-input,
 .filter-select {
-  padding: 10px 12px;
-  /* reduced padding from 12px 16px to 10px 12px */
+  width: 100%;
+  padding: 11px 14px;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 13px;
-  /* reduced font-size from 14px to 13px */
+  border-radius: 10px;
+  font-size: 14px;
   background: white;
   color: #2d3748;
   transition: all 0.2s;
+  font-family: inherit;
 }
 
-/* Changed filter focus border to brown */
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
@@ -107,6 +103,13 @@ body {
 
 .filter-select {
   cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
 }
 
 .card {
@@ -525,14 +528,14 @@ body {
     padding: 28px 16px;
   }
 
-  /* Responsive adjustments for new filter layout */
-  .filters-row {
+  .filters-row-top {
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
-  .filter-input {
-    grid-column: 1 / -1;
+  .filters-row-bottom {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
   }
 }
 
@@ -651,23 +654,30 @@ body {
   }
 
   /* Make filters stack on mobile */
-  .filters-container {
-    grid-template-columns: 1fr;
+  .filters-section {
+    padding: 16px;
   }
 
-  .filters-row {
+  .filters-row-top {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .filters-row-bottom {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .add-result-btn {
+    width: 100%;
     padding: 14px;
     font-size: 15px;
   }
 
   .filter-input,
   .filter-select {
-    padding: 10px 14px;
-    font-size: 13px;
+    padding: 11px 14px;
+    font-size: 14px;
   }
 }
 
@@ -791,12 +801,7 @@ body {
   .add-result-btn {
     padding: 12px;
     font-size: 14px;
-  }
-
-  .filter-input,
-  .filter-select {
-    padding: 10px 12px;
-    font-size: 13px;
+    width: 100%;
   }
 }
 
