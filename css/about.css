@@ -555,6 +555,25 @@ body {
   font-weight: 500;
 }
 
+/* Document images styling */
+.document-images {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  align-items: center;
+}
+
+.document-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  max-height: 400px;
+  object-fit: contain;
+  border: 1px solid var(--border-color);
+}
+
 /* CTA section */
 .cta-section {
   padding: 5rem 2rem;
@@ -671,6 +690,14 @@ body {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+
+  .document-images {
+    gap: 0.75rem;
+  }
+
+  .document-img {
+    max-height: 300px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -694,6 +721,10 @@ body {
   .info-card h3,
   .feature-card h4 {
     font-size: 1.5rem;
+  }
+
+  .document-img {
+    max-height: 250px;
   }
 }
 
