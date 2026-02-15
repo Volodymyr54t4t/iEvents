@@ -1,11 +1,13 @@
-// competitionsM.js - Сторінка конкурсів для методиста (без можливості додавати учнів)
+// 🔧 Визначаємо, де зараз запущений сайт — локально чи онлайн
 let BASE_URL
 if (window.location.hostname === "localhost") {
+    // 🖥️ Локальний режим
     BASE_URL = "http://localhost:3000"
 } else {
+    // ☁️ Онлайн-сервер Render
     BASE_URL = "https://ievents-qf5k.onrender.com"
 }
-console.log("Підключення до:", BASE_URL)
+console.log("📡 Підключення до:", BASE_URL)
 
 let currentCompetitionId = null
 let allCompetitions = []

@@ -67,41 +67,69 @@ function renderHeader() {
     return
   }
 
-  const competitionsLink =
-    userRole === "вчитель" ?
-      '<a href="competitionsT.html" class="nav-link">Конкурси</a>' :
-      userRole === "методист" ?
-        '<a href="competitionsM.html" class="nav-link">Конкурси</a>' :
-        '<a href="competitionsP.html" class="nav-link">Конкурси</a>'
+  // Build role-specific links
+  const competitionsHref =
+    userRole === "вчитель" ? "competitionsT.html" :
+      userRole === "методист" ? "competitionsM.html" :
+        "competitionsP.html"
 
-  const rehearsalLink =
-    userRole === "вчитель" || userRole === "методист" ?
-      '<a href="rehearsalT.html" class="nav-link">Репетиції</a>' :
-      userRole === "учень" ?
-        '<a href="rehearsalP.html" class="nav-link">Репетиції</a>' :
-        ""
+  const rehearsalHref =
+    (userRole === "вчитель" || userRole === "методист") ? "rehearsalT.html" :
+      userRole === "учень" ? "rehearsalP.html" : null
 
-  const newsLink =
-    userRole === "вчитель" || userRole === "методист" ?
-      '<a href="newsT.html" class="nav-link">Новини</a>' :
-      '<a href="newsP.html" class="nav-link">Новини</a>'
+  const newsHref =
+    (userRole === "вчитель" || userRole === "методист") ? "newsT.html" : "newsP.html"
 
-  const resultsLink =
-    userRole === "вчитель" || userRole === "методист" ? '<a href="results.html" class="nav-link">Результати</a>' : ""
+  const resultsHref =
+    (userRole === "вчитель" || userRole === "методист") ? "results.html" : null
 
-  const statisticsLink = '<a href="statistics.html" class="nav-link">Статистика</a>'
-  const predictionsLink = '<a href="predictions.html" class="nav-link">Прогнози</a>'
-  const calendarLink = '<a href="calendar.html" class="nav-link">Календар</a>'
-  const adminLink = userRole === "методист" ? '<a href="admin.html" class="nav-link">Адмін</a>' : ""
-  const studentAdminLink =
-    userRole === "учень" ? '<a href="adminUser.html" class="nav-link">Е-кабінет</a>' : ""
-  const teacherAdminLink =
-    userRole === "вчитель" ? '<a href="adminTeacher.html" class="nav-link">Адмінка</a>' : ""
+  const profileHref =
+    (userRole === "вчитель" || userRole === "методист") ? "profilesT.html" : "profile.html"
 
-  let profileLink = '<a href="profile.html" class="nav-link">Профіль</a>'
-  if (userRole === "вчитель" || userRole === "методист") {
-    profileLink = '<a href="profilesT.html" class="nav-link">Профіль</a>'
-  }
+  const adminHref =
+    userRole === "методист" ? "admin.html" :
+      userRole === "вчитель" ? "adminTeacher.html" :
+        userRole === "учень" ? "adminUser.html" : null
+
+  const adminLabel =
+    userRole === "методист" ? "Адмін" :
+      userRole === "вчитель" ? "Адмінка" :
+        userRole === "учень" ? "Е-кабінет" : ""
+
+  // Build dropdown items for Events
+  let eventsItems = `<a href="${competitionsHref}" class="dropdown-item">Конкурси</a>`
+  if (rehearsalHref) eventsItems += `<a href="${rehearsalHref}" class="dropdown-item">Репетиції</a>`
+  eventsItems += `<a href="calendar.html" class="dropdown-item">Календар</a>`
+  if (resultsHref) eventsItems += `<a href="${resultsHref}" class="dropdown-item">Результати</a>`
+  eventsItems += `<a href="predictions.html" class="dropdown-item">Прогнози</a>`
+
+  // Build dropdown items for Info
+  const infoItems = `
+    <a href="${newsHref}" class="dropdown-item">Новини</a>
+    <a href="about.html" class="dropdown-item">Про нас</a>
+    <a href="contacts.html" class="dropdown-item">Контакти</a>
+  `
+
+  // Build dropdown items for Communication
+  const commItems = `
+    <a href="chat.html" class="dropdown-item">Чат</a>
+    <a href="question.html" class="dropdown-item">Задати питання</a>
+    <a href="support.html" class="dropdown-item">Підтримка</a>
+  `
+
+  // Build dropdown items for Account
+  let accountItems = `<a href="${profileHref}" class="dropdown-item">Профіль</a>`
+  if (adminHref) accountItems += `<a href="${adminHref}" class="dropdown-item">${adminLabel}</a>`
+
+  // Build sidebar items for mobile (grouped with headers)
+  let sidebarEventsItems = `<a href="${competitionsHref}" class="sidebar-link">Конкурси</a>`
+  if (rehearsalHref) sidebarEventsItems += `<a href="${rehearsalHref}" class="sidebar-link">Репетиції</a>`
+  sidebarEventsItems += `<a href="calendar.html" class="sidebar-link">Календар</a>`
+  if (resultsHref) sidebarEventsItems += `<a href="${resultsHref}" class="sidebar-link">Результати</a>`
+  sidebarEventsItems += `<a href="predictions.html" class="sidebar-link">Прогнози</a>`
+
+  let sidebarAccountItems = `<a href="${profileHref}" class="sidebar-link">Профіль</a>`
+  if (adminHref) sidebarAccountItems += `<a href="${adminHref}" class="sidebar-link">${adminLabel}</a>`
 
   header.innerHTML = `
         <header class="site-header">
@@ -114,17 +142,23 @@ function renderHeader() {
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
                     <a href="index.html" class="nav-link">Головна</a>
-                    ${competitionsLink}
-                    ${rehearsalLink}
-                    ${newsLink}
-                    ${calendarLink}
-                    ${resultsLink}
-                    ${statisticsLink}
-                    ${predictionsLink}
-                    ${studentAdminLink}
-                    ${teacherAdminLink}
-                    ${profileLink}
-                    ${adminLink}
+                    <div class="nav-dropdown">
+                        <button class="nav-link dropdown-toggle">Події <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${eventsItems}</div>
+                    </div>
+                    <a href="statistics.html" class="nav-link">Статистика</a>
+                    <div class="nav-dropdown">
+                        <button class="nav-link dropdown-toggle">Інформація <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${infoItems}</div>
+                    </div>
+                    <div class="nav-dropdown">
+                        <button class="nav-link dropdown-toggle">Комунікація <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${commItems}</div>
+                    </div>
+                    <div class="nav-dropdown">
+                        <button class="nav-link dropdown-toggle">Акаунт <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${accountItems}</div>
+                    </div>
                     ${notificationButton}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
@@ -134,17 +168,20 @@ function renderHeader() {
                 </nav>
                 <aside class="sidebar" id="sidebar">
                     <a href="index.html" class="sidebar-link">Головна</a>
-                    ${competitionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${rehearsalLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${newsLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${calendarLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${resultsLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${statisticsLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${predictionsLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${studentAdminLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${teacherAdminLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${profileLink.replace('class="nav-link"', 'class="sidebar-link"')}
-                    ${adminLink.replace('class="nav-link"', 'class="sidebar-link"')}
+                    <div class="sidebar-group-label">Події</div>
+                    ${sidebarEventsItems}
+                    <div class="sidebar-group-label">Аналітика</div>
+                    <a href="statistics.html" class="sidebar-link">Статистика</a>
+                    <div class="sidebar-group-label">Інформація</div>
+                    <a href="${newsHref}" class="sidebar-link">Новини</a>
+                    <a href="about.html" class="sidebar-link">Про нас</a>
+                    <a href="contacts.html" class="sidebar-link">Контакти</a>
+                    <div class="sidebar-group-label">Комунікація</div>
+                    <a href="chat.html" class="sidebar-link">Чат</a>
+                    <a href="question.html" class="sidebar-link">Задати питання</a>
+                    <a href="support.html" class="sidebar-link">Підтримка</a>
+                    <div class="sidebar-group-label">Акаунт</div>
+                    ${sidebarAccountItems}
                     <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
                     <div style="padding: 16px 24px;">
                         <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
@@ -169,15 +206,16 @@ function renderFooter() {
   footer.innerHTML = `
         <footer class="site-footer">
             <div class="footer-container">
-                <p>&copy; 2025 iEvents. Всі права захищені.</p>
-                <div class="footer-links">
-                    <a href="../chat.html">Чат система</a>
-                    <a href="../about.html">Про нас</a>
-                    <a href="../contacts.html">Контакти</a>
-                    <a href="../support.html">Підтримка</a>
-                    <a href="../question.html">Задати питання</a>
-                    
-                    <a href="../privacy-policy.html">Політика конфіденційності</a>
+                <div class="footer-left">
+                    <p class="footer-copyright">&copy; 2025 iEvents. Всі права захищені.</p>
+                    <p class="footer-info">Платформа для організації та управління навчальними подіями</p>
+                </div>
+                <div class="footer-right">
+                    <a href="privacy-policy.html" class="footer-link">Політика конфіденційності</a>
+                    <button class="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Прокрутити догори">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+                        <span>Догори</span>
+                    </button>
                 </div>
             </div>
         </footer>
@@ -229,6 +267,36 @@ function setupMenuToggle() {
       hamburger.classList.remove("active")
       sidebar.classList.remove("active")
     })
+  })
+
+  // Setup header dropdown toggles (click-based)
+  setupDropdowns()
+}
+
+function setupDropdowns() {
+  const dropdowns = document.querySelectorAll(".nav-dropdown")
+  dropdowns.forEach((dropdown) => {
+    const toggle = dropdown.querySelector(".dropdown-toggle")
+    if (!toggle) return
+
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      // Close all other dropdowns first
+      dropdowns.forEach((other) => {
+        if (other !== dropdown) other.classList.remove("open")
+      })
+
+      dropdown.classList.toggle("open")
+    })
+  })
+
+  // Close all dropdowns when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".nav-dropdown")) {
+      dropdowns.forEach((d) => d.classList.remove("open"))
+    }
   })
 }
 

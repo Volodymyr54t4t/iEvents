@@ -1,10 +1,13 @@
-const BASE_URL = window.AppConfig ?
-  window.AppConfig.API_URL :
-  window.location.hostname === "localhost" ?
-  "http://localhost:3000" :
-  "https://ievents-qf5k.onrender.com"
-
-console.log("📡  Підключення до:", BASE_URL)
+// 🔧 Визначаємо, де зараз запущений сайт — локально чи онлайн
+let BASE_URL
+if (window.location.hostname === "localhost") {
+  // 🖥️ Локальний режим
+  BASE_URL = "http://localhost:3000"
+} else {
+  // ☁️ Онлайн-сервер Render
+  BASE_URL = "https://ievents-qf5k.onrender.com"
+}
+console.log("📡 Підключення до:", BASE_URL)
 
 // Перевірка авторизації
 const userId = localStorage.getItem("userId")
