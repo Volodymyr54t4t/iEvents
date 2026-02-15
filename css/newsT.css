@@ -2,7 +2,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
-  padding-top: 100px;
+  padding-top: 100px !important;
+  flex: 1;
 }
 
 .page-header {
