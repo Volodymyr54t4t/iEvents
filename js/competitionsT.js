@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000"
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
+  BASE_URL = "https://ievents-o8nm.onrender.com"
 }
 console.log("📡 Підключення до:", BASE_URL)
 
@@ -806,13 +806,13 @@ function displayCompetitions(competitions) {
             </div>
             <div class="competition-actions">
               ${isSubscribed
-          ? `<button class="btn btn-unsubscribe" onclick="event.stopPropagation(); unsubscribeFromCompetition(${competition.id})">
+                ? `<button class="btn btn-unsubscribe" onclick="event.stopPropagation(); unsubscribeFromCompetition(${competition.id})">
                     <span class="btn-icon-animate">&#10005;</span> Вiдписатися
                   </button>`
-          : `<button class="btn btn-subscribe" onclick="event.stopPropagation(); subscribeToCompetition(${competition.id})">
+                : `<button class="btn btn-subscribe" onclick="event.stopPropagation(); subscribeToCompetition(${competition.id})">
                     <span class="btn-icon-animate">&#10003;</span> ПIДПИСАТИСЯ
                   </button>`
-        }
+              }
               <button class="btn btn-info" onclick="openCompetitionDetailsModal(${competition.id})">
                 Детальнiше
               </button>
@@ -1242,11 +1242,27 @@ async function loadStudents() {
   }
 }
 
+// Зберігаємо список вже доданих учнів для поточного конкурсу
+let existingParticipantIds = new Set()
+
 // Відкриття модального вікна для додавання учнів
-function openAddStudentsModal(competitionId) {
+async function openAddStudentsModal(competitionId) {
   currentCompetitionId = competitionId
   const modal = document.getElementById("addStudentsModal")
   modal.classList.add("active")
+
+  // Завантажуємо існуючих учасників конкурсу
+  existingParticipantIds = new Set()
+  try {
+    const response = await fetch(`${BASE_URL}/api/competitions/${competitionId}/participants`)
+    const data = await response.json()
+    if (response.ok && data.participants) {
+      data.participants.forEach(p => existingParticipantIds.add(p.id))
+    }
+  } catch (error) {
+    console.error("Помилка завантаження учасників:", error)
+  }
+
   displayStudents(allStudents)
 }
 
@@ -1255,6 +1271,7 @@ function closeAddStudentsModal() {
   const modal = document.getElementById("addStudentsModal")
   modal.classList.remove("active")
   currentCompetitionId = null
+  existingParticipantIds = new Set()
   document.getElementById("studentSearch").value = ""
 }
 
@@ -1300,9 +1317,25 @@ function displayStudents(students) {
 
             const avatarHTML = student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : initials
 
+            const isAlreadyAdded = existingParticipantIds.has(student.id)
+
+            if (isAlreadyAdded) {
+              return `
+                <div class="student-item student-already-added" title="Цей учень вже доданий на конкурс">
+                  <input type="checkbox" class="student-checkbox" id="student-${student.id}" value="${student.id}" disabled checked>
+                  <div class="student-avatar">${avatarHTML}</div>
+                  <div class="student-info">
+                    <div class="student-name">${fullName}</div>
+                    <div class="student-grade">${student.grade || "Клас не вказано"}</div>
+                    <div class="student-added-badge">Вже доданий на конкурс</div>
+                  </div>
+                </div>
+              `
+            }
+
             return `
                 <div class="student-item" onclick="toggleStudent(${student.id})">
-                  <input type="checkbox" class="student-checkbox" id="student-${student.id}" value="${student.id}">
+                  <input type="checkbox" class="student-checkbox" id="student-${student.id}" value="${student.id}" onclick="event.stopPropagation(); toggleStudentFromCheckbox(${student.id})">
                   <div class="student-avatar">${avatarHTML}</div>
                   <div class="student-info">
                     <div class="student-name">${fullName}</div>
@@ -1322,8 +1355,20 @@ function displayStudents(students) {
 function toggleStudent(studentId) {
   const checkbox = document.getElementById(`student-${studentId}`)
   const item = checkbox.closest(".student-item")
-
+  
   checkbox.checked = !checkbox.checked
+  
+  if (checkbox.checked) {
+    item.classList.add("selected")
+  } else {
+    item.classList.remove("selected")
+  }
+}
+
+// Окремий обробник для кліку по самому чекбоксу (браузер вже змінив checked)
+function toggleStudentFromCheckbox(studentId) {
+  const checkbox = document.getElementById(`student-${studentId}`)
+  const item = checkbox.closest(".student-item")
 
   if (checkbox.checked) {
     item.classList.add("selected")
@@ -1374,7 +1419,11 @@ async function addSelectedStudents() {
     const data = await response.json()
 
     if (response.ok) {
-      alert(data.message)
+      let msg = `Успiшно додано ${data.added} учнiв`
+      if (data.skipped > 0) {
+        msg += `\nПропущено ${data.skipped} (вже були на конкурсi)`
+      }
+      alert(msg)
       closeAddStudentsModal()
       loadCompetitions()
     } else {

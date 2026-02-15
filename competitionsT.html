@@ -23,7 +23,9 @@
 
         <!-- Filters section with add button -->
         <div class="filters-section">
-            
+            <button class="btn-add-competition" onclick="openCreateCompetitionModal()">
+                Додати конкурс
+            </button>
 
             <div class="filters-row">
                 <input type="text" id="searchCompetitions" class="filter-input" placeholder="Пошук конкурсів...">
@@ -45,7 +47,7 @@
 
                 <select id="filterOwnership" class="filter-select">
                     <option value="all">Всі конкурси</option>
-                    
+                    <option value="my">Мої конкурси</option>
                 </select>
 
                 <select id="sortBy" class="filter-select">
