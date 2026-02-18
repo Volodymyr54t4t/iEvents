@@ -251,7 +251,7 @@ async function loadPredictions() {
   }
 }
 
-// Calculate prediction for a student
+//Розрахунок прогнозу для учня
 function calculatePrediction(student, studentResults) {
   const participationCount = studentResults.length
 

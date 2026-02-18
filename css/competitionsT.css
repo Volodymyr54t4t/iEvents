@@ -583,86 +583,23 @@ body {
 }
 
 .competition-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  flex-wrap: wrap;
   margin-top: 12px;
 }
 
 .competition-actions .btn {
-  flex: 1;
-  min-width: auto;
+  width: 100%;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-size: 12px;
-  padding: 10px 14px;
-}
-
-.competition-actions .btn:nth-child(1) {
-  grid-column: 1;
-}
-
-.competition-actions .btn:nth-child(2) {
-  grid-column: 2;
-}
-
-.competition-actions .btn:nth-child(3) {
-  grid-column: 1;
-}
-
-.competition-actions .btn:nth-child(4) {
-  grid-column: 2;
-}
-
-.competition-actions .btn:nth-child(5) {
-  grid-column: 1;
-}
-
-.competition-actions .btn:nth-child(6) {
-  grid-column: 2;
-}
-
-.competition-actions .btn:nth-child(7) {
-  grid-column: 1 / -1;
+  font-size: 13px;
+  padding: 10px 16px;
+  text-align: center;
+  justify-content: center;
 }
 
 .competition-actions .btn:hover {
   transform: translateY(-3px) scale(1.05);
-}
-
-/* Add mobile responsive for competition actions */
-@media (max-width: 480px) {
-  .competition-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .competition-actions .btn:nth-child(1) {
-    grid-column: 1;
-  }
-
-  .competition-actions .btn:nth-child(2) {
-    grid-column: 1;
-  }
-
-  .competition-actions .btn:nth-child(3) {
-    grid-column: 1;
-  }
-
-  .competition-actions .btn:nth-child(4) {
-    grid-column: 1;
-  }
-
-  .competition-actions .btn:nth-child(5) {
-    grid-column: 1;
-  }
-
-  .competition-actions .btn:nth-child(6) {
-    grid-column: 1;
-  }
-
-  .competition-actions .btn:nth-child(7) {
-    grid-column: 1;
-  }
 }
 
 .btn-view-docs {
@@ -1587,12 +1524,10 @@ body {
   }
 
   .competition-actions {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
   }
 
   .competition-actions .btn {
-    grid-column: 1 !important;
     font-size: 12px;
     padding: 10px 12px;
   }

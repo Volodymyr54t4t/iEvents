@@ -5,7 +5,7 @@ if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000";
 } else {
   // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com";
+  BASE_URL = "https://ievents-o8nm.onrender.com";
 }
 console.log("📡 Підключення до:", BASE_URL);
 
@@ -275,6 +275,9 @@ function renderMyCompetitions() {
               <button class="btn btn-secondary" onclick="openViewResponsesModal(${competition.id})">
                 Вiдповiдi учнiв
               </button>
+              <button class="btn btn-view-participants" onclick="openViewParticipantsModal(${competition.id})">
+                Учасники
+              </button>
               ${
                 isOwner
                   ? `
@@ -539,9 +542,25 @@ async function saveCompetition() {
     const data = await response.json();
 
     if (response.ok) {
+      // Auto-subscribe teacher to the competition they just created
+      if (!isEdit && data.competition && data.competition.id) {
+        try {
+          await fetch(
+            `${BASE_URL}/api/teacher/${userId}/competition-subscriptions/${data.competition.id}`,
+            {
+              method: "POST",
+            },
+          );
+          teacherSubscriptions.add(data.competition.id);
+          updateMyCompetitionsCount();
+        } catch (subError) {
+          console.error("Помилка автопiдписки:", subError);
+        }
+      }
       alert(isEdit ? "Конкурс успішно оновлено!" : "Конкурс успішно створено!");
       closeCreateCompetitionModal();
-      loadCompetitions();
+      await loadCompetitions();
+      renderMyCompetitions();
     } else {
       alert(data.error || "Помилка збереження конкурсу");
     }
