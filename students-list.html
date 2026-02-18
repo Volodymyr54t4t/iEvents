@@ -8,9 +8,6 @@
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/students-list.css">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#317EFB">
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/page-spacing.css">
     <script src="js/config.js"></script>
 </head>
@@ -39,23 +36,44 @@
                     <option value="inactive">Неактивні</option>
                 </select>
 
-                <button class="btn btn-primary" onclick="resetFilters()">🔄 Скинути</button>
+                <select id="filterTrend" class="filter-select">
+                    <option value="">Всі тренди</option>
+                    <option value="improving">Покращення</option>
+                    <option value="stable">Стабільний</option>
+                    <option value="declining">Погіршення</option>
+                    <option value="new">Новачок</option>
+                </select>
+
+                <button class="btn btn-primary" onclick="resetFilters()">Скинути</button>
             </div>
         </div>
 
         <!-- Статистика -->
         <div class="stats-container">
             <div class="stat-card">
+                <div class="stat-icon">&#128101;</div>
                 <div class="stat-value" id="totalStudents">0</div>
                 <div class="stat-label">Всього учнів</div>
             </div>
             <div class="stat-card">
+                <div class="stat-icon">&#9989;</div>
                 <div class="stat-value" id="activeStudents">0</div>
                 <div class="stat-label">Активних</div>
             </div>
             <div class="stat-card">
+                <div class="stat-icon">&#128200;</div>
+                <div class="stat-value" id="improvingStudents">0</div>
+                <div class="stat-label">Покращують результат</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">&#9888;&#65039;</div>
+                <div class="stat-value" id="needAttention">0</div>
+                <div class="stat-label">Потребують уваги</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">&#127942;</div>
                 <div class="stat-value" id="averageGrade">0</div>
-                <div class="stat-label">Середня оцінка</div>
+                <div class="stat-label">Середній бал</div>
             </div>
         </div>
 
@@ -77,17 +95,40 @@
 
     <!-- Модальне вікно деталей учня -->
     <div id="studentDetailModal" class="modal">
-        <div class="modal-content modal-medium">
+        <div class="modal-content modal-large">
             <div class="modal-header">
                 <h2 id="modalStudentName">Деталі учня</h2>
                 <button class="modal-close" onclick="closeStudentModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="student-detail">
+                    <!-- Prediction Summary Card -->
+                    <div class="detail-prediction-summary" id="detailPredictionSummary" style="display:none;">
+                        <div class="pred-summary-grid">
+                            <div class="pred-summary-item">
+                                <span class="pred-summary-label">Тренд</span>
+                                <span class="pred-summary-value" id="detailTrend">-</span>
+                            </div>
+                            <div class="pred-summary-item">
+                                <span class="pred-summary-label">Середній бал</span>
+                                <span class="pred-summary-value" id="detailAvgScore">-</span>
+                            </div>
+                            <div class="pred-summary-item">
+                                <span class="pred-summary-label">Прогноз</span>
+                                <span class="pred-summary-value" id="detailPredictedScore">-</span>
+                            </div>
+                            <div class="pred-summary-item">
+                                <span class="pred-summary-label">Участей</span>
+                                <span class="pred-summary-value" id="detailParticipationCount">0</span>
+                            </div>
+                        </div>
+                        <div class="pred-recommendation" id="detailRecommendation"></div>
+                    </div>
+
                     <div class="detail-section">
                         <h3>Особисті дані</h3>
                         <div class="detail-row">
-                            <span class="detail-label">ПІБ:</span>
+                            <span class="detail-label">ПIБ:</span>
                             <span class="detail-value" id="detailFullName">-</span>
                         </div>
                         <div class="detail-row">
@@ -115,8 +156,15 @@
                             <span class="detail-value" id="detailGrade">-</span>
                         </div>
                         <div class="detail-row">
-                            <span class="detail-label">Навчальний заклад:</span>
+                            <span class="detail-label">Навч. заклад:</span>
                             <span class="detail-value" id="detailSchool">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Результати конкурсів</h3>
+                        <div id="resultsList" class="results-list">
+                            <p>Завантаження...</p>
                         </div>
                     </div>
 
