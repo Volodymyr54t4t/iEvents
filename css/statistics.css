@@ -196,18 +196,18 @@ body {
   transform: rotate(5deg) scale(1.1);
 }
 
-.stat-info,
-.stat-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 20px 32px;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 1;
+
+.stat-info, .stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 11px 21px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
 }
 
 .stat-value {
