@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>AIC 2.0 - Adaptive Intelligence Core - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/aic-2-0.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <header id="header"></header>
+
+    <!-- Student Selection Modal -->
+    <div class="aic-mode-overlay" id="aicModeOverlay">
+        <div class="aic-mode-modal">
+            <div class="aic-mode-header">
+                <h2>Adaptive Intelligence Core 2.0</h2>
+                <p>Оберіть учня для аналізу інтелектуального профілю</p>
+            </div>
+            <div class="aic-search-box">
+                <input type="text" id="studentSearchInput" placeholder="Пошук учня за ім'ям або email..."
+                    autocomplete="off">
+            </div>
+            <div class="aic-students-list" id="aicStudentsList">
+                <div class="aic-loading">
+                    <div class="spinner"></div>
+                    <p>Завантаження учнів...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="aicPage" style="display: none;">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="aic-badge">AIC 2.0</div>
+                <h1 id="pageTitle">Adaptive Intelligence Core</h1>
+                <p class="subtitle" id="pageSubtitle">ML-аналітика та прогнозування успіху учня</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-change-student" onclick="showStudentSelector()">Обрати іншого учня</button>
+                <button class="btn-back" onclick="window.location.href='statistics.html'">&#8592; Статистика</button>
+            </div>
+        </div>
+
+        <!-- Student Profile Banner -->
+        <section class="student-banner" id="studentBanner">
+            <div class="student-banner-avatar" id="bannerAvatar">
+                <span class="avatar-initials" id="bannerInitials">?</span>
+            </div>
+            <div class="student-banner-info">
+                <h2 id="bannerName">Завантаження...</h2>
+                <div class="student-banner-meta">
+                    <span class="meta-tag" id="bannerGrade">-</span>
+                    <span class="meta-tag" id="bannerSchool">-</span>
+                    <span class="meta-tag" id="bannerEmail">-</span>
+                </div>
+            </div>
+            <div class="student-banner-stats">
+                <div class="banner-stat">
+                    <div class="banner-stat-value" id="bannerTotalComps">0</div>
+                    <div class="banner-stat-label">Конкурсів</div>
+                </div>
+                <div class="banner-stat">
+                    <div class="banner-stat-value" id="bannerAvgScore">-</div>
+                    <div class="banner-stat-label">Середній бал</div>
+                </div>
+                <div class="banner-stat">
+                    <div class="banner-stat-value" id="bannerBestPlace">-</div>
+                    <div class="banner-stat-label">Найкраще місце</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ML Prediction Section -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#129302;</div>
+                <div>
+                    <h2>ML-прогнозування успіху</h2>
+                    <p>Аналіз історії конкурсів та прогноз результатів</p>
+                </div>
+            </div>
+
+            <div class="ml-grid">
+                <!-- Prize Probability -->
+                <div class="ml-card">
+                    <h3>Імовірність призового місця</h3>
+                    <div class="probability-circle" id="prizeCircleContainer">
+                        <canvas id="prizeCircle" width="180" height="180"></canvas>
+                        <div class="probability-value" id="prizePercent">0%</div>
+                    </div>
+                    <p class="ml-card-note" id="prizeNote">Недостатньо даних для аналізу</p>
+                </div>
+
+                <!-- Competition Level Recommendation -->
+                <div class="ml-card">
+                    <h3>Рекомендований рівень конкурсу</h3>
+                    <div class="level-recommendation" id="levelRecommendation">
+                        <div class="level-bar">
+                            <div class="level-item" data-level="school">
+                                <div class="level-dot"></div>
+                                <span>Шкільний</span>
+                            </div>
+                            <div class="level-item" data-level="city">
+                                <div class="level-dot"></div>
+                                <span>Міський</span>
+                            </div>
+                            <div class="level-item" data-level="region">
+                                <div class="level-dot"></div>
+                                <span>Обласний</span>
+                            </div>
+                            <div class="level-item" data-level="national">
+                                <div class="level-dot"></div>
+                                <span>Всеукраїнський</span>
+                            </div>
+                            <div class="level-item" data-level="international">
+                                <div class="level-dot"></div>
+                                <span>Міжнародний</span>
+                            </div>
+                            <div class="level-progress" id="levelProgress"></div>
+                        </div>
+                    </div>
+                    <p class="ml-card-note" id="levelNote">Визначення оптимального рівня...</p>
+                </div>
+
+                <!-- Score Trend Prediction -->
+                <div class="ml-card ml-card-wide">
+                    <h3>Прогноз динаміки результатів</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Competency Radar Section -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#127919;</div>
+                <div>
+                    <h2>Профіль інтелектуального розвитку</h2>
+                    <p>Competency Radar та STEM-індекс</p>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                <!-- Competency Radar -->
+                <div class="profile-card">
+                    <h3>Competency Radar</h3>
+                    <div class="chart-wrapper radar-wrapper">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- STEM Index & Stability -->
+                <div class="profile-card">
+                    <h3>Ключові індекси</h3>
+                    <div class="indices-grid">
+                        <!-- STEM Index -->
+                        <div class="index-card stem-index">
+                            <div class="index-header">
+                                <span class="index-icon">&#129514;</span>
+                                <span class="index-label">STEM-індекс</span>
+                            </div>
+                            <div class="index-value-container">
+                                <div class="index-bar-track">
+                                    <div class="index-bar-fill stem-fill" id="stemBar" style="width: 0%"></div>
+                                </div>
+                                <span class="index-value" id="stemValue">0</span>
+                            </div>
+                            <p class="index-note" id="stemNote">Рівень STEM-компетентності</p>
+                        </div>
+
+                        <!-- Stability Index -->
+                        <div class="index-card stability-index">
+                            <div class="index-header">
+                                <span class="index-icon">&#9878;&#65039;</span>
+                                <span class="index-label">Індекс стабільності</span>
+                            </div>
+                            <div class="index-value-container">
+                                <div class="index-bar-track">
+                                    <div class="index-bar-fill stability-fill" id="stabilityBar" style="width: 0%">
+                                    </div>
+                                </div>
+                                <span class="index-value" id="stabilityValue">0</span>
+                            </div>
+                            <p class="index-note" id="stabilityNote">Стабільність результатів</p>
+                        </div>
+
+                        <!-- Improvement Rate -->
+                        <div class="index-card improvement-index">
+                            <div class="index-header">
+                                <span class="index-icon">&#128200;</span>
+                                <span class="index-label">Темп розвитку</span>
+                            </div>
+                            <div class="index-value-container">
+                                <div class="index-bar-track">
+                                    <div class="index-bar-fill improvement-fill" id="improvementBar" style="width: 0%">
+                                    </div>
+                                </div>
+                                <span class="index-value" id="improvementValue">0</span>
+                            </div>
+                            <p class="index-note" id="improvementNote">Динаміка покращення</p>
+                        </div>
+
+                        <!-- Engagement Score -->
+                        <div class="index-card engagement-index">
+                            <div class="index-header">
+                                <span class="index-icon">&#128170;</span>
+                                <span class="index-label">Залученість</span>
+                            </div>
+                            <div class="index-value-container">
+                                <div class="index-bar-track">
+                                    <div class="index-bar-fill engagement-fill" id="engagementBar" style="width: 0%">
+                                    </div>
+                                </div>
+                                <span class="index-value" id="engagementValue">0</span>
+                            </div>
+                            <p class="index-note" id="engagementNote">Рівень активної участі</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Competition History Analysis -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#128202;</div>
+                <div>
+                    <h2>Аналіз історії конкурсів</h2>
+                    <p>Детальний розбір участі та досягнень</p>
+                </div>
+            </div>
+
+            <div class="history-grid">
+                <!-- Achievement Distribution -->
+                <div class="history-card">
+                    <h3>Розподіл досягнень</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="achievementChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Score Distribution -->
+                <div class="history-card">
+                    <h3>Розподіл балів</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="scoreDistChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competition Details Table -->
+            <div class="history-table-wrapper">
+                <h3>Детальна історія участі</h3>
+                <table class="history-table" id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Конкурс</th>
+                            <th>Місце</th>
+                            <th>Бали</th>
+                            <th>Досягнення</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="5" class="loading">Завантаження...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- AI Recommendations -->
+        <section class="aic-section recommendations-section">
+            <div class="section-header">
+                <div class="section-icon">&#128161;</div>
+                <div>
+                    <h2>AI-рекомендації</h2>
+                    <p>Персоналізовані поради для розвитку</p>
+                </div>
+            </div>
+
+            <div class="recommendations-grid" id="recommendationsGrid">
+                <div class="loading">Генерація рекомендацій...</div>
+            </div>
+        </section>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/components.js"></script>
+    <script src="js/aic-2-0.js"></script>
+</body>
+
+</html>
