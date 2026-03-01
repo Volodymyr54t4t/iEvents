@@ -281,6 +281,388 @@
             </div>
         </section>
 
+        <!-- 1. Achievement Complexity Score -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#129351;</div>
+                <div>
+                    <h2>Achievement Complexity Score</h2>
+                    <p>Індекс складності досягнень з урахуванням рівня конкурсу</p>
+                </div>
+            </div>
+
+            <div class="complexity-grid">
+                <div class="complexity-card">
+                    <h3>Complexity Coefficient (CC)</h3>
+                    <div class="cc-formula">
+                        <code>CC = Level x Participants x AvgScore</code>
+                    </div>
+                    <div class="cc-table-wrap">
+                        <table class="cc-table" id="ccTable">
+                            <thead>
+                                <tr>
+                                    <th>Конкурс</th>
+                                    <th>Бал</th>
+                                    <th>CC</th>
+                                    <th>Adjusted Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ccTableBody">
+                                <tr>
+                                    <td colspan="4" class="loading">Обчислення...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="complexity-card">
+                    <h3>Порівняння: Raw vs Adjusted</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="complexityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Probability Breakdown (Explainable AI) -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#128269;</div>
+                <div>
+                    <h2>Explainable AI (XAI)</h2>
+                    <p>Прозорий розклад ML-прогнозу з факторами впливу</p>
+                </div>
+            </div>
+
+            <div class="xai-grid">
+                <div class="xai-card xai-breakdown">
+                    <h3>Фактори прогнозу</h3>
+                    <div class="xai-factors" id="xaiFactors">
+                        <div class="xai-factor">
+                            <div class="xai-factor-header">
+                                <span class="xai-factor-name">Попередні результати</span>
+                                <span class="xai-factor-weight">30%</span>
+                            </div>
+                            <div class="xai-factor-bar-track">
+                                <div class="xai-factor-bar" id="xaiFactor1" style="width: 0%" data-color="#78643a">
+                                </div>
+                            </div>
+                            <span class="xai-factor-value" id="xaiFactorVal1">0</span>
+                        </div>
+                        <div class="xai-factor">
+                            <div class="xai-factor-header">
+                                <span class="xai-factor-name">Стабільність</span>
+                                <span class="xai-factor-weight">25%</span>
+                            </div>
+                            <div class="xai-factor-bar-track">
+                                <div class="xai-factor-bar" id="xaiFactor2" style="width: 0%" data-color="#4CAF50">
+                                </div>
+                            </div>
+                            <span class="xai-factor-value" id="xaiFactorVal2">0</span>
+                        </div>
+                        <div class="xai-factor">
+                            <div class="xai-factor-header">
+                                <span class="xai-factor-name">Рівень активності</span>
+                                <span class="xai-factor-weight">20%</span>
+                            </div>
+                            <div class="xai-factor-bar-track">
+                                <div class="xai-factor-bar" id="xaiFactor3" style="width: 0%" data-color="#2196F3">
+                                </div>
+                            </div>
+                            <span class="xai-factor-value" id="xaiFactorVal3">0</span>
+                        </div>
+                        <div class="xai-factor">
+                            <div class="xai-factor-header">
+                                <span class="xai-factor-name">Складність конкурсів</span>
+                                <span class="xai-factor-weight">15%</span>
+                            </div>
+                            <div class="xai-factor-bar-track">
+                                <div class="xai-factor-bar" id="xaiFactor4" style="width: 0%" data-color="#FF9800">
+                                </div>
+                            </div>
+                            <span class="xai-factor-value" id="xaiFactorVal4">0</span>
+                        </div>
+                        <div class="xai-factor">
+                            <div class="xai-factor-header">
+                                <span class="xai-factor-name">Темп зростання</span>
+                                <span class="xai-factor-weight">10%</span>
+                            </div>
+                            <div class="xai-factor-bar-track">
+                                <div class="xai-factor-bar" id="xaiFactor5" style="width: 0%" data-color="#9C27B0">
+                                </div>
+                            </div>
+                            <span class="xai-factor-value" id="xaiFactorVal5">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="xai-card xai-summary">
+                    <h3>Підсумок прогнозу</h3>
+                    <div class="xai-total">
+                        <div class="xai-total-circle">
+                            <canvas id="xaiTotalCircle" width="160" height="160"></canvas>
+                            <div class="xai-total-value" id="xaiTotalValue">0%</div>
+                        </div>
+                        <p class="xai-total-label">Зважена імовірність</p>
+                    </div>
+                    <div class="xai-confidence" id="xaiConfidence">
+                        <div class="xai-conf-row">
+                            <span>Рівень впевненості</span>
+                            <span class="xai-conf-badge" id="xaiConfBadge">-</span>
+                        </div>
+                        <div class="xai-conf-row">
+                            <span>Обсяг вибірки</span>
+                            <span id="xaiSampleSize">0 результатів</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Risk Index -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#9888;&#65039;</div>
+                <div>
+                    <h2>Risk of Decline</h2>
+                    <p>Індекс ризику зниження результативності</p>
+                </div>
+            </div>
+
+            <div class="risk-grid">
+                <div class="risk-card risk-gauge-card">
+                    <h3>Risk Index</h3>
+                    <div class="risk-gauge" id="riskGauge">
+                        <canvas id="riskGaugeCanvas" width="220" height="140"></canvas>
+                        <div class="risk-gauge-value" id="riskGaugeValue">0</div>
+                    </div>
+                    <div class="risk-level-label" id="riskLevelLabel">Обчислення...</div>
+                    <div class="risk-formula">
+                        <code>Risk = 100 - (Stability + Trend + Activity) / 3</code>
+                    </div>
+                </div>
+                <div class="risk-card">
+                    <h3>Компоненти ризику</h3>
+                    <div class="risk-components" id="riskComponents">
+                        <div class="risk-comp">
+                            <span class="risk-comp-name">Стабільність</span>
+                            <div class="risk-comp-bar-track">
+                                <div class="risk-comp-bar" id="riskStability" style="width:0%"></div>
+                            </div>
+                            <span class="risk-comp-val" id="riskStabilityVal">0</span>
+                        </div>
+                        <div class="risk-comp">
+                            <span class="risk-comp-name">Тренд</span>
+                            <div class="risk-comp-bar-track">
+                                <div class="risk-comp-bar" id="riskTrend" style="width:0%"></div>
+                            </div>
+                            <span class="risk-comp-val" id="riskTrendVal">0</span>
+                        </div>
+                        <div class="risk-comp">
+                            <span class="risk-comp-name">Активність</span>
+                            <div class="risk-comp-bar-track">
+                                <div class="risk-comp-bar" id="riskActivity" style="width:0%"></div>
+                            </div>
+                            <span class="risk-comp-val" id="riskActivityVal">0</span>
+                        </div>
+                    </div>
+                    <div class="risk-legend">
+                        <span class="risk-legend-item risk-green">0-40 Безпечно</span>
+                        <span class="risk-legend-item risk-yellow">40-70 Увага</span>
+                        <span class="risk-legend-item risk-red">70+ Небезпека</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Learning Trajectory Model -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#128200;</div>
+                <div>
+                    <h2>Learning Trajectory Model</h2>
+                    <p>Прогноз розвитку на 1 рік: 3 сценарії</p>
+                </div>
+            </div>
+
+            <div class="trajectory-content">
+                <div class="trajectory-chart-wrap">
+                    <div class="chart-wrapper">
+                        <canvas id="trajectoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="trajectory-scenarios">
+                    <div class="scenario-card scenario-conservative">
+                        <div class="scenario-header">
+                            <span class="scenario-dot conservative-dot"></span>
+                            <h4>Conservative</h4>
+                        </div>
+                        <p class="scenario-desc">Якщо активність знижується</p>
+                        <div class="scenario-prediction" id="scenarioConservative">
+                            <span class="scenario-score">-</span>
+                            <span class="scenario-label">Прогноз балу</span>
+                        </div>
+                    </div>
+                    <div class="scenario-card scenario-realistic">
+                        <div class="scenario-header">
+                            <span class="scenario-dot realistic-dot"></span>
+                            <h4>Realistic</h4>
+                        </div>
+                        <p class="scenario-desc">Якщо участь зберігається</p>
+                        <div class="scenario-prediction" id="scenarioRealistic">
+                            <span class="scenario-score">-</span>
+                            <span class="scenario-label">Прогноз балу</span>
+                        </div>
+                    </div>
+                    <div class="scenario-card scenario-ambitious">
+                        <div class="scenario-header">
+                            <span class="scenario-dot ambitious-dot"></span>
+                            <h4>Ambitious</h4>
+                        </div>
+                        <p class="scenario-desc">Якщо переходить на вищий рівень</p>
+                        <div class="scenario-prediction" id="scenarioAmbitious">
+                            <span class="scenario-score">-</span>
+                            <span class="scenario-label">Прогноз балу</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Talent Detection Module -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#128142;</div>
+                <div>
+                    <h2>Talent Detection Module</h2>
+                    <p>Автоматичне визначення типу таланту</p>
+                </div>
+            </div>
+
+            <div class="talent-content">
+                <div class="talent-badge-main" id="talentBadgeMain">
+                    <div class="talent-badge-icon" id="talentBadgeIcon">?</div>
+                    <div class="talent-badge-info">
+                        <div class="talent-type-label">Talent Type</div>
+                        <div class="talent-type-name" id="talentTypeName">Аналіз...</div>
+                        <div class="talent-type-desc" id="talentTypeDesc">Визначення типу таланту на основі даних</div>
+                    </div>
+                </div>
+                <div class="talent-grid" id="talentGrid">
+                    <div class="talent-card" data-talent="stem">
+                        <div class="talent-card-icon">&#129514;</div>
+                        <div class="talent-card-name">STEM-талант</div>
+                        <div class="talent-card-bar-track">
+                            <div class="talent-card-bar" id="talentSTEM"></div>
+                        </div>
+                        <div class="talent-card-score" id="talentSTEMVal">0%</div>
+                    </div>
+                    <div class="talent-card" data-talent="humanitarian">
+                        <div class="talent-card-icon">&#128214;</div>
+                        <div class="talent-card-name">Гуманітарний</div>
+                        <div class="talent-card-bar-track">
+                            <div class="talent-card-bar" id="talentHuman"></div>
+                        </div>
+                        <div class="talent-card-score" id="talentHumanVal">0%</div>
+                    </div>
+                    <div class="talent-card" data-talent="leader">
+                        <div class="talent-card-icon">&#127941;</div>
+                        <div class="talent-card-name">Лідер активності</div>
+                        <div class="talent-card-bar-track">
+                            <div class="talent-card-bar" id="talentLeader"></div>
+                        </div>
+                        <div class="talent-card-score" id="talentLeaderVal">0%</div>
+                    </div>
+                    <div class="talent-card" data-talent="strategist">
+                        <div class="talent-card-icon">&#9878;&#65039;</div>
+                        <div class="talent-card-name">Стратег стабільності</div>
+                        <div class="talent-card-bar-track">
+                            <div class="talent-card-bar" id="talentStrategist"></div>
+                        </div>
+                        <div class="talent-card-score" id="talentStrategistVal">0%</div>
+                    </div>
+                    <div class="talent-card" data-talent="progressor">
+                        <div class="talent-card-icon">&#128640;</div>
+                        <div class="talent-card-name">Швидкий прогресор</div>
+                        <div class="talent-card-bar-track">
+                            <div class="talent-card-bar" id="talentProgressor"></div>
+                        </div>
+                        <div class="talent-card-score" id="talentProgressorVal">0%</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Comparative Position -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#128176;</div>
+                <div>
+                    <h2>Comparative Position</h2>
+                    <p>Позиція серед однолітків: перцентилі</p>
+                </div>
+            </div>
+
+            <div class="percentile-grid">
+                <div class="percentile-card">
+                    <div class="percentile-circle">
+                        <canvas id="percentileClass" width="130" height="130"></canvas>
+                        <div class="percentile-value" id="percentileClassVal">-</div>
+                    </div>
+                    <div class="percentile-label">Серед класу</div>
+                    <div class="percentile-desc" id="percentileClassDesc">-</div>
+                </div>
+                <div class="percentile-card">
+                    <div class="percentile-circle">
+                        <canvas id="percentileSchool" width="130" height="130"></canvas>
+                        <div class="percentile-value" id="percentileSchoolVal">-</div>
+                    </div>
+                    <div class="percentile-label">Серед школи</div>
+                    <div class="percentile-desc" id="percentileSchoolDesc">-</div>
+                </div>
+                <div class="percentile-card">
+                    <div class="percentile-circle">
+                        <canvas id="percentileRegion" width="130" height="130"></canvas>
+                        <div class="percentile-value" id="percentileRegionVal">-</div>
+                    </div>
+                    <div class="percentile-label">Серед області</div>
+                    <div class="percentile-desc" id="percentileRegionDesc">-</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Achievement Momentum Index -->
+        <section class="aic-section">
+            <div class="section-header">
+                <div class="section-icon">&#128293;</div>
+                <div>
+                    <h2>Achievement Momentum Index (AMI)</h2>
+                    <p>Інерція досягнень: розгін, плато чи спад</p>
+                </div>
+            </div>
+
+            <div class="ami-grid">
+                <div class="ami-card ami-main">
+                    <div class="ami-value-wrap">
+                        <div class="ami-big-value" id="amiValue">0</div>
+                        <div class="ami-big-label">AMI Score</div>
+                    </div>
+                    <div class="ami-status" id="amiStatus">
+                        <span class="ami-status-icon" id="amiStatusIcon">&#8212;</span>
+                        <span class="ami-status-text" id="amiStatusText">Обчислення...</span>
+                    </div>
+                    <div class="ami-formula">
+                        <code>AMI = (Trend x Activity) / Stability</code>
+                    </div>
+                </div>
+                <div class="ami-card">
+                    <h3>AMI Trend</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="amiTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- AI Recommendations -->
         <section class="aic-section recommendations-section">
             <div class="section-header">
