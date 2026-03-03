@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управління конкурсами - iEvents</title>
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/page-spacing.css">
@@ -337,59 +336,44 @@
     </div>
 
     <div id="viewDocumentsModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h2>📎 Завантажені файли учнів</h2>
+        <div class="modal-content modal-large modal-animated">
+            <div class="modal-header docs-modal-header">
+                <h2>Файли учнiв</h2>
                 <button class="modal-close" onclick="closeViewDocumentsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="documents-upload-section">
-                    <div class="upload-box">
-                        <h3>➕ Додати файл для учня</h3>
-                        <div class="upload-form">
-                            <div class="form-group">
-                                <label for="teacherFileInput">Оберіть файл</label>
-                                <input type="file" id="teacherFileInput" accept="*" />
-                            </div>
-                            <div class="form-group">
-                                <label for="teacherFileDescription">Опис (необов'язково)</label>
-                                <textarea id="teacherFileDescription" rows="2"
-                                    placeholder="Додайте опис файлу..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="teacherFileStudent">Оберіть учня *</label>
-                                <select id="teacherFileStudent" required>
-                                    <option value="">-- Оберіть учня --</option>
-                                </select>
-                            </div>
-                            <button type="button" class="btn btn-primary" onclick="uploadFileByTeacher()">📤 Завантажити
-                                файл</button>
-                        </div>
-                        <div id="teacherUploadProgress" class="upload-progress" style="display: none;">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="teacherProgressFill"></div>
-                            </div>
-                            <p id="teacherProgressText">Завантаження...</p>
-                        </div>
+                <div class="docs-filters-bar">
+                    <div class="docs-search-wrap">
+                        <span class="docs-search-icon">&#128269;</span>
+                        <input type="text" id="searchDocuments" class="docs-search-input"
+                            placeholder="Пошук по iменi учня або файлу...">
                     </div>
-                </div>
-
-                <div class="documents-filters">
-                    <input type="text" id="searchDocuments" class="filter-input"
-                        placeholder="Пошук по імені учня або файлу...">
-                    <select id="filterStudent" class="filter-select">
-                        <option value="">Всі учні</option>
+                    <select id="filterStudent" class="docs-filter-select">
+                        <option value="">Всi учнi</option>
                     </select>
                 </div>
 
-                <div id="documentsContainer" class="teacher-documents-view">
-                    <div class="loading">Завантаження файлів...</div>
+                <div id="documentsContainer" class="docs-list-container">
+                    <div class="loading">Завантаження файлiв...</div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeViewDocumentsModal()">Закрити</button>
             </div>
         </div>
+    </div>
+
+    <!-- Hidden teacher upload elements for JS compatibility -->
+    <input type="file" id="teacherFileInput" accept="*" style="display:none;" />
+    <textarea id="teacherFileDescription" style="display:none;"></textarea>
+    <select id="teacherFileStudent" style="display:none;">
+        <option value="">--</option>
+    </select>
+    <div id="teacherUploadProgress" style="display:none;">
+        <div class="progress-bar">
+            <div class="progress-fill" id="teacherProgressFill"></div>
+        </div>
+        <p id="teacherProgressText"></p>
     </div>
 
     <!-- Modal for viewing student responses -->
@@ -417,6 +401,29 @@
             </div>
         </div>
     </div>
+
+    <!-- File Preview Modal -->
+    <div id="filePreviewModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="previewFileName">Попередній перегляд</h2>
+                <button class="modal-close" onclick="closeFilePreview()">&times;</button>
+            </div>
+            <div class="modal-body" id="previewBody">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="downloadPreviewBtn">Завантажити</button>
+                <button class="btn btn-secondary" onclick="closeFilePreview()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden elements for JS compatibility -->
+    <select id="responseCompetitionSelector" style="display:none;">
+        <option value="">-- Оберіть конкурс --</option>
+    </select>
+    <div id="responsesContainer" style="display:none;"></div>
+    <input type="text" id="searchResponses" style="display:none;">
 
     <script src="js/components.js"></script>
     <script src="js/competitionsT.js"></script>
