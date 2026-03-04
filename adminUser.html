@@ -4,149 +4,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Особистий кабінет - iEvents</title>
-    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
+    <title>Е-кабінет учня - iEvents</title>
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/adminUser.css">
     <link rel="stylesheet" href="css/page-spacing.css">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#317EFB">
-
     <script src="js/config.js"></script>
 </head>
 
 <body>
     <div id="header"></div>
 
-    <main class="main-container">
-        <!-- Updated hero section with professional design -->
-        <section class="hero-section">
-            <div class="hero-container">
-                <div class="hero-content">
-                    <h1 class="hero-title">Особистий кабінет учня</h1>
-                    <p class="hero-description">
-                        Керуй своїм профілем, відстежуй участь у конкурсах та переглядай свої досягнення на одній
-                        платформі
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Персональна інформація -->
-        <div class="card card-fade-in">
-            <div class="card-header">
-                <div class="card-title-group">
-                    <div class="card-icon">👤</div>
-                    <h2>Персональна інформація</h2>
-                </div>
-                <button class="btn btn-primary" onclick="toggleEditMode('personal')">
-                    <span id="editPersonalBtn">✏️ Редагувати</span>
-                </button>
-            </div>
-            <div id="personalInfo" class="info-section">
-                <div class="loading">Завантаження...</div>
-            </div>
-            <form id="personalForm" class="edit-form" style="display: none;">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="editFirstName">Ім'я *</label>
-                        <input type="text" id="editFirstName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editLastName">Прізвище *</label>
-                        <input type="text" id="editLastName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editMiddleName">По батькові</label>
-                        <input type="text" id="editMiddleName">
-                    </div>
-                    <div class="form-group">
-                        <label for="editPhone">Телефон</label>
-                        <input type="tel" id="editPhone">
-                    </div>
-                    <div class="form-group">
-                        <label for="editTelegram">Telegram</label>
-                        <input type="text" id="editTelegram">
-                    </div>
-                    <div class="form-group">
-                        <label for="editCity">Місто</label>
-                        <input type="text" id="editCity">
+    <main class="cabinet">
+        <!-- Profile Hero Banner -->
+        <div class="cabinet-hero">
+            <div class="cabinet-hero-inner">
+                <div class="cabinet-avatar-wrap">
+                    <div class="cabinet-avatar" id="cabinetAvatar">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" /></svg>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-success">💾 Зберегти</button>
-                    <button type="button" class="btn btn-secondary" onclick="cancelEdit('personal')">❌
-                        Скасувати</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Зміна пароля -->
-        <div class="card card-fade-in">
-            <div class="card-header">
-                <div class="card-title-group">
-                    <div class="card-icon">🔐</div>
-                    <h2>Зміна пароля</h2>
-                </div>
-            </div>
-            <form id="passwordForm" class="password-form">
-                <div class="form-group">
-                    <label for="currentPassword">Поточний пароль</label>
-                    <input type="password" id="currentPassword" required>
-                </div>
-                <div class="form-group">
-                    <label for="newPassword">Новий пароль (мінімум 6 символів)</label>
-                    <input type="password" id="newPassword" required minlength="6">
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Підтвердіть новий пароль</label>
-                    <input type="password" id="confirmPassword" required minlength="6">
-                </div>
-                <div id="passwordMessage" class="message" style="display: none;"></div>
-                <button type="submit" class="btn btn-primary">🔄 Змінити пароль</button>
-            </form>
-        </div>
-
-        <!-- Мої конкурси -->
-        <div class="card card-fade-in">
-            <div class="card-header">
-                <div class="card-title-group">
-                    <div class="card-icon">🎯</div>
-                    <h2>Мої конкурси</h2>
-                </div>
-            </div>
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="active">Активні</button>
-                <button class="tab-btn" data-tab="upcoming">Майбутні</button>
-                <button class="tab-btn" data-tab="completed">Завершені</button>
-            </div>
-            <div id="competitionsContainer">
-                <div id="activeTab" class="tab-content active">
-                    <div class="loading">Завантаження...</div>
-                </div>
-                <div id="upcomingTab" class="tab-content">
-                    <div class="loading">Завантаження...</div>
-                </div>
-                <div id="completedTab" class="tab-content">
-                    <div class="loading">Завантаження...</div>
+                <div class="cabinet-hero-info">
+                    <h1 class="cabinet-hero-name" id="heroName">Завантаження...</h1>
+                    <div class="cabinet-hero-meta">
+                        <span class="cabinet-meta-tag" id="heroRole">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                <path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                            Учень
+                        </span>
+                        <span class="cabinet-meta-tag" id="heroCity">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" /></svg>
+                            <span id="heroCityText">...</span>
+                        </span>
+                        <span class="cabinet-meta-tag" id="heroEmail">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect width="20" height="16" x="2" y="4" rx="2" />
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                            <span id="heroEmailText">...</span>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Мої результати -->
-        <div class="card card-fade-in">
-            <div class="card-header">
-                <div class="card-title-group">
-                    <div class="card-icon">🏆</div>
-                    <h2>Мої результати</h2>
+        <!-- Stats Dashboard -->
+        <div class="cabinet-stats" id="cabinetStats">
+            <div class="stat-card stat-competitions">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                        <path d="M4 22h16" />
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statCompetitions">0</span>
+                    <span class="stat-label">Конкурсів</span>
                 </div>
             </div>
-            <div id="resultsContainer">
-                <div class="loading">Завантаження...</div>
+            <div class="stat-card stat-active">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" /></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statActive">0</span>
+                    <span class="stat-label">Активних</span>
+                </div>
+            </div>
+            <div class="stat-card stat-results">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statResults">0</span>
+                    <span class="stat-label">Результатів</span>
+                </div>
+            </div>
+            <div class="stat-card stat-rehearsals">
+                <div class="stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                        <line x1="16" x2="16" y1="2" y2="6" />
+                        <line x1="8" x2="8" y1="2" y2="6" />
+                        <line x1="3" x2="21" y1="10" y2="10" /></svg>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statRehearsals">0</span>
+                    <span class="stat-label">Репетицій</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cabinet Navigation Tabs -->
+        <div class="cabinet-nav">
+            <button class="cabinet-nav-btn active" data-section="overview">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="7" height="9" x="3" y="3" rx="1" />
+                    <rect width="7" height="5" x="14" y="3" rx="1" />
+                    <rect width="7" height="9" x="14" y="12" rx="1" />
+                    <rect width="7" height="5" x="3" y="16" rx="1" /></svg>
+                Огляд
+            </button>
+            <button class="cabinet-nav-btn" data-section="profile">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" /></svg>
+                Профіль
+            </button>
+            <button class="cabinet-nav-btn" data-section="competitions">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                    <path d="M4 22h16" />
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                Конкурси
+            </button>
+            <button class="cabinet-nav-btn" data-section="results">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20V10" />
+                    <path d="M18 20V4" />
+                    <path d="M6 20v-4" /></svg>
+                Результати
+            </button>
+            <button class="cabinet-nav-btn" data-section="rehearsals">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" x2="16" y1="2" y2="6" />
+                    <line x1="8" x2="8" y1="2" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" /></svg>
+                Репетиції
+            </button>
+            <button class="cabinet-nav-btn" data-section="settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                    <circle cx="12" cy="12" r="3" /></svg>
+                Налаштування
+            </button>
+        </div>
+
+        <!-- Section: Overview -->
+        <div class="cabinet-section active" id="section-overview">
+            <div class="cabinet-grid">
+                <!-- Upcoming Events Timeline -->
+                <div class="cabinet-card cabinet-card-wide">
+                    <div class="cabinet-card-header">
+                        <h2>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" /></svg>
+                            Найближчі події
+                        </h2>
+                    </div>
+                    <div class="cabinet-card-body" id="upcomingEvents">
+                        <div class="cabinet-loading">
+                            <div class="cabinet-spinner"></div> Завантаження...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Results -->
+                <div class="cabinet-card">
+                    <div class="cabinet-card-header">
+                        <h2>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20V10" />
+                                <path d="M18 20V4" />
+                                <path d="M6 20v-4" /></svg>
+                            Останні результати
+                        </h2>
+                    </div>
+                    <div class="cabinet-card-body" id="recentResults">
+                        <div class="cabinet-loading">
+                            <div class="cabinet-spinner"></div> Завантаження...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Info Card -->
+                <div class="cabinet-card">
+                    <div class="cabinet-card-header">
+                        <h2>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" /></svg>
+                            Мої дані
+                        </h2>
+                    </div>
+                    <div class="cabinet-card-body" id="quickInfo">
+                        <div class="cabinet-loading">
+                            <div class="cabinet-spinner"></div> Завантаження...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Profile -->
+        <div class="cabinet-section" id="section-profile">
+            <div class="cabinet-card">
+                <div class="cabinet-card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" /></svg>
+                        Персональна інформація
+                    </h2>
+                    <button class="cabinet-btn cabinet-btn-outline" onclick="toggleEditMode('personal')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                            <path d="m15 5 4 4" /></svg>
+                        <span id="editPersonalBtn">Редагувати</span>
+                    </button>
+                </div>
+                <div class="cabinet-card-body">
+                    <div id="personalInfo" class="profile-grid">
+                        <div class="cabinet-loading">
+                            <div class="cabinet-spinner"></div> Завантаження...
+                        </div>
+                    </div>
+                    <form id="personalForm" class="edit-form" style="display: none;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="editFirstName">Ім'я *</label>
+                                <input type="text" id="editFirstName" required placeholder="Введіть ім'я">
+                            </div>
+                            <div class="form-group">
+                                <label for="editLastName">Прізвище *</label>
+                                <input type="text" id="editLastName" required placeholder="Введіть прізвище">
+                            </div>
+                            <div class="form-group">
+                                <label for="editMiddleName">По батькові</label>
+                                <input type="text" id="editMiddleName" placeholder="Введіть по батькові">
+                            </div>
+                            <div class="form-group">
+                                <label for="editPhone">Телефон</label>
+                                <input type="tel" id="editPhone" placeholder="+380...">
+                            </div>
+                            <div class="form-group">
+                                <label for="editTelegram">Telegram</label>
+                                <input type="text" id="editTelegram" placeholder="@username">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCity">Місто</label>
+                                <input type="text" id="editCity" placeholder="Ваше місто">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="cabinet-btn cabinet-btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                    <polyline points="7 3 7 8 15 8" /></svg>
+                                Зберегти
+                            </button>
+                            <button type="button" class="cabinet-btn cabinet-btn-ghost"
+                                onclick="cancelEdit('personal')">Скасувати</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Competitions -->
+        <div class="cabinet-section" id="section-competitions">
+            <div class="cabinet-card">
+                <div class="cabinet-card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                            <path d="M4 22h16" />
+                            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                        Мої конкурси
+                    </h2>
+                </div>
+                <div class="cabinet-card-body">
+                    <div class="comp-tabs">
+                        <button class="comp-tab active" data-tab="active">Активні</button>
+                        <button class="comp-tab" data-tab="upcoming">Майбутні</button>
+                        <button class="comp-tab" data-tab="completed">Завершені</button>
+                    </div>
+                    <div id="activeTab" class="comp-tab-content active">
+                        <div class="cabinet-loading">
+                            <div class="cabinet-spinner"></div> Завантаження...
+                        </div>
+                    </div>
+                    <div id="upcomingTab" class="comp-tab-content">
+                        <div class="cabinet-loading">
+                            <div class="cabinet-spinner"></div> Завантаження...
+                        </div>
+                    </div>
+                    <div id="completedTab" class="comp-tab-content">
+                        <div class="cabinet-loading">
+                            <div class="cabinet-spinner"></div> Завантаження...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Results -->
+        <div class="cabinet-section" id="section-results">
+            <div class="cabinet-card">
+                <div class="cabinet-card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 20V10" />
+                            <path d="M18 20V4" />
+                            <path d="M6 20v-4" /></svg>
+                        Мої результати
+                    </h2>
+                </div>
+                <div class="cabinet-card-body" id="resultsContainer">
+                    <div class="cabinet-loading">
+                        <div class="cabinet-spinner"></div> Завантаження...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Rehearsals -->
+        <div class="cabinet-section" id="section-rehearsals">
+            <div class="cabinet-card">
+                <div class="cabinet-card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                            <line x1="16" x2="16" y1="2" y2="6" />
+                            <line x1="8" x2="8" y1="2" y2="6" />
+                            <line x1="3" x2="21" y1="10" y2="10" /></svg>
+                        Мої репетиції
+                    </h2>
+                </div>
+                <div class="cabinet-card-body" id="rehearsalsContainer">
+                    <div class="cabinet-loading">
+                        <div class="cabinet-spinner"></div> Завантаження...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Settings -->
+        <div class="cabinet-section" id="section-settings">
+            <div class="cabinet-card">
+                <div class="cabinet-card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect width="20" height="16" x="2" y="4" rx="2" />
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                        Зміна пароля
+                    </h2>
+                </div>
+                <div class="cabinet-card-body">
+                    <form id="passwordForm" class="password-form">
+                        <div class="form-grid form-grid-narrow">
+                            <div class="form-group">
+                                <label for="currentPassword">Поточний пароль</label>
+                                <input type="password" id="currentPassword" required
+                                    placeholder="Введіть поточний пароль">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">Новий пароль (мін. 6 символів)</label>
+                                <input type="password" id="newPassword" required minlength="6"
+                                    placeholder="Введіть новий пароль">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Підтвердіть новий пароль</label>
+                                <input type="password" id="confirmPassword" required minlength="6"
+                                    placeholder="Повторіть новий пароль">
+                            </div>
+                        </div>
+                        <div id="passwordMessage" class="cabinet-message" style="display: none;"></div>
+                        <div class="form-actions">
+                            <button type="submit" class="cabinet-btn cabinet-btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                Змінити пароль
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <div id="footer"></div>
 
