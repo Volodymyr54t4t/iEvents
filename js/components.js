@@ -13,6 +13,7 @@ function renderHeader() {
             <div class="header-container">
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
+                    <a href="contest-database.html" class="nav-link">Бібліотека</a>
                     <a href="auth.html" class="btn btn-primary">Увійти / Зареєструватися</a>
                 </nav>
             </div>
@@ -39,6 +40,7 @@ function renderHeader() {
                     <a href="index.html" class="nav-link">Головна</a>
                     <a href="profileCommunity.html" class="nav-link">Профіль</a>
                     <a href="adminCommunity.html" class="nav-link">Admin</a>
+                    <a href="contest-database.html" class="nav-link">Бібліотека</a>
                     ${notificationButton}
                     <div class="user-info">
                         <span class="user-email">${userEmail}</span>
@@ -50,6 +52,7 @@ function renderHeader() {
                     <a href="index.html" class="sidebar-link">Головна</a>
                     <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
                     <a href="adminCommunity.html" class="sidebar-link">Admin</a>
+                    <a href="contest-database.html" class="sidebar-link">Бібліотека</a>
                     <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
                     <div style="padding: 16px 24px;">
                         <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
@@ -121,9 +124,8 @@ function renderHeader() {
   if (resultsHref)
     eventsItems += `<a href="${resultsHref}" class="dropdown-item">Результати</a>`;
   eventsItems += `<a href="predictions.html" class="dropdown-item">Прогнози</a>`;
-  if (userRole === "вчитель" || userRole === "методист") {
-    eventsItems += `<a href="aic-2-0.html" class="dropdown-item">AIC 2.0</a>`;
-  }
+  eventsItems += `<a href="new.html" class="dropdown-item">AIC 2.0</a>`;
+  eventsItems += `<a href="contest-database.html" class="dropdown-item">Бібліотека</a>`;
 
   // Build dropdown items for Info
   const infoItems = `
@@ -152,9 +154,8 @@ function renderHeader() {
   if (resultsHref)
     sidebarEventsItems += `<a href="${resultsHref}" class="sidebar-link">Результати</a>`;
   sidebarEventsItems += `<a href="predictions.html" class="sidebar-link">Прогнози</a>`;
-  if (userRole === "вчитель" || userRole === "методист") {
-    sidebarEventsItems += `<a href="aic-2-0.html" class="sidebar-link">AIC 2.0</a>`;
-  }
+  sidebarEventsItems += `<a href="new.html" class="sidebar-link">AIC 2.0</a>`;
+  sidebarEventsItems += `<a href="contest-database.html" class="sidebar-link">Бібліотека</a>`;
 
   let sidebarAccountItems = `<a href="${profileHref}" class="sidebar-link">Профіль</a>`;
   if (adminHref)
@@ -265,6 +266,7 @@ function checkAdminPageAccess(userRole) {
     "index.html",
     "profileCommunity.html",
     "adminCommunity.html",
+    "contest-database.html",
   ];
 
   if (!allowedPages.includes(currentPage) && currentPage !== "") {

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бібліотека конкурсів - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/contest-database.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <!-- Hero Section -->
+        <div class="cdb-hero">
+            <div class="cdb-hero-content">
+                <div class="cdb-hero-badge">
+                    <span class="cdb-badge-icon">&#128218;</span>
+                    <span>&#1040;&#1088;&#1093;&#1110;&#1074;
+                        &#1082;&#1086;&#1085;&#1082;&#1091;&#1088;&#1089;&#1110;&#1074;</span>
+                </div>
+                <h1 class="cdb-hero-title">Бібліотека конкурсів</h1>
+                <p class="cdb-hero-subtitle">Повний архів усіх конкурсів платформи iEvents. Переглядайте завдання,
+                    умови, роботи переможців та надихайтесь на нові звершення.</p>
+                <div class="cdb-hero-stats" id="heroStats">
+                    <div class="cdb-stat-item">
+                        <div class="cdb-stat-number" id="statTotal">--</div>
+                        <div class="cdb-stat-label">Всього конкурсів</div>
+                    </div>
+                    <div class="cdb-stat-item">
+                        <div class="cdb-stat-number" id="statFinished">--</div>
+                        <div class="cdb-stat-label">Завершених</div>
+                    </div>
+                    <div class="cdb-stat-item">
+                        <div class="cdb-stat-number" id="statActive">--</div>
+                        <div class="cdb-stat-label">Активних</div>
+                    </div>
+                    <div class="cdb-stat-item">
+                        <div class="cdb-stat-number" id="statParticipants">--</div>
+                        <div class="cdb-stat-label">Учасників</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="cdb-filters-bar">
+            <div class="cdb-search-wrap">
+                <svg class="cdb-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" /></svg>
+                <input type="text" id="searchInput" class="cdb-search-input"
+                    placeholder="Пошук конкурсів за назвою, описом...">
+            </div>
+            <div class="cdb-filter-group">
+                <select id="filterStatus" class="cdb-select">
+                    <option value="all">Всі статуси</option>
+                    <option value="active">Активні</option>
+                    <option value="upcoming">Майбутні</option>
+                    <option value="finished">Завершені</option>
+                </select>
+                <select id="filterYear" class="cdb-select">
+                    <option value="all">Всі роки</option>
+                </select>
+                <select id="filterSort" class="cdb-select">
+                    <option value="newest">Спочатку нові</option>
+                    <option value="oldest">Спочатку старі</option>
+                    <option value="participants">За учасниками</option>
+                    <option value="alpha">За алфавітом</option>
+                </select>
+            </div>
+            <div class="cdb-view-toggle">
+                <button class="cdb-view-btn active" id="viewGrid" title="Сітка" onclick="setView('grid')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" /></svg>
+                </button>
+                <button class="cdb-view-btn" id="viewList" title="Список" onclick="setView('list')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contests Grid -->
+        <div id="contestsContainer" class="cdb-grid">
+            <div class="cdb-loading">
+                <div class="cdb-spinner"></div>
+                <p>Завантаження бібліотеки конкурсів...</p>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="cdb-empty" style="display: none;">
+            <div class="cdb-empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#a88264" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <line x1="10" y1="9" x2="8" y2="9" /></svg>
+            </div>
+            <h3>Конкурсів не знайдено</h3>
+            <p>Спробуйте змінити критерії пошуку або фільтри</p>
+        </div>
+    </main>
+
+    <!-- Contest Detail Modal -->
+    <div id="contestModal" class="cdb-modal">
+        <div class="cdb-modal-content">
+            <div class="cdb-modal-header">
+                <h2 id="modalTitle">Деталі конкурсу</h2>
+                <button class="cdb-modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="cdb-modal-body" id="modalBody">
+                <div class="cdb-loading">
+                    <div class="cdb-spinner"></div>
+                    <p>Завантаження...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/components.js"></script>
+    <script src="js/contest-database.js"></script>
+</body>
+
+</html>
