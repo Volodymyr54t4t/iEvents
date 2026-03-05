@@ -31,6 +31,7 @@ app.use(express.static(path.join(__dirname)));
 app.use("/uploads", express.static("uploads"));
 
 app.use("/documents", express.static(path.join(__dirname, "documents")));
+app.use("/achievex", express.static(path.join(__dirname, "achievex")));
 
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
@@ -38,7 +39,12 @@ if (!fs.existsSync("uploads")) {
 
 if (!fs.existsSync("documents")) {
   fs.mkdirSync("documents");
-  console.log("📁 Створено папку documents/");
+  console.log("Створено папку documents/");
+}
+
+if (!fs.existsSync("achievex")) {
+  fs.mkdirSync("achievex");
+  console.log("Створено папку achievex/");
 }
 
 // Налаштування Multer для завантаження файлів
@@ -948,6 +954,88 @@ async function initializeDatabase() {
       console.log("  ✓ Таблиця teacher_competition_subscriptions створена");
     } else {
       console.log("  ✓ Таблиця teacher_competition_subscriptions вже існує");
+    }
+
+    // ==================== ACHIEVEX (Achievement Garage) TABLES ====================
+    console.log("Перевірка таблиці achievements...");
+    const achievementsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'achievements'
+      ) as exists
+    `);
+
+    if (!achievementsTableCheck.rows[0].exists) {
+      console.log("  -> Створення таблиці achievements...");
+      await client.query(`
+        CREATE TABLE achievements (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          competition_name VARCHAR(255),
+          competition_date DATE,
+          competition_level VARCHAR(50),
+          competition_place VARCHAR(100),
+          category VARCHAR(100),
+          file_path VARCHAR(500),
+          file_name VARCHAR(255),
+          file_type VARCHAR(100),
+          file_size BIGINT,
+          project_file_path VARCHAR(500),
+          project_file_name VARCHAR(255),
+          project_file_type VARCHAR(100),
+          project_file_size BIGINT,
+          teacher_confirmed BOOLEAN DEFAULT FALSE,
+          confirmed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          confirmed_at TIMESTAMP,
+          teacher_comment TEXT,
+          teacher_recommendation TEXT,
+          teacher_signature TEXT,
+          qr_token VARCHAR(100) UNIQUE,
+          is_public BOOLEAN DEFAULT TRUE,
+          share_token VARCHAR(100) UNIQUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log("  + Таблиця achievements створена");
+    } else {
+      console.log("  + Таблиця achievements вже існує");
+      // Add missing columns
+      const achCols = [
+        { name: "project_file_path", type: "VARCHAR(500)" },
+        { name: "project_file_name", type: "VARCHAR(255)" },
+        { name: "project_file_type", type: "VARCHAR(100)" },
+        { name: "project_file_size", type: "BIGINT" },
+        { name: "teacher_confirmed", type: "BOOLEAN DEFAULT FALSE" },
+        {
+          name: "confirmed_by",
+          type: "INTEGER REFERENCES users(id) ON DELETE SET NULL",
+        },
+        { name: "confirmed_at", type: "TIMESTAMP" },
+        { name: "teacher_comment", type: "TEXT" },
+        { name: "teacher_recommendation", type: "TEXT" },
+        { name: "teacher_signature", type: "TEXT" },
+        { name: "qr_token", type: "VARCHAR(100) UNIQUE" },
+        { name: "is_public", type: "BOOLEAN DEFAULT TRUE" },
+        { name: "share_token", type: "VARCHAR(100) UNIQUE" },
+      ];
+      for (const col of achCols) {
+        try {
+          const colCheck = await client.query(`
+            SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='achievements' AND column_name='${col.name}') as exists
+          `);
+          if (!colCheck.rows[0].exists) {
+            await client.query(
+              `ALTER TABLE achievements ADD COLUMN ${col.name} ${col.type}`,
+            );
+            console.log(`  + Колонка ${col.name} додана`);
+          }
+        } catch (e) {
+          console.log(`  - ${col.name}: ${e.message}`);
+        }
+      }
     }
 
     console.log("=== База даних готова до роботи! ===\n");
@@ -6501,6 +6589,566 @@ app.delete("/api/results/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting result:", error);
     res.status(500).json({ message: "Помилка видалення результату" });
+  }
+});
+
+// ==================== ACHIEVEX (Achievement Garage) API ====================
+
+// Achievex file storage - each student gets their own folder
+const achievexStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const userId = req.params.userId || req.body.user_id || "unknown";
+    const userDir = path.join("achievex", `user_${userId}`);
+    if (!fs.existsSync(userDir)) {
+      fs.mkdirSync(userDir, { recursive: true });
+    }
+    cb(null, userDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+    cb(null, uniqueSuffix + "-" + sanitizedName);
+  },
+});
+
+const uploadAchievex = multer({
+  storage: achievexStorage,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  fileFilter: (req, file, cb) => {
+    const allowed =
+      /jpeg|jpg|png|gif|pdf|doc|docx|ppt|pptx|xls|xlsx|zip|rar|mp4|mp3/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    if (ext) {
+      return cb(null, true);
+    }
+    cb(new Error("Недозволений тип файлу"));
+  },
+});
+
+// Generate random token
+function generateToken(length = 32) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let token = "";
+  for (let i = 0; i < length; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+}
+
+// Get all achievements for a user
+app.get("/api/achievex/user/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const result = await pool.query(
+      `
+      SELECT a.*, 
+             p_owner.first_name as owner_first_name, p_owner.last_name as owner_last_name,
+             p_conf.first_name as confirmer_first_name, p_conf.last_name as confirmer_last_name
+      FROM achievements a
+      LEFT JOIN profiles p_owner ON a.user_id = p_owner.user_id
+      LEFT JOIN profiles p_conf ON a.confirmed_by = p_conf.user_id
+      WHERE a.user_id = $1
+      ORDER BY a.created_at DESC
+    `,
+      [userId],
+    );
+    res.json({ success: true, achievements: result.rows });
+  } catch (error) {
+    console.error("Error getting achievements:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Помилка отримання досягнень" });
+  }
+});
+
+// Get public portfolio by share token
+app.get("/api/achievex/public/:shareToken", async (req, res) => {
+  const { shareToken } = req.params;
+  try {
+    const result = await pool.query(
+      `
+      SELECT a.*, 
+             p.first_name, p.last_name, p.school_id, p.avatar, p.city,
+             s.name as school_name,
+             p_conf.first_name as confirmer_first_name, p_conf.last_name as confirmer_last_name
+      FROM achievements a
+      LEFT JOIN profiles p ON a.user_id = p.user_id
+      LEFT JOIN schools s ON p.school_id = s.id
+      LEFT JOIN profiles p_conf ON a.confirmed_by = p_conf.user_id
+      WHERE a.share_token = $1 AND a.is_public = true
+    `,
+      [shareToken],
+    );
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({
+          success: false,
+          error: "Досягнення не знайдено або не є публічним",
+        });
+    }
+
+    res.json({ success: true, achievement: result.rows[0] });
+  } catch (error) {
+    console.error("Error getting public achievement:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Помилка отримання досягнення" });
+  }
+});
+
+// Get public portfolio for a user (all public achievements)
+app.get("/api/achievex/portfolio/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const profileResult = await pool.query(
+      `
+      SELECT p.*, u.email, s.name as school_name
+      FROM profiles p 
+      LEFT JOIN users u ON p.user_id = u.id
+      LEFT JOIN schools s ON p.school_id = s.id
+      WHERE p.user_id = $1
+    `,
+      [userId],
+    );
+
+    const achievementsResult = await pool.query(
+      `
+      SELECT a.*,
+             p_conf.first_name as confirmer_first_name, p_conf.last_name as confirmer_last_name
+      FROM achievements a
+      LEFT JOIN profiles p_conf ON a.confirmed_by = p_conf.user_id
+      WHERE a.user_id = $1 AND a.is_public = true
+      ORDER BY a.competition_date DESC NULLS LAST, a.created_at DESC
+    `,
+      [userId],
+    );
+
+    res.json({
+      success: true,
+      profile: profileResult.rows[0] || null,
+      achievements: achievementsResult.rows,
+    });
+  } catch (error) {
+    console.error("Error getting portfolio:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Помилка отримання портфоліо" });
+  }
+});
+
+// Verify achievement by QR token
+app.get("/api/achievex/verify/:qrToken", async (req, res) => {
+  const { qrToken } = req.params;
+  try {
+    const result = await pool.query(
+      `
+      SELECT a.*,
+             p_owner.first_name, p_owner.last_name,
+             p_conf.first_name as confirmer_first_name, p_conf.last_name as confirmer_last_name,
+             s.name as school_name
+      FROM achievements a
+      LEFT JOIN profiles p_owner ON a.user_id = p_owner.user_id
+      LEFT JOIN schools s ON p_owner.school_id = s.id
+      LEFT JOIN profiles p_conf ON a.confirmed_by = p_conf.user_id
+      WHERE a.qr_token = $1
+    `,
+      [qrToken],
+    );
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Досягнення не знайдено" });
+    }
+
+    res.json({ success: true, achievement: result.rows[0] });
+  } catch (error) {
+    console.error("Error verifying achievement:", error);
+    res.status(500).json({ success: false, error: "Помилка верифікації" });
+  }
+});
+
+// Create achievement
+app.post(
+  "/api/achievex/:userId",
+  uploadAchievex.fields([
+    { name: "diploma", maxCount: 1 },
+    { name: "project", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { userId } = req.params;
+    const {
+      title,
+      description,
+      competition_name,
+      competition_date,
+      competition_level,
+      competition_place,
+      category,
+      is_public,
+    } = req.body;
+
+    try {
+      const qrToken = generateToken(40);
+      const shareToken = generateToken(20);
+
+      let filePath = null,
+        fileName = null,
+        fileType = null,
+        fileSize = null;
+      if (req.files && req.files.diploma && req.files.diploma[0]) {
+        const f = req.files.diploma[0];
+        filePath = "/" + f.path.replace(/\\/g, "/");
+        fileName = f.originalname;
+        fileType = f.mimetype;
+        fileSize = f.size;
+      }
+
+      let projectFilePath = null,
+        projectFileName = null,
+        projectFileType = null,
+        projectFileSize = null;
+      if (req.files && req.files.project && req.files.project[0]) {
+        const f = req.files.project[0];
+        projectFilePath = "/" + f.path.replace(/\\/g, "/");
+        projectFileName = f.originalname;
+        projectFileType = f.mimetype;
+        projectFileSize = f.size;
+      }
+
+      const result = await pool.query(
+        `
+      INSERT INTO achievements (
+        user_id, title, description, competition_name, competition_date, competition_level,
+        competition_place, category, file_path, file_name, file_type, file_size,
+        project_file_path, project_file_name, project_file_type, project_file_size,
+        qr_token, share_token, is_public
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+      RETURNING *
+    `,
+        [
+          userId,
+          title,
+          description || null,
+          competition_name || null,
+          competition_date || null,
+          competition_level || null,
+          competition_place || null,
+          category || null,
+          filePath,
+          fileName,
+          fileType,
+          fileSize,
+          projectFilePath,
+          projectFileName,
+          projectFileType,
+          projectFileSize,
+          qrToken,
+          shareToken,
+          is_public === "false" ? false : true,
+        ],
+      );
+
+      console.log("Achievement created for user", userId);
+      res.json({ success: true, achievement: result.rows[0] });
+    } catch (error) {
+      console.error("Error creating achievement:", error);
+      res
+        .status(500)
+        .json({ success: false, error: "Помилка створення досягнення" });
+    }
+  },
+);
+
+// Update achievement
+app.put(
+  "/api/achievex/:id",
+  uploadAchievex.fields([
+    { name: "diploma", maxCount: 1 },
+    { name: "project", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      competition_name,
+      competition_date,
+      competition_level,
+      competition_place,
+      category,
+      is_public,
+      user_id,
+    } = req.body;
+
+    try {
+      let updateFields = `
+      title=$1, description=$2, competition_name=$3, competition_date=$4,
+      competition_level=$5, competition_place=$6, category=$7, is_public=$8, updated_at=CURRENT_TIMESTAMP
+    `;
+      let params = [
+        title,
+        description || null,
+        competition_name || null,
+        competition_date || null,
+        competition_level || null,
+        competition_place || null,
+        category || null,
+        is_public === "false" ? false : true,
+      ];
+      let paramIdx = 9;
+
+      if (req.files && req.files.diploma && req.files.diploma[0]) {
+        const f = req.files.diploma[0];
+        updateFields += `, file_path=$${paramIdx}, file_name=$${paramIdx + 1}, file_type=$${paramIdx + 2}, file_size=$${paramIdx + 3}`;
+        params.push(
+          "/" + f.path.replace(/\\/g, "/"),
+          f.originalname,
+          f.mimetype,
+          f.size,
+        );
+        paramIdx += 4;
+      }
+
+      if (req.files && req.files.project && req.files.project[0]) {
+        const f = req.files.project[0];
+        updateFields += `, project_file_path=$${paramIdx}, project_file_name=$${paramIdx + 1}, project_file_type=$${paramIdx + 2}, project_file_size=$${paramIdx + 3}`;
+        params.push(
+          "/" + f.path.replace(/\\/g, "/"),
+          f.originalname,
+          f.mimetype,
+          f.size,
+        );
+        paramIdx += 4;
+      }
+
+      params.push(id);
+      const result = await pool.query(
+        `UPDATE achievements SET ${updateFields} WHERE id=$${paramIdx} RETURNING *`,
+        params,
+      );
+
+      if (result.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Досягнення не знайдено" });
+      }
+
+      res.json({ success: true, achievement: result.rows[0] });
+    } catch (error) {
+      console.error("Error updating achievement:", error);
+      res
+        .status(500)
+        .json({ success: false, error: "Помилка оновлення досягнення" });
+    }
+  },
+);
+
+// Delete achievement
+app.delete("/api/achievex/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Get file paths before deletion
+    const existing = await pool.query(
+      "SELECT file_path, project_file_path FROM achievements WHERE id=$1",
+      [id],
+    );
+    if (existing.rows.length > 0) {
+      const row = existing.rows[0];
+      if (row.file_path) {
+        const fp = path.join(__dirname, row.file_path);
+        if (fs.existsSync(fp)) fs.unlinkSync(fp);
+      }
+      if (row.project_file_path) {
+        const fp = path.join(__dirname, row.project_file_path);
+        if (fs.existsSync(fp)) fs.unlinkSync(fp);
+      }
+    }
+    await pool.query("DELETE FROM achievements WHERE id=$1", [id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting achievement:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Помилка видалення досягнення" });
+  }
+});
+
+// Teacher confirm achievement
+app.post("/api/achievex/:id/confirm", async (req, res) => {
+  const { id } = req.params;
+  const {
+    confirmed_by,
+    teacher_comment,
+    teacher_recommendation,
+    teacher_signature,
+  } = req.body;
+
+  try {
+    const result = await pool.query(
+      `
+      UPDATE achievements SET 
+        teacher_confirmed = true,
+        confirmed_by = $1,
+        confirmed_at = CURRENT_TIMESTAMP,
+        teacher_comment = $2,
+        teacher_recommendation = $3,
+        teacher_signature = $4,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $5
+      RETURNING *
+    `,
+      [
+        confirmed_by,
+        teacher_comment || null,
+        teacher_recommendation || null,
+        teacher_signature || null,
+        id,
+      ],
+    );
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Досягнення не знайдено" });
+    }
+
+    res.json({ success: true, achievement: result.rows[0] });
+  } catch (error) {
+    console.error("Error confirming achievement:", error);
+    res.status(500).json({ success: false, error: "Помилка підтвердження" });
+  }
+});
+
+// Revoke confirmation
+app.post("/api/achievex/:id/revoke", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      `
+      UPDATE achievements SET 
+        teacher_confirmed = false,
+        confirmed_by = NULL,
+        confirmed_at = NULL,
+        teacher_comment = NULL,
+        teacher_recommendation = NULL,
+        teacher_signature = NULL,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING *
+    `,
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Досягнення не знайдено" });
+    }
+    res.json({ success: true, achievement: result.rows[0] });
+  } catch (error) {
+    console.error("Error revoking confirmation:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Помилка скасування підтвердження" });
+  }
+});
+
+// Get all achievements for teacher (students they can manage)
+app.get("/api/achievex/teacher/:teacherId", async (req, res) => {
+  const { teacherId } = req.params;
+  const { category, confirmed, search } = req.query;
+  try {
+    let whereConditions = [];
+    let params = [];
+    let idx = 1;
+
+    if (category) {
+      whereConditions.push(`a.category = $${idx}`);
+      params.push(category);
+      idx++;
+    }
+    if (confirmed === "true") {
+      whereConditions.push(`a.teacher_confirmed = true`);
+    } else if (confirmed === "false") {
+      whereConditions.push(`a.teacher_confirmed = false`);
+    }
+    if (search) {
+      whereConditions.push(
+        `(p.first_name ILIKE $${idx} OR p.last_name ILIKE $${idx} OR a.title ILIKE $${idx} OR a.competition_name ILIKE $${idx})`,
+      );
+      params.push(`%${search}%`);
+      idx++;
+    }
+
+    const whereClause =
+      whereConditions.length > 0
+        ? "WHERE " + whereConditions.join(" AND ")
+        : "";
+
+    const result = await pool.query(
+      `
+      SELECT a.*,
+             p.first_name, p.last_name, p.avatar, p.school_id,
+             s.name as school_name,
+             p_conf.first_name as confirmer_first_name, p_conf.last_name as confirmer_last_name
+      FROM achievements a
+      LEFT JOIN profiles p ON a.user_id = p.user_id
+      LEFT JOIN schools s ON p.school_id = s.id
+      LEFT JOIN profiles p_conf ON a.confirmed_by = p_conf.user_id
+      ${whereClause}
+      ORDER BY a.teacher_confirmed ASC, a.created_at DESC
+    `,
+      params,
+    );
+
+    res.json({ success: true, achievements: result.rows });
+  } catch (error) {
+    console.error("Error getting teacher achievements:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Помилка отримання досягнень" });
+  }
+});
+
+// Get categories stats
+app.get("/api/achievex/stats/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const total = await pool.query(
+      "SELECT COUNT(*) as count FROM achievements WHERE user_id=$1",
+      [userId],
+    );
+    const confirmed = await pool.query(
+      "SELECT COUNT(*) as count FROM achievements WHERE user_id=$1 AND teacher_confirmed=true",
+      [userId],
+    );
+    const categories = await pool.query(
+      "SELECT category, COUNT(*) as count FROM achievements WHERE user_id=$1 GROUP BY category ORDER BY count DESC",
+      [userId],
+    );
+    const levels = await pool.query(
+      "SELECT competition_level, COUNT(*) as count FROM achievements WHERE user_id=$1 AND competition_level IS NOT NULL GROUP BY competition_level ORDER BY count DESC",
+      [userId],
+    );
+
+    res.json({
+      success: true,
+      stats: {
+        total: parseInt(total.rows[0].count),
+        confirmed: parseInt(confirmed.rows[0].count),
+        categories: categories.rows,
+        levels: levels.rows,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting stats:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Помилка отримання статистики" });
   }
 });
 

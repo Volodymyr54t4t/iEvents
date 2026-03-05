@@ -143,6 +143,7 @@ function renderHeader() {
 
   // Build dropdown items for Account
   let accountItems = `<a href="${profileHref}" class="dropdown-item">Профіль</a>`;
+  accountItems += `<a href="achievex.html" class="dropdown-item">AchieveX</a>`;
   if (adminHref)
     accountItems += `<a href="${adminHref}" class="dropdown-item">${adminLabel}</a>`;
 
@@ -158,6 +159,7 @@ function renderHeader() {
   sidebarEventsItems += `<a href="contest-database.html" class="sidebar-link">Бібліотека</a>`;
 
   let sidebarAccountItems = `<a href="${profileHref}" class="sidebar-link">Профіль</a>`;
+  sidebarAccountItems += `<a href="achievex.html" class="sidebar-link">AchieveX</a>`;
   if (adminHref)
     sidebarAccountItems += `<a href="${adminHref}" class="sidebar-link">${adminLabel}</a>`;
 

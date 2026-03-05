@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AchieveX - Гараж досягнень | iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <link rel="stylesheet" href="css/achievex.css">
+    <link rel="icon" href="images/iEvents_logo.png" type="image/png">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <header id="header"></header>
+
+    <main class="main-content">
+        <div class="achievex-container">
+            <!-- Page Header -->
+            <div class="achievex-header">
+                <div class="achievex-header-top">
+                    <div>
+                        <h1 class="achievex-title">AchieveX</h1>
+                        <p class="achievex-subtitle">Електронний гараж досягнень</p>
+                    </div>
+                    <div class="achievex-header-actions">
+                        <button class="btn-achx btn-achx-outline" id="portfolioBtn" onclick="openPortfolio()">Моє
+                            портфоліо</button>
+                        <button class="btn-achx btn-achx-primary" id="addAchievementBtn" onclick="openAddModal()">Додати
+                            досягнення</button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="achx-stats-grid" id="statsGrid">
+                    <div class="achx-stat-card">
+                        <div class="achx-stat-number" id="statTotal">0</div>
+                        <div class="achx-stat-label">Всього досягнень</div>
+                    </div>
+                    <div class="achx-stat-card achx-stat-confirmed">
+                        <div class="achx-stat-number" id="statConfirmed">0</div>
+                        <div class="achx-stat-label">Підтверджено</div>
+                    </div>
+                    <div class="achx-stat-card achx-stat-categories">
+                        <div class="achx-stat-number" id="statCategories">0</div>
+                        <div class="achx-stat-label">Категорій</div>
+                    </div>
+                    <div class="achx-stat-card achx-stat-levels">
+                        <div class="achx-stat-number" id="statLevels">0</div>
+                        <div class="achx-stat-label">Рівнів</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters & Search (for teachers) -->
+            <div class="achx-filters" id="teacherFilters" style="display:none;">
+                <div class="achx-filter-row">
+                    <input type="text" id="searchInput" class="achx-input" placeholder="Пошук за учнем, назвою...">
+                    <select id="filterCategory" class="achx-select">
+                        <option value="">Всі категорії</option>
+                        <option value="Олімпіада">Олімпіада</option>
+                        <option value="Конкурс">Конкурс</option>
+                        <option value="МАН">МАН</option>
+                        <option value="Спорт">Спорт</option>
+                        <option value="Творчість">Творчість</option>
+                        <option value="Волонтерство">Волонтерство</option>
+                        <option value="Наука">Наука</option>
+                        <option value="Проєкт">Проєкт</option>
+                        <option value="Інше">Інше</option>
+                    </select>
+                    <select id="filterConfirmed" class="achx-select">
+                        <option value="">Всі статуси</option>
+                        <option value="false">Очікують підтвердження</option>
+                        <option value="true">Підтверджені</option>
+                    </select>
+                    <button class="btn-achx btn-achx-outline" onclick="loadAchievements()">Фільтрувати</button>
+                </div>
+            </div>
+
+            <!-- Student filter -->
+            <div class="achx-filters" id="studentFilters">
+                <div class="achx-filter-row">
+                    <select id="studentFilterCategory" class="achx-select">
+                        <option value="">Всі категорії</option>
+                        <option value="Олімпіада">Олімпіада</option>
+                        <option value="Конкурс">Конкурс</option>
+                        <option value="МАН">МАН</option>
+                        <option value="Спорт">Спорт</option>
+                        <option value="Творчість">Творчість</option>
+                        <option value="Волонтерство">Волонтерство</option>
+                        <option value="Наука">Наука</option>
+                        <option value="Проєкт">Проєкт</option>
+                        <option value="Інше">Інше</option>
+                    </select>
+                    <select id="studentFilterStatus" class="achx-select">
+                        <option value="">Всі статуси</option>
+                        <option value="confirmed">Підтверджені</option>
+                        <option value="pending">Очікують</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Achievement Cards -->
+            <div class="achx-grid" id="achievementsGrid">
+                <div class="achx-loading">Завантаження досягнень...</div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="achx-empty" id="emptyState" style="display:none;">
+                <div class="achx-empty-icon">&#127942;</div>
+                <h3>Поки що немає досягнень</h3>
+                <p>Додайте своє перше досягнення, натиснувши кнопку вище</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Achievement Modal -->
+    <div class="achx-modal-overlay" id="achievementModal" style="display:none;">
+        <div class="achx-modal">
+            <div class="achx-modal-header">
+                <h2 id="modalTitle">Додати досягнення</h2>
+                <button class="achx-modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="achx-modal-body">
+                <form id="achievementForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editId" value="">
+
+                    <div class="achx-form-group">
+                        <label for="achTitle">Назва досягнення *</label>
+                        <input type="text" id="achTitle" class="achx-input" required
+                            placeholder="Наприклад: Переможець олімпіади з математики">
+                    </div>
+
+                    <div class="achx-form-row">
+                        <div class="achx-form-group">
+                            <label for="achCategory">Категорія *</label>
+                            <select id="achCategory" class="achx-select" required>
+                                <option value="">Оберіть категорію</option>
+                                <option value="Олімпіада">Олімпіада</option>
+                                <option value="Конкурс">Конкурс</option>
+                                <option value="МАН">МАН</option>
+                                <option value="Спорт">Спорт</option>
+                                <option value="Творчість">Творчість</option>
+                                <option value="Волонтерство">Волонтерство</option>
+                                <option value="Наука">Наука</option>
+                                <option value="Проєкт">Проєкт</option>
+                                <option value="Інше">Інше</option>
+                            </select>
+                        </div>
+                        <div class="achx-form-group">
+                            <label for="achLevel">Рівень</label>
+                            <select id="achLevel" class="achx-select">
+                                <option value="">Оберіть рівень</option>
+                                <option value="Шкільний">Шкільний</option>
+                                <option value="Районний">Районний</option>
+                                <option value="Міський">Міський</option>
+                                <option value="Обласний">Обласний</option>
+                                <option value="Всеукраїнський">Всеукраїнський</option>
+                                <option value="Міжнародний">Міжнародний</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="achx-form-row">
+                        <div class="achx-form-group">
+                            <label for="achCompName">Назва конкурсу/олімпіади</label>
+                            <input type="text" id="achCompName" class="achx-input" placeholder="Назва заходу">
+                        </div>
+                        <div class="achx-form-group">
+                            <label for="achCompDate">Дата проведення</label>
+                            <input type="date" id="achCompDate" class="achx-input">
+                        </div>
+                    </div>
+
+                    <div class="achx-form-group">
+                        <label for="achPlace">Зайняте місце / результат</label>
+                        <input type="text" id="achPlace" class="achx-input"
+                            placeholder="Наприклад: 1 місце, Диплом I ступеня">
+                    </div>
+
+                    <div class="achx-form-group">
+                        <label for="achDescription">Опис</label>
+                        <textarea id="achDescription" class="achx-textarea" rows="3"
+                            placeholder="Додатковий опис досягнення..."></textarea>
+                    </div>
+
+                    <div class="achx-form-row">
+                        <div class="achx-form-group">
+                            <label for="achDiploma">Диплом / Сертифікат</label>
+                            <div class="achx-file-upload" id="diplomaUploadArea">
+                                <input type="file" id="achDiploma" accept=".jpg,.jpeg,.png,.gif,.pdf"
+                                    onchange="handleFileSelect(this, 'diplomaPreview')">
+                                <div class="achx-file-placeholder" id="diplomaPreview">
+                                    <span class="achx-file-icon">&#128196;</span>
+                                    <span>Перетягніть файл або натисніть</span>
+                                    <small>JPG, PNG, PDF (до 20 МБ)</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="achx-form-group">
+                            <label for="achProject">Проєкт / Робота</label>
+                            <div class="achx-file-upload" id="projectUploadArea">
+                                <input type="file" id="achProject"
+                                    accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.mp4,.mp3"
+                                    onchange="handleFileSelect(this, 'projectPreview')">
+                                <div class="achx-file-placeholder" id="projectPreview">
+                                    <span class="achx-file-icon">&#128193;</span>
+                                    <span>Перетягніть файл або натисніть</span>
+                                    <small>Будь-який формат (до 20 МБ)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="achx-form-group">
+                        <label class="achx-checkbox-label">
+                            <input type="checkbox" id="achPublic" checked>
+                            <span>Зробити публічним (видиме у портфоліо)</span>
+                        </label>
+                    </div>
+
+                    <div class="achx-form-actions">
+                        <button type="button" class="btn-achx btn-achx-outline"
+                            onclick="closeModal()">Скасувати</button>
+                        <button type="submit" class="btn-achx btn-achx-primary" id="submitBtn">Зберегти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Confirm Modal -->
+    <div class="achx-modal-overlay" id="confirmModal" style="display:none;">
+        <div class="achx-modal achx-modal-sm">
+            <div class="achx-modal-header">
+                <h2>Підтвердження досягнення</h2>
+                <button class="achx-modal-close" onclick="closeConfirmModal()">&times;</button>
+            </div>
+            <div class="achx-modal-body">
+                <div class="achx-confirm-info" id="confirmInfo"></div>
+                <form id="confirmForm">
+                    <input type="hidden" id="confirmAchId" value="">
+
+                    <div class="achx-form-group">
+                        <label for="teacherComment">Коментар вчителя</label>
+                        <textarea id="teacherComment" class="achx-textarea" rows="3"
+                            placeholder="Коментар до досягнення..."></textarea>
+                    </div>
+
+                    <div class="achx-form-group">
+                        <label for="teacherRecommendation">Рекомендація</label>
+                        <textarea id="teacherRecommendation" class="achx-textarea" rows="3"
+                            placeholder="Рекомендація для учня..."></textarea>
+                    </div>
+
+                    <div class="achx-form-group">
+                        <label for="teacherSignature">Електронний підпис (ПІБ)</label>
+                        <input type="text" id="teacherSignature" class="achx-input" placeholder="Прізвище І.Б.">
+                    </div>
+
+                    <div class="achx-form-actions">
+                        <button type="button" class="btn-achx btn-achx-outline"
+                            onclick="closeConfirmModal()">Скасувати</button>
+                        <button type="submit" class="btn-achx btn-achx-success">Підтвердити</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail View Modal -->
+    <div class="achx-modal-overlay" id="detailModal" style="display:none;">
+        <div class="achx-modal achx-modal-lg">
+            <div class="achx-modal-header">
+                <h2 id="detailTitle">Деталі досягнення</h2>
+                <button class="achx-modal-close" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div class="achx-modal-body" id="detailBody"></div>
+        </div>
+    </div>
+
+    <!-- Portfolio Modal -->
+    <div class="achx-modal-overlay" id="portfolioModal" style="display:none;">
+        <div class="achx-modal achx-modal-xl">
+            <div class="achx-modal-header">
+                <h2>Публічне портфоліо досягнень</h2>
+                <button class="achx-modal-close" onclick="closePortfolioModal()">&times;</button>
+            </div>
+            <div class="achx-modal-body" id="portfolioBody">
+                <div class="achx-loading">Завантаження портфоліо...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="achx-modal-overlay" id="qrModal" style="display:none;">
+        <div class="achx-modal achx-modal-sm">
+            <div class="achx-modal-header">
+                <h2>QR-код для перевірки</h2>
+                <button class="achx-modal-close" onclick="closeQrModal()">&times;</button>
+            </div>
+            <div class="achx-modal-body achx-qr-body" id="qrBody"></div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="js/role.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/achievex.js"></script>
+</body>
+
+</html>
