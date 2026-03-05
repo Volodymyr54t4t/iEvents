@@ -1038,6 +1038,58 @@ async function initializeDatabase() {
       }
     }
 
+    // Таблиця запитів на наставництво
+    console.log("Перевірка таблиці mentor_requests...");
+    const mentorReqCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'mentor_requests'
+      ) as exists
+    `);
+    if (!mentorReqCheck.rows[0].exists) {
+      console.log("  → Створення таблиці mentor_requests...");
+      await client.query(`
+        CREATE TABLE mentor_requests (
+          id SERIAL PRIMARY KEY,
+          student_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          teacher_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          message TEXT,
+          subject VARCHAR(255),
+          status VARCHAR(20) DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(student_id, teacher_id)
+        )
+      `);
+      console.log("  ✓ Таблиця mentor_requests створена");
+    } else {
+      console.log("  ✓ Таблиця mentor_requests вже існує");
+    }
+
+    // Таблиця обраних наставників
+    console.log("Перевірка таблиці mentor_favorites...");
+    const mentorFavCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'mentor_favorites'
+      ) as exists
+    `);
+    if (!mentorFavCheck.rows[0].exists) {
+      console.log("  → Створення таблиці mentor_favorites...");
+      await client.query(`
+        CREATE TABLE mentor_favorites (
+          id SERIAL PRIMARY KEY,
+          student_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          teacher_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(student_id, teacher_id)
+        )
+      `);
+      console.log("  ✓ Таблиця mentor_favorites створена");
+    } else {
+      console.log("  ✓ Таблиця mentor_favorites вже існує");
+    }
+
     console.log("=== База даних готова до роботи! ===\n");
   } catch (error) {
     console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:");
@@ -4879,6 +4931,277 @@ app.get("/api/calendar/competitions", async (req, res) => {
     });
   }
 });
+
+// ============ MENTOR MATCHING API ============
+
+// GET mentors (teachers from same school as logged-in student)
+app.get("/api/mentors", async (req, res) => {
+  const { userId } = req.query;
+
+  if (!userId) {
+    return res.status(400).json({ error: "userId обов'язковий" });
+  }
+
+  try {
+    // Get student's school_id
+    const studentProfile = await pool.query(
+      "SELECT school_id FROM profiles WHERE user_id = $1",
+      [userId],
+    );
+
+    const schoolId =
+      studentProfile.rows.length > 0 ? studentProfile.rows[0].school_id : null;
+
+    let mentorsQuery;
+    let params;
+
+    if (schoolId) {
+      // Fetch teachers from the same school
+      mentorsQuery = `
+        SELECT 
+          u.id as user_id,
+          p.first_name,
+          p.last_name,
+          p.middle_name,
+          p.city,
+          p.school,
+          p.school_id,
+          p.experience_years,
+          p.specialization,
+          p.awards,
+          p.bio,
+          p.avatar,
+          p.subjects_ids,
+          p.consultation_areas,
+          s.name as school_name,
+          (SELECT COUNT(*) FROM profiles sp WHERE sp.school_id = p.school_id AND EXISTS(SELECT 1 FROM users su WHERE su.id = sp.user_id AND su.role = 'учень')) as students_count
+        FROM users u
+        JOIN profiles p ON u.id = p.user_id
+        LEFT JOIN schools s ON p.school_id = s.id
+        WHERE u.role = 'вчитель' AND p.school_id = $1 AND u.id != $2
+        ORDER BY p.last_name, p.first_name
+      `;
+      params = [schoolId, userId];
+    } else {
+      // No school_id - return all teachers
+      mentorsQuery = `
+        SELECT 
+          u.id as user_id,
+          p.first_name,
+          p.last_name,
+          p.middle_name,
+          p.city,
+          p.school,
+          p.school_id,
+          p.experience_years,
+          p.specialization,
+          p.awards,
+          p.bio,
+          p.avatar,
+          p.subjects_ids,
+          p.consultation_areas,
+          s.name as school_name,
+          (SELECT COUNT(*) FROM profiles sp WHERE sp.school_id = p.school_id AND EXISTS(SELECT 1 FROM users su WHERE su.id = sp.user_id AND su.role = 'учень')) as students_count
+        FROM users u
+        JOIN profiles p ON u.id = p.user_id
+        LEFT JOIN schools s ON p.school_id = s.id
+        WHERE u.role = 'вчитель' AND u.id != $1
+        ORDER BY p.last_name, p.first_name
+      `;
+      params = [userId];
+    }
+
+    const result = await pool.query(mentorsQuery, params);
+
+    // Also fetch subjects for names
+    const subjectsResult = await pool.query(
+      "SELECT id, name FROM subjects ORDER BY name",
+    );
+    const subjectsMap = {};
+    subjectsResult.rows.forEach((s) => {
+      subjectsMap[s.id] = s.name;
+    });
+
+    // Enrich mentors with subject names
+    const mentors = result.rows.map((m) => {
+      let subjectNames = [];
+      if (m.subjects_ids) {
+        try {
+          const ids = JSON.parse(m.subjects_ids);
+          subjectNames = ids
+            .map((id) => subjectsMap[id] || `Предмет #${id}`)
+            .filter(Boolean);
+        } catch (e) {
+          // subjects_ids might be comma-separated
+          const ids = m.subjects_ids.split(",").map((s) => s.trim());
+          subjectNames = ids.map((id) => subjectsMap[id] || id).filter(Boolean);
+        }
+      }
+      return {
+        ...m,
+        subject_names: subjectNames,
+      };
+    });
+
+    res.json({
+      mentors,
+      subjects: subjectsResult.rows,
+      studentSchoolId: schoolId,
+    });
+  } catch (error) {
+    console.error("Помилка отримання наставників:", error.message);
+    res.status(500).json({ error: "Помилка отримання наставників" });
+  }
+});
+
+// GET student's mentor requests
+app.get("/api/mentor-requests/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        mr.id,
+        mr.student_id,
+        mr.teacher_id,
+        mr.message,
+        mr.subject,
+        mr.status,
+        mr.created_at,
+        p.first_name as teacher_first_name,
+        p.last_name as teacher_last_name,
+        p.middle_name as teacher_middle_name,
+        p.school,
+        p.city,
+        p.avatar as teacher_avatar,
+        p.specialization,
+        p.subjects_ids,
+        s.name as school_name
+      FROM mentor_requests mr
+      JOIN profiles p ON mr.teacher_id = p.user_id
+      LEFT JOIN schools s ON p.school_id = s.id
+      WHERE mr.student_id = $1
+      ORDER BY mr.created_at DESC
+    `,
+      [userId],
+    );
+
+    res.json({ requests: result.rows });
+  } catch (error) {
+    console.error("Помилка отримання запитів:", error.message);
+    res.status(500).json({ error: "Помилка отримання запитів" });
+  }
+});
+
+// POST create mentor request
+app.post("/api/mentor-requests", async (req, res) => {
+  const { studentId, teacherId, message, subject } = req.body;
+
+  if (!studentId || !teacherId) {
+    return res
+      .status(400)
+      .json({ error: "studentId та teacherId обов'язкові" });
+  }
+
+  try {
+    // Check for duplicate
+    const existing = await pool.query(
+      "SELECT id FROM mentor_requests WHERE student_id = $1 AND teacher_id = $2",
+      [studentId, teacherId],
+    );
+    if (existing.rows.length > 0) {
+      return res
+        .status(409)
+        .json({ error: "Запит вже надіслано цьому наставнику" });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO mentor_requests (student_id, teacher_id, message, subject) 
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [studentId, teacherId, message || null, subject || null],
+    );
+
+    res.json({ success: true, request: result.rows[0] });
+  } catch (error) {
+    console.error("Помилка створення запиту:", error.message);
+    res.status(500).json({ error: "Помилка створення запиту" });
+  }
+});
+
+// DELETE cancel mentor request
+app.delete("/api/mentor-requests/:requestId", async (req, res) => {
+  const { requestId } = req.params;
+  const { userId } = req.query;
+
+  try {
+    await pool.query(
+      "DELETE FROM mentor_requests WHERE id = $1 AND student_id = $2",
+      [requestId, userId],
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Помилка скасування запиту:", error.message);
+    res.status(500).json({ error: "Помилка скасування запиту" });
+  }
+});
+
+// GET student's mentor favorites
+app.get("/api/mentor-favorites/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const result = await pool.query(
+      "SELECT teacher_id FROM mentor_favorites WHERE student_id = $1",
+      [userId],
+    );
+    const favoriteIds = result.rows.map((r) => r.teacher_id);
+    res.json({ favorites: favoriteIds });
+  } catch (error) {
+    console.error("Помилка отримання обраних:", error.message);
+    res.status(500).json({ error: "Помилка отримання обраних" });
+  }
+});
+
+// POST toggle mentor favorite
+app.post("/api/mentor-favorites", async (req, res) => {
+  const { studentId, teacherId } = req.body;
+
+  if (!studentId || !teacherId) {
+    return res
+      .status(400)
+      .json({ error: "studentId та teacherId обов'язкові" });
+  }
+
+  try {
+    // Check if already favorited
+    const existing = await pool.query(
+      "SELECT id FROM mentor_favorites WHERE student_id = $1 AND teacher_id = $2",
+      [studentId, teacherId],
+    );
+
+    if (existing.rows.length > 0) {
+      // Remove favorite
+      await pool.query(
+        "DELETE FROM mentor_favorites WHERE student_id = $1 AND teacher_id = $2",
+        [studentId, teacherId],
+      );
+      res.json({ success: true, action: "removed" });
+    } else {
+      // Add favorite
+      await pool.query(
+        "INSERT INTO mentor_favorites (student_id, teacher_id) VALUES ($1, $2)",
+        [studentId, teacherId],
+      );
+      res.json({ success: true, action: "added" });
+    }
+  } catch (error) {
+    console.error("Помилка обраних:", error.message);
+    res.status(500).json({ error: "Помилка обраних" });
+  }
+});
+
+// ============ END MENTOR MATCHING API ============
 
 // Запуск сервера
 const server = app.listen(PORT, async () => {

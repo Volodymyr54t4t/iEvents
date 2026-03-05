@@ -890,10 +890,6 @@ function closeViewDocumentsModal() {
   document.getElementById("searchDocuments").value = "";
   document.getElementById("filterStudent").innerHTML =
     '<option value="">Всі учні</option>';
-  document.getElementById("teacherFileInput").value = "";
-  document.getElementById("teacherFileDescription").value = "";
-  document.getElementById("teacherFileStudent").value = "";
-  document.getElementById("teacherUploadProgress").style.display = "none";
 }
 
 async function loadCompetitionDocuments(competitionId) {
@@ -966,11 +962,6 @@ async function loadCompetitionDocuments(competitionId) {
       const filterSelect = document.getElementById("filterStudent");
       filterSelect.innerHTML = '<option value="">Всі учні</option>';
 
-      const teacherFileStudentSelect =
-        document.getElementById("teacherFileStudent");
-      teacherFileStudentSelect.innerHTML =
-        '<option value="">-- Оберіть учня --</option>';
-
       currentDocumentsStudents
         .sort((a, b) => {
           const nameA = [a.last_name, a.first_name].filter(Boolean).join(" ");
@@ -985,9 +976,6 @@ async function loadCompetitionDocuments(competitionId) {
           option.value = student.id;
           option.textContent = `${fullName}${student.grade ? ` (${student.grade})` : ""}`;
           filterSelect.appendChild(option.cloneNode(true));
-
-          const teacherOption = option.cloneNode(true);
-          teacherFileStudentSelect.appendChild(teacherOption);
         });
 
       displayDocuments(allDocuments);
@@ -1159,9 +1147,6 @@ function displayDocuments(documents) {
                   <button class="btn btn-download btn-sm" onclick="downloadDocument('${doc.file_path}', '${doc.original_name}')">
                     Завантажити
                   </button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteTeacherDocument(${doc.id})">
-                    Видалити
-                  </button>
                 </div>
               </div>
             `;
@@ -1172,80 +1157,6 @@ function displayDocuments(documents) {
     `;
     })
     .join("");
-}
-
-async function uploadFileByTeacher() {
-  const competitionId = currentDocumentsCompetitionId;
-  const fileInput = document.getElementById("teacherFileInput");
-  const fileDescription = document.getElementById(
-    "teacherFileDescription",
-  ).value;
-  const studentId = document.getElementById("teacherFileStudent").value;
-
-  if (!fileInput.files[0]) {
-    alert("Будь ласка, оберіть файл");
-    return;
-  }
-
-  if (!studentId) {
-    alert("Будь ласка, оберіть учня");
-    return;
-  }
-
-  const maxSize = 50 * 1024 * 1024;
-  if (fileInput.files[0].size > maxSize) {
-    alert("Файл занадто великий. Максимальний розмір: 50 МБ");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", fileInput.files[0]);
-  formData.append("userId", studentId);
-  formData.append("description", fileDescription);
-  formData.append("uploadedBy", userId);
-  formData.append("uploadedByRole", userRole);
-
-  try {
-    const uploadBtn = document.querySelector(
-      "[onclick='uploadFileByTeacher()']",
-    );
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = "Завантаження...";
-
-    const progressDiv = document.getElementById("teacherUploadProgress");
-    progressDiv.style.display = "block";
-
-    const response = await fetch(
-      `${BASE_URL}/api/competitions/${competitionId}/documents/upload-teacher`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert("Файл успішно завантажено!");
-      document.getElementById("teacherFileInput").value = "";
-      document.getElementById("teacherFileDescription").value = "";
-      document.getElementById("teacherFileStudent").value = "";
-      progressDiv.style.display = "none";
-      await loadCompetitionDocuments(competitionId);
-    } else {
-      alert(`Помилка: ${data.error}`);
-    }
-  } catch (error) {
-    console.error("Помилка завантаження файлу:", error);
-    alert("Помилка завантаження файлу. Спробуйте ще раз.");
-  } finally {
-    const uploadBtn = document.querySelector(
-      "[onclick='uploadFileByTeacher()']",
-    );
-    uploadBtn.disabled = false;
-    uploadBtn.textContent = "Завантажити файл";
-    document.getElementById("teacherUploadProgress").style.display = "none";
-  }
 }
 
 function formatFileSize(bytes) {
@@ -1285,40 +1196,6 @@ function downloadDocument(filePath, originalName) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-}
-
-async function deleteTeacherDocument(documentId) {
-  if (!confirm("Ви впевнені, що хочете видалити цей файл?")) {
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `${BASE_URL}/api/competitions/documents/${documentId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: userId,
-          userRole: userRole,
-        }),
-      },
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert(data.message);
-      await loadCompetitionDocuments(currentDocumentsCompetitionId);
-    } else {
-      alert(data.error || "Помилка видалення файлу");
-    }
-  } catch (error) {
-    console.error("Помилка видалення файлу:", error);
-    alert("Помилка видалення файлу");
-  }
 }
 
 function previewFile(filePath, fileName, fileType) {

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Matching - iEvents</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/mentor.css">
+    <link rel="stylesheet" href="css/page-spacing.css">
+    <script src="js/config.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <main class="main-container">
+        <!-- Page Hero -->
+        <div class="page-hero">
+            <div class="hero-content-wrapper">
+                <div class="hero-badge-mentor">
+                    <span class="badge-icon-mentor">&#x1F9D1;&#x200D;&#x1F3EB;</span>
+                    <span>Mentor Matching</span>
+                </div>
+                <h1 class="page-title">Знайди свого наставника</h1>
+                <p class="page-subtitle">Обирай наставника за предметом та напрямком, надсилай запити та отримуй
+                    персональну підтримку для підготовки до конкурсів</p>
+                <div class="hero-stats-row">
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-number" id="totalMentors">0</span>
+                        <span class="hero-stat-label">Наставників</span>
+                    </div>
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-number" id="totalSubjects">0</span>
+                        <span class="hero-stat-label">Предметів</span>
+                    </div>
+                    <div class="hero-stat-item">
+                        <span class="hero-stat-number" id="myRequestsCount">0</span>
+                        <span class="hero-stat-label">Моїх запитів</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="mentors">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                <span>Наставники</span>
+            </button>
+            <button class="tab-btn" data-tab="requests">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" /></svg>
+                <span>Мої запити</span>
+                <span class="tab-badge" id="requestsBadge" style="display:none;">0</span>
+            </button>
+            <button class="tab-btn" data-tab="favorites">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                <span>Обрані</span>
+                <span class="tab-badge" id="favoritesBadge" style="display:none;">0</span>
+            </button>
+        </div>
+
+        <!-- Tab: Mentors List -->
+        <div class="tab-content active" id="tab-mentors">
+            <!-- Search & Filters -->
+            <div class="filters-card">
+                <div class="filters-row">
+                    <div class="search-wrapper">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                        <input type="text" id="searchInput" class="search-input"
+                            placeholder="Пошук за ПІБ, школою або містом...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="subjectFilter" class="filter-select">
+                            <option value="">Всі предмети</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="directionFilter" class="filter-select">
+                            <option value="">Всі напрямки</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-reset-filters" id="resetFilters">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10" />
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
+                        Скинути
+                    </button>
+                </div>
+                <div class="active-filters" id="activeFilters" style="display:none;"></div>
+            </div>
+
+            <!-- Mentors Grid -->
+            <div class="mentors-grid" id="mentorsGrid">
+                <div class="loading">Завантаження наставників...</div>
+            </div>
+        </div>
+
+        <!-- Tab: My Requests -->
+        <div class="tab-content" id="tab-requests">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">Мої запити на наставництво</h2>
+                    <p class="section-subtitle">Відстежуйте статус ваших запитів</p>
+                </div>
+                <div class="requests-list" id="requestsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#a88264"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" /></svg>
+                        </div>
+                        <h3>Ще немає запитів</h3>
+                        <p>Перейдіть на вкладку "Наставники" та надішліть запит обраному наставнику</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Favorites -->
+        <div class="tab-content" id="tab-favorites">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">Обрані наставники</h2>
+                    <p class="section-subtitle">Наставники, яких ви зберегли для швидкого доступу</p>
+                </div>
+                <div class="mentors-grid" id="favoritesGrid">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#a88264"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                </svg>
+                        </div>
+                        <h3>Список порожній</h3>
+                        <p>Натисніть на серце на картці наставника, щоб додати його до обраних</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mentor Detail Modal -->
+    <div id="mentorDetailModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalMentorName">Профіль наставника</h2>
+                <button class="modal-close" onclick="closeMentorModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalMentorBody">
+                <div class="loading">Завантаження...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeMentorModal()">Закрити</button>
+                <button class="btn btn-primary" id="modalSendRequestBtn" onclick="sendRequestFromModal()">Надіслати
+                    запит</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Message Modal -->
+    <div id="requestMessageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Надіслати запит на наставництво</h2>
+                <button class="modal-close" onclick="closeRequestMessageModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="request-modal-info" id="requestMentorInfo"></p>
+                <div class="form-group">
+                    <label for="requestMessage">Повідомлення наставнику</label>
+                    <textarea id="requestMessage" rows="4"
+                        placeholder="Розкажіть, чому ви хочете працювати з цим наставником, ваші цілі та очікування..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="requestSubject">Предмет підготовки</label>
+                    <select id="requestSubject" class="filter-select">
+                        <option value="">Оберіть предмет</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeRequestMessageModal()">Скасувати</button>
+                <button class="btn btn-primary" onclick="confirmSendRequest()">Надіслати запит</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <div id="footer"></div>
+
+    <script src="js/role.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/mentor.js"></script>
+</body>
+
+</html>
