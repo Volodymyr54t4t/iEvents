@@ -127,6 +127,14 @@ function renderHeader() {
   eventsItems += `<a href="new.html" class="dropdown-item">AIC 2.0</a>`;
   eventsItems += `<a href="contest-database.html" class="dropdown-item">Бібліотека</a>`;
 
+  const mentorHref =
+    userRole === "методист"
+      ? "mentorM.html"
+      : userRole === "вчитель"
+        ? "mentorT.html"
+        : "mentor.html";
+  eventsItems += `<a href="${mentorHref}" class="dropdown-item">Mentor Matching</a>`;
+
   // Build dropdown items for Info
   const infoItems = `
     <a href="${newsHref}" class="dropdown-item">Новини</a>
@@ -157,6 +165,7 @@ function renderHeader() {
   sidebarEventsItems += `<a href="predictions.html" class="sidebar-link">Прогнози</a>`;
   sidebarEventsItems += `<a href="new.html" class="sidebar-link">AIC 2.0</a>`;
   sidebarEventsItems += `<a href="contest-database.html" class="sidebar-link">Бібліотека</a>`;
+  sidebarEventsItems += `<a href="${mentorHref}" class="sidebar-link">Mentor Matching</a>`;
 
   let sidebarAccountItems = `<a href="${profileHref}" class="sidebar-link">Профіль</a>`;
   sidebarAccountItems += `<a href="achievex.html" class="sidebar-link">AchieveX</a>`;
