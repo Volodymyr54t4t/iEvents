@@ -37,7 +37,7 @@ function renderHeader() {
                 </button>
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
-                    <a href="index.html" class="nav-link">Головна</a>
+                   
                     <a href="profileCommunity.html" class="nav-link">Профіль</a>
                     <a href="adminCommunity.html" class="nav-link">Admin</a>
                     <a href="contest-database.html" class="nav-link">Бібліотека</a>
@@ -49,7 +49,7 @@ function renderHeader() {
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
-                    <a href="index.html" class="sidebar-link">Головна</a>
+                    
                     <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
                     <a href="adminCommunity.html" class="sidebar-link">Admin</a>
                     <a href="contest-database.html" class="sidebar-link">Бібліотека</a>
@@ -116,61 +116,79 @@ function renderHeader() {
           ? "Е-кабінет"
           : "";
 
-  // Build dropdown items for Events
-  let eventsItems = `<a href="${competitionsHref}" class="dropdown-item">Конкурси</a>`;
-  if (rehearsalHref)
-    eventsItems += `<a href="${rehearsalHref}" class="dropdown-item">Репетиції</a>`;
-  eventsItems += `<a href="calendar.html" class="dropdown-item">Календар</a>`;
-  if (resultsHref)
-    eventsItems += `<a href="${resultsHref}" class="dropdown-item">Результати</a>`;
-  eventsItems += `<a href="predictions.html" class="dropdown-item">Прогнози</a>`;
-  eventsItems += `<a href="new.html" class="dropdown-item">AIC 2.0</a>`;
-  eventsItems += `<a href="contest-database.html" class="dropdown-item">Бібліотека</a>`;
-
   const mentorHref =
     userRole === "методист"
       ? "mentorM.html"
       : userRole === "вчитель"
         ? "mentorT.html"
         : "mentor.html";
-  eventsItems += `<a href="${mentorHref}" class="dropdown-item">Mentor Matching</a>`;
 
-  // Build dropdown items for Info
-  const infoItems = `
-    <a href="${newsHref}" class="dropdown-item">Новини</a>
-    <a href="about.html" class="dropdown-item">Про нас</a>
-    <a href="contacts.html" class="dropdown-item">Контакти</a>
+  // === НОВА СТРУКТУРА МЕНЮ (за вашим запитом) ===
+
+  // Головне
+  let mainItems = `<a href="${competitionsHref}" class="dropdown-item">Конкурси</a>`;
+  if (rehearsalHref)
+    mainItems += `<a href="${rehearsalHref}" class="dropdown-item">Репетиції</a>`;
+  mainItems += `<a href="calendar.html" class="dropdown-item">Календар</a>`;
+
+  // AI та розвиток
+  const aiDevelopmentItems = `
+    <a href="predictions.html" class="dropdown-item">Прогнози</a>
+    <a href="new.html" class="dropdown-item">AIC 2.0</a>
+    <a href="${mentorHref}" class="dropdown-item">Mentor Matching</a>
+    <a href="achievex.html" class="dropdown-item">AchieveX</a>
   `;
 
-  // Build dropdown items for Communication
+  // Аналітика
+  const analyticsItems = `
+    <a href="statistics.html" class="dropdown-item">Статистика</a>
+    <a href="contest-database.html" class="dropdown-item">Бібліотека</a>
+  `;
+
+  // Комунікація
   const commItems = `
     <a href="chat.html" class="dropdown-item">Чат</a>
     <a href="question.html" class="dropdown-item">Задати питання</a>
     <a href="support.html" class="dropdown-item">Підтримка</a>
   `;
 
-  // Build dropdown items for Account
-  let accountItems = `<a href="${profileHref}" class="dropdown-item">Профіль</a>`;
-  accountItems += `<a href="achievex.html" class="dropdown-item">AchieveX</a>`;
-  if (adminHref)
+  // Інформація
+  const infoItems = `
+    <a href="${newsHref}" class="dropdown-item">Новини</a>
+    <a href="about.html" class="dropdown-item">Про нас</a>
+    <a href="contacts.html" class="dropdown-item">Контакти</a>
+  `;
+
+  // Акаунт (Е-кабінет перший, потім Профіль — за вашим порядком)
+  let accountItems = "";
+  if (adminHref) {
     accountItems += `<a href="${adminHref}" class="dropdown-item">${adminLabel}</a>`;
+  }
+  accountItems += `<a href="${profileHref}" class="dropdown-item">Профіль</a>`;
 
-  // Build sidebar items for mobile (grouped with headers)
-  let sidebarEventsItems = `<a href="${competitionsHref}" class="sidebar-link">Конкурси</a>`;
+  // Sidebar items (аналогічно новій структурі)
+  let sidebarMainItems = `<a href="${competitionsHref}" class="sidebar-link">Конкурси</a>`;
   if (rehearsalHref)
-    sidebarEventsItems += `<a href="${rehearsalHref}" class="sidebar-link">Репетиції</a>`;
-  sidebarEventsItems += `<a href="calendar.html" class="sidebar-link">Календар</a>`;
-  if (resultsHref)
-    sidebarEventsItems += `<a href="${resultsHref}" class="sidebar-link">Результати</a>`;
-  sidebarEventsItems += `<a href="predictions.html" class="sidebar-link">Прогнози</a>`;
-  sidebarEventsItems += `<a href="new.html" class="sidebar-link">AIC 2.0</a>`;
-  sidebarEventsItems += `<a href="contest-database.html" class="sidebar-link">Бібліотека</a>`;
-  sidebarEventsItems += `<a href="${mentorHref}" class="sidebar-link">Mentor Matching</a>`;
+    sidebarMainItems += `<a href="${rehearsalHref}" class="sidebar-link">Репетиції</a>`;
+  sidebarMainItems += `<a href="calendar.html" class="sidebar-link">Календар</a>`;
 
-  let sidebarAccountItems = `<a href="${profileHref}" class="sidebar-link">Профіль</a>`;
-  sidebarAccountItems += `<a href="achievex.html" class="sidebar-link">AchieveX</a>`;
-  if (adminHref)
+  const sidebarAiItems = `
+    <a href="predictions.html" class="sidebar-link">Прогнози</a>
+    <a href="new.html" class="sidebar-link">AIC 2.0</a>
+    <a href="${mentorHref}" class="sidebar-link">Mentor Matching</a>
+    <a href="achievex.html" class="sidebar-link">AchieveX</a>
+  `;
+
+  const sidebarAnalyticsItems = `
+    <a href="statistics.html" class="sidebar-link">Статистика</a>
+    <a href="contest-database.html" class="sidebar-link">Бібліотека</a>
+  `;
+
+  let sidebarAccountItems = "";
+  if (adminHref) {
     sidebarAccountItems += `<a href="${adminHref}" class="sidebar-link">${adminLabel}</a>`;
+  }
+  sidebarAccountItems += `<a href="${profileHref}" class="sidebar-link">Профіль</a>`;
 
   header.innerHTML = `
         <header class="site-header">
@@ -182,19 +200,26 @@ function renderHeader() {
                 </button>
                 <a href="index.html" class="logo">iEvents</a>
                 <nav class="nav">
-                    <a href="index.html" class="nav-link">Головна</a>
+                    
                     <div class="nav-dropdown">
-                        <button class="nav-link dropdown-toggle">Події <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                        <div class="dropdown-menu">${eventsItems}</div>
+                        <button class="nav-link dropdown-toggle">Головне <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${mainItems}</div>
                     </div>
-                    <a href="statistics.html" class="nav-link">Статистика</a>
                     <div class="nav-dropdown">
-                        <button class="nav-link dropdown-toggle">Інформація <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                        <div class="dropdown-menu">${infoItems}</div>
+                        <button class="nav-link dropdown-toggle">AI та розвиток <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${aiDevelopmentItems}</div>
+                    </div>
+                    <div class="nav-dropdown">
+                        <button class="nav-link dropdown-toggle">Аналітика <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${analyticsItems}</div>
                     </div>
                     <div class="nav-dropdown">
                         <button class="nav-link dropdown-toggle">Комунікація <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                         <div class="dropdown-menu">${commItems}</div>
+                    </div>
+                    <div class="nav-dropdown">
+                        <button class="nav-link dropdown-toggle">Інформація <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <div class="dropdown-menu">${infoItems}</div>
                     </div>
                     <div class="nav-dropdown">
                         <button class="nav-link dropdown-toggle">Акаунт <svg class="dropdown-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -208,19 +233,21 @@ function renderHeader() {
                     <button class="btn-logout" onclick="logout()">Вийти</button>
                 </nav>
                 <aside class="sidebar" id="sidebar">
-                    <a href="index.html" class="sidebar-link">Головна</a>
-                    <div class="sidebar-group-label">Події</div>
-                    ${sidebarEventsItems}
+                    
+                    <div class="sidebar-group-label">Головне</div>
+                    ${sidebarMainItems}
+                    <div class="sidebar-group-label">AI та розвиток</div>
+                    ${sidebarAiItems}
                     <div class="sidebar-group-label">Аналітика</div>
-                    <a href="statistics.html" class="sidebar-link">Статистика</a>
-                    <div class="sidebar-group-label">Інформація</div>
-                    <a href="${newsHref}" class="sidebar-link">Новини</a>
-                    <a href="about.html" class="sidebar-link">Про нас</a>
-                    <a href="contacts.html" class="sidebar-link">Контакти</a>
+                    ${sidebarAnalyticsItems}
                     <div class="sidebar-group-label">Комунікація</div>
                     <a href="chat.html" class="sidebar-link">Чат</a>
                     <a href="question.html" class="sidebar-link">Задати питання</a>
                     <a href="support.html" class="sidebar-link">Підтримка</a>
+                    <div class="sidebar-group-label">Інформація</div>
+                    <a href="${newsHref}" class="sidebar-link">Новини</a>
+                    <a href="about.html" class="sidebar-link">Про нас</a>
+                    <a href="contacts.html" class="sidebar-link">Контакти</a>
                     <div class="sidebar-group-label">Акаунт</div>
                     ${sidebarAccountItems}
                     <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
