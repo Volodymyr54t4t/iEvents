@@ -1118,45 +1118,6 @@ docker run -p 3000:3000 --env-file .env ievents
 
 ---
 
-## Додаткові ресурси
-
-### SQL Міграції
-
-| Файл                            | Опис               |
-| ------------------------------- | ------------------ |
-| `complete-database-setup.sql`   | Повне налаштування |
-| `seed-students-and-results.sql` | Тестові дані       |
-| `init-competitions-forms.sql`   | Форми конкурсів    |
-| `team-competitions-*.sql`       | Командні конкурси  |
-| `create-chat-tables*.sql`       | Чат                |
-| `create-news-tables.sql`        | Новини             |
-| `notifications-setup.sql`       | Сповіщення         |
-| `create-mentor-*.sql`           | Менторство         |
-
-### Парсер ІСУО
-
-```bash
-npm run parse-schools
-```
-
-Парсить школи з сайту ІСУО та зберігає в базу:
-
-- Системний номер
-- Повна назва
-- Скорочена назва
-- Тип закладу
-- Адреса
-- ЄДРПОУ
-
-### Корисні посилання
-
-- [Neon PostgreSQL](https://neon.tech) — Serverless PostgreSQL
-- [Render](https://render.com) — Хостинг
-- [Telegram Bot API](https://core.telegram.org/bots/api) — Документація
-- [Google Gemini AI](https://ai.google.dev/) — AI API
-
----
-
 ## Troubleshooting
 
 ### Часті проблеми
