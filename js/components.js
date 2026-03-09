@@ -134,7 +134,7 @@ function renderHeader() {
   // AI та розвиток
   const aiDevelopmentItems = `
     <a href="predictions.html" class="dropdown-item">Прогнози</a>
-    <a href="new.html" class="dropdown-item">AIC 2.0</a>
+    <a href="aic-2-0.html" class="dropdown-item">AIC 2.0</a>
     <a href="${mentorHref}" class="dropdown-item">Mentor Matching</a>
     <a href="achievex.html" class="dropdown-item">AchieveX</a>
   `;
@@ -174,7 +174,7 @@ function renderHeader() {
 
   const sidebarAiItems = `
     <a href="predictions.html" class="sidebar-link">Прогнози</a>
-    <a href="new.html" class="sidebar-link">AIC 2.0</a>
+    <a href="aic-2-0.html" class="sidebar-link">AIC 2.0</a>
     <a href="${mentorHref}" class="sidebar-link">Mentor Matching</a>
     <a href="achievex.html" class="sidebar-link">AchieveX</a>
   `;

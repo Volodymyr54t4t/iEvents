@@ -2625,3 +2625,471 @@ body {
     padding: 8px 10px;
   }
 }
+
+/* ================================
+   STANDARD FIELDS SECTION STYLES
+   ================================ */
+
+.standard-fields-section {
+  background: #f8f6f1;
+  border: 2px solid #e8e3da;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.standard-fields-section h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a3a52;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e3da;
+}
+
+.standard-fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.standard-fields-group {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #e8e3da;
+}
+
+.standard-fields-group-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a3a52;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #d4cfc4;
+}
+
+.standard-field-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #faf8f3;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.standard-field-item:last-child {
+  margin-bottom: 0;
+}
+
+.standard-field-item:hover {
+  background: #f0ede6;
+}
+
+.standard-field-item .field-info {
+  flex: 1;
+}
+
+.standard-field-item .field-info strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a3a52;
+  margin-bottom: 2px;
+}
+
+.standard-field-item .field-info small {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Toggle Switch Styles */
+.standard-field-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.standard-field-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #d4cfc4;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.standard-field-toggle input:checked + .toggle-slider {
+  background-color: #1a3a52;
+}
+
+.standard-field-toggle input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.standard-field-toggle input:focus + .toggle-slider {
+  box-shadow: 0 0 0 3px rgba(26, 58, 82, 0.15);
+}
+
+/* ================================
+   DYNAMIC FIELDS STYLES
+   ================================ */
+
+.dynamic-fields-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dynamic-fields-header label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a3a52;
+}
+
+.dynamic-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dynamic-field-wrapper {
+  background: white;
+  border: 2px solid #e8e3da;
+  border-radius: 12px;
+  padding: 16px;
+  animation: slideInUp 0.3s ease-out;
+  transition: all 0.3s ease;
+}
+
+.dynamic-field-wrapper:hover {
+  border-color: #1a3a52;
+  box-shadow: 0 4px 12px rgba(26, 58, 82, 0.1);
+}
+
+.dynamic-field-wrapper.animate-in {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.dynamic-field-wrapper.animate-out {
+  animation: slideOutRight 0.3s ease-out forwards;
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+.dynamic-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.dynamic-field-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #e8f0f6;
+  color: #1a3a52;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dynamic-field-type-badge .type-icon {
+  font-size: 14px;
+}
+
+.dynamic-field-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.dynamic-field-row input[type="text"] {
+  padding: 10px 14px;
+  border: 2px solid #d4cfc4;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.dynamic-field-row input[type="text"]:focus {
+  outline: none;
+  border-color: #1a3a52;
+  box-shadow: 0 0 0 3px rgba(26, 58, 82, 0.1);
+}
+
+.dynamic-field-row select {
+  padding: 10px 14px;
+  border: 2px solid #d4cfc4;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.dynamic-field-row select:focus {
+  outline: none;
+  border-color: #1a3a52;
+}
+
+.dynamic-field-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #1a3a52;
+  cursor: pointer;
+}
+
+.dynamic-field-row label {
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dynamic-field-label {
+  min-width: 200px;
+}
+
+.dynamic-field-placeholder {
+  min-width: 150px;
+}
+
+/* Options container for select/radio/checkbox */
+.dynamic-field-options {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #d4cfc4;
+}
+
+.dynamic-field-options-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dynamic-field-options-header label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a3a52;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-item input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d4cfc4;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.option-item input:focus {
+  outline: none;
+  border-color: #1a3a52;
+}
+
+.btn-remove-option {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: #fce8ec;
+  color: #c41e3a;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-option:hover {
+  background: #c41e3a;
+  color: white;
+}
+
+.btn-add-option {
+  padding: 6px 12px;
+  background: #f0f4f8;
+  color: #1a3a52;
+  border: 1px dashed #1a3a52;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-option:hover {
+  background: #1a3a52;
+  color: white;
+  border-style: solid;
+}
+
+/* ================================
+   ADD FIELD MODAL STYLES
+   ================================ */
+
+.modal-medium {
+  max-width: 700px;
+}
+
+.field-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.field-type-card {
+  background: white;
+  border: 2px solid #e8e3da;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+}
+
+.field-type-card:hover {
+  border-color: #1a3a52;
+  background: #f8f6f1;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(26, 58, 82, 0.15);
+}
+
+.field-type-card:active {
+  transform: translateY(-2px);
+}
+
+.field-type-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  background: linear-gradient(135deg, #1a3a52 0%, #0f2839 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+  font-weight: 700;
+}
+
+.field-type-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a3a52;
+  margin-bottom: 4px;
+}
+
+.field-type-desc {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.4;
+}
+
+/* Tab description */
+.tab-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.tab-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a3a52;
+  margin-bottom: 8px;
+}
+
+/* Responsive for dynamic fields */
+@media (max-width: 768px) {
+  .dynamic-field-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .dynamic-field-row select {
+    min-width: 100%;
+  }
+
+  .dynamic-field-label,
+  .dynamic-field-placeholder {
+    min-width: 100%;
+  }
+
+  .field-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .standard-field-item {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .field-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .standard-fields-group {
+    padding: 12px;
+  }
+
+  .standard-field-item {
+    padding: 8px 10px;
+  }
+}

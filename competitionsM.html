@@ -222,27 +222,243 @@
                     <div id="tab-content-form" class="tab-content">
                         <h3 class="tab-section-title">Форма для заповнення учнем</h3>
                         <p class="tab-description">Створіть форму, яку повинні заповнити учні при реєстрації на конкурс.
-                            Стандартні поля (ПІБ, номер телефону, email) додаються автоматично.</p>
+                            Стандартні поля додаються автоматично, але їх можна вимкнути.</p>
 
                         <div class="standard-fields-section">
-                            <h4>Стандартні поля (додаються автоматично)</h4>
-                            <div class="standard-fields-list">
-                                <div class="standard-field-item">
-                                    <div class="field-info">
-                                        <strong>ПІБ учня</strong>
-                                        <small>Текстове поле, обов'язкове</small>
+                            <h4>Стандартні поля (можна вимкнути)</h4>
+                            <div class="standard-fields-list" id="standardFieldsList">
+                                <!-- Дані учасника -->
+                                <div class="standard-fields-group">
+                                    <div class="standard-fields-group-title">Дані учасника</div>
+                                    <div class="standard-field-item" data-field-key="student_name">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" checked data-standard-field="student_name">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>ПІБ учня</strong>
+                                            <small>Текстове поле, обов'язкове</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="student_email">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" checked data-standard-field="student_email">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Електронна пошта</strong>
+                                            <small>Email поле, обов'язкове</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="student_phone">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" checked data-standard-field="student_phone">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Номер телефону</strong>
+                                            <small>Телефон, обов'язкове</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="student_birthdate">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="student_birthdate">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Дата народження</strong>
+                                            <small>Дата</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="student_class">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="student_class">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Клас / курс</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="student_school">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="student_school">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Навчальний заклад</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="student_city">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="student_city">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Місто / область</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="student_country">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="student_country">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Країна</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="standard-field-item">
-                                    <div class="field-info">
-                                        <strong>Номер телефону</strong>
-                                        <small>Текстове поле, обов'язкове</small>
+
+                                <!-- Дані керівника -->
+                                <div class="standard-fields-group">
+                                    <div class="standard-fields-group-title">Дані керівника (ментора)</div>
+                                    <div class="standard-field-item" data-field-key="mentor_name">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="mentor_name">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>ПІБ керівника</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="mentor_email">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="mentor_email">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Email керівника</strong>
+                                            <small>Email поле</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="mentor_phone">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="mentor_phone">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Телефон керівника</strong>
+                                            <small>Телефон</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="mentor_position">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="mentor_position">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Посада / школа / університет</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="standard-field-item">
-                                    <div class="field-info">
-                                        <strong>Електронна пошта</strong>
-                                        <small>Email поле, обов'язкове</small>
+
+                                <!-- Дані роботи -->
+                                <div class="standard-fields-group">
+                                    <div class="standard-fields-group-title">Дані роботи</div>
+                                    <div class="standard-field-item" data-field-key="work_title">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="work_title">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Назва роботи / проєкту</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="work_category">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="work_category">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Категорія / секція конкурсу</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="work_description">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="work_description">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Короткий опис (abstract)</strong>
+                                            <small>Багато тексту</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="work_keywords">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="work_keywords">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Ключові слова</strong>
+                                            <small>Текстове поле</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Файли -->
+                                <div class="standard-fields-group">
+                                    <div class="standard-fields-group-title">Файли</div>
+                                    <div class="standard-field-item" data-field-key="file_work">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="file_work">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Файл роботи (PDF / DOCX)</strong>
+                                            <small>Файл</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="file_presentation">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="file_presentation">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Презентація (PPTX / PDF)</strong>
+                                            <small>Файл</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="file_photo">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="file_photo">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Фото або постер</strong>
+                                            <small>Файл</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Інше -->
+                                <div class="standard-fields-group">
+                                    <div class="standard-fields-group-title">Інше</div>
+                                    <div class="standard-field-item" data-field-key="consent_data">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="consent_data">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Згода на обробку даних</strong>
+                                            <small>Так/Ні (checkbox)</small>
+                                        </div>
+                                    </div>
+                                    <div class="standard-field-item" data-field-key="consent_authorship">
+                                        <label class="standard-field-toggle">
+                                            <input type="checkbox" data-standard-field="consent_authorship">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <div class="field-info">
+                                            <strong>Підтвердження авторства</strong>
+                                            <small>Так/Ні (checkbox)</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -251,8 +467,8 @@
                         <div class="form-group">
                             <div class="dynamic-fields-header">
                                 <label>Додаткові поля форми</label>
-                                <button type="button" class="btn btn-sm btn-primary" onclick="addDynamicField()">
-                                    Додати поле
+                                <button type="button" class="btn btn-sm btn-primary" onclick="openAddFieldModal()">
+                                    + Додати поле
                                 </button>
                             </div>
                             <div id="dynamicFieldsContainer" class="dynamic-fields-container">
@@ -320,6 +536,88 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeViewResponsesModal()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Field Type Modal -->
+    <div id="addFieldModal" class="modal">
+        <div class="modal-content modal-medium">
+            <div class="modal-header">
+                <h2>Додати поле</h2>
+                <button class="modal-close" onclick="closeAddFieldModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="field-type-grid">
+                    <div class="field-type-card" onclick="selectFieldType('text')">
+                        <div class="field-type-icon">Aa</div>
+                        <div class="field-type-name">Текст</div>
+                        <div class="field-type-desc">Однорядкове текстове поле</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('textarea')">
+                        <div class="field-type-icon">&#9776;</div>
+                        <div class="field-type-name">Багато тексту</div>
+                        <div class="field-type-desc">Багаторядкове текстове поле</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('number')">
+                        <div class="field-type-icon">123</div>
+                        <div class="field-type-name">Число</div>
+                        <div class="field-type-desc">Поле для введення чисел</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('email')">
+                        <div class="field-type-icon">@</div>
+                        <div class="field-type-name">Email</div>
+                        <div class="field-type-desc">Поле для електронної пошти</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('phone')">
+                        <div class="field-type-icon">&#128222;</div>
+                        <div class="field-type-name">Телефон</div>
+                        <div class="field-type-desc">Поле для номера телефону</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('date')">
+                        <div class="field-type-icon">&#128197;</div>
+                        <div class="field-type-name">Дата</div>
+                        <div class="field-type-desc">Вибір дати з календаря</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('select')">
+                        <div class="field-type-icon">&#9660;</div>
+                        <div class="field-type-name">Випадаючий список</div>
+                        <div class="field-type-desc">Вибір одного варіанту зі списку</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('radio')">
+                        <div class="field-type-icon">&#9673;</div>
+                        <div class="field-type-name">Перемикачі</div>
+                        <div class="field-type-desc">Вибір одного з кількох варіантів</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('checkbox')">
+                        <div class="field-type-icon">&#9745;</div>
+                        <div class="field-type-name">Прапорці</div>
+                        <div class="field-type-desc">Вибір кількох варіантів</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('file')">
+                        <div class="field-type-icon">&#128206;</div>
+                        <div class="field-type-name">Файл</div>
+                        <div class="field-type-desc">Завантаження одного файлу</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('multifile')">
+                        <div class="field-type-icon">&#128451;</div>
+                        <div class="field-type-name">Кілька файлів</div>
+                        <div class="field-type-desc">Завантаження кількох файлів</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('url')">
+                        <div class="field-type-icon">&#128279;</div>
+                        <div class="field-type-name">Посилання</div>
+                        <div class="field-type-desc">Поле для URL-адреси</div>
+                    </div>
+                    <div class="field-type-card" onclick="selectFieldType('boolean')">
+                        <div class="field-type-icon">&#10003;</div>
+                        <div class="field-type-name">Так/Ні</div>
+                        <div class="field-type-desc">Один прапорець (checkbox)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddFieldModal()">Скасувати</button>
             </div>
         </div>
     </div>

@@ -1975,7 +1975,8 @@ app.post("/api/competitions", async (req, res) => {
     contactInfo,
     websiteUrl,
     isOnline,
-    customFields, // Added customFields parameter
+    customFields,
+    standardFields, // Added standardFields parameter
   } = req.body;
 
   console.log("Створення конкурсу:", title);
@@ -1993,9 +1994,9 @@ app.post("/api/competitions", async (req, res) => {
         title, description, start_date, end_date, manual_status, created_by,
         subject_id, level, organizer, location, max_participants,
         registration_deadline, requirements, prizes, contact_info,
-        website_url, is_online, custom_fields
+        website_url, is_online, custom_fields, standard_fields
       ) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) 
        RETURNING *`,
       [
         title,
@@ -2015,7 +2016,8 @@ app.post("/api/competitions", async (req, res) => {
         contactInfo || null,
         websiteUrl || null,
         isOnline || false,
-        customFields ? JSON.stringify(customFields) : null, // Stringify customFields
+        customFields || null,
+        standardFields || null,
       ],
     );
 
@@ -3182,7 +3184,8 @@ app.put("/api/competitions/:id", async (req, res) => {
     contactInfo,
     websiteUrl,
     isOnline,
-    customFields, // Added customFields parameter
+    customFields,
+    standardFields, // Added standardFields parameter
   } = req.body;
 
   console.log("Оновлення конкурсу ID:", id);
@@ -3199,8 +3202,8 @@ app.put("/api/competitions/:id", async (req, res) => {
            location = $9, max_participants = $10, registration_deadline = $11,
            requirements = $12, prizes = $13, contact_info = $14,
            website_url = $15, is_online = $16, custom_fields = $17, 
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $18
+           standard_fields = $18, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $19
        RETURNING *`,
       [
         title,
@@ -3219,7 +3222,8 @@ app.put("/api/competitions/:id", async (req, res) => {
         contactInfo || null,
         websiteUrl || null,
         isOnline || false,
-        customFields ? JSON.stringify(customFields) : null, // Stringify customFields
+        customFields || null,
+        standardFields || null,
         id,
       ],
     );

@@ -3,7 +3,7 @@ let BASE_URL;
 if (window.location.hostname === "localhost") {
   BASE_URL = "http://localhost:3000";
 } else {
-  BASE_URL = "https://ievents-qf5k.onrender.com";
+  BASE_URL = "https://ievents-o8nm.onrender.com";
 }
 console.log("Підключення до:", BASE_URL);
 
@@ -106,6 +106,16 @@ function openCreateCompetitionModal() {
   dynamicFieldCount = 0;
   document.getElementById("dynamicFieldsContainer").innerHTML = "";
 
+  // Reset standard fields to defaults (student_name, student_email, student_phone checked)
+  document.querySelectorAll("[data-standard-field]").forEach((checkbox) => {
+    const fieldKey = checkbox.getAttribute("data-standard-field");
+    checkbox.checked = [
+      "student_name",
+      "student_email",
+      "student_phone",
+    ].includes(fieldKey);
+  });
+
   switchTab("info");
 
   document.getElementById("createCompetitionModal").classList.add("active");
@@ -119,33 +129,85 @@ function closeCreateCompetitionModal() {
   currentResponses = [];
 }
 
-function addDynamicField() {
+// Field type definitions with icons and labels
+const FIELD_TYPES = {
+  text: { label: "Текст", icon: "Aa", needsOptions: false },
+  textarea: { label: "Багато тексту", icon: "☰", needsOptions: false },
+  number: { label: "Число", icon: "123", needsOptions: false },
+  email: { label: "Email", icon: "@", needsOptions: false },
+  phone: { label: "Телефон", icon: "📞", needsOptions: false },
+  date: { label: "Дата", icon: "📅", needsOptions: false },
+  select: { label: "Випадаючий список", icon: "▼", needsOptions: true },
+  radio: { label: "Перемикачі", icon: "◉", needsOptions: true },
+  checkbox: { label: "Прапорці", icon: "☑", needsOptions: true },
+  file: { label: "Файл", icon: "📎", needsOptions: false },
+  multifile: { label: "Кілька файлів", icon: "📁", needsOptions: false },
+  url: { label: "Посилання", icon: "🔗", needsOptions: false },
+  boolean: { label: "Так/Ні", icon: "✓", needsOptions: false },
+};
+
+function openAddFieldModal() {
+  document.getElementById("addFieldModal").classList.add("active");
+}
+
+function closeAddFieldModal() {
+  document.getElementById("addFieldModal").classList.remove("active");
+}
+
+function selectFieldType(type) {
+  closeAddFieldModal();
+  addDynamicField(type);
+}
+
+function addDynamicField(type = "text") {
   dynamicFieldCount++;
   const container = document.getElementById("dynamicFieldsContainer");
+  const fieldInfo = FIELD_TYPES[type] || FIELD_TYPES.text;
 
   const fieldWrapper = document.createElement("div");
   fieldWrapper.className = "dynamic-field-wrapper";
   fieldWrapper.id = `field-${dynamicFieldCount}`;
   fieldWrapper.setAttribute("data-field-index", dynamicFieldCount);
+  fieldWrapper.setAttribute("data-field-type", type);
+
+  let optionsHTML = "";
+  if (fieldInfo.needsOptions) {
+    optionsHTML = `
+      <div class="dynamic-field-options">
+        <div class="dynamic-field-options-header">
+          <label>Варіанти відповідей</label>
+          <button type="button" class="btn-add-option" onclick="addFieldOption(${dynamicFieldCount})">+ Додати варіант</button>
+        </div>
+        <div class="options-list" id="options-list-${dynamicFieldCount}">
+          <div class="option-item">
+            <input type="text" class="option-value" placeholder="Варіант 1">
+            <button type="button" class="btn-remove-option" onclick="removeFieldOption(this)">×</button>
+          </div>
+          <div class="option-item">
+            <input type="text" class="option-value" placeholder="Варіант 2">
+            <button type="button" class="btn-remove-option" onclick="removeFieldOption(this)">×</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   fieldWrapper.innerHTML = `
+    <div class="dynamic-field-header">
+      <div class="dynamic-field-type-badge">
+        <span class="type-icon">${fieldInfo.icon}</span>
+        <span>${fieldInfo.label}</span>
+      </div>
+      <button type="button" class="btn btn-danger btn-sm" onclick="removeDynamicField(${dynamicFieldCount})">✕ Видалити</button>
+    </div>
     <div class="dynamic-field-row">
       <input type="text" class="dynamic-field-label" placeholder="Назва поля (напр. Клас, Вік)" required>
-      <select class="dynamic-field-type">
-        <option value="text">Текст</option>
-        <option value="email">Email</option>
-        <option value="tel">Телефон</option>
-        <option value="url">Посилання</option>
-        <option value="number">Число</option>
-        <option value="date">Дата</option>
-        <option value="textarea">Багато тексту</option>
-        <option value="file">Файл</option>
-      </select>
+      <input type="hidden" class="dynamic-field-type" value="${type}">
       <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}">
       <label for="required-${dynamicFieldCount}">Обов'язкове</label>
       <input type="text" class="dynamic-field-placeholder" placeholder="Підказка (необов'язково)">
-      <button type="button" class="btn btn-danger btn-sm" onclick="removeDynamicField(${dynamicFieldCount})">Видалити</button>
     </div>
+    ${optionsHTML}
   `;
 
   container.appendChild(fieldWrapper);
@@ -153,6 +215,31 @@ function addDynamicField() {
   setTimeout(() => {
     fieldWrapper.classList.add("animate-in");
   }, 10);
+}
+
+function addFieldOption(fieldId) {
+  const optionsList = document.getElementById(`options-list-${fieldId}`);
+  const optionCount = optionsList.querySelectorAll(".option-item").length + 1;
+
+  const optionItem = document.createElement("div");
+  optionItem.className = "option-item";
+  optionItem.innerHTML = `
+    <input type="text" class="option-value" placeholder="Варіант ${optionCount}">
+    <button type="button" class="btn-remove-option" onclick="removeFieldOption(this)">×</button>
+  `;
+  optionsList.appendChild(optionItem);
+}
+
+function removeFieldOption(button) {
+  const optionItem = button.closest(".option-item");
+  const optionsList = optionItem.closest(".options-list");
+
+  // Keep at least 2 options
+  if (optionsList.querySelectorAll(".option-item").length > 2) {
+    optionItem.remove();
+  } else {
+    alert("Потрібно мати щонайменше 2 варіанти");
+  }
 }
 
 function removeDynamicField(fieldId) {
@@ -191,6 +278,37 @@ function openEditCompetitionModal(competition) {
   document.getElementById("contactInfo").value = competition.contact_info || "";
   document.getElementById("websiteUrl").value = competition.website_url || "";
 
+  // Reset standard fields to defaults first
+  document.querySelectorAll("[data-standard-field]").forEach((checkbox) => {
+    const fieldKey = checkbox.getAttribute("data-standard-field");
+    checkbox.checked = [
+      "student_name",
+      "student_email",
+      "student_phone",
+    ].includes(fieldKey);
+  });
+
+  // Load saved standard fields if they exist
+  if (competition.standard_fields) {
+    try {
+      const standardFields =
+        typeof competition.standard_fields === "string"
+          ? JSON.parse(competition.standard_fields)
+          : competition.standard_fields;
+
+      Object.keys(standardFields).forEach((fieldKey) => {
+        const checkbox = document.querySelector(
+          `[data-standard-field="${fieldKey}"]`,
+        );
+        if (checkbox) {
+          checkbox.checked = standardFields[fieldKey];
+        }
+      });
+    } catch (e) {
+      console.error("Помилка парсування standard_fields:", e);
+    }
+  }
+
   dynamicFieldCount = 0;
   const container = document.getElementById("dynamicFieldsContainer");
   container.innerHTML = "";
@@ -205,29 +323,56 @@ function openEditCompetitionModal(competition) {
       if (Array.isArray(customFields)) {
         customFields.forEach((field) => {
           dynamicFieldCount++;
+          const fieldInfo = FIELD_TYPES[field.type] || FIELD_TYPES.text;
           const fieldWrapper = document.createElement("div");
           fieldWrapper.className = "dynamic-field-wrapper";
           fieldWrapper.id = `field-${dynamicFieldCount}`;
           fieldWrapper.setAttribute("data-field-index", dynamicFieldCount);
+          fieldWrapper.setAttribute("data-field-type", field.type);
+
+          // Build options HTML if needed
+          let optionsHTML = "";
+          if (fieldInfo.needsOptions) {
+            const optionItems = (field.options || ["", ""])
+              .map(
+                (opt, idx) => `
+              <div class="option-item">
+                <input type="text" class="option-value" placeholder="Варіант ${idx + 1}" value="${(opt || "").replace(/"/g, "&quot;")}">
+                <button type="button" class="btn-remove-option" onclick="removeFieldOption(this)">×</button>
+              </div>
+            `,
+              )
+              .join("");
+
+            optionsHTML = `
+              <div class="dynamic-field-options">
+                <div class="dynamic-field-options-header">
+                  <label>Варіанти відповідей</label>
+                  <button type="button" class="btn-add-option" onclick="addFieldOption(${dynamicFieldCount})">+ Додати варіант</button>
+                </div>
+                <div class="options-list" id="options-list-${dynamicFieldCount}">
+                  ${optionItems}
+                </div>
+              </div>
+            `;
+          }
 
           fieldWrapper.innerHTML = `
+            <div class="dynamic-field-header">
+              <div class="dynamic-field-type-badge">
+                <span class="type-icon">${fieldInfo.icon}</span>
+                <span>${fieldInfo.label}</span>
+              </div>
+              <button type="button" class="btn btn-danger btn-sm" onclick="removeDynamicField(${dynamicFieldCount})">✕ Видалити</button>
+            </div>
             <div class="dynamic-field-row">
               <input type="text" class="dynamic-field-label" placeholder="Назва поля" value="${(field.label || "").replace(/"/g, "&quot;")}" required>
-              <select class="dynamic-field-type">
-                <option value="text" ${field.type === "text" ? "selected" : ""}>Текст</option>
-                <option value="email" ${field.type === "email" ? "selected" : ""}>Email</option>
-                <option value="tel" ${field.type === "tel" ? "selected" : ""}>Телефон</option>
-                <option value="url" ${field.type === "url" ? "selected" : ""}>Посилання</option>
-                <option value="number" ${field.type === "number" ? "selected" : ""}>Число</option>
-                <option value="date" ${field.type === "date" ? "selected" : ""}>Дата</option>
-                <option value="textarea" ${field.type === "textarea" ? "selected" : ""}>Багато тексту</option>
-                <option value="file" ${field.type === "file" ? "selected" : ""}>Файл</option>
-              </select>
+              <input type="hidden" class="dynamic-field-type" value="${field.type}">
               <input type="checkbox" class="dynamic-field-required" id="required-${dynamicFieldCount}" ${field.required ? "checked" : ""}>
               <label for="required-${dynamicFieldCount}">Обов'язкове</label>
               <input type="text" class="dynamic-field-placeholder" placeholder="Підказка" value="${(field.placeholder || "").replace(/"/g, "&quot;")}">
-              <button type="button" class="btn btn-danger btn-sm" onclick="removeDynamicField(${dynamicFieldCount})">Видалити</button>
             </div>
+            ${optionsHTML}
           `;
           container.appendChild(fieldWrapper);
         });
@@ -246,22 +391,50 @@ async function saveCompetition() {
   const competitionId = document.getElementById("editCompetitionId").value;
   const isEdit = !!competitionId;
 
+  // Collect standard fields (which ones are enabled)
+  const standardFields = {};
+  document.querySelectorAll("[data-standard-field]").forEach((checkbox) => {
+    const fieldKey = checkbox.getAttribute("data-standard-field");
+    standardFields[fieldKey] = checkbox.checked;
+  });
+
+  // Collect custom/dynamic fields
   const customFields = [];
   document.querySelectorAll(".dynamic-field-wrapper").forEach((wrapper) => {
     const label = wrapper.querySelector(".dynamic-field-label").value.trim();
-    const type = wrapper.querySelector(".dynamic-field-type").value;
+    const typeInput = wrapper.querySelector(".dynamic-field-type");
+    const type =
+      typeInput.tagName === "SELECT" ? typeInput.value : typeInput.value;
     const required = wrapper.querySelector(".dynamic-field-required").checked;
     const placeholder = wrapper
       .querySelector(".dynamic-field-placeholder")
       .value.trim();
 
+    // Get options for select/radio/checkbox types
+    let options = [];
+    const optionsList = wrapper.querySelector(".options-list");
+    if (optionsList) {
+      optionsList.querySelectorAll(".option-value").forEach((input) => {
+        const value = input.value.trim();
+        if (value) {
+          options.push(value);
+        }
+      });
+    }
+
     if (label) {
-      customFields.push({
+      const fieldData = {
         label,
         type,
         required,
         placeholder: placeholder || null,
-      });
+      };
+
+      if (options.length > 0) {
+        fieldData.options = options;
+      }
+
+      customFields.push(fieldData);
     }
   });
 
@@ -283,6 +456,7 @@ async function saveCompetition() {
     contactInfo: document.getElementById("contactInfo").value,
     websiteUrl: document.getElementById("websiteUrl").value,
     createdBy: userId,
+    standardFields: JSON.stringify(standardFields),
     customFields: JSON.stringify(customFields),
   };
 
