@@ -321,7 +321,7 @@ iEvents/
 ├── results.html / results.css / results.js       # Результати
 ├── statistics.html / statistics.css / statistics.js  # Статистика
 ├── predictions.html / predictions.css / predictions.js  # Прогнози
-├── new.html / new.css / new.js                   # AIC 2.0
+├── aic-2-0.html / aic-2-0.css / aic-2-0.js                   # AIC 2.0
 │
 ├── # ══════════════════════════════════════════════════════════
 ├── # КОМУНІКАЦІЯ
@@ -652,7 +652,7 @@ const API_URL = "https://ievents-qf5k.onrender.com";
 | `results.html`       |   -   |    ✓    |    ✓     |   -   |
 | `statistics.html`    |   -   |    ✓    |    ✓     |   -   |
 | `predictions.html`   |   ✓   |    ✓    |    ✓     |   -   |
-| `new.html` (AIC)     |   ✓   |    ✓    |    ✓     |   -   |
+| `aic-2-0.html` (AIC)     |   ✓   |    ✓    |    ✓     |   -   |
 | `admin.html`         |   -   |    -    |    ✓     |   -   |
 | `rehearsalP.html`    |   ✓   |    -    |    -     |   -   |
 | `rehearsalT.html`    |   -   |    ✓    |    ✓     |   -   |
@@ -732,7 +732,7 @@ SUPER_METHODIST_PASSWORD=secure_password
 
 ### 4. Результати та статистика
 
-**Файли:** `results.html`, `statistics.html`, `predictions.html`, `new.html`
+**Файли:** `results.html`, `statistics.html`, `predictions.html`, `aic-2-0.html`
 
 **Статистика включає:**
 
@@ -743,7 +743,7 @@ SUPER_METHODIST_PASSWORD=secure_password
 - Середні бали
 - Хронологія участі
 
-**AIC 2.0 (new.html):**
+**AIC 2.0 (aic-2-0.html):**
 
 - Прогноз ймовірності призового місця
 - Рекомендація рівня конкурсу
