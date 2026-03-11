@@ -1,15 +1,5 @@
 // ============ MENTOR MATCHING PAGE (Methodist/Admin) - Database-backed ============
-let BASE_URL
-if (window.location.hostname === "localhost") {
-  // 🖥️ Локальний режим
-  BASE_URL = "http://localhost:3000"
-} else {
-  // ☁️ Онлайн-сервер Render
-  BASE_URL = "https://ievents-qf5k.onrender.com"
-}
-console.log("📡 Підключення до:", BASE_URL)
 
-const API_URL = BASE_URL
 // --------------- STATE ---------------
 let allMentors = [];
 let filteredMentors = [];
