@@ -13,6 +13,14 @@ const {
   notifyNewCompetition,
 } = require("./bot");
 
+// Set to true to enable verbose database initialization logging
+const DEBUG_DB_INIT = false;
+
+// Silent log function - only logs if DEBUG_DB_INIT is true
+const dbLog = (...args) => {
+  if (DEBUG_DB_INIT) console.log(...args);
+};
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -21,7 +29,7 @@ const subscribedChats = new Set();
 
 // Функція відправки Telegram сповіщень
 async function sendTelegramNotification(message) {
-  console.log("sendTelegramNotification викликано з повідомленням:", message);
+  // Silent - notification sent
 }
 
 // Middleware
@@ -39,12 +47,10 @@ if (!fs.existsSync("uploads")) {
 
 if (!fs.existsSync("documents")) {
   fs.mkdirSync("documents");
-  console.log("Створено папку documents/");
 }
 
 if (!fs.existsSync("achievex")) {
   fs.mkdirSync("achievex");
-  console.log("Створено папку achievex/");
 }
 
 // Налаштування Multer для завантаження файлів
@@ -107,10 +113,9 @@ const pool = new Pool({
 async function initializeDatabase() {
   const client = await pool.connect();
   try {
-    console.log("=== Початок ініціалізації бази даних ===");
+    // Silent database initialization - only log errors
 
     // Перевірка та створення enum типу
-    console.log("Перевірка enum типу user_role...");
     const enumCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM pg_type WHERE typname = 'user_role'
@@ -121,13 +126,9 @@ async function initializeDatabase() {
       await client.query(
         `CREATE TYPE user_role AS ENUM ('учень', 'вчитель', 'методист')`,
       );
-      console.log("Enum тип user_role створено");
-    } else {
-      console.log("Enum тип user_role вже існує");
     }
 
     // Перевірка та створення таблиці users
-    console.log("Перевірка таблиці users...");
     const usersTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -136,7 +137,6 @@ async function initializeDatabase() {
     `);
 
     if (!usersTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці users...");
       await client.query(`
         CREATE TABLE users (
           id SERIAL PRIMARY KEY,
@@ -146,12 +146,8 @@ async function initializeDatabase() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця users створена");
     } else {
-      console.log("  ✓ Таблиця users вже існує");
-
       // Видалення зайвої колонки name
-      console.log("  → Перевірка та видалення зайвої колонки name...");
       const nameColumnCheck = await client.query(`
         SELECT EXISTS (
           SELECT 1 FROM information_schema.columns 
@@ -160,15 +156,10 @@ async function initializeDatabase() {
       `);
 
       if (nameColumnCheck.rows[0].exists) {
-        console.log("  → Видалення колонки name...");
         await client.query(`ALTER TABLE users DROP COLUMN IF EXISTS name`);
-        console.log("  ✓ Колонка name видалена");
-      } else {
-        console.log("  ✓ Колонка name відсутня");
       }
 
       // Перевірка колонки role
-      console.log("  → Перевірка колонки role...");
       const roleColumnCheck = await client.query(`
         SELECT EXISTS (
           SELECT 1 FROM information_schema.columns 
@@ -177,18 +168,13 @@ async function initializeDatabase() {
       `);
 
       if (!roleColumnCheck.rows[0].exists) {
-        console.log("  → Додавання колонки role...");
         await client.query(
           `ALTER TABLE users ADD COLUMN role user_role DEFAULT 'учень'`,
         );
-        console.log("  ✓ Колонка role додана");
-      } else {
-        console.log("  ✓ Колонка role вже існує");
       }
     }
 
     // Перевірка та створення таблиці profiles
-    console.log("Перевірка таблиці profiles...");
     const profilesTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -197,7 +183,6 @@ async function initializeDatabase() {
     `);
 
     if (!profilesTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці profiles...");
       await client.query(`
         CREATE TABLE profiles (
           id SERIAL PRIMARY KEY,
@@ -229,9 +214,7 @@ async function initializeDatabase() {
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця profiles створена");
     } else {
-      console.log("  ✓ Таблиця profiles вже існує");
       // Додавання колонок до profiles
       const columnsToAdd = [
         { name: "school_id", type: "INTEGER" },
@@ -248,7 +231,6 @@ async function initializeDatabase() {
         { name: "consultation_areas", type: "TEXT" },
       ];
 
-      console.log("  → Перевірка та додавання колонок до profiles...");
       for (const col of columnsToAdd) {
         try {
           const columnCheck = await client.query(`
@@ -259,19 +241,12 @@ async function initializeDatabase() {
           `);
 
           if (!columnCheck.rows[0].exists) {
-            console.log(`  → Додавання колонки ${col.name}...`);
             await client.query(
               `ALTER TABLE profiles ADD COLUMN ${col.name} ${col.type}`,
             );
-            console.log(`  ✓ Колонка ${col.name} додана`);
-          } else {
-            console.log(`  ✓ Колонка ${col.name} вже існує`);
           }
         } catch (colError) {
-          // Колонка вже існує
-          console.log(
-            `  ⚠️  Помилка при перевірці/додаванні ${col.name} (можливо, вже існує): ${colError.message}`,
-          );
+          // Колонка вже існує - ігноруємо
         }
       }
     }
@@ -289,9 +264,6 @@ async function initializeDatabase() {
       { name: "average_score", type: "NUMERIC(5, 2)" },
     ];
 
-    console.log(
-      "  → Перевірка та додавання колонок для профілю вчителя/методиста...",
-    );
     for (const col of teacherProfileColumns) {
       const columnCheck = await client.query(`
         SELECT EXISTS (
@@ -300,24 +272,18 @@ async function initializeDatabase() {
         ) as exists
       `);
       if (!columnCheck.rows[0].exists) {
-        console.log(`  → Додавання колонки ${col.name}...`);
         try {
           await client.query(
             `ALTER TABLE profiles ADD COLUMN ${col.name} ${col.type}`,
           );
-          console.log(`  ✓ Колонка ${col.name} додана`);
         } catch (colError) {
-          console.log(
-            `  ⚠️  Помилка при додаванні ${col.name}: ${colError.message}`,
-          );
+          // Ігноруємо помилки - колонка може вже існувати
         }
-      } else {
-        console.log(`  ✓ Колонка ${col.name} вже існує`);
       }
     }
 
     // Перевірка та створення таблиці subjects (потрібна для competitions.subject_id)
-    console.log("Перевірка таблиці subjects...");
+    dbLog("Перевірка таблиці subjects...");
     const subjectsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -326,7 +292,7 @@ async function initializeDatabase() {
     `);
 
     if (!subjectsTableCheck.rows[0].exists) {
-      console.log("  -> Створення таблиці subjects...");
+      dbLog("  -> Створення таблиці subjects...");
       await client.query(`
         CREATE TABLE subjects (
           id SERIAL PRIMARY KEY,
@@ -335,10 +301,10 @@ async function initializeDatabase() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  + Таблиця subjects створена");
+      dbLog("  + Таблиця subjects створена");
 
       // Додаємо базові предмети
-      console.log("  -> Додавання базових предметів...");
+      dbLog("  -> Додавання базових предметів...");
       await client.query(`
         INSERT INTO subjects (name, category) VALUES
         ('Математика', 'Точні науки'),
@@ -356,13 +322,13 @@ async function initializeDatabase() {
         ('Правознавство', 'Суспільні науки')
         ON CONFLICT DO NOTHING
       `);
-      console.log("  + Базові предмети додані");
+      dbLog("  + Базові предмети додані");
     } else {
-      console.log("  + Таблиця subjects вже існує");
+      dbLog("  + Таблиця subjects вже існує");
     }
 
     // Перевірка та створення таблиці competitions
-    console.log("Перевірка таблиці competitions...");
+    dbLog("Перевірка таблиці competitions...");
     const competitionsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -371,7 +337,7 @@ async function initializeDatabase() {
     `);
 
     if (!competitionsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці competitions...");
+      dbLog("  → Створення таблиці competitions...");
       await client.query(`
         CREATE TABLE competitions (
           id SERIAL PRIMARY KEY,
@@ -384,19 +350,19 @@ async function initializeDatabase() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця competitions створена");
+      dbLog("  ✓ Таблиця competitions створена");
     } else {
-      console.log("  ✓ Таблиця competitions вже існує");
+      dbLog("  ✓ Таблиця competitions вже існує");
       // Перевірка колонки manual_status
-      console.log("  → Перевірка колонки manual_status...");
+      dbLog("  → Перевірка колонки manual_status...");
       try {
         await client.query(
           `ALTER TABLE competitions ADD COLUMN IF NOT EXISTS manual_status VARCHAR(20)`,
         );
-        console.log("  ✓ Колонка manual_status перевірена/додана");
+        dbLog("  ✓ Колонка manual_status перевірена/додана");
       } catch (e) {
         if (e.code === "42701") {
-          console.log("  ✓ Колонка manual_status вже існує");
+          dbLog("  ✓ Колонка manual_status вже існує");
         } else {
           throw e;
         }
@@ -423,7 +389,7 @@ async function initializeDatabase() {
       { name: "updated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" },
     ];
 
-    console.log("  → Перевірка та додавання нових колонок до competitions...");
+    dbLog("  → Перевірка та додавання нових колонок до competitions...");
     for (const col of newCompetitionColumns) {
       try {
         // Use IF NOT EXISTS for simple types, or check first for complex types with REFERENCES
@@ -435,31 +401,31 @@ async function initializeDatabase() {
             ) as exists
           `);
           if (!columnCheck.rows[0].exists) {
-            console.log(`  → Додавання колонки ${col.name}...`);
+            dbLog(`  → Додавання колонки ${col.name}...`);
             await client.query(
               `ALTER TABLE competitions ADD COLUMN ${col.name} ${col.type}`,
             );
-            console.log(`  ✓ Колонка ${col.name} додана`);
+            dbLog(`  ✓ Колонка ${col.name} додана`);
           } else {
-            console.log(`  ✓ Колонка ${col.name} вже існує`);
+            dbLog(`  ✓ Колонка ${col.name} вже існує`);
           }
         } else {
           await client.query(
             `ALTER TABLE competitions ADD COLUMN IF NOT EXISTS ${col.name} ${col.type}`,
           );
-          console.log(`  ✓ Колонка ${col.name} перевірена/додана`);
+          dbLog(`  ✓ Колонка ${col.name} перевірена/додана`);
         }
       } catch (e) {
         if (e.code === "42701") {
-          console.log(`  ✓ Колонка ${col.name} вже існує`);
+          dbLog(`  ✓ Колонка ${col.name} вже існує`);
         } else {
-          console.log(`  ⚠️ Помилка при додаванні ${col.name}: ${e.message}`);
+          dbLog(`  ⚠️ Помилка при додаванні ${col.name}: ${e.message}`);
         }
       }
     }
 
     // Перевірка та створення таблиці competition_participants
-    console.log("Перевірка таблиці competition_participants...");
+    dbLog("Перевірка таблиці competition_participants...");
     const participantsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -468,7 +434,7 @@ async function initializeDatabase() {
     `);
 
     if (!participantsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці competition_participants...");
+      dbLog("  → Створення таблиці competition_participants...");
       await client.query(`
         CREATE TABLE competition_participants (
           id SERIAL PRIMARY KEY,
@@ -478,13 +444,13 @@ async function initializeDatabase() {
           UNIQUE(competition_id, user_id)
         )
       `);
-      console.log("  ✓ Таблиця competition_participants створена");
+      dbLog("  ✓ Таблиця competition_participants створена");
     } else {
-      console.log("  ✓ Таблиця competition_participants вже існує");
+      dbLog("  ✓ Таблиця competition_participants вже існує");
     }
 
     // Перевірка та створення таблиці competition_results
-    console.log("Перевірка таблиці competition_results...");
+    dbLog("Перевірка таблиці competition_results...");
     const resultsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -493,7 +459,7 @@ async function initializeDatabase() {
     `);
 
     if (!resultsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці competition_results...");
+      dbLog("  → Створення таблиці competition_results...");
       await client.query(`
         CREATE TABLE competition_results (
           id SERIAL PRIMARY KEY,
@@ -509,9 +475,9 @@ async function initializeDatabase() {
           UNIQUE(competition_id, user_id)
         )
       `);
-      console.log("  ✓ Таблиця competition_results створена");
+      dbLog("  ✓ Таблиця competition_results створена");
     } else {
-      console.log("  ✓ Таблиця competition_results вже існує");
+      dbLog("  ✓ Таблиця competition_results вже існує");
       // Перевірка та додавання колонок до competition_results
       const resultColumns = [
         { name: "score", type: "VARCHAR(50)" },
@@ -525,7 +491,7 @@ async function initializeDatabase() {
         { name: "achievement", type: "VARCHAR(255) NOT NULL" },
       ];
 
-      console.log("  → Перевірка колонок таблиці competition_results...");
+      dbLog("  → Перевірка колонок таблиці competition_results...");
       for (const col of resultColumns) {
         const columnCheck = await client.query(`
           SELECT EXISTS (
@@ -535,13 +501,13 @@ async function initializeDatabase() {
         `);
 
         if (!columnCheck.rows[0].exists) {
-          console.log(`  → Додавання колонки ${col.name}...`);
+          dbLog(`  → Додавання колонки ${col.name}...`);
           await client.query(
             `ALTER TABLE competition_results ADD COLUMN ${col.name} ${col.type}`,
           );
-          console.log(`  ✓ Колонка ${col.name} додана`);
+          dbLog(`  ✓ Колонка ${col.name} додана`);
         } else {
-          console.log(`  ✓ Колонка ${col.name} вже існує`);
+          dbLog(`  ✓ Колонка ${col.name} вже існує`);
         }
       }
 
@@ -553,27 +519,27 @@ async function initializeDatabase() {
       `);
 
       if (columnCheck.rows.length === 0) {
-        console.log("  → Додавання колонки is_confirmed...");
+        dbLog("  → Додавання колонки is_confirmed...");
         await client.query(`
           ALTER TABLE competition_results 
           ADD COLUMN is_confirmed BOOLEAN DEFAULT FALSE
         `);
-        console.log("  ✓ Додано колонку is_confirmed");
+        dbLog("  ✓ Додано колонку is_confirmed");
       } else {
-        console.log("  ✓ Колонка is_confirmed вже існує");
+        dbLog("  ✓ Колонка is_confirmed вже існує");
       }
 
       //ALTER COLUMN place TYPE VARCHAR(10) USING place::VARCHAR(10)
-      console.log("  → Альтерація колонки place...");
+      dbLog("  → Альтерація колонки place...");
       await client.query(`
         ALTER TABLE competition_results 
         ALTER COLUMN place TYPE VARCHAR(10) USING place::VARCHAR(10)
       `);
-      console.log("  ✓ Колонка place змінена на VARCHAR(10)");
+      dbLog("  ✓ Колонка place змінена на VARCHAR(10)");
     }
 
     // Створення таблиці competition_documents
-    console.log("Перевірка таблиці competition_documents...");
+    dbLog("Перевірка таблиці competition_documents...");
     const documentsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -582,7 +548,7 @@ async function initializeDatabase() {
     `);
 
     if (!documentsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці competition_documents...");
+      dbLog("  → Створення таблиці competition_documents...");
       await client.query(`
         CREATE TABLE competition_documents (
           id SERIAL PRIMARY KEY,
@@ -597,13 +563,13 @@ async function initializeDatabase() {
           uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця competition_documents створена");
+      dbLog("  ✓ Таблиця competition_documents створена");
     } else {
-      console.log("  ✓ Таблиця competition_documents вже існує");
+      dbLog("  ✓ Таблиця competition_documents вже існує");
     }
 
     // Перевірка таблиці competition_form_responses
-    console.log("Перевірка таблиці competition_form_responses...");
+    dbLog("Перевірка таблиці competition_form_responses...");
     const formResponsesTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -612,7 +578,7 @@ async function initializeDatabase() {
     `);
 
     if (!formResponsesTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці competition_form_responses...");
+      dbLog("  → Створення таблиці competition_form_responses...");
       await client.query(`
         CREATE TABLE competition_form_responses (
           id SERIAL PRIMARY KEY,
@@ -624,13 +590,13 @@ async function initializeDatabase() {
           UNIQUE(competition_id, user_id)
         )
       `);
-      console.log("  ✓ Таблиця competition_form_responses створена");
+      dbLog("  ✓ Таблиця competition_form_responses створена");
     } else {
-      console.log("  ✓ Таблиця competition_form_responses вже існує");
+      dbLog("  ✓ Таблиця competition_form_responses вже існує");
     }
 
     // Перевірка та створення таблиці rehearsals
-    console.log("Перевірка таблиці rehearsals...");
+    dbLog("Перевірка таблиці rehearsals...");
     const rehearsalsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -639,7 +605,7 @@ async function initializeDatabase() {
     `);
 
     if (!rehearsalsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці rehearsals...");
+      dbLog("  → Створення таблиці rehearsals...");
       await client.query(`
         CREATE TABLE rehearsals (
           id SERIAL PRIMARY KEY,
@@ -657,9 +623,9 @@ async function initializeDatabase() {
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця rehearsals створена");
+      dbLog("  ✓ Таблиця rehearsals створена");
     } else {
-      console.log("  ✓ Таблиця rehearsals вже існує");
+      dbLog("  ✓ Таблиця rehearsals вже існує");
       // Перевірка та додавання колонок до rehearsals
       const rehearsalColumnsToAdd = [
         {
@@ -673,7 +639,7 @@ async function initializeDatabase() {
         { name: "updated_at", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" },
       ];
 
-      console.log("  → Перевірка та додавання колонок до rehearsals...");
+      dbLog("  → Перевірка та додавання колонок до rehearsals...");
       for (const col of rehearsalColumnsToAdd) {
         try {
           const columnCheck = await client.query(`
@@ -684,16 +650,16 @@ async function initializeDatabase() {
           `);
 
           if (!columnCheck.rows[0].exists) {
-            console.log(`  → Додавання колонки ${col.name}...`);
+            dbLog(`  → Додавання колонки ${col.name}...`);
             await client.query(
               `ALTER TABLE rehearsals ADD COLUMN ${col.name} ${col.type}`,
             );
-            console.log(`  ✓ Колонка ${col.name} додана`);
+            dbLog(`  ✓ Колонка ${col.name} додана`);
           } else {
-            console.log(`  ✓ Колонка ${col.name} вже існує`);
+            dbLog(`  ✓ Колонка ${col.name} вже існує`);
           }
         } catch (colError) {
-          console.log(
+          dbLog(
             `  ⚠️  Помилка при перевірці/додаванні ${col.name} (можливо, вже існує): ${colError.message}`,
           );
         }
@@ -701,7 +667,7 @@ async function initializeDatabase() {
     }
 
     // Перевірка та створення таблиці chats
-    console.log("Перевірка таблиці chats...");
+    dbLog("Перевірка таблиці chats...");
     const chatsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -710,7 +676,7 @@ async function initializeDatabase() {
     `);
 
     if (!chatsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці chats...");
+      dbLog("  → Створення таблиці chats...");
       await client.query(`
         CREATE TABLE chats (
           id SERIAL PRIMARY KEY,
@@ -720,13 +686,13 @@ async function initializeDatabase() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця chats створена");
+      dbLog("  ✓ Таблиця chats створена");
     } else {
-      console.log("  ✓ Таблиця chats вже існує");
+      dbLog("  ✓ Таблиця chats вже існує");
     }
 
     // Перевірка та створення таблиці chat_members
-    console.log("Перевірка таблиці chat_members...");
+    dbLog("Перевірка таблиці chat_members...");
     const chatMembersTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -735,7 +701,7 @@ async function initializeDatabase() {
     `);
 
     if (!chatMembersTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці chat_members...");
+      dbLog("  → Створення таблиці chat_members...");
       await client.query(`
         CREATE TABLE chat_members (
           id SERIAL PRIMARY KEY,
@@ -745,13 +711,13 @@ async function initializeDatabase() {
           UNIQUE(chat_id, user_id)
         )
       `);
-      console.log("  ✓ Таблиця chat_members створена");
+      dbLog("  ✓ Таблиця chat_members створена");
     } else {
-      console.log("  ✓ Таблиця chat_members вже існує");
+      dbLog("  ✓ Таблиця chat_members вже існує");
     }
 
     // Перевірка та створення таблиці chat_messages
-    console.log("Перевірка таблиці chat_messages...");
+    dbLog("Перевірка таблиці chat_messages...");
     const chatMessagesTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -760,7 +726,7 @@ async function initializeDatabase() {
     `);
 
     if (!chatMessagesTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці chat_messages...");
+      dbLog("  → Створення таблиці chat_messages...");
       await client.query(`
         CREATE TABLE chat_messages (
           id SERIAL PRIMARY KEY,
@@ -771,13 +737,13 @@ async function initializeDatabase() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця chat_messages створена");
+      dbLog("  ✓ Таблиця chat_messages створена");
     } else {
-      console.log("  ✓ Таблиця chat_messages вже існує");
+      dbLog("  ✓ Таблиця chat_messages вже існує");
     }
 
     // Перевірка та створення таблиці chat_read_status
-    console.log("Перевірка таблиці chat_read_status...");
+    dbLog("Перевірка таблиці chat_read_status...");
     const chatReadStatusTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -786,7 +752,7 @@ async function initializeDatabase() {
     `);
 
     if (!chatReadStatusTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці chat_read_status...");
+      dbLog("  → Створення таблиці chat_read_status...");
       await client.query(`
         CREATE TABLE chat_read_status (
           id SERIAL PRIMARY KEY,
@@ -796,13 +762,13 @@ async function initializeDatabase() {
           UNIQUE(chat_id, user_id)
         )
       `);
-      console.log("  ✓ Таблиця chat_read_status створена");
+      dbLog("  ✓ Таблиця chat_read_status створена");
     } else {
-      console.log("  ✓ Таблиця chat_read_status вже існує");
+      dbLog("  ✓ Таблиця chat_read_status вже існує");
     }
 
     // Перевірка та створення таблиці news
-    console.log("Перевірка таблиці news...");
+    dbLog("Перевірка таблиці news...");
     const newsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -811,7 +777,7 @@ async function initializeDatabase() {
     `);
 
     if (!newsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці news...");
+      dbLog("  → Створення таблиці news...");
       await client.query(`
         CREATE TABLE news (
           id SERIAL PRIMARY KEY,
@@ -825,13 +791,13 @@ async function initializeDatabase() {
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця news створена");
+      dbLog("  ✓ Таблиця news створена");
     } else {
-      console.log("  ✓ Таблиця news вже існує");
+      dbLog("  ✓ Таблиця news вже існує");
     }
 
     // Перевірка та створення таблиці news_comments
-    console.log("Перевірка таблиці news_comments...");
+    dbLog("Перевірка таблиці news_comments...");
     const newsCommentsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -840,7 +806,7 @@ async function initializeDatabase() {
     `);
 
     if (!newsCommentsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці news_comments...");
+      dbLog("  → Створення таблиці news_comments...");
       await client.query(`
         CREATE TABLE news_comments (
           id SERIAL PRIMARY KEY,
@@ -850,13 +816,13 @@ async function initializeDatabase() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  ✓ Таблиця news_comments створена");
+      dbLog("  ✓ Таблиця news_comments створена");
     } else {
-      console.log("  ✓ Таблиця news_comments вже існує");
+      dbLog("  ✓ Таблиця news_comments вже існує");
     }
 
     // Перевірка та створення таблиці news_likes
-    console.log("Перевірка таблиці news_likes...");
+    dbLog("Перевірка таблиці news_likes...");
     const newsLikesTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
@@ -865,7 +831,7 @@ async function initializeDatabase() {
     `);
 
     if (!newsLikesTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці news_likes...");
+      dbLog("  → Створення таблиці news_likes...");
       await client.query(`
         CREATE TABLE news_likes (
           id SERIAL PRIMARY KEY,
@@ -875,13 +841,13 @@ async function initializeDatabase() {
           UNIQUE(news_id, user_id)
         )
       `);
-      console.log("  ✓ Таблиця news_likes створена");
+      dbLog("  ✓ Таблиця news_likes створена");
     } else {
-      console.log("  ✓ Таблиця news_likes вже існує");
+      dbLog("  ✓ Таблиця news_likes вже існує");
     }
 
     // Перевірка та додавання колонки views_count до таблиці news
-    console.log("Перевірка колонки views_count в таблиці news...");
+    dbLog("Перевірка колонки views_count в таблиці news...");
     const viewsCountCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.columns 
@@ -889,13 +855,13 @@ async function initializeDatabase() {
       ) as exists
     `);
     if (!viewsCountCheck.rows[0].exists) {
-      console.log("  → Додавання колонки views_count...");
+      dbLog("  → Додавання колонки views_count...");
       await client.query(
         `ALTER TABLE news ADD COLUMN views_count INTEGER DEFAULT 0`,
       );
-      console.log("  ✓ Колонка views_count додана");
+      dbLog("  ✓ Колонка views_count додана");
     } else {
-      console.log("  ✓ Колонка views_count вже існує");
+      dbLog("  ✓ Колонка views_count вже існує");
     }
 
     // --- CHANGES START HERE ---
@@ -905,9 +871,7 @@ async function initializeDatabase() {
       { name: "gallery_images", type: "TEXT[]" }, // Array of text for multiple image URLs
     ];
 
-    console.log(
-      "  → Перевірка та додавання колонок зображень до таблиці news...",
-    );
+    dbLog("  → Перевірка та додавання колонок зображень до таблиці news...");
     for (const col of newsImageColumns) {
       const columnCheck = await client.query(`
         SELECT EXISTS (
@@ -916,19 +880,19 @@ async function initializeDatabase() {
         ) as exists
       `);
       if (!columnCheck.rows[0].exists) {
-        console.log(`  → Додавання колонки ${col.name}...`);
+        dbLog(`  → Додавання колонки ${col.name}...`);
         await client.query(
           `ALTER TABLE news ADD COLUMN ${col.name} ${col.type}`,
         );
-        console.log(`  ✓ Колонка ${col.name} додана`);
+        dbLog(`  ✓ Колонка ${col.name} додана`);
       } else {
-        console.log(`  ✓ Колонка ${col.name} вже існує`);
+        dbLog(`  ✓ Колонка ${col.name} вже існує`);
       }
     }
     // --- CHANGES END HERE ---
 
     // Перевірка та створення таблиці teacher_competition_subscriptions
-    console.log("Перевірка таблиці teacher_competition_subscriptions...");
+    dbLog("Перевірка таблиці teacher_competition_subscriptions...");
     const teacherSubsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -937,7 +901,7 @@ async function initializeDatabase() {
     `);
 
     if (!teacherSubsTableCheck.rows[0].exists) {
-      console.log("  → Створення таблиці teacher_competition_subscriptions...");
+      dbLog("  → Створення таблиці teacher_competition_subscriptions...");
       // Видаляємо залишкову послідовність, якщо вона існує без таблиці
       await client.query(
         `DROP SEQUENCE IF EXISTS teacher_competition_subscriptions_id_seq CASCADE`,
@@ -951,13 +915,13 @@ async function initializeDatabase() {
           UNIQUE(teacher_id, competition_id)
         )
       `);
-      console.log("  ✓ Таблиця teacher_competition_subscriptions створена");
+      dbLog("  ✓ Таблиця teacher_competition_subscriptions створена");
     } else {
-      console.log("  ✓ Таблиця teacher_competition_subscriptions вже існує");
+      dbLog("  ✓ Таблиця teacher_competition_subscriptions вже існує");
     }
 
     // ==================== ACHIEVEX (Achievement Garage) TABLES ====================
-    console.log("Перевірка таблиці achievements...");
+    dbLog("Перевірка таблиці achievements...");
     const achievementsTableCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -966,7 +930,7 @@ async function initializeDatabase() {
     `);
 
     if (!achievementsTableCheck.rows[0].exists) {
-      console.log("  -> Створення таблиці achievements...");
+      dbLog("  -> Створення таблиці achievements...");
       await client.query(`
         CREATE TABLE achievements (
           id SERIAL PRIMARY KEY,
@@ -999,9 +963,9 @@ async function initializeDatabase() {
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("  + Таблиця achievements створена");
+      dbLog("  + Таблиця achievements створена");
     } else {
-      console.log("  + Таблиця achievements вже існує");
+      dbLog("  + Таблиця achievements вже існує");
       // Add missing columns
       const achCols = [
         { name: "project_file_path", type: "VARCHAR(500)" },
@@ -1039,7 +1003,7 @@ async function initializeDatabase() {
     }
 
     // Таблиця запитів на наставництво
-    console.log("Перевірка таблиці mentor_requests...");
+    dbLog("Перевірка таблиці mentor_requests...");
     const mentorReqCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -1047,7 +1011,7 @@ async function initializeDatabase() {
       ) as exists
     `);
     if (!mentorReqCheck.rows[0].exists) {
-      console.log("  → Створення таблиці mentor_requests...");
+      dbLog("  → Створення таблиці mentor_requests...");
       await client.query(`
         CREATE TABLE mentor_requests (
           id SERIAL PRIMARY KEY,
@@ -1061,27 +1025,27 @@ async function initializeDatabase() {
           UNIQUE(student_id, teacher_id)
         )
       `);
-      console.log("  ✓ Таблиця mentor_requests створена");
+      dbLog("  ✓ Таблиця mentor_requests створена");
     } else {
-      console.log("  ✓ Таблиця mentor_requests вже існує");
+      dbLog("  ✓ Таблиця mentor_requests вже існує");
       // Fix: rename mentor_id -> teacher_id if needed
       const mrColCheck = await client.query(`
         SELECT column_name FROM information_schema.columns 
         WHERE table_name = 'mentor_requests' AND column_name = 'mentor_id'
       `);
       if (mrColCheck.rows.length > 0) {
-        console.log(
+        dbLog(
           "  → Перейменування mentor_id -> teacher_id в mentor_requests...",
         );
         await client.query(
           `ALTER TABLE mentor_requests RENAME COLUMN mentor_id TO teacher_id`,
         );
-        console.log("  ✓ Колонку перейменовано");
+        dbLog("  ✓ Колонку перейменовано");
       }
     }
 
     // Таблиця обраних наставників
-    console.log("Перевірка таблиці mentor_favorites...");
+    dbLog("Перевірка таблиці mentor_favorites...");
     const mentorFavCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -1089,7 +1053,7 @@ async function initializeDatabase() {
       ) as exists
     `);
     if (!mentorFavCheck.rows[0].exists) {
-      console.log("  → Створення таблиці mentor_favorites...");
+      dbLog("  → Створення таблиці mentor_favorites...");
       await client.query(`
         CREATE TABLE mentor_favorites (
           id SERIAL PRIMARY KEY,
@@ -1099,27 +1063,27 @@ async function initializeDatabase() {
           UNIQUE(student_id, teacher_id)
         )
       `);
-      console.log("  ✓ Таблиця mentor_favorites створена");
+      dbLog("  ✓ Таблиця mentor_favorites створена");
     } else {
-      console.log("  ✓ Таблиця mentor_favorites вже існує");
+      dbLog("  ✓ Таблиця mentor_favorites вже існує");
       // Fix: rename mentor_id -> teacher_id if needed
       const mfColCheck = await client.query(`
         SELECT column_name FROM information_schema.columns 
         WHERE table_name = 'mentor_favorites' AND column_name = 'mentor_id'
       `);
       if (mfColCheck.rows.length > 0) {
-        console.log(
+        dbLog(
           "  → Перейменування mentor_id -> teacher_id в mentor_favorites...",
         );
         await client.query(
           `ALTER TABLE mentor_favorites RENAME COLUMN mentor_id TO teacher_id`,
         );
-        console.log("  ✓ Колонку перейменовано");
+        dbLog("  ✓ Колонку перейменовано");
       }
     }
 
     // Таблиця матеріалів наставника
-    console.log("Перевірка таблиці mentor_materials...");
+    dbLog("Перевірка таблиці mentor_materials...");
     const mentorMatCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -1127,7 +1091,7 @@ async function initializeDatabase() {
       ) as exists
     `);
     if (!mentorMatCheck.rows[0].exists) {
-      console.log("  → Створення таблиці mentor_materials...");
+      dbLog("  → Створення таблиці mentor_materials...");
       await client.query(`
         CREATE TABLE mentor_materials (
           id SERIAL PRIMARY KEY,
@@ -1146,13 +1110,13 @@ async function initializeDatabase() {
       await client.query(
         `CREATE INDEX IF NOT EXISTS idx_mentor_materials_student ON mentor_materials(student_id)`,
       );
-      console.log("  ✓ Таблиця mentor_materials створена");
+      dbLog("  ✓ Таблиця mentor_materials створена");
     } else {
-      console.log("  ✓ Таблиця mentor_materials вже існує");
+      dbLog("  ✓ Таблиця mentor_materials вже існує");
     }
 
     // Таблиця розкладу наставника
-    console.log("Перевірка таблиці mentor_schedule...");
+    dbLog("Перевірка таблиці mentor_schedule...");
     const mentorSchCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
@@ -1160,7 +1124,7 @@ async function initializeDatabase() {
       ) as exists
     `);
     if (!mentorSchCheck.rows[0].exists) {
-      console.log("  → Створення таблиці mentor_schedule...");
+      dbLog("  → Створення таблиці mentor_schedule...");
       await client.query(`
         CREATE TABLE mentor_schedule (
           id SERIAL PRIMARY KEY,
@@ -1176,13 +1140,13 @@ async function initializeDatabase() {
       await client.query(
         `CREATE INDEX IF NOT EXISTS idx_mentor_schedule_teacher ON mentor_schedule(teacher_id)`,
       );
-      console.log("  ✓ Таблиця mentor_schedule створена");
+      dbLog("  ✓ Таблиця mentor_schedule створена");
     } else {
-      console.log("  ✓ Таблиця mentor_schedule вже існує");
+      dbLog("  ✓ Таблиця mentor_schedule вже існує");
     }
 
     // Add is_blocked column to users if not exists
-    console.log("Перевірка колонки is_blocked в users...");
+    dbLog("Перевірка колонки is_blocked в users...");
     const isBlockedCheck = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.columns 
@@ -1190,26 +1154,18 @@ async function initializeDatabase() {
       )
     `);
     if (!isBlockedCheck.rows[0].exists) {
-      console.log("  → Додавання колонки is_blocked...");
+      dbLog("  → Додавання колонки is_blocked...");
       await client.query(
         `ALTER TABLE users ADD COLUMN is_blocked BOOLEAN DEFAULT FALSE`,
       );
-      console.log("  ✓ Колонку is_blocked додано");
+      dbLog("  ✓ Колонку is_blocked додано");
     } else {
-      console.log("  ✓ Колонка is_blocked вже існує");
+      dbLog("  ✓ Колонка is_blocked вже існує");
     }
 
-    console.log("=== База даних готова до роботи! ===\n");
+    // Database ready - silent success
   } catch (error) {
-    console.error("❌ КРИТИЧНА ПОМИЛКА ініціалізації бази даних:");
-    console.error("Тип помилки:", error.name);
-    console.error("Повідомлення:", error.message);
-    console.error("Код помилки:", error.code);
-    console.error("\n⚠️  РІШЕННЯ:");
-    console.error("1. Відкрийте файл scripts/init-competitions-forms.sql");
-    console.error("2. Скопіюйте весь SQL код");
-    console.error("3. Виконайте його в SQL редакторі вашої бази даних Neon");
-    console.error("4. Перезапустіть сервер командою: npm start\n");
+    console.error("\n[DB ERROR] " + error.message);
     throw error;
   } finally {
     client.release();
@@ -1218,7 +1174,6 @@ async function initializeDatabase() {
 
 // Запуск ініціалізації БД
 initializeDatabase().catch((err) => {
-  console.error("Не вдалося ініціалізувати базу даних. Сервер не запущено.");
   process.exit(1);
 });
 
@@ -1282,7 +1237,7 @@ app.post("/api/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Створення користувача
-    console.log("Створення користувача в базі даних...");
+    dbLog("Створення користувача в базі даних...");
     const userResult = await client.query(
       "INSERT INTO users (email, password, role) VALUES ($1, $2, $3::user_role) RETURNING id, email, role",
       [email, hashedPassword, "учень"],
@@ -1291,7 +1246,7 @@ app.post("/api/register", async (req, res) => {
     const user = userResult.rows[0];
     console.log("Користувач створений з ID:", user.id);
 
-    console.log("Створення профілю для користувача...");
+    dbLog("Створення профілю для користувача...");
     await client.query(
       "INSERT INTO profiles (user_id, phone, telegram) VALUES ($1, $2, $3)",
       [user.id, phone || null, telegram || null],
@@ -1528,7 +1483,7 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
     bio,
   } = req.body;
 
-  console.log("Оновлення профілю для користувача:", userId);
+  dbLog("Оновлення профілю для користувача:", userId);
 
   if (!userId || userId === "undefined" || userId === "null") {
     console.log("Помилка: невірний userId");
@@ -1567,7 +1522,7 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
     );
 
     if (existingProfile.rows.length === 0) {
-      console.log("Створення нового профілю...");
+      dbLog("Створення нового профілю...");
       await client.query(
         `INSERT INTO profiles (
           user_id, first_name, last_name, middle_name, 
@@ -1598,7 +1553,7 @@ app.post("/api/profile", upload.single("avatar"), async (req, res) => {
       );
       console.log("✓ Новий профіль створено");
     } else {
-      console.log("Оновлення існуючого профілю...");
+      dbLog("Оновлення існуючого профілю...");
 
       const updateFields = [];
       const updateValues = [userId];
@@ -1979,7 +1934,7 @@ app.post("/api/competitions", async (req, res) => {
     standardFields, // Added standardFields parameter
   } = req.body;
 
-  console.log("Створення конкурсу:", title);
+  dbLog("Створення конкурсу:", title);
 
   if (!title || !startDate || !endDate) {
     console.log("Помилка: відсутні обов'язкові поля");
@@ -2642,7 +2597,7 @@ app.put("/api/results/:resultId", async (req, res) => {
     isConfirmed,
   } = req.body;
 
-  console.log("Оновлення результату ID:", resultId);
+  dbLog("Оновлення результату ID:", resultId);
 
   if (!score && !place) {
     console.log("Помилка: потрібно вказати хоча б бали або місце");
@@ -3188,7 +3143,7 @@ app.put("/api/competitions/:id", async (req, res) => {
     standardFields, // Added standardFields parameter
   } = req.body;
 
-  console.log("Оновлення конкурсу ID:", id);
+  dbLog("Оновлення конкурсу ID:", id);
 
   if (!title || !startDate || !endDate) {
     return res.status(400).json({ error: "Назва та дати обов'язкові" });
@@ -3245,12 +3200,7 @@ app.post("/api/create-user", async (req, res) => {
   const { email, password, firstName, lastName, role, phone, telegram } =
     req.body;
 
-  console.log(
-    "Створення користувача адміністратором:",
-    email,
-    "з роллю:",
-    role,
-  );
+  dbLog("Створення користувача адміністратором:", email, "з роллю:", role);
 
   // Validation
   if (!email || !password || !role) {
@@ -3308,7 +3258,7 @@ app.post("/api/create-user", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user with specified role
-    console.log("Створення користувача в базі даних...");
+    dbLog("Створення користувача в базі даних...");
     const userResult = await client.query(
       "INSERT INTO users (email, password, role) VALUES ($1, $2, $3::user_role) RETURNING id, email, role",
       [email, hashedPassword, role],
@@ -3318,7 +3268,7 @@ app.post("/api/create-user", async (req, res) => {
     console.log("Користувач створений з ID:", user.id);
 
     // Create profile with additional information
-    console.log("Створення профілю для користувача...");
+    dbLog("Створення профілю для користувача...");
     await client.query(
       "INSERT INTO profiles (user_id, first_name, last_name, phone, telegram) VALUES ($1, $2, $3, $4, $5)",
       [
@@ -4845,7 +4795,7 @@ app.post(
       console.log(
         `✓ Файл успішно завантажено та організовано: ${req.file.originalname}`,
       );
-      console.log(`  → Шлях: ${relativeFilePath}`);
+      dbLog(`  → Шлях: ${relativeFilePath}`);
 
       res.json({
         message: "Файл успішно завантажено",
@@ -5961,32 +5911,40 @@ app.post("/api/mentor-admin/create-pair", async (req, res) => {
 
 // Запуск сервера
 const server = app.listen(PORT, async () => {
-  console.log(`Сервер запущено на порту ${PORT}`);
+  console.log("\n========================================");
+  console.log("   iEvents Server");
+  console.log("========================================");
+  console.log(`   Local:   http://localhost:${PORT}`);
+  console.log("========================================\n");
+
   await initializeDatabase();
 
   try {
     await initBot();
-    console.log("Telegram бот успiшно запущено");
   } catch (error) {
-    console.error("Помилка при запуску Telegram бота:", error);
+    // Silent bot error - bot is optional
   }
 });
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
-    console.log(`Порт ${PORT} зайнятий, пробуємо порт ${PORT + 1}...`);
     server.close();
     app.listen(PORT + 1, async () => {
-      console.log(`Сервер запущено на порту ${PORT + 1}`);
+      console.log("\n========================================");
+      console.log("   iEvents Server");
+      console.log("========================================");
+      console.log(`   Local:   http://localhost:${PORT + 1}`);
+      console.log("========================================\n");
+
       await initializeDatabase();
       try {
         await initBot();
       } catch (e) {
-        console.error("Помилка бота:", e);
+        // Silent bot error
       }
     });
   } else {
-    console.error("Помилка сервера:", err);
+    console.error("Server error:", err);
   }
 });
 
@@ -6225,7 +6183,7 @@ app.post(
       console.log(
         `✓ Файл успішно завантажено та організовано: ${req.file.originalname}`,
       );
-      console.log(`  → Шлях: ${relativeFilePath}`);
+      dbLog(`  → Шлях: ${relativeFilePath}`);
 
       res.json({
         message: "Файл успішно завантажено",
@@ -6263,7 +6221,7 @@ app.post("/api/rehearsals", async (req, res) => {
     notes,
   } = req.body;
 
-  console.log("Створення репетиції:", title);
+  dbLog("Створення репетиції:", title);
 
   if (!competitionId || !teacherId || !title || !rehearsalDate) {
     console.log("Помилка: відсутні обов'язкові поля");
@@ -6434,7 +6392,7 @@ app.put("/api/rehearsals/:id", async (req, res) => {
     notes,
   } = req.body;
 
-  console.log("Оновлення репетиції ID:", id);
+  dbLog("Оновлення репетиції ID:", id);
 
   if (!title || !rehearsalDate) {
     return res.status(400).json({
@@ -6862,7 +6820,7 @@ app.post("/api/news", async (req, res) => {
     galleryImageUrls,
     authorId,
   } = req.body;
-  console.log("Створення новини:", title);
+  dbLog("Створення новини:", title);
 
   if (!title || !content || !authorId) {
     return res.status(400).json({
@@ -6913,7 +6871,7 @@ app.put("/api/news/:id", async (req, res) => {
     coverImageUrl,
     galleryImageUrls,
   } = req.body;
-  console.log("Оновлення новини ID:", id);
+  dbLog("Оновлення новини ID:", id);
 
   if (!title || !content) {
     return res.status(400).json({
@@ -8233,11 +8191,7 @@ app.get("/api/achievex/stats/:userId", async (req, res) => {
 
 // Обробка помилок
 app.use((err, req, res, next) => {
-  console.error("❌ Необроблена помилка сервера:");
-  console.error("URL:", req.url);
-  console.error("Метод:", req.method);
-  console.error("Помилка:", err.message);
-  console.error("Stack:", err.stack);
+  console.error(`[ERROR] ${req.method} ${req.url}: ${err.message}`);
 
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
