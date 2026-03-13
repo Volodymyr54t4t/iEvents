@@ -1,5 +1,11 @@
 // ============ MENTOR MATCHING PAGE (Methodist/Admin) - Database-backed ============
 
+const BASE_URL = window.AppConfig
+  ? window.AppConfig.API_URL
+  : window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://ievents-qf5k.onrender.com";
+
 // --------------- STATE ---------------
 let allMentors = [];
 let filteredMentors = [];
