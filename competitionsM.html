@@ -490,25 +490,33 @@
     <!-- NO addStudentsModal for methodist - methodist cannot add students -->
 
     <div id="viewDocumentsModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h2>Файли учнів (перегляд)</h2>
+        <div class="modal-content modal-large modal-animated">
+            <div class="modal-header docs-modal-header">
+                <div class="docs-header-left">
+                    <h2>Файли учнiв (перегляд)</h2>
+                    <div class="docs-header-stats" id="docsHeaderStats"></div>
+                </div>
                 <button class="modal-close" onclick="closeViewDocumentsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="documents-filters">
-                    <input type="text" id="searchDocuments" class="filter-input"
-                        placeholder="Пошук по імені учня або файлу...">
-                    <select id="filterStudent" class="filter-select">
-                        <option value="">Всі учні</option>
+                <!-- Filters -->
+                <div class="docs-filters-bar">
+                    <div class="docs-search-wrap">
+                        <span class="docs-search-icon">&#128269;</span>
+                        <input type="text" id="searchDocuments" class="docs-search-input"
+                            placeholder="Пошук по iменi учня або файлу...">
+                    </div>
+                    <select id="filterStudent" class="docs-filter-select">
+                        <option value="">Всi учнi</option>
                     </select>
                 </div>
 
-                <div id="documentsContainer" class="teacher-documents-view">
-                    <div class="loading">Завантаження файлів...</div>
+                <div id="documentsContainer" class="docs-list-container">
+                    <div class="loading">Завантаження файлiв...</div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer docs-modal-footer">
+                <div class="docs-footer-info" id="docsFooterInfo"></div>
                 <button class="btn btn-secondary" onclick="closeViewDocumentsModal()">Закрити</button>
             </div>
         </div>

@@ -1043,7 +1043,11 @@ function getFieldTypeLabel(type) {
 async function openViewDocumentsModal(competitionId) {
   currentDocumentsCompetitionId = competitionId;
   const modal = document.getElementById("viewDocumentsModal");
-  modal.classList.add("active");
+
+  // Use requestAnimationFrame for smooth animation start
+  requestAnimationFrame(() => {
+    modal.classList.add("active");
+  });
 
   await loadCompetitionDocuments(competitionId);
 
@@ -1063,7 +1067,43 @@ function closeViewDocumentsModal() {
   currentDocumentsStudents = [];
   document.getElementById("searchDocuments").value = "";
   document.getElementById("filterStudent").innerHTML =
-    '<option value="">Всі учні</option>';
+    '<option value="">Всi учнi</option>';
+}
+
+// Update header stats and footer info
+function updateDocsStats(documents) {
+  const statsEl = document.getElementById("docsHeaderStats");
+  const footerEl = document.getElementById("docsFooterInfo");
+
+  if (!documents || documents.length === 0) {
+    if (statsEl) statsEl.innerHTML = "";
+    if (footerEl) footerEl.innerHTML = "";
+    return;
+  }
+
+  const uniqueStudents = new Set(documents.map((d) => d.user_id));
+  const totalSize = documents.reduce((sum, d) => sum + (d.file_size || 0), 0);
+
+  if (statsEl) {
+    statsEl.innerHTML = `
+      <span class="docs-stat-chip"><span class="docs-stat-chip-num">${documents.length}</span> файл${documents.length === 1 ? "" : documents.length < 5 ? "и" : "iв"}</span>
+      <span class="docs-stat-chip"><span class="docs-stat-chip-num">${uniqueStudents.size}</span> учн${uniqueStudents.size === 1 ? "ь" : uniqueStudents.size < 5 ? "i" : "iв"}</span>
+    `;
+  }
+
+  if (footerEl) {
+    footerEl.textContent = `Загальний розмiр: ${formatFileSize(totalSize)}`;
+  }
+}
+
+// Toggle student documents group
+function toggleStudentDocs(studentId) {
+  const group = document.querySelector(
+    `.docs-student-group[data-student-id="${studentId}"]`,
+  );
+  if (group) {
+    group.classList.toggle("open");
+  }
 }
 
 async function loadCompetitionDocuments(competitionId) {
@@ -1082,40 +1122,9 @@ async function loadCompetitionDocuments(competitionId) {
     const formData = await formResponse.json();
 
     if (docsResponse.ok) {
+      // Only include actual file documents, not form responses
+      // Form responses are available separately via "Відповіді учнів" button
       allDocuments = docsData.documents;
-
-      if (
-        formResponse.ok &&
-        formData.responses &&
-        formData.responses.length > 0
-      ) {
-        formData.responses.forEach((response) => {
-          const fullName =
-            response.first_name && response.last_name
-              ? `${response.last_name} ${response.first_name}`
-              : response.form_data?.fullName ||
-                response.form_data?.["ПІБ"] ||
-                response.email ||
-                "Невідомий учень";
-
-          allDocuments.push({
-            id: `form-${response.user_id}`,
-            user_id: response.user_id,
-            original_name: "Відповіді на форму конкурсу",
-            file_type: "form-response",
-            file_size: 0,
-            uploaded_at: response.submitted_at,
-            description: "Заповнена форма учня",
-            email: response.email,
-            first_name: response.first_name,
-            last_name: response.last_name,
-            grade: response.grade,
-            avatar: response.avatar,
-            form_data: response.form_data,
-            file_path: null,
-          });
-        });
-      }
 
       const uniqueStudents = {};
       allDocuments.forEach((doc) => {
@@ -1153,14 +1162,15 @@ async function loadCompetitionDocuments(competitionId) {
         });
 
       displayDocuments(allDocuments);
+      updateDocsStats(allDocuments);
     } else {
       container.innerHTML =
-        '<div class="empty-state"><p>Помилка завантаження файлів</p></div>';
+        '<div class="docs-empty-state"><div class="docs-empty-state-icon">&#128196;</div><h3>Помилка завантаження</h3><p>Не вдалося завантажити файли</p></div>';
     }
   } catch (error) {
     console.error("Помилка завантаження документів:", error);
     container.innerHTML =
-      '<div class="empty-state"><p>Помилка завантаження файлів</p></div>';
+      '<div class="docs-empty-state"><div class="docs-empty-state-icon">&#128196;</div><h3>Помилка завантаження</h3><p>Не вдалося завантажити файли</p></div>';
   }
 }
 
@@ -1207,11 +1217,13 @@ function displayDocuments(documents) {
 
   if (documents.length === 0) {
     container.innerHTML = `
-      <div class="no-documents-message">
-        <p><strong>Файлів не знайдено</strong></p>
-        <p>Учні ще не завантажили жодного файлу для цього конкурсу</p>
+      <div class="docs-empty-state">
+        <div class="docs-empty-state-icon">&#128194;</div>
+        <h3>Файлiв не знайдено</h3>
+        <p>Учнi ще не завантажили жодного файлу для цього конкурсу</p>
       </div>
     `;
+    updateDocsStats([]);
     return;
   }
 
@@ -1244,7 +1256,7 @@ function displayDocuments(documents) {
   });
 
   container.innerHTML = sortedGroups
-    .map((group) => {
+    .map((group, groupIndex) => {
       const student = group.student;
       const docs = group.documents;
       const fullName =
@@ -1258,67 +1270,46 @@ function displayDocuments(documents) {
         .slice(0, 2);
 
       return `
-      <div class="student-documents-group">
-        <div class="student-group-header">
-          <div class="student-avatar-large">
-            ${student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : `<span>${initials}</span>`}
+      <div class="docs-student-group" data-student-id="${student.id}" style="animation-delay: ${groupIndex * 0.08}s">
+        <div class="docs-student-header" onclick="toggleStudentDocs('${student.id}')">
+          <div class="docs-student-avatar">
+            ${student.avatar ? `<img src="${student.avatar}" alt="${fullName}">` : initials}
           </div>
-          <div class="student-group-info">
-            <div class="student-group-name">${fullName}</div>
-            <div class="student-group-meta">
+          <div class="docs-student-info">
+            <div class="docs-student-name">${fullName}</div>
+            <div class="docs-student-meta">
               ${student.grade ? `<span>Клас: ${student.grade}</span>` : ""}
               <span>${student.email}</span>
-              <span class="file-count-badge">Файлів: ${docs.length}</span>
+              <span>Файлiв: ${docs.length}</span>
             </div>
           </div>
+          <div class="docs-student-toggle">&#9660;</div>
         </div>
-        <div class="student-documents-list">
+        <div class="docs-student-files">
           ${docs
-            .map((doc) => {
+            .map((doc, docIndex) => {
               const uploadDate = new Date(doc.uploaded_at).toLocaleString(
                 "uk-UA",
               );
               const fileSize = formatFileSize(doc.file_size);
-              const fileIcon = getFileIcon(doc.file_type);
-
-              if (doc.file_type === "form-response") {
-                return `
-                <div class="teacher-document-item form-response-item">
-                  <div class="document-icon">form</div>
-                  <div class="teacher-document-info">
-                    <div class="teacher-document-name">${doc.original_name}</div>
-                    <div class="teacher-document-meta">
-                      <span>${uploadDate}</span>
-                      <span>Форма</span>
-                    </div>
-                    ${doc.description ? `<div class="teacher-document-description">${doc.description}</div>` : ""}
-                  </div>
-                  <div class="teacher-document-actions">
-                    <button class="btn btn-view btn-sm" onclick='viewFormResponse(${JSON.stringify(doc.form_data)}, "${fullName}")'>
-                      Переглянути відповіді
-                    </button>
-                  </div>
-                </div>
-              `;
-              }
+              const fileIcon = getFileIconEmoji(doc.file_type);
 
               return `
-              <div class="teacher-document-item">
-                <div class="document-icon">${fileIcon}</div>
-                <div class="teacher-document-info">
-                  <div class="teacher-document-name">${doc.original_name}</div>
-                  <div class="teacher-document-meta">
+              <div class="docs-file-item" style="animation-delay: ${docIndex * 0.05}s">
+                <div class="docs-file-icon">${fileIcon}</div>
+                <div class="docs-file-info">
+                  <div class="docs-file-name">${doc.original_name}</div>
+                  <div class="docs-file-meta">
                     <span>${uploadDate}</span>
                     <span>${fileSize}</span>
-                    ${doc.file_type ? `<span>${doc.file_type}</span>` : ""}
+                    ${doc.file_type ? `<span>${doc.file_type.split("/").pop()}</span>` : ""}
                   </div>
-                  ${doc.description ? `<div class="teacher-document-description">${doc.description}</div>` : ""}
                 </div>
-                <div class="teacher-document-actions">
-                  <button class="btn btn-view btn-sm" onclick="previewFile('${doc.file_path}', '${doc.original_name}', '${doc.file_type}')">
+                <div class="docs-file-actions">
+                  <button class="docs-file-btn docs-file-btn-view" onclick="previewFile('${doc.file_path}', '${doc.original_name.replace(/'/g, "\\'")}', '${doc.file_type}')">
                     Переглянути
                   </button>
-                  <button class="btn btn-download btn-sm" onclick="downloadDocument('${doc.file_path}', '${doc.original_name}')">
+                  <button class="docs-file-btn docs-file-btn-download" onclick="downloadDocument('${doc.file_path}', '${doc.original_name.replace(/'/g, "\\'")}')">
                     Завантажити
                   </button>
                 </div>
@@ -1331,6 +1322,29 @@ function displayDocuments(documents) {
     `;
     })
     .join("");
+}
+
+// Get emoji icon for file type
+function getFileIconEmoji(fileType) {
+  if (!fileType) return "&#128196;";
+  if (fileType.includes("pdf")) return "&#128196;";
+  if (fileType.includes("word") || fileType.includes("document"))
+    return "&#128195;";
+  if (fileType.includes("excel") || fileType.includes("spreadsheet"))
+    return "&#128200;";
+  if (fileType.includes("powerpoint") || fileType.includes("presentation"))
+    return "&#128202;";
+  if (fileType.includes("image")) return "&#128444;";
+  if (fileType.includes("video")) return "&#127909;";
+  if (fileType.includes("audio")) return "&#127925;";
+  if (
+    fileType.includes("zip") ||
+    fileType.includes("rar") ||
+    fileType.includes("archive")
+  )
+    return "&#128230;";
+  if (fileType.includes("text")) return "&#128195;";
+  return "&#128196;";
 }
 
 function formatFileSize(bytes) {
@@ -1363,13 +1377,30 @@ function getFileIcon(fileType) {
 }
 
 function downloadDocument(filePath, originalName) {
-  const link = document.createElement("a");
-  link.href = `${BASE_URL}${filePath}`;
-  link.download = originalName;
-  link.target = "_blank";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  // Use fetch to download and create blob for proper Cyrillic filename support
+  fetch(`${BASE_URL}${filePath}`)
+    .then((response) => response.blob())
+    .then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = originalName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("Download error:", error);
+      // Fallback to direct download
+      const link = document.createElement("a");
+      link.href = `${BASE_URL}${filePath}`;
+      link.download = originalName;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
 }
 
 function previewFile(filePath, fileName, fileType) {
