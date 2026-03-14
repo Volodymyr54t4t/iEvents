@@ -1,8 +1,9 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { Pool } = require("pg");
+const bcrypt = require("bcrypt");
 
-// Telegram Bot Token
-const TELEGRAM_TOKEN = "8352460980:AAGXc5J6JDxAC3jvqxDXaGEDx8V_cPVmsoI";
+// Telegram Bot Token (з .env)
+const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 // Connection retry configuration
 const MAX_RETRIES = 3;
@@ -479,7 +480,7 @@ async function initBot() {
       await bot.sendMessage(chatId, helpMessage);
     });
 
-    // Handle text messages (for email input)
+    // Handle text messages (for login flow)
     bot.on("message", async (msg) => {
       const chatId = msg.chat.id;
       const text = msg.text;
@@ -502,7 +503,7 @@ async function initBot() {
 
         try {
           const result = await safePoolQuery(
-            "SELECT id, email, role, telegram_chat_id FROM users WHERE email = $1",
+            "SELECT id, email, role, telegram_chat_id, password FROM users WHERE email = $1",
             [text.toLowerCase()],
           );
 
@@ -516,6 +517,52 @@ async function initBot() {
           }
 
           const user = result.rows[0];
+          // Зберігаємо інформацію про користувача і запитуємо пароль
+          userStates.set(chatId, {
+            state: "waiting_for_password",
+            email: user.email,
+          });
+
+          await bot.sendMessage(
+            chatId,
+            "🔐 Введи свій пароль від облікового запису iEvents:",
+          );
+        } catch (error) {
+          console.error("Помилка при пошуку користувача по email:", error);
+          await bot.sendMessage(
+            chatId,
+            "❌ Виникла помилка при перевірці email. Спробуй пізніше.",
+          );
+          userStates.delete(chatId);
+        }
+      } else if (userState && userState.state === "waiting_for_password") {
+        try {
+          const email = userState.email;
+
+          const result = await safePoolQuery(
+            "SELECT id, email, role, telegram_chat_id, password FROM users WHERE email = $1",
+            [email.toLowerCase()],
+          );
+
+          if (result.rows.length === 0) {
+            await bot.sendMessage(
+              chatId,
+              "❌ Користувача з таким email не знайдено в системі. Почни знову командою /login.",
+            );
+            userStates.delete(chatId);
+            return;
+          }
+
+          const user = result.rows[0];
+
+          const isPasswordValid = await bcrypt.compare(text, user.password);
+          if (!isPasswordValid) {
+            await bot.sendMessage(
+              chatId,
+              "❌ Пароль невірний. Спробуй ще раз ввести пароль:",
+            );
+            return;
+          }
 
           if (user.telegram_chat_id === chatId) {
             await bot.sendMessage(
