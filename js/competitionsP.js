@@ -108,12 +108,17 @@ function displayCompetitions(containerId, competitions, type) {
 
       return `
         <div class="competition-card ${statusClass}">
-          <h3 class="competition-title">${competition.title}</h3>
-          <span class="status-badge status-${statusClass}">${statusText}</span>
+          <div class="competition-card-top">
+            <div>
+              <span class="competition-kicker">Конкурс</span>
+              <h3 class="competition-title">${competition.title}</h3>
+            </div>
+            <span class="status-badge status-${statusClass}">${statusText}</span>
+          </div>
           ${competition.description ? `<p class="competition-description">${competition.description}</p>` : ""}
           <div class="competition-dates">
-            <span>📅 Початок: ${startDate.toLocaleDateString("uk-UA")}</span>
-            <span>📅 Закінчення: ${endDate.toLocaleDateString("uk-UA")}</span>
+            <span><strong>Початок</strong>${startDate.toLocaleDateString("uk-UA")}</span>
+            <span><strong>Фініш</strong>${endDate.toLocaleDateString("uk-UA")}</span>
           </div>
           ${daysInfo}
           <div class="competition-actions">

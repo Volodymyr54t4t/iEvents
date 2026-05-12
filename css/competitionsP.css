@@ -11,7 +11,8 @@ html {
 body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
-  background: #fafaf9;
+  background:
+    linear-gradient(180deg, #fbfaf7 0%, #f4f7fb 42%, #fafaf9 100%);
   color: #1f2937;
   min-height: 100vh;
   overflow-x: hidden;
@@ -84,22 +85,25 @@ body {
 
 /* Main container with proper spacing */
 .main-container {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 20px 80px;
+  padding: 36px 24px 80px;
   animation: fadeIn 0.6s ease-out;
 }
 
 /* New hero section for page header */
 .page-hero {
-  background: linear-gradient(135deg, #f5f1eb 0%, #f9f7f4 100%);
-  border-bottom: 1px solid #e5ddd3;
+  background:
+    linear-gradient(135deg, rgba(31, 41, 55, 0.92), rgba(69, 85, 108, 0.86)),
+    url("../images/iEvents.png") center / cover;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 16px;
-  padding: 60px 40px;
-  margin-bottom: 60px;
+  padding: 52px 40px;
+  margin-bottom: 34px;
   position: relative;
   overflow: hidden;
   animation: slideInDown 0.8s ease-out;
+  box-shadow: 0 18px 45px rgba(31, 41, 55, 0.18);
 }
 
 .page-hero::before {
@@ -128,15 +132,15 @@ body {
 .page-title {
   font-size: 48px;
   font-weight: 700;
-  color: #1f2937;
+  color: #ffffff;
   margin-bottom: 16px;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
   animation: fadeInUp 0.8s ease-out 0.1s both;
 }
 
 .page-subtitle {
   font-size: 18px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.82);
   line-height: 1.6;
   animation: fadeInUp 0.8s ease-out 0.2s both;
 }
@@ -145,10 +149,10 @@ body {
 .section-card {
   background: white;
   border-radius: 16px;
-  border: 1px solid #e5ddd3;
-  padding: 40px;
-  margin-bottom: 32px;
-  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
+  border: 1px solid #e3e8ef;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 30px rgba(31, 41, 55, 0.07);
   animation: slideInUp 0.8s ease-out both;
   transition: all 0.3s ease;
 }
@@ -167,24 +171,28 @@ body {
 }
 
 .section-card:hover {
-  border-color: #a88264;
-  box-shadow: 0 12px 32px rgba(168, 130, 100, 0.12);
+  border-color: #cbd5e1;
+  box-shadow: 0 18px 36px rgba(31, 41, 55, 0.1);
   transform: translateY(-2px);
 }
 
 .section-header {
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 2px solid #e5ddd3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e3e8ef;
   animation: fadeInUp 0.8s ease-out;
 }
 
 .section-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 8px;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
 }
 
 .section-subtitle {
@@ -196,51 +204,42 @@ body {
 /* Competitions list grid with responsive design */
 .competitions-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
   animation: fadeIn 0.6s ease-out;
+  align-items: stretch;
 }
 
 /* Enhanced competition card with expandable details section */
 .competition-card {
-  background: white;
-  border: 1.5px solid #e5ddd3;
+  background: #ffffff;
+  border: 1px solid #e3e8ef;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.06);
+  box-shadow: 0 8px 22px rgba(31, 41, 55, 0.07);
   animation: scaleIn 0.5s ease-out both;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 275px;
 }
 
 .competition-card::before {
   content: "";
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(168, 130, 100, 0.05),
-    transparent
-  );
-  transition: left 0.6s ease;
-}
-
-.competition-card:hover::before {
-  left: 100%;
+  height: 5px;
+  background: #94a3b8;
 }
 
 .competition-card:hover {
-  transform: translateY(-8px);
-  border-color: #a88264;
-  box-shadow: 0 12px 32px rgba(168, 130, 100, 0.15);
+  transform: translateY(-6px);
+  border-color: #cbd5e1;
+  box-shadow: 0 18px 36px rgba(31, 41, 55, 0.13);
 }
 
 /* Detailed info section on card */
@@ -290,62 +289,108 @@ body {
 }
 
 .competition-card.active {
-  border-color: #a88264;
-  background: linear-gradient(135deg, #faf8f5 0%, #f9f7f4 100%);
+  border-color: #bbf7d0;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fef9 100%);
 }
 
 .competition-card.upcoming {
-  border-color: #d4ccc0;
+  border-color: #fde68a;
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
 }
 
 .competition-card.inactive {
-  opacity: 0.8;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.competition-card.active::before {
+  background: linear-gradient(90deg, #16a34a, #86efac);
+}
+
+.competition-card.upcoming::before {
+  background: linear-gradient(90deg, #d97706, #fbbf24);
+}
+
+.competition-card.inactive::before {
+  background: linear-gradient(90deg, #64748b, #cbd5e1);
+}
+
+.competition-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.competition-kicker {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: uppercase;
 }
 
 .competition-title {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 12px;
+  margin-bottom: 0;
   line-height: 1.4;
   word-break: break-word;
 }
 
 .competition-description {
   color: #6b7280;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   line-height: 1.6;
   font-size: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .competition-dates {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  font-size: 14px;
+  font-size: 13px;
   color: #1f2937;
-  margin-bottom: 20px;
+  margin-top: auto;
+  margin-bottom: 14px;
 }
 
 .competition-dates span {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #6b7280;
+  flex-direction: column;
+  gap: 4px;
+  color: #1f2937;
+  padding: 11px 12px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+}
+
+.competition-dates strong {
+  color: #64748b;
+  font-size: 11px;
+  text-transform: uppercase;
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 7px 11px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0;
+  box-shadow: none;
   animation: scaleIn 0.4s ease-out both;
   transition: all 0.3s ease;
-  margin-top: 12px;
 }
 
 .status-badge:hover {
@@ -353,18 +398,68 @@ body {
 }
 
 .status-active {
-  background: linear-gradient(135deg, #78643a 0%, #5a4a2a 100%);
-  color: white;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .status-upcoming {
-  background: linear-gradient(135deg, #a88264 0%, #9a7252 100%);
-  color: white;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .status-inactive {
-  background: linear-gradient(135deg, #b0b0b0 0%, #909090 100%);
-  color: white;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.days-remaining {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-bottom: 14px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.competition-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.btn-action,
+.btn-upload {
+  min-height: 42px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-details {
+  background: #1f2937;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(31, 41, 55, 0.18);
+}
+
+.btn-upload {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-action:hover,
+.btn-upload:hover {
+  transform: translateY(-2px);
 }
 
 /* Results section styling */
@@ -1267,7 +1362,7 @@ body {
   }
 
   .section-card {
-    padding: 32px;
+    padding: 24px;
   }
 
   .section-title {
@@ -1275,7 +1370,7 @@ body {
   }
 
   .competitions-list {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
     gap: 20px;
   }
 
@@ -1332,6 +1427,9 @@ body {
   }
 
   .section-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
     margin-bottom: 24px;
     padding-bottom: 16px;
   }
@@ -1345,7 +1443,7 @@ body {
   }
 
   .competitions-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 16px;
   }
 
@@ -1377,6 +1475,10 @@ body {
   .status-badge {
     padding: 6px 12px;
     font-size: 11px;
+  }
+
+  .competition-actions {
+    grid-template-columns: 1fr;
   }
 
   .results-grid {
@@ -1580,6 +1682,12 @@ body {
   .competition-card {
     padding: 16px;
     border-radius: 10px;
+    min-height: auto;
+  }
+
+  .competition-card-top {
+    flex-direction: column;
+    gap: 10px;
   }
 
   .competition-info-grid {
@@ -1608,6 +1716,7 @@ body {
   }
 
   .competition-dates {
+    grid-template-columns: 1fr;
     font-size: 12px;
     gap: 6px;
     margin-bottom: 12px;

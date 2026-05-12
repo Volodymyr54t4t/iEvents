@@ -450,7 +450,7 @@ function displayCompetitions(containerId, competitions, type) {
           }
 
           return `
-            <div class="comp-item">
+            <div class="comp-item ${type}">
               <div class="comp-status-dot ${type}"></div>
               <div class="comp-item-body">
                 <div class="comp-item-title">${c.title}</div>
