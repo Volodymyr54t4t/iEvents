@@ -437,13 +437,13 @@ function showEventsPanel(date) {
                     <span class="event-card-type type-${event.eventType}">${event.eventLabel}</span>
                 </div>
                 <div class="event-card-info">
-                    <span>📅 ${formatDateUkrainian(new Date(event.start_date))} - ${formatDateUkrainian(new Date(event.end_date))}</span>
-                    ${event.location ? `<span>📍 ${event.location}</span>` : ""}
-                    ${event.organizer ? `<span>👤 ${event.organizer}</span>` : ""}
+                    <span>${formatDateUkrainian(new Date(event.start_date))} - ${formatDateUkrainian(new Date(event.end_date))}</span>
+                    ${event.location ? `<span>${event.location}</span>` : ""}
+                    ${event.organizer ? `<span>${event.organizer}</span>` : ""}
                 </div>
                 <div class="event-card-badges">
                     ${event.level ? `<span class="event-badge">${event.level}</span>` : ""}
-                    ${event.is_online ? '<span class="event-badge">🌐 Онлайн</span>' : ""}
+                    ${event.is_online ? '<span class="event-badge">Онлайн</span>' : ""}
                 </div>
             </div>
         `,
@@ -555,7 +555,7 @@ function renderUpcomingEvents() {
                 <div class="upcoming-card-badges">
                     <span class="status-badge status-${status}">${status === "active" ? "Активний" : "Очікується"}</span>
                     ${comp.level ? `<span class="level-badge">${comp.level}</span>` : ""}
-                    ${comp.is_online ? '<span class="level-badge">🌐 Онлайн</span>' : ""}
+                    ${comp.is_online ? '<span class="level-badge">Онлайн</span>' : ""}
                 </div>
             </div>
         `

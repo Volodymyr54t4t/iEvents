@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Календар конкурсів - iEvents</title>
-    <link rel="stylesheet" href="css/calendar.css">
     <link rel="icon" href="images/iEvents_logo.png" type="image/png">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/page-spacing.css">
+    <link rel="stylesheet" href="css/calendar.css">
 </head>
 
 <body>
@@ -18,6 +18,11 @@
 
     <main class="main-container">
         <div class="page-header">
+            <div class="page-header-content">
+                <span class="page-eyebrow">Планування подій</span>
+                <h1>Календар конкурсів</h1>
+                <p class="subtitle">Переглядайте дати старту, завершення та дедлайни реєстрації в одному місці.</p>
+            </div>
         </div>
 
         <!-- Легенда -->
@@ -41,52 +46,55 @@
         </div>
 
         <!-- Навігація календаря -->
-        <div class="calendar-navigation">
-            <button class="btn btn-secondary" id="prevMonth">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 18l-6-6 6-6" />
-                </svg>
-                Попередній
-            </button>
-            <h2 class="current-month" id="currentMonth">Січень 2025</h2>
-            <button class="btn btn-secondary" id="nextMonth">
-                Наступний
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6" />
-                </svg>
-            </button>
-        </div>
+        <div class="calendar-toolbar">
+            <!-- Навігація календаря -->
+            <div class="calendar-navigation">
+                <button class="btn btn-secondary" id="prevMonth" aria-label="Попередній місяць">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                    Попередній
+                </button>
+                <h2 class="current-month" id="currentMonth">Січень 2025</h2>
+                <button class="btn btn-secondary" id="nextMonth" aria-label="Наступний місяць">
+                    Наступний
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </button>
+            </div>
 
-        <!-- Фільтри -->
-        <div class="calendar-filters">
-            <div class="filter-group">
-                <label for="filterSubject">Предмет:</label>
-                <select id="filterSubject" class="filter-select">
-                    <option value="">Всі предмети</option>
-                </select>
+            <!-- Фільтри -->
+            <div class="calendar-filters">
+                <div class="filter-group">
+                    <label for="filterSubject">Предмет</label>
+                    <select id="filterSubject" class="filter-select">
+                        <option value="">Всі предмети</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterLevel">Рівень</label>
+                    <select id="filterLevel" class="filter-select">
+                        <option value="">Всі рівні</option>
+                        <option value="школа">Школа</option>
+                        <option value="район">Район</option>
+                        <option value="місто">Місто</option>
+                        <option value="область">Область</option>
+                        <option value="країна">Країна</option>
+                        <option value="міжнародний">Міжнародний</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus">Статус</label>
+                    <select id="filterStatus" class="filter-select">
+                        <option value="">Всі</option>
+                        <option value="active">Активні</option>
+                        <option value="upcoming">Майбутні</option>
+                        <option value="completed">Завершені</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="todayBtn">Сьогодні</button>
             </div>
-            <div class="filter-group">
-                <label for="filterLevel">Рівень:</label>
-                <select id="filterLevel" class="filter-select">
-                    <option value="">Всі рівні</option>
-                    <option value="школа">Школа</option>
-                    <option value="район">Район</option>
-                    <option value="місто">Місто</option>
-                    <option value="область">Область</option>
-                    <option value="країна">Країна</option>
-                    <option value="міжнародний">Міжнародний</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterStatus">Статус:</label>
-                <select id="filterStatus" class="filter-select">
-                    <option value="">Всі</option>
-                    <option value="active">Активні</option>
-                    <option value="upcoming">Майбутні</option>
-                    <option value="completed">Завершені</option>
-                </select>
-            </div>
-            <button class="btn btn-primary" id="todayBtn">Сьогодні</button>
         </div>
 
         <!-- Календар -->
@@ -118,7 +126,7 @@
 
         <!-- Найближчі конкурси -->
         <div class="upcoming-section">
-            <h2>🔥 Найближчі події</h2>
+            <h2>Найближчі події</h2>
             <div class="upcoming-grid" id="upcomingGrid">
                 <div class="loading">Завантаження...</div>
             </div>
