@@ -1,4 +1,4 @@
-/* Modern Footer Styles with Brown Theme */
+/* Shared Footer */
 body {
   min-height: 100vh;
   display: flex;
@@ -14,8 +14,10 @@ main,
 }
 
 .site-footer {
-  background: linear-gradient(135deg, #f5f1e8 0%, #ede6d9 100%);
-  color: #78643a;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.94)),
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.22), transparent 36%);
+  color: #e2e8f0;
   margin-top: auto;
   position: relative;
   overflow: hidden;
@@ -28,14 +30,14 @@ main,
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #78643a 0%, #a88264 50%, #78643a 100%);
-  box-shadow: 0 0 10px rgba(120, 100, 58, 0.6), 0 0 20px rgba(120, 100, 58, 0.4);
+  background: linear-gradient(90deg, #2563eb 0%, #16a34a 50%, #f59e0b 100%);
+  box-shadow: 0 0 18px rgba(37, 99, 235, 0.36);
 }
 
 .footer-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 34px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,13 +56,13 @@ main,
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: #78643a;
+  color: #ffffff;
 }
 
 .footer-info {
   margin: 0;
   font-size: 13px;
-  color: #a88264;
+  color: #94a3b8;
   font-weight: 400;
 }
 
@@ -71,7 +73,7 @@ main,
 }
 
 .footer-link {
-  color: #78643a;
+  color: #cbd5e1;
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
@@ -88,12 +90,12 @@ main,
   left: 0;
   width: 0;
   height: 2px;
-  background: #a88264;
+  background: #60a5fa;
   transition: width 0.3s ease;
 }
 
 .footer-link:hover {
-  color: #a88264;
+  color: #ffffff;
 }
 
 .footer-link:hover::after {
@@ -105,10 +107,10 @@ main,
   align-items: center;
   gap: 6px;
   padding: 10px 18px;
-  background: white;
-  border: 2px solid #e8dcc8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(203, 213, 225, 0.34);
   border-radius: 10px;
-  color: #78643a;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
@@ -118,15 +120,15 @@ main,
 }
 
 .btn-scroll-top:hover {
-  background: #78643a;
-  border-color: #78643a;
-  color: white;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #0f172a;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(120, 100, 58, 0.25);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.24);
 }
 
 .btn-scroll-top:hover svg {
-  stroke: white;
+  stroke: #0f172a;
 }
 
 /* Tablets */

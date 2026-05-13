@@ -53,14 +53,14 @@ function renderHeader() {
                     <a href="profileCommunity.html" class="sidebar-link">Профіль</a>
                     <a href="adminCommunity.html" class="sidebar-link">Admin</a>
                     <a href="contest-database.html" class="sidebar-link">Бібліотека</a>
-                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
                     <div style="padding: 16px 24px;">
-                        <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
-                        <p style="font-size: 13px; color: #78643a; margin: 0 0 4px 0; word-break: break-word;">${userEmail}</p>
-                        <span style="font-size: 12px; color: white; padding: 3px 10px; background: linear-gradient(135deg, #a88264 0%, #8b7355 100%); border-radius: 12px; font-weight: 500; display: inline-block; margin-top: 8px; text-transform: capitalize;">${userRole}</span>
+                        <p style="font-size: 12px; color: #2563eb; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
+                        <p style="font-size: 13px; color: #334155; margin: 0 0 4px 0; word-break: break-word;">${userEmail}</p>
+                        <span style="font-size: 12px; color: white; padding: 3px 10px; background: linear-gradient(135deg, #2563eb 0%, #0f172a 100%); border-radius: 12px; font-weight: 500; display: inline-block; margin-top: 8px; text-transform: capitalize;">${userRole}</span>
                     </div>
-                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
-                    <button class="sidebar-link" onclick="logout()" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; padding: 16px 24px; color: #78643a; font-weight: 500; font-size: 14px;">Вийти</button>
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
+                    <button class="sidebar-link" onclick="logout()" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; padding: 16px 24px; color: #334155; font-weight: 500; font-size: 14px;">Вийти</button>
                 </aside>
             </div>
         </header>
@@ -250,14 +250,14 @@ function renderHeader() {
                     <a href="contacts.html" class="sidebar-link">Контакти</a>
                     <div class="sidebar-group-label">Акаунт</div>
                     ${sidebarAccountItems}
-                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
                     <div style="padding: 16px 24px;">
-                        <p style="font-size: 12px; color: #78643a; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
-                        <p style="font-size: 13px; color: #78643a; margin: 0 0 4px 0; word-break: break-word;">${userEmail}</p>
-                        <span style="font-size: 12px; color: white; padding: 3px 10px; background: linear-gradient(135deg, #a88264 0%, #8b7355 100%); border-radius: 12px; font-weight: 500; display: inline-block; margin-top: 8px; text-transform: capitalize;">${userRole}</span>
+                        <p style="font-size: 12px; color: #2563eb; margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase;">Профіль</p>
+                        <p style="font-size: 13px; color: #334155; margin: 0 0 4px 0; word-break: break-word;">${userEmail}</p>
+                        <span style="font-size: 12px; color: white; padding: 3px 10px; background: linear-gradient(135deg, #2563eb 0%, #0f172a 100%); border-radius: 12px; font-weight: 500; display: inline-block; margin-top: 8px; text-transform: capitalize;">${userRole}</span>
                     </div>
-                    <hr style="border: none; border-top: 1px solid #e8dcc8; margin: 12px 0;">
-                    <button class="sidebar-link" onclick="logout()" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; padding: 16px 24px; color: #78643a; font-weight: 500; font-size: 14px;">Вийти</button>
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
+                    <button class="sidebar-link" onclick="logout()" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; padding: 16px 24px; color: #334155; font-weight: 500; font-size: 14px;">Вийти</button>
                 </aside>
             </div>
         </header>
