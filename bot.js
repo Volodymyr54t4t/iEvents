@@ -1,6 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { Pool } = require("pg");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 // Telegram Bot Token (з .env)
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
